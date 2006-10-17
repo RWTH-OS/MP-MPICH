@@ -1,0 +1,77 @@
+#
+#  $Id$
+#
+#  (C) 1993,1995 by Argonne National Laboratory and Mississipi State University.
+#      All rights reserved.  See COPYRIGHT in top-level directory.
+#
+# Eventually, there will be two sets of routines
+#
+#
+##### User configurable options #####
+
+ARCH        = @ARCH@
+MPIR_HOME   = @MPIR_HOME@
+INCLUDE_DIR = @INCLUDE_PATH@ -Iinclude
+CC          = @CC@
+AR          = @AR@
+RANLIB      = @RANLIB@
+OPTFLAGS    = @OPTFLAGS@
+SHELL       = /bin/sh
+libbuild_dir = @libbuild_dir@
+top_srcdir  = @top_srcdir@
+DEVICE = @DEVICE@
+### End User configurable options ###
+
+ALL: default
+
+LIBNAME  = ${libbuild_dir}/lib@MPILIBNAME@.a
+
+CFLAGS   = @CFLAGS@ @OPTFLAGSC@ $(OPTFLAGS) -I${top_srcdir}/include -I${top_srcdir}/src/pt2pt -I${top_srcdir}/src/coll -I. -I../util \
+           -DMPI_$(ARCH) -DMPID_DEVICE_CODE @GETNAME_DEFS@ @DEVCFLAGS@ @DEV_DEFS@
+
+ADI2SOURCE = adi2debug.c adi2recv.c adi2send.c adi2init.c adi2probe.c adi2ssend.c adi2rsend.c \
+		adi2hsend.c adi2hrecv.c adi2hssend.c adi2hrsend.c adi2pack.c adi2mpack.c \
+		adi2req.c adi2cancel.c objtrace.c calltrace.c \
+		chnodename.c chtick.c chtime.c chflow.c \
+		adi3mmu.c adi3get.c adi3put.c adi3rhc.c adi3win.c \
+		packdtype.c sync.c bswap2.c multidevice.c adi2wrapper.c
+
+ADI2HEADERS = dev.h req.h mpid.h mpid_common.h \
+		adi3types.h sside.h sside_protocol.h multidevice.h
+
+ADI2OBJECTS = adi2debug.o adi2recv.o adi2send.o adi2init.o adi2probe.o adi2ssend.o adi2rsend.o \
+		adi2hsend.o adi2hrecv.o adi2hssend.o adi2hrsend.o adi2pack.o adi2mpack.o \
+		adi2req.o adi2cancel.o objtrace.o calltrace.o \
+		chnodename.o chtick.o chtime.o chflow.o \
+		adi3mmu.o adi3get.o adi3put.o adi3rhc.o adi3win.o \
+		packdtype.o sync.o bswap2.o multidevice.o adi2wrapper.o
+
+
+default: $(LIBNAME)
+
+# default_all is the same as default, but without the RANLIB.  This
+# can speed up the build (ranlibs can take a LONG time).  profile_all 
+# is the same, but for the profile library
+default_all: $(ADI2OBJECTS)
+	$(AR) $(LIBNAME) $?
+
+$(LIBNAME): $(ADI2OBJECTS) 
+	$(AR) $@ $?
+	$(RANLIB) $@
+
+$(ADI2OBJECTS): $(ADI2HEADERS)
+
+sharedlib: default
+	@(cd ${MPIR_HOME}; make sharedlibs; cd ${MPIR_HOME}/mpid/ch2;)
+
+clean:
+	@/bin/rm -f *~ $(ADI2OBJECTS) 
+
+# this is a dummy target which is only meaningful in the /src/ dirs
+wrapperlib:
+
+distclean: clean
+	@rm -f Makefile
+.c.o:
+	$(CC) $(CFLAGS) $(BASEOPT) -c $*.c $(MPI_PROFILE)
+

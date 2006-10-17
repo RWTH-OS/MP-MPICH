@@ -1,0 +1,4 @@
+mkdir $1
+mv ~/membench.out* $1
+cp arg.conf $1
+cp machines $1

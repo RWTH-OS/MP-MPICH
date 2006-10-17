@@ -1,0 +1,228 @@
+<html>
+
+<head>
+<title></title>
+</head>
+
+<body>
+
+<p><a href="../index.html">main</a></p>
+
+<p>::ELIMINATING THE LAUNCHER</p>
+
+<p>The information on this page would be useful for users who want to launch each process
+in an application manually or want to use their own launcher to start an application.</p>
+
+<p><big><strong>The Current Launcher</strong></big></p>
+
+<p>It is possible to launch an MPICH application without using the provided launcher.
+&nbsp; First we need to know what the launcher does and then we can show how to launch an
+application without it.&nbsp; MPICH.NT uses environment variables to communicate with the
+spawned processes, so any launcher that can provide the required environment variables
+could launch an MPICH.NT application.</p>
+
+<p>What the launcher does: </p>
+
+<p>&nbsp;&nbsp;&nbsp; 1) Create the first process</p>
+
+<blockquote>
+  <p>Process zero acquires a port to listen on and then communicates this port number back
+  to the launcher.</p>
+</blockquote>
+
+<p>&nbsp;&nbsp;&nbsp; 2) Create the rest of the processes</p>
+
+<blockquote>
+  <p>The launcher then creates all the rest of the processes, informing them of which port
+  the first process is listening on through an environment variable.</p>
+</blockquote>
+
+<p>Here are the environment variables set by the launcher:</p>
+
+<table border="1" width="100%" height="269">
+  <tr>
+    <td width="14%" height="19">Required</td>
+    <td width="86%" height="19">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="14%" height="38">MPICH_JOBID</td>
+    <td width="86%" height="38">Unique string accross all machines used to create named objects like
+    mutexes and shared memory queues.&nbsp; I create this string by appending a number to the
+    root hostname (ie. fry14). The launcher uses this value as a key in the registry to store
+    information about running mpich applications</td>
+  </tr>
+  <tr>
+    <td width="14%" height="19">MPICH_IPROC</td>
+    <td width="86%" height="19">The rank of the current process.</td>
+  </tr>
+  <tr>
+    <td width="14%" height="19">MPICH_NPROC</td>
+    <td width="86%" height="19">The total number of processes.</td>
+  </tr>
+  <tr>
+    <td width="14%" height="19">MPICH_ROOT</td>
+    <td width="86%" height="19">The hostname of the root process and the port
+      where it is listening.&nbsp; Use a colon to separate the host name and
+      port: hostA:port or a.b.c.d:port</td>
+  </tr>
+  <tr>
+    <td width="14%" height="19">MPICH_EXTRA</td>
+    <td width="86%" height="19">Only valid on the root process.&nbsp; The name of a temporary file used to
+    communicate the port number from the root process to the launcher.</td>
+  </tr>
+  <tr>
+    <td width="14%" height="19">Conditional</td>
+    <td width="86%" height="19">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="14%" height="19">MPICH_SHM_LOW</td>
+    <td width="86%" height="19">The lowest rank that the current process can reach through shared memory
+    queues.</td>
+  </tr>
+  <tr>
+    <td width="14%" height="19">MPICH_SHM_HIGH</td>
+    <td width="86%" height="19">The highest rank the current process can reach through shared memory
+    queues.</td>
+  </tr>
+  <tr>
+    <td width="14%" height="19">MPICH_COMNIC</td>
+    <td width="86%" height="19">The name of the network card used for mpi communication connections if it
+    is different from that which gethostname returns.</td>
+  </tr>
+</table>
+
+<p><big><strong>Without the Launcher</strong></big></p>
+
+<p>The key to eliminating the launcher is to remove the interaction with the first
+process.&nbsp; If you set MPICH_ROOTPORT to an available port number in the envionment of
+the first process then the process will use this port and it will not attempt to write the
+number out to the file described by MPICH_EXTRA.</p>
+
+<p>Here is an example.</p>
+
+<p>I brought up two command prompts on two separate machines, set the environment
+variables and ran an application according to the charts below:</p>
+
+<table border="1" width="100%">
+  <tr>
+    <td width="10%">Host</td>
+    <td width="45%">Fry</td>
+    <td width="45%">Jazz</td>
+  </tr>
+  <tr>
+    <td width="10%">Environment</td>
+    <td width="45%">MPICH_JOBID=fry.123<br>
+    MPICH_IPROC=0<br>
+    MPICH_NPROC=2<br>
+      MPICH_ROOT=fry:12345</td>
+    <td width="45%">MPICH_JOBID=fry.123<br>
+    MPICH_IPROC=1<br>
+    MPICH_NPROC=2<br>
+      MPICH_ROOTHOST=fry:12345</td>
+  </tr>
+  <tr>
+    <td width="10%">Command</td>
+    <td width="45%">netpipe.exe</td>
+    <td width="45%">netpipe.exe</td>
+  </tr>
+</table>
+
+<p>Here is the same example on a single machine which uses shared memory:</p>
+
+<table border="1" width="100%">
+  <tr>
+    <td width="10%">Host</td>
+    <td width="45%">Fry</td>
+    <td width="45%">Fry</td>
+  </tr>
+  <tr>
+    <td width="10%">Environment</td>
+    <td width="45%">MPICH_JOBID=fry.2000<br>
+      MPICH_IPROC=0<br>
+      MPICH_NPROC=2<br>
+      MPICH_ROOT=fry:12345<br>
+      MPICH_SHM_LOW=0<br>
+      MPICH_SHM_HIGH=1</td>
+    <td width="45%">MPICH_JOBID=fry.2000<br>
+      MPICH_IPROC=1<br>
+      MPICH_NPROC=2<br>
+      MPICH_ROOT=fry:12345<br>
+      MPICH_SHM_LOW=0<br>
+      MPICH_SHM_HIGH=1</td>
+  </tr>
+  <tr>
+    <td width="10%">Command</td>
+    <td width="45%">netpipe.exe</td>
+    <td width="45%">netpipe.exe</td>
+  </tr>
+</table>
+
+<p>Here is an example of four processes on two machines which mixes shared memory and
+socket communication:</p>
+
+<table border="1" width="100%">
+  <tr>
+    <td width="12%">Host</td>
+    <td width="22%">Fry</td>
+    <td width="22%">Fry</td>
+    <td width="22%">Jazz</td>
+    <td width="22%">Jazz</td>
+  </tr>
+  <tr>
+    <td width="12%">Environment</td>
+    <td width="22%">MPICH_JOBID=fry.100<br>
+      MPICH_IPROC=0<br>
+      MPICH_NPROC=4<br>
+      MPICH_ROOT=fry:12345<br>
+      MPICH_SHM_LOW=0<br>
+      MPICH_SHM_HIGH=1</td>
+    <td width="22%">MPICH_JOBID=fry.100<br>
+      MPICH_IPROC=1<br>
+      MPICH_NPROC=4<br>
+      MPICH_ROOT=fry:12345<br>
+      MPICH_SHM_LOW=0<br>
+      MPICH_SHM_HIGH=1</td>
+    <td width="22%">MPICH_JOBID=fry.100<br>
+      MPICH_IPROC=2<br>
+      MPICH_NPROC=4<br>
+      MPICH_ROOT=fry:12345<br>
+      MPICH_SHM_LOW=2<br>
+      MPICH_SHM_HIGH=3</td>
+    <td width="22%">MPICH_JOBID=fry.100<br>
+      MPICH_IPROC=3<br>
+      MPICH_NPROC=4<br>
+      MPICH_ROOT=fry:12345<br>
+      MPICH_SHM_LOW=2<br>
+      MPICH_SHM_HIGH=3</td>
+  </tr>
+  <tr>
+    <td width="12%">Command</td>
+    <td width="22%">mandel.exe</td>
+    <td width="22%">mandel.exe</td>
+    <td width="22%">mandel.exe</td>
+    <td width="22%">mandel.exe</td>
+  </tr>
+</table>
+
+<p>This is the exact process for the first example from a command prompt:</p>
+
+<p>On Fry</p>
+
+<p><font face="Courier">C:\Temp&gt;set MPICH_JOBID=fry.123<br>
+C:\Temp&gt;set MPICH_IPROC=0<br>
+C:\Temp&gt;set MPICH_NPROC=2<br>
+C:\Temp&gt;set MPICH_ROOT=fry:12345<br>
+C:\Temp&gt;netpipe.exe</font></p>
+
+<p>On Jazz</p>
+
+<p><font face="Courier">C:\Temp&gt;set MPICH_JOBID=fry.123<br>
+C:\Temp&gt;set MPICH_IPROC=1<br>
+C:\Temp&gt;set MPICH_NPROC=2<br>
+C:\Temp&gt;set MPICH_ROOTHOST=fry:12345<br>
+C:\Temp&gt;netpipe.exe</font></p>
+
+<p><a href="../index.html">main</a><br>
+</p>
+</body>
+</html>

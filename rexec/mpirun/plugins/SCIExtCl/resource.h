@@ -1,0 +1,13 @@
+#ifndef __RESOURCE_H__
+#define __RESOURCE_H__
+
+#define IDD_DIALOG1		101
+#define IDC_CHECK_VERBOSE	1000
+#define IDC_CHECK_DEBUG		1001
+#define IDC_PORT_LABEL		1002
+#define IDC_EDIT_PORT		1003
+#define IDC_EDIT_FILE		1004
+#define IDC_BUTTON_SELFILE	1005
+
+
+#endif

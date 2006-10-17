@@ -1,0 +1,67 @@
+#! /bin/sh
+
+COMPSKRIPT=`basename $0`
+# first find ourselfs
+rundir=`pwd`
+cd "`dirname $0`"
+scriptdir=`pwd`
+cd "$rundir"
+if [ ! -x "$scriptdir/$COMPSKRIPT" ]
+then
+	echo "Cannot find myself. How did you manage to call this script?"
+	exit 1
+fi
+
+. $scriptdir/mpicompile.args
+
+status=0
+if [ $DoCompile = 1 -o $show_compile = 1 ] ; then 
+    if [ $HasDashC != 1 ] ; then
+        compileargs="-c $compileargs"
+    fi
+    $Show $F77 $FINC $ROMIO_TFFLAGS $FFLAGS $compileargs
+    status=$?
+    if [ $status != 0 ] ; then 
+	exit $status
+    fi
+fi
+if [ $DoLink = 1 -o $show_link = 1 ] ; then
+    # If the profiling library doesn't exist, or MPICH_NO_PROF environment
+    # variable is set, skip the profiling library.
+    if [ -n "$MPICH_NO_PROF" -o ! -s "$proflibfullname" ] ; then
+        proflib=""
+    fi
+    # Add this just in case we are building with shared libraries
+    if [ -s $libdir/lib${MPILIBNAME}f.a ] ; then
+        farglib="-l${MPILIBNAME}f"
+    fi
+    # See the comment in mpicc about UseSharedLib
+    # Also, don't use if the shared libraries don't exist yet
+    # (because -lmpichfarg.a won't exist yet)
+    MPI_LIBS="$DEVICELFLAGS -l$MPILIBNAME -lmpidutil"
+    if [ "$SHAREDKIND" != "ignore" -a $UseSharedLib = "1" ] ; then 
+	#-a 
+	#	-s $libdir/lib$(MPILIBNAME)farg.a ] ; then
+	# We also add a library containing MPI_Init and the routines
+        # that it uses to call getarg/iarg.  
+	# -L path is already set in $LIB_PATH - instead, add the dir for the shared libs in front
+	LIB_PATH="$FLIB_PATH_LEADER$sharedlib_dir $FLIB_PATH_LEADER$libdir $LIB_PATH"
+        if [ "$UseLibPath" = "1" -a -n "$SHARED_LIB_SEARCH_PATH_LEADER" ] ; then
+	    flibpath="$SHARED_LIB_SEARCH_PATH_LEADER$sharedlib_dir $flibpath"
+	fi
+	farglib="-l${MPILIBNAME}farg $farglib"
+	F77LINKER="$F77LINKER $F77LINKERDYNAMICOPTS"
+    else
+
+        # if we link statically, we need additional flags to force the linker
+	# to link against the device libs, because there are no unresolved symbols
+	# which could be resolved with the device libs
+	# plus, we need the static device libs here
+	MPI_LIBS="$MPI_LIBS -ldl"
+	F77LINKER="$F77LINKER $F77LINKERSTATICOPTS"
+    fi
+
+    $Show $F77LINKER $ROMIO_LFLAGS $ROMIO_TFFLAGS $FFLAGS $LIB_PATH $flibpath $LDFLAGS $linkobjs $MPILOG $linkargs $mpiolib $proflib $MPI_LIBS $farglib $BASE_LIB_LIST $FLIB_LIST $ROMIO_DEVLIBS
+    status=$?
+fi
+exit $status

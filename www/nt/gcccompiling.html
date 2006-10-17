@@ -1,0 +1,62 @@
+<html>
+
+<head>
+<title></title>
+</head>
+
+<body>
+
+<p><a href="../index.html">main</a></p>
+
+<p>::COMPILING MPICH APPLICATIONS: </p>
+
+<p>Here are the settings necessary to compile an mpi application written in C/C++ with
+gcc.</p>
+
+<p>Create a new makefile make the following settings:</p>
+
+<p>include path: </p>
+
+<table border="1" width="100%">
+  <tr>
+    <td width="50%">If you installed the full source tree (mpich.nt.1.2.0.src.zip)</td>
+    <td width="50%">If you installed the SDK (mpich.nt.1.2.0.sdk.zip)</td>
+  </tr>
+  <tr>
+    <td width="50%"><ul>
+      <li>[MPICH Home]\include </li>
+      <li>[MPICH Home]\mpid\nt_tcp_shm </li>
+      <li>[MPICH Home]\mpid\ch2 </li>
+      <li>[MPICH Home]\mpid\util </li>
+    </ul>
+    </td>
+    <td width="50%"><ul>
+      <li>[MPICH Home]\include</li>
+    </ul>
+    </td>
+  </tr>
+</table>
+
+<p>libraries: 
+
+<ul>
+  <li>libmpich_tcp_shm.a </li>
+  <li>libpmpich_tcp_shm.a </li>
+  <li>libmpich_tcp_shmd.a</li>
+  <li>libpmpich_tcp_shmd.a</li>
+  <li>Note: the pmpich*.lib libraries are only necessary if you make PMPI_ * calls in your
+    code.</li>
+</ul>
+
+<p>lib path: 
+
+<ul>
+  <li>[MPICH Home]\lib </li>
+</ul>
+
+<p>Add your source files to the makefile and then build. </p>
+
+<p><a href="../index.html">main</a><br>
+</p>
+</body>
+</html>

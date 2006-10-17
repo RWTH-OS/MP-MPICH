@@ -1,0 +1,170 @@
+#!/bin/bash 
+
+# MPIRUN for MPICH
+# (Don't change the above line - we use it to identify MPICH mpirun as
+# opposed to others (e.g., SGI's mpirun)
+#
+# This script tries to start jobs on whatever kind of machine you're on.
+# Strategy - This program is built with a default device it uses in
+# certain ways. The user can override this default from the command line.
+#
+# This sh script is designed to use other scripts to provide the commands
+# to run each system, using the . filename.sh mechanism
+#
+# Debuggers should be handled by running 
+# mpirun.db.<debugger_name>
+# e.g., mpirun.db.gdb or mpirun.db.xxgdb.
+# This will allow users to add there own debuggers 
+# (with -debug=<debugger_name>)
+#
+
+COMPSKRIPT=`basename $0`
+# first find ourselfs
+rundir=`pwd`
+cd "`dirname $0`"
+scriptdir=`pwd`
+cd "$rundir"
+if [ ! -x "$scriptdir/$COMPSKRIPT" ]
+then
+	echo "Cannot find myself. How did you manage to call this script?"
+	exit 1
+fi
+
+# Special, system specific values
+#
+# polling_mode is for systems that can select between polling and 
+# interrupt-driven operation.  Currently, only IBM POE is so supported
+# (TMC CMMD has some support for this choice of mode)
+polling_mode=1
+
+# Parse command line arguments
+# The ultimate goal is to determine what kind of parallel machine this
+# is we are running on. Then we know how to start jobs...
+#
+# Process common arguments (currently does ALL, but should pass unrecognized
+# ones to called files)
+#
+hasprinthelp=1
+. $scriptdir/mpirun.args
+argsset=1
+
+#
+# Jump to the correct code for the device (by pseudo machine)
+#
+mpirun_version=""
+case $machine in
+    meta)
+	mpirun_version=$scriptdir/mpirun.meta
+	;;
+    ch_smi)
+	mpirun_version=$scriptdir/mpirun.ch_smi
+	;;
+    ch_usock)
+	mpirun_version=$scriptdir/mpirun.ch_usock
+	;;
+    ch_mpx)
+	mpirun_version=$scriptdir/mpirun.ch_mpx
+	;;
+    ch_gm)
+	# if no machine file was given, we assume there is a node specification
+	if [ -z ${machineFile} ] ; then
+
+	    # convert -nodes to temp. machinefile
+	    mID=`date +%H%M%S`
+	    mID=$mID.$$
+	    machineFile="${PWD}/machines.tmp.${mID}"
+
+	    for n in ${nodes} ; do
+		echo "$n" >> ${machineFile}
+	    done    
+	fi
+
+	mpirun_version=$scriptdir/mpirun.ch_gm
+	;;
+    ch_cmmd)
+	mpirun_version=$scriptdir/mpirun.ch_cmmd
+	;;
+    ibmspx|ch_eui|ch_mpl)
+	mpirun_version=$scriptdir/mpirun.ch_mpl
+	;;
+    anlspx)
+	mpirun_version=$scriptdir/mpirun.anlspx
+	;;
+    ch_meiko|meiko)
+	mpirun_version=$scriptdir/mpirun.meiko
+	;;
+    cray_t3d|t3d)
+	mpirun_version=$scriptdir/mpirun.t3d
+	;;
+    ch_nc)
+	mpirun_version=$scriptdir/mpirun.ch_nc
+	;;
+    paragon|ch_nx|nx)
+	mpirun_version=$scriptdir/mpirun.paragon
+	;;
+    inteldelta)
+	mpirun_version=$scriptdir/mpirun.delta
+	;;
+    i860|ipsc860)
+	mpirun_version=$scriptdir/mpirun.i860
+	;;
+    p4|ch_p4|sgi_mp)
+	mpirun_version=$scriptdir/mpirun.ch_p4
+	;;
+    execer)
+	mpirun_version=$scriptdir/mpirun.execer
+	;;
+    ch_shmem|ch_spp|smp|convex_spp)
+	# sgi_mp is reserved for the p4 version
+	mpirun_version=$scriptdir/mpirun.ch_shmem
+    	;;
+    ksr|symm_ptx)
+	mpirun_version=$scriptdir/mpirun.p4shmem
+	;;
+    ch_tcp|tcp)
+	mpirun_version=$scriptdir/mpirun.ch_tcp
+	;;
+    globus)
+	mpirun_version=$scriptdir/mpirun.globus
+	;;
+    *)
+	#
+	# This allows us to add a device without changing the base mpirun
+	# code
+	if [ -f $scriptdir/mpirun.$device ] ; then
+	    mpirun_version=$scriptdir/mpirun.$device
+	elif [ -f $scriptdir/mpirun.$default_device ] ; then
+	    mpirun_version=$scriptdir/mpirun.$default_device
+	    device=$default_device
+	else
+	    echo "*** mpirun: cannot find MPIRUN machine file for machine $machine"
+	    echo "            and architecture $arch ."
+            if [ -n "$device" ] ; then
+		echo "            (Looking for $scriptdir/mpirun.$device)"
+	    else
+	        echo "            (No device specified.)"
+            fi
+	    # . $scriptdir/mpirun.default
+	    exit 1
+	fi
+  	;;
+esac
+
+if [ ${usemeta} -eq 1 ] ; then
+    mpirun_version=$scriptdir/mpirun.meta
+fi
+
+exitstat=1
+if [ -n "$mpirun_version" ] ; then
+    if [ -f $mpirun_version ] ; then
+        . $mpirun_version
+    else
+       	echo "*** mpirun: $mpirun_version is not available."
+	    exit 1
+    fi
+else
+    echo "*** mpirun: No mpirun script for this configuration!"
+    exit 1
+fi
+exit $exitstat
+

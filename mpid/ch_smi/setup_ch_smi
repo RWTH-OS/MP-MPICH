@@ -1,0 +1,219 @@
+#!/bin/sh
+# $Id$
+#
+# ch_smi setup for MP-MPICH configure
+#
+if test -n "$DEVICE_ARGS_ch_smi" ; then
+    echo "ch_smi: running device specific setup with args: $DEVICE_ARGS_ch_smi"
+else
+    test -n "$verbose" && echo "ch_smi: running device specific setup with args: NONE"
+fi
+
+cp $srcdir/mpid/ch_smi/smi_conf.h.in mpid/ch_smi/smi_conf.h
+
+#indicate presence of device
+CFLAGS="${CFLAGS} -DCH_SMI_PRESENT"
+FFLAGS="${FFLAGS} -DCH_SMI_PRESENT"
+
+# force linking of device lib in static case
+CLINKERSTATICOPTS="${CLINKERSTATICOPTS} -u MPID_CH_SMI_InitMsgPass"
+F77LINKERSTATICOPTS="${F77LINKERSTATICOPTS} -uMPID_CH_SMI_InitMsgPass"
+
+for arg in $DEVICE_ARGS_ch_smi $@; do
+    case $arg in
+     --enable-async)
+	if test "$DevThreadsEnabled" = "0"; then
+	    echo "#define MPID_USE_DEVTHREADS      1" >> $srcdir/mpid/ch_smi/smi_conf.h
+	  DevThreadsEnabled=1
+	fi
+        echo "ch_smi: enabling asynchronous transfers"
+	UsePthreads=1	
+	;;
+
+     --disable-dynamic)
+	echo "#define MPID_SMI_STATIC_CONFIG     1" >> $srcdir/mpid/ch_smi/smi_conf.h
+	echo "#define MPID_SMI_STATIC_CONNECT    1" >> $srcdir/mpid/ch_smi/smi_conf.h
+	echo "ch_smi: disabling dynamic run-time configurability"
+	;;
+     --enable-statistics)
+	echo "#define MPID_SMI_STATISTICS        1" >> $srcdir/mpid/ch_smi/smi_conf.h
+	echo "ch_smi: enabling gathering of run-time statistics"
+	;;
+
+    --with-sisci=*)
+	SISCIDIR=`echo $arg|sed 's/-*with-sisci=//'`
+	ROMIO_ARGS="$ROMIO_ARGS --with-sisci=$SISCIDIR"
+	;;
+
+    --with-smi-opts=*)
+	SMI_configure_args="$SMI_configure_args `echo $arg|sed 's/-*with-smi-opts=//'`"
+	;;
+
+    --disable-sisci=*)
+	SMI_configure_args="$SMI_configure_args --disable-sisci"
+	;;
+
+    *)
+	if test -n "$arg" ; then
+	    echo "ch_smi: unrecognized argument $arg"
+	    exit 1
+	fi
+	;;
+    esac
+done
+
+# configure SMI
+# we use the included version of the SMI library
+SMIDIR=mpid/ch_smi/SMI
+
+if ! test -d "$srcdir/$SMIDIR" ; then
+  echo "SMI library not found!"
+  exit 1
+fi
+
+if ! test -d "$SMIDIR"; then
+	mkdir $SMIDIR
+fi
+
+if [ -n "$SISCIDIR" ] ; then
+  SMI_configure_args="$SMI_configure_args --with-sisci=$SISCIDIR"
+fi
+if [ "$NODEVDEBUG" = "0" ] ; then
+  SMI_configure_args="$SMI_configure_args --enable-debug"
+fi
+if [ "$UseSharedLibs" = "1" ] ; then
+  SMI_configure_args="$SMI_configure_args --enable-shared"
+else
+  SMI_configure_args="$SMI_configure_args --disable-shared"
+fi
+SMI_configure_args=`echo "$SMI_configure_args" | tr ":" " "`
+
+echo "*** configuring internal SMI library"
+test -n "$verbose" && echo "	args: $SMI_configure_args"
+rm -f include/smiconfig.h
+(cd $SMIDIR; CFLAGS="$OPTCFLAGS $CFLAGS" $srcdir/$SMIDIR/configure $SMI_configure_args)
+if [ ! -r $SMIDIR/include/smiconfig.h ] ; then
+   echo "configure of SMI failed!"
+   exit 1
+fi
+
+#test -n "$verbose" && echo "configured internal SMI library in $SMIDIR, defining MPI_SMI"
+test -n "$verbose" && echo "configured internal SMI library in $SMIDIR"
+
+# We need to know if write-combining is enabled or not to choose the best function
+# for remote memcpy(). This check is done in the SMI library, we just check if MTRR
+# support is available.
+sisci_type=`cat $SMIDIR/include/smiconfig.h | grep "SISCI " | grep define`
+if [ "$sisci_type" = "#define NO_SISCI 1" ] ; then
+  SCI_TYPE=NO_SCI
+  LIBSISCI=""
+elif [ "$sisci_type" = "#define DOLPHIN_SISCI 1" ] ; then
+  SCI_TYPE=DOLPHIN
+  LIBSISCI=sisci
+elif [ "$sisci_type" = "#define SCALI_SISCI 1" ] ; then
+  SCI_TYPE=SCALI
+  LIBSISCI=sisci_api
+fi
+if [ $ARCH = "LINUX" -a $SCI_TYPE != "NO_SCI" ] ; then
+  if [ ! -r "/proc/mtrr" ] ; then
+    test -n "$verbose" && \
+	(echo "	*** /proc/mtrr does not exist - recompile the kernel with MTRR support enabled" ;
+	echo "	*** to get optimal performance via SCI!")
+  fi
+  if [ ! -r "/proc/bigphysarea" ] ; then
+    test -n "$verbose" && \
+	(echo "	*** /proc/bigphysare does not exist - we recommend to apply the bigphysarea-patch" ;
+	echo "	*** to the kernel to get fully reliable allocation of SCI shared memory!")
+  fi
+fi
+
+if [ $SCI_TYPE != "NO_SCI" ] ; then
+  SISCIDIR=`cat $SMIDIR/include/smiconfig.h | grep SISCIDIR | cut -d" " -f 3`
+fi
+
+# set up library lists and pathes accordingly
+# We need pthreads for the SMI watchdog on SCI and other stuff.
+THREAD_LIB="-lpthread"
+THREAD_DEF="-D_REENTRANT"
+THREAD_FLAG="-mt"
+if [ -n "$LIBSISCI" ] ; then
+  LIB_LIST="${LIB_LIST} -l${LIBSISCI} ${THREAD_LIB}"
+else 
+  # no SISCI, SMP only
+  test -n "$verbose" && \
+  echo "	no SISCI library found, SMP usage only"
+  LIB_LIST="${LIB_LIST} ${THREAD_LIB}"
+fi
+if [ -n "$SISCIDIR" ] ; then
+	LIB_PATH="${LIB_PATH} -L${SISCIDIR}/lib"
+	FLIB_LIST="${FLIB_LIST} \${FLIB_PATH_LEADER}${SISCIDIR}/lib"
+fi
+# The proper place, I hope
+
+# if the MPICH libary is to be used as a shared library, it also means that the 
+# SMI and SISCI library are (probably) shared. We add the relevant dynamic search pathes
+sharedliblink_dirs="$sharedliblink_dirs $DLL_DIRS"
+
+# Solaris needs these, they are already in C lib on Linux
+if [ $ARCH = "solaris" -o $ARCH = "solaris86" ] ; then
+   LIB_LIST="${LIB_LIST} -lsocket -lnsl -lrt"
+fi
+# for dlopen() etc. (used in smicoll.c), libdl is required
+LIB_LIST="${LIB_LIST} -ldl"
+
+# smi.h is needed outside of ch_smi, too
+# XXX why ? 
+# INCLUDE_PATH="$INCLUDE_PATH -I${SMIDIR}/include"
+
+# SMI also needs the define MPI_SMI on compile time
+#DEV_DEFS="${DEV_DEFS} -DMPI_SMI"
+# SCI-MPICH uses the SMI library which is multithreaded (and the
+# device ch_smi may be multithreaded, too)
+CFLAGS="$CFLAGS $THREAD_DEF"
+# need to know the type of SCI drivers running for some low-level optimizations
+# and topology setup
+#CFLAGS="$CFLAGS -D${SCI_TYPE}"
+echo "#define $SCI_TYPE" >> $srcdir/mpid/ch_smi/smi_conf.h
+if [ -n "$THREAD_LIB" -a "(" $ARCH = "solaris" -o $ARCH = "solaris86" ")" ] ; then
+	# If compiling for Solaris, test if Sun or Gnu C is used. Sun C needs the -mt
+	# option if compiling for multithreaded applications.
+	if [ -n "`$CC -V 2>&1 | grep Sun`" ] ; then
+	    CFLAGS="$CFLAGS $THREAD_FLAG"
+	fi
+fi
+
+# optimized remote-memcpy functions are only needed on x86 (not on sparc)
+# anything not sparc is assumed to be x86 (FIXME!)
+if [ $ARCH = "solaris" -o $ARCH = "LINUX_ALPHA" -o $ARCH = "LINUX_IA64" -o $ARCH = "LINUX_X86_64" ] ; then
+   ASMFILES_O=""
+else
+   ASMFILES_O="mmx_memcpy.o mmx32_memcpy.o mmx64_memcpy.o wc32_memcpy.o wc64_memcpy.o sse32_memcpy.o sse64_memcpy.o mmx_prefetchnta_memcpy.o checksum.o "
+fi
+# For Linux on x86, some optimization for low-level copy operations
+# need to know which CPU type we are running on. This can also be determined
+# dynamically, but for now and because this is more run-time efficient, we
+# do this statically here.
+if [ $ARCH = "LINUX" ] ; then
+	# test for AMD Athlon
+      CPU_CHECK=`cat /proc/cpuinfo | grep -i "AMD Athlon"`
+	if [ -n "$CPU_CHECK" ] ; then
+	    echo "#define AMD_ATHLON   1" >> mpid/ch_smi/smi_conf.h
+      fi
+      CPU_CHECK=`cat /proc/cpuinfo | grep -i "Intel(R) Xeon"`
+	if [ -n "$CPU_CHECK" ] ; then
+	    echo "#define INTEL_PENTIUM_4   1" >> mpid/ch_smi/smi_conf.h
+      fi
+	# XXX code for single-CPU Pentium 4 ???
+      CPU_CHECK=`cat /proc/cpuinfo | grep -i "Pentium 4"`
+	if [ -n "$CPU_CHECK" ] ; then
+	    echo "#define INTEL_PENTIUM_4   1" >> mpid/ch_smi/smi_conf.h
+      fi
+      CPU_CHECK=`cat /proc/cpuinfo | grep -i "Pentium III"`
+	if [ -n "$CPU_CHECK" ] ; then
+	    echo "#define INTEL_PENTIUM_III   1" >> mpid/ch_smi/smi_conf.h
+      fi
+fi
+
+DEFAULT_MACHINE="smi"
+
+echo "ch_smi: end of device specific setup."

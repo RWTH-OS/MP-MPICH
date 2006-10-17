@@ -1,0 +1,2 @@
+pingping with MPI_Send synchronous send
+# blocksize 	bandwidth [MB/s]	 latency [ms]

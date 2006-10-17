@@ -1,0 +1,720 @@
+#!@PYTHON@
+#$Id: tkrun_smi.in,v 1.1 2000/11/15 14:41:42 joachim Exp $
+from Tkinter import Tk
+from Tkinter import Frame
+from Tkinter import Button
+from Tkinter import Scale
+from Tkinter import Checkbutton
+from Tkinter import Radiobutton
+from Tkinter import Label
+from Tkinter import Entry
+from Tkinter import Listbox
+from Tkinter import Menubutton
+from Tkinter import Menu
+from Tkinter import StringVar
+from Tkinter import IntVar
+from ScrolledText import ScrolledText
+from sys import exit
+from os.path import expanduser
+from os import getcwd
+from os import chdir
+from os import system
+from os import remove
+from os import fork
+from os import _exit
+from os import wait
+from os import getpid
+from tkFileDialog import Open
+
+# global constants
+program_name = "tkrun_smi"
+mpir_home="@MPIR_HOME@"
+
+# class for the about message
+class AboutMessage(Frame):
+
+    def __init__(self, root):
+
+	Frame.__init__(self, root)
+	self.pack()
+
+	self.master = root       # safe reference to Tk object for destruction
+
+	text = ScrolledText(self)
+	text.insert("end", "program name: " + program_name + "\n", "centered")
+	text.tag_config("centered", justify = "center")
+	text.pack()
+
+	b = Button(self, text = "OK", command = self.bye)
+	b.pack()
+
+    def bye(self):
+	self.master.destroy()
+
+# class for error messages
+class ErrorMessage(Frame):
+
+    def __init__(self, root, message):
+
+	Frame.__init__(self, root)
+	self.pack()
+
+	self.master = root     # safe reference to Tk object for destruction
+
+	text = ScrolledText(self)
+	text.insert("end", message, "centered")
+	text.tag_config("centered", justify = "center")
+	text.pack()
+
+	b = Button(self, text = "OK", command = self.bye)
+	b.pack()
+
+    def bye(self):
+	self.master.destroy()
+
+
+class MainWindow(Frame):
+
+    def __init__(self, root):
+
+	Frame.__init__(self, root)    # call constructor method of superclass
+	self.pack()
+
+	# instantiate objects for variables
+	self.verbose = IntVar()
+	self.non_blocking = IntVar()
+	self.use_dma = IntVar()
+	self.statistics = IntVar()
+	self.eager_dynamic = IntVar()
+	self.rndv_blocking = IntVar()
+	self.smidebug = IntVar()
+	self.stdout = IntVar()
+	self.stderr = IntVar()
+	self.xterm = IntVar()
+	self.pager = IntVar()
+	self.smp = IntVar()
+	self.name = StringVar()
+	self.dir = StringVar()
+	self.stdout_name = StringVar()
+	self.stderr_name = StringVar()
+	self.np = StringVar()
+	self.memcpy_sync = StringVar()
+	self.adapter_mode = StringVar()
+
+	# initialize variables
+	self.current_dir = getcwd()
+	self.dir.set(self.current_dir)
+	self.nodes_list = []
+
+	# look for machines file
+	machines_path_string = self.dir.get() + "/machines"
+	try:
+	    machines_file = open(machines_path_string, "r")
+	except:
+	    machines_path_string = "~/machines"
+	    machines_path_string = expanduser(machines_path_string)
+	    try:
+		machines_file = open(machines_path_string, "r")
+	    except:
+		machines_path_string = ""
+	if machines_path_string != "":
+
+	    for node in machines_file.readlines():
+		node = node[0: len(node) - 1]
+		if node != "":
+		    self.nodes_list.append(node)
+	    machines_file.close()
+
+	else:
+	    self.nodes_list = ["torres", "tuvok", "chakotay", "kes", "neelix"]
+
+	# configure menubar
+	# XXX seems that this has to be done first to avoid confusion
+        menubar = Frame(self, relief = "raised", bd = 2)
+        fileButton = Menubutton(menubar,
+                text = "File", underline = 0)
+        helpButton = Menubutton(menubar,
+                text = "Help", underline = 0)
+        fileButton["menu"] = file = Menu(fileButton, tearoff = 0)
+        helpButton["menu"] = view = Menu(helpButton, tearoff = 0)
+        self.makeFileMenu(file)
+        self.makeHelpMenu(view)
+        fileButton.pack(side="left")
+        helpButton.pack(side="right")
+        menubar.pack(side="top", fill="x")
+
+	# main part of window is divided into lines
+	main_first_line_frame = Frame(self, borderwidth = 2, relief = "flat")
+	main_second_line_frame = Frame(self, borderwidth = 2, relief = "flat")
+	main_third_line_frame = Frame(self, borderwidth = 2, relief = "flat")
+
+	main_first_line_frame.pack(side = "top", padx = 2, fill = "x")
+	main_second_line_frame.pack(side = "top", padx = 2, fill = "x")
+	main_third_line_frame.pack(side = "top", padx = 2, pady = 6, fill = "x")
+
+	# frame for input of program name and working directory
+	path_frame = Frame(main_first_line_frame, borderwidth = 2, relief = "flat")
+	# frame for stdout and stderr config
+	stdio_frame = Frame(main_first_line_frame, borderwidth = 2, relief = "flat")
+	# frame for device configuration input
+	conf_frame = Frame(main_second_line_frame, borderwidth = 2, relief = "flat")
+	# frame for startup configuration input
+	misc_frame = Frame(main_second_line_frame, borderwidth = 2, relief = "flat")
+	# frame for node selection
+	node_proc_frame = Frame(main_second_line_frame, borderwidth = 2, relief = "flat")
+	# frame for big buttons
+	button_frame = Frame(main_third_line_frame, borderwidth = 2, relief = "flat")
+
+	# place frames
+	path_frame.pack(side = "left", padx = 2)
+	stdio_frame.pack(side = "right", padx = 2)
+	conf_frame.pack(side = "left", padx = 2, anchor = "n")
+	misc_frame.pack(side = "left", padx = 2, anchor = "n")
+	node_proc_frame.pack(side = "right", padx = 2, anchor = "n")
+	button_frame.pack(side = "bottom", padx = 2, fill = "x")
+
+	# fill conf_frame
+	devconf_frame = Frame(conf_frame, borderwidth = 2, relief = "flat")
+	devconf_frame.pack(side = "left")
+
+	#
+	# this fills the frame for device configuration input
+	#
+	
+	# label for whole frame
+	devconf_label = Label(devconf_frame, text = "device configuration", font = "Times 19")
+	devconf_label.pack(side = "top")
+
+	# first column frame
+	first_devconf_frame = Frame(devconf_frame, borderwidth = 2, relief = "flat")
+	# second column frame
+	second_devconf_frame = Frame(devconf_frame, borderwidth = 2, relief = "flat")
+
+	# place column frames
+	first_devconf_frame.pack(side = "left", fill = "y")
+	second_devconf_frame.pack(side = "left", fill = "y")
+
+	# fill first column frame
+	# this column contains on each line a Label followed by an Entry
+	# frames for lines
+	short_frame = Frame(first_devconf_frame, borderwidth = 2, relief = "groove")
+	eager_frame = Frame(first_devconf_frame, borderwidth = 2, relief = "groove")
+	rndv_frame = Frame(first_devconf_frame, borderwidth = 2, relief = "groove")
+
+	# place frames
+	short_frame.pack(side = "top", fill = "x")
+	eager_frame.pack(side = "top", fill = "x")
+	rndv_frame.pack(side = "top", fill = "x")
+
+	# fill short frame
+	# label for short frame
+	short_label = Label(short_frame, text = "short protocol", font = "Times 13")
+	short_label.pack(side = "top")
+
+	short_bufsize_frame = Frame(short_frame, borderwidth = 2, relief = "flat")
+	short_nbrbufs_frame = Frame(short_frame, borderwidth = 2, relief = "flat")
+	short_bufsize_frame.pack(side = "top", fill = "x")
+	short_nbrbufs_frame.pack(side = "top", fill = "x")
+	
+	# short_bufsize input
+	# label for short_bufsize input
+	short_bufsize_label = Label(short_bufsize_frame, text = "bufsize")
+	short_bufsize_label.pack(side = "left")
+
+	# Entry-Widget for short_bufsize input
+	self.short_bufsize = StringVar()
+	self.short_bufsize.set("128")
+	short_bufsize_entry = Entry(short_bufsize_frame, relief = "sunken", textvariable = self.short_bufsize, width = 8)
+	short_bufsize_entry.pack(side = "right")
+	
+	# short_nbrbufs input
+	# label for short_nbrbufs input
+	short_nbrbufs_label = Label(short_nbrbufs_frame, text = "nbrbufs")
+	short_nbrbufs_label.pack(side = "left")
+
+	# Entry-Widget for short_nbrbufs input
+	self.short_nbrbufs = StringVar()
+	self.short_nbrbufs.set("63")
+	short_nbrbufs_entry = Entry(short_nbrbufs_frame, relief = "sunken", textvariable = self.short_nbrbufs, width = 8)
+	short_nbrbufs_entry.pack(side = "right")
+
+	# end of short frame configuration
+
+	# fill eager_frame
+	# label for eager_frame
+	eager_label = Label(eager_frame, text = "eager protocol", font = "Times 13")
+	eager_label.pack(side = "top")
+
+	eager_bufsize_frame = Frame(eager_frame, borderwidth = 2, relief = "flat")
+	eager_nbrbufs_frame = Frame(eager_frame, borderwidth = 2, relief = "flat")
+	eager_bufsize_frame.pack(side = "top", fill = "x")
+	eager_nbrbufs_frame.pack(side = "top", fill = "x")
+
+	# eager_bufsize input
+	# label for eager_bufsize input
+	eager_bufsize_label = Label(eager_bufsize_frame, text = "bufsize")
+	eager_bufsize_label.pack(side = "left")
+
+	# Entry-Widget for eager_bufsize input
+	self.eager_bufsize = StringVar()
+	self.eager_bufsize.set("16k")
+	eager_bufsize_entry = Entry(eager_bufsize_frame, relief = "sunken", textvariable = self.eager_bufsize, width = 8)
+	eager_bufsize_entry.pack(side = "right")
+	
+	# eager_nbrbufs input
+	# label for eager_nbrbufs input
+	eager_nbrbufs_label = Label(eager_nbrbufs_frame, text = "nbrbufs")
+	eager_nbrbufs_label.pack(side = "left")
+
+	# Entry-Widget for eager_nbrbufs input
+	self.eager_nbrbufs = StringVar()
+	self.eager_nbrbufs.set("4")
+	eager_nbrbufs_entry = Entry(eager_nbrbufs_frame, relief = "sunken", textvariable = self.eager_nbrbufs, width = 8)
+	eager_nbrbufs_entry.pack(side = "right")
+
+	# Checkbutton for eager_dynamic
+	eager_dynamic_cbutton = Checkbutton(eager_frame, text = "eager_dynamic", variable = self.eager_dynamic)
+	eager_dynamic_cbutton.pack(side = "top", anchor = "w")
+
+	# end of eager frame configuration
+
+	# fill rndv frame
+	# label for rndv_frame
+	rndv_label = Label(rndv_frame, text = "rndv protocol", font = "Times 13")
+	rndv_label.pack(side = "top")
+
+	rndv_memorysize_frame = Frame(rndv_frame, borderwidth = 2, relief = "flat")
+	rndv_blocksize_frame = Frame(rndv_frame, borderwidth = 2, relief = "flat")
+	rndv_memorysize_frame.pack(side = "top", fill = "x")
+	rndv_blocksize_frame.pack(side = "top", fill = "x")
+
+	# rndv_memorysize input
+	# label for rndv_memorysize input
+	rndv_memorysize_label = Label(rndv_memorysize_frame, text = "memorysize")
+	rndv_memorysize_label.pack(side = "left")
+
+	# Entry-Widget for rndv_memorysize input
+	self.rndv_memorysize = StringVar()
+	self.rndv_memorysize.set("1024k")
+	rndv_memorysize_entry = Entry(rndv_memorysize_frame, relief = "sunken", textvariable = self.rndv_memorysize, width = 8)
+	rndv_memorysize_entry.pack(side = "right")
+
+	# rndv_blocksize input
+	# label for rndv_blocksize input
+	rndv_blocksize_label = Label(rndv_blocksize_frame, text = "blocksize")
+	rndv_blocksize_label.pack(side = "left")
+
+	# Entry-Widget for rndv_blocksize input
+	self.rndv_blocksize = StringVar()
+	self.rndv_blocksize.set("24k")
+	rndv_blocksize_entry = Entry(rndv_blocksize_frame, relief = "sunken", textvariable = self.rndv_blocksize, width = 8)
+	rndv_blocksize_entry.pack(side = "right")
+
+	# Checkbutton for rndv_blocking
+	rndv_blocking_cbutton = Checkbutton(rndv_frame, text = "rndv_blocking", variable = self.rndv_blocking)
+	rndv_blocking_cbutton.pack(side = "top", anchor = "w")
+
+	# end of rndv frame configuration
+
+	# end of first column configuration
+
+	# fill second column frame
+	# label for second column
+	sec_label = Label(second_devconf_frame, text = "common", font = "Times 13")
+	sec_label.pack(side = "top")
+
+	# Checkbutton for non_blocking
+	non_blocking_cbutton = Checkbutton(second_devconf_frame, text = "non_blocking", variable = self.non_blocking)
+	non_blocking_cbutton.pack(side = "top", anchor = "w")
+
+	# Checkbutton for use_dma
+	use_dma_cbutton = Checkbutton(second_devconf_frame, text = "use_dma", variable = self.use_dma)
+	use_dma_cbutton.pack(side = "top", anchor = "w")
+
+	# Checkbutton for statistics
+	statistics_cbutton = Checkbutton(second_devconf_frame, text = "statistics", variable = self.statistics)
+	statistics_cbutton.pack(side = "top", anchor = "w")
+
+	# frame for memcpy_sync
+	memcpy_sync_frame = Frame(second_devconf_frame, borderwidth = 2, relief = "flat")
+	memcpy_sync_frame.pack(side = "top")
+
+	memcpy_sync_label = Label(memcpy_sync_frame, text = "memcpy_sync")
+	memcpy_sync_label.pack(side = "top")
+
+	# frame for radiobuttons in memcpy_sync_frame
+	memcpy_sync_radio_frame = Frame(memcpy_sync_frame, borderwidth = 2, relief = "flat")
+	memcpy_sync_radio_frame.pack(side = "top")
+
+	rb = Radiobutton(memcpy_sync_radio_frame, text = "no sync", variable = self.memcpy_sync,
+			 value = "0", anchor = "w")
+	rb.pack(side = "top", anchor = "w")
+
+	rb = Radiobutton(memcpy_sync_radio_frame, text = "incoming", variable = self.memcpy_sync,
+			 value = "1", anchor = "w")
+	rb.pack(side = "top", anchor = "w")
+
+	rb = Radiobutton(memcpy_sync_radio_frame, text = "outgoing", variable = self.memcpy_sync,
+			 value = "2", anchor = "w")
+	rb.pack(side = "top", anchor = "w")
+
+	rb = Radiobutton(memcpy_sync_radio_frame, text = "in & out", variable = self.memcpy_sync,
+			 value = "3", anchor = "w")
+	rb.pack(side = "top", anchor = "w")
+	rb.select()
+
+	# frame for adapter_mode
+	adapter_mode_frame = Frame(second_devconf_frame, borderwidth = 2, relief = "flat")
+	adapter_mode_frame.pack(side = "top")
+
+	adapter_mode_label = Label(adapter_mode_frame, text = "adapter_mode")
+	adapter_mode_label.pack(side = "top")
+
+	# frame for radiobuttons in adapter_mode_frame
+	adapter_mode_radio_frame = Frame(adapter_mode_frame, borderwidth = 2, relief = "flat")
+	adapter_mode_radio_frame.pack(side = "top")
+
+	rb = Radiobutton(adapter_mode_radio_frame, text = "default", variable = self.adapter_mode,
+			 value = "0", anchor = "w")
+	rb.pack(side = "top", anchor = "w")
+	rb.select()
+
+	rb = Radiobutton(adapter_mode_radio_frame, text = "impexp", variable = self.adapter_mode,
+			 value = "1", anchor = "w")
+	rb.pack(side = "top", anchor = "w")
+
+	rb = Radiobutton(adapter_mode_radio_frame, text = "smp", variable = self.adapter_mode,
+			 value = "2", anchor = "w")
+	rb.pack(side = "top", anchor = "w")
+
+
+	# end of second column configuration
+
+	#
+	# end of device configuration frame configuration
+	#
+
+	#
+	# fill frame for miscellaneous things
+	#
+
+	# label for frame
+	startup_label = Label(misc_frame, text = "startup configuration", font = "Times 19")
+	startup_label.pack(side = "top")
+
+	# Checkbutton for verbose mode input
+	verbose_cbutton = Checkbutton(misc_frame, text = "verbose", variable = self.verbose)
+	verbose_cbutton.pack(side = "top", anchor = "w")
+
+	# Checkbutton for smidebug input
+	smidebug_cbutton = Checkbutton(misc_frame, text = "smidebug", variable = self.smidebug)
+	smidebug_cbutton.pack(side = "top",  anchor = "w")
+
+	# Checkbutton for xterm usage
+	xterm_cbutton = Checkbutton(misc_frame, text = "xterm", variable = self.xterm)
+	xterm_cbutton.pack(side = "top", anchor = "w")
+
+	# Checkbutton for pager usage
+	pager_cbutton = Checkbutton(misc_frame, text = "pager", variable = self.pager)
+	pager_cbutton.pack(side = "top", anchor = "w")
+
+	# Checkbutton for -smp switch
+	smp_cbutton = Checkbutton(misc_frame, text = "SMP", variable = self.smp)
+	smp_cbutton.pack(side = "top", anchor = "w")
+
+	#
+	# miscellaneous end
+	#
+
+	#
+	# configure frame for node selection
+	# it consists of two columns: the first with a list of the available nodes and the
+	# second with the list of the selected nodes
+	#
+	# frame for node selection
+	node_frame = Frame(node_proc_frame, borderwidth = 2, relief = "flat")
+	node_frame.pack(side = "top")
+	# label for whole frame
+	node_label = Label(node_frame, text = "node selection", font = "Times 19")
+	node_label.pack(side = "top")
+
+	# first column frame
+	first_node_frame = Frame(node_frame, borderwidth = 2, relief = "groove")
+	# second column frame
+	second_node_frame = Frame(node_frame, borderwidth = 2, relief = "groove")
+
+	# place column frames
+	first_node_frame.pack(side = "left", fill = "y")
+	second_node_frame.pack(side = "left", fill = "y")
+
+	# fill first column frame
+	# at the top sits a label
+	first_node_label = Label(first_node_frame, text = "available nodes", font = "Times 13")
+	first_node_label.pack(side = "top")
+
+	# below is the listbox with the available nodes
+	self.first_node_box = Listbox(first_node_frame)
+	self.first_node_box.pack(side = "top")
+	for node in self.nodes_list:
+	    self.first_node_box.insert("end", node)
+	self.first_node_box.bind("<Double-1>", self.select_node)
+
+	# fill second column frame
+	# at the top sits a label
+	second_node_label = Label(second_node_frame, text = "selected nodes", font = "Times 13")
+	second_node_label.pack(side = "top")
+	
+	# below is the listbox with the selected nodes
+	self.second_node_box = Listbox(second_node_frame)
+	self.second_node_box.pack(side = "top")
+	self.second_node_box.bind("<Double-1>", self.unselect_node)
+
+	# end of node selection configuration
+	
+	# frame for selection of process number
+	np_frame = Frame(node_proc_frame, borderwidth = 2, relief = "flat")
+	np_frame.pack(side = "right", padx = 2)
+
+	#
+	# fill np_frame
+	#
+
+	# Scale to select number of processes
+	np_scale = Scale(np_frame, label = "# processes", from_ = 1, to = 32,
+			 command = self.setNP, orient = "horizontal",
+			 length = 300, font = "Times 19")
+	np_scale.pack()
+
+	#
+	# end of np_frame configuration
+	#
+
+
+	#
+	# fill path_frame
+	#
+
+	# frame for input of program name
+	name_frame = Frame(path_frame, borderwidth = 2, relief = "flat")
+	# frame for input of working directory
+	dir_frame = Frame(path_frame, borderwidth = 2, relief = "flat")
+
+	# places frames
+	name_frame.pack(side = "top", padx = 2, fill = "x")
+	dir_frame.pack(side = "top", padx = 2, fill = "x")
+
+	# label for progam name input
+	name_label = Label(name_frame, text = "program name")
+	name_label.pack(side = "left")
+
+	# Entry-Widget for program name input
+	name_entry = Entry(name_frame, relief = "sunken", textvariable = self.name, width = 40)
+	name_entry.pack(side = "left")
+
+	# Button to start dialog for program name input
+	name_button = Button(name_frame, text = "Browse", command = self.startOpenDialog)
+	name_button.pack(side = "left")
+
+	# label for directory input
+	dir_label = Label(dir_frame, text = "working directory")
+	dir_label.pack(side = "left")
+
+	# Entry-Widget for directory input
+	dir_entry = Entry(dir_frame, relief = "sunken", textvariable = self.dir)
+	dir_entry.pack(fill = "x")
+
+	#
+	# end of path_frame configuration
+	#
+
+	#
+	# fill stdio_frame
+	#
+
+	# frame for input of stdout file
+	stdout_frame = Frame(stdio_frame, borderwidth = 2, relief = "flat")
+	# frame for input of stderr file
+	stderr_frame = Frame(stdio_frame, borderwidth = 2, relief = "flat")
+
+	# place frames
+	stdout_frame.pack(side = "top", padx = 2)
+	stderr_frame.pack(side = "top", padx = 2)
+
+	# Checkbutton for stdout output
+	stdout_cbutton = Checkbutton(stdout_frame, text = "stdout", variable = self.stdout)
+	stdout_cbutton.pack(side = "left", anchor = "w")
+
+	# Entry-Widget for stdout file input
+	stdout_entry = Entry(stdout_frame, relief = "sunken", textvariable = self.stdout_name)
+	stdout_entry.pack(side = "left")
+
+	# Checkbutton for stderr output
+	stderr_cbutton = Checkbutton(stderr_frame, text = "stderr", variable = self.stderr)
+	stderr_cbutton.pack(side = "left", anchor = "w")
+
+	# Entry-Widget for stderr file input
+	stderr_entry = Entry(stderr_frame, relief = "sunken", textvariable = self.stderr_name)
+	stderr_entry.pack(side = "left")
+
+	#
+	# end of stdio_frame configuration
+	#
+
+	# Button to start execution
+	run_button = Button(button_frame, text = "Run", command = self.launch)
+	run_button.pack(side = "left")
+
+	# Button to exit program
+	exit_button = Button(button_frame, text = "Quit", command = self.bye)
+	exit_button.pack(side = "right")
+
+    def setNP(self, value):
+	self.np.set(`value`)
+
+    def startOpenDialog(self):
+	dialog = Open(filetypes = [("all files", "*")])
+	new_name = dialog.show()
+	if new_name != "":
+	    self.name.set(new_name)
+
+    def select_node(self, event):
+	self.second_node_box.insert("end", self.first_node_box.get("anchor"))
+	
+    def unselect_node(self, event):
+	self.second_node_box.delete("anchor")
+
+    def makeFileMenu(self, menu):
+        menu.add_command(label = "Quit", command = self.bye, underline = 0)
+
+    def makeHelpMenu(self, menu):
+	menu.add_command(label = "About", command = self.makeAboutWindow, underline = 0)
+
+    # real version of launch
+    def launch(self):
+	#
+	# make launch string
+	#
+	# make strings out of variables
+	if self.verbose.get():
+	    verbose_string = " -v "
+	else:
+	    verbose_string = ""
+		
+	if self.smidebug.get():
+	    smidebug_string = " -smidebug "
+	else:
+	    smidebug_string = ""
+
+	if self.xterm.get():
+	    xterm_string = " -xterm "
+	else:
+	    xterm_string = ""
+
+	if self.pager.get():
+	    pager_string = " -pager "
+	else:
+	    pager_string = ""
+
+	if self.smp.get():
+	    smp_string = " -smp "
+	else:
+	    smp_string = ""
+
+	# make strings for stdout and stderr output
+	stdout_string = ""
+	if self.stdout.get():
+	    if self.stdout_name.get() == "":
+		errorWindow = ErrorMessage(Tk(className = "Error"), "Please provide a filename for stdout")
+		errorWindow.mainloop()
+		return
+	    else:
+		stdout_string = "-stdout " + self.stdout_name.get() + " "
+
+	stderr_string = ""
+	if self.stderr.get():
+	    if self.stderr_name.get() == "":
+		errorWindow = ErrorMessage(Tk(className = "Error"), "Please provide a filename for stderr")
+		errorWindow.mainloop()
+		return
+	    else:
+		stderr_string = "-stderr " + self.stderr_name.get() + " "
+	    
+	# it is necessary to start mpirun with full path for machines and device config file, because
+	# otherwise we get a problem if the executable is not in the current directory
+	machinefilename = self.dir.get() + "/tkrun_smi.machines "
+	devconffilename = self.dir.get() + "/tkrun_smi.devconf "
+
+	launch_string = mpir_home + "/bin/mpirun -np " + self.np.get() + smp_string + " -machinefile " + machinefilename
+	launch_string = launch_string + verbose_string + smidebug_string + "-devconf " + devconffilename
+	launch_string = launch_string + stdout_string + stderr_string + xterm_string + pager_string
+	launch_string = launch_string + self.name.get()
+	
+	# go to working directory
+	chdir(self.dir.get())
+
+	# make machines file
+	machineFile = open("tkrun_smi.machines", "w")
+	selected_node_list = self.second_node_box.get(0, 100)
+	for node in selected_node_list:
+	    machineFile.write(node + "\n")
+	machineFile.close()
+
+	# make strings out of variables from checkbuttons
+	if self.non_blocking.get():
+	    non_blocking_string = "1"
+	else:
+	    non_blocking_string = "0"
+	if self.use_dma.get():
+	    use_dma_string = "1"
+	else:
+	    use_dma_string = "0"
+	if self.statistics.get():
+	    statistics_string = "1"
+	else:
+	    statistics_string = "0"
+	if self.eager_dynamic.get():
+	    eager_dynamic_string = "1"
+	else:
+	    eager_dynamic_string = "0"
+	if self.rndv_blocking.get():
+	    rndv_blocking_string = "1"
+	else:
+	    rndv_blocking_string = "0"
+		
+	# make device configuration file
+	devconf_file = open("tkrun_smi.devconf", "w")
+	devconf_file.write("short_bufsize " + self.short_bufsize.get() + "\n")
+	devconf_file.write("short_nbrbufs " + self.short_nbrbufs.get() + "\n")
+	devconf_file.write("eager_bufsize " + self.eager_bufsize.get() + "\n")
+	devconf_file.write("eager_nbrbufs " + self.eager_nbrbufs.get() + "\n")
+	devconf_file.write("rndv_memorysize " + self.rndv_memorysize.get() + "\n")
+	devconf_file.write("rndv_blocksize " + self.rndv_blocksize.get() + "\n")
+	devconf_file.write("non_blocking " + non_blocking_string + "\n")
+	devconf_file.write("use_dma " + use_dma_string + "\n")
+	devconf_file.write("statistics " + statistics_string + "\n")
+	devconf_file.write("eager_dynamic " + eager_dynamic_string + "\n")
+	devconf_file.write("rndv_blocking " + rndv_blocking_string + "\n")
+	devconf_file.write("memcpy_sync " + self.memcpy_sync.get() + "\n")
+	devconf_file.write("adapter_mode " + self.adapter_mode.get() + "\n")
+	devconf_file.close()
+
+	#print launch_string
+	system(launch_string)
+
+	# delete device configuration file and machines File
+	remove("./tkrun_smi.devconf")
+	remove("./tkrun_smi.machines")
+
+	# re-change working directory
+	chdir(self.current_dir)
+	
+    def makeAboutWindow(self):
+	aboutWindow = AboutMessage(Tk(className="About"))
+	aboutWindow.mainloop()
+
+    def bye(self):
+	exit(0)
+
+# script execution starts here
+app = MainWindow(Tk(className=program_name))
+app.mainloop()

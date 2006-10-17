@@ -1,0 +1,79 @@
+Howto use "autotest"
+
+"autotest" is an automatic testing suite for software projects located on svn-servers (svn=subversion).It tests if configurations can be build and with the help of tests it checks if the latests version of the project is still as good as the versions before. If you want to autotest your configuration you must provide a few information to autotest. You have to do this by editing the main.conf in the "autotest" directory of your BRANCH-ROOT-DIR. Perhaps you have to edit/add more files. After doing this all like described below you have to "commit" this all in the repository because autotest always works on the last committed revision to the svn-server.
+
+main.conf
+=========
+This is an example for a test-configuration in the main.conf.
+
+[CONFIG]
+TESTING=(enabled|disabled)
+CONFIGURE=configure-flags-file
+MAKE=make-targets-file
+TEST=test-script-file
+TESTDIR=test-dir
+TESTCONF=test-conf-file
+
+'CONFIG' must be replaced by the name of the test-configuration.
+All 'files' are relative to the path where main.conf resides, this is normally the "BRANCH-ROOT-DIR/autotest" directory.
+The 'test-dir' is relative to the BRANCH-ROOT-DIR.
+
+The 'configure-flags-file' and the 'make-targets-file' are filled with the flags for configure and the targets for make (for both: all flags/targets in one line) but do not include the commands 'make' and './configure'.
+
+The 'test-script-file' must be an exutable program (e.g. shell script). Remember that the test-script-file is called by "autotest" from the BRANCH-ROOT-DIR.
+
+If there is no configuration with 'TESTING=enabled' found in main.conf autotest will skip this branch for testing.
+
+
+
+The example test-script-file for mp-mpich "default.test.sh"
+===========================================================
+The file is called by autotest from the BRANCH-ROOT-DIR (autotest/default.test.sh)
+The bash-script needs 3 parameters:
+	1.) TESTDIR
+	directory containing the test-files sources and a Makefile, relative to BRANCH-ROOT-DIR
+	when default.test.sh is called by "autotest" then TESTDIR is taken from main.conf
+	2.) TESTCONF
+	configuration file for the tests to be done in 'TESTDIR', see below 'TESTCONF'
+	when default.test.sh is called by "autotest" then TESTCONF ist taken from main.conf
+	3.) RESULTDIR
+	all outputs (stdout and stderr) of the single tests are saved to RESULUTDIR.
+	the file  RESULTDIR/result gives a summary of all tests in TESTDIR.
+	the files RESULTDIR/success and RESULTDIR/failure contain the number of success/failures from RESULTDIR/result.
+	when default.test.sh is called by "autotest" then RESULTDIR is internal used.
+
+The default.test.sh script compiles and runs all tests from the TESTCONF-file. If the maximum time for testing is reached, the test will cancel and be a failure. If the standard output (stdout) of the test is the same like the content in the test-success-file (see TESTCONF) the test will be a success. Variations of the output can be provided in the test-success-file with the help of regular expressions.
+A summary of all tests is saved in the RESULTDIR/result file.
+
+
+
+TESTCONF
+========
+This file is used by the default.test.sh script. The values in the TESTCONF-file are seperated by 'tabs'. Multiple 'tabs' between values are seen as "one" tab.
+The 5 Columns:
+	1.) TEST
+	name of the test in TESTDIR
+	2.) DURATION
+	maximum time for testing in minutes
+	3.) ARGS
+	argmuents to the test
+	for mp-mpich the argmuents to mpirun (mpirun $ARGS $TEST)
+	4.) SUCCESS_FILE
+	the content in the test-success-file is compared with the output of the test
+	the test-success-file is located in the TESTDIR
+	if the output of the test variates, the test-success-file can contain regular expressions.
+	5.) SUCCESS_SCAN (exact|regexp)
+	if the content in the test-success-file is exactly the same like the output of the test you can here choose 'exact'. if you use regular expressions in the test-success-file you choose here 'regexp'
+
+example:
+reqcreate	1	-np 1	reqcreate.std.success	regexp
+
+_reqcreate_ is the name of the test
+after _1_ minute the test will cancel
+_-np 1_ is given as argument to the test (mpirun -np 1 reqcreate)
+in TESTDIR _reqcreate.std.succes_ is the SUCCESS_FILE
+_regexp_ means the SUCCESS_FILE contains regular expressions
+
+Attention: TEST must be unique. Multiple appearance of the same test name 'TEST' in the first column of the TESTCONF will not work and might cause errors!
+
+Attention: Only Lines that begin with '#' are commented out and disregarded. Other comments behind the lines will not work and might cause errors.

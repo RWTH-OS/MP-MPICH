@@ -1,0 +1,104 @@
+#
+#  (C) 1993 by Argonne National Laboratory and Mississipi State University.
+#      All rights reserved.  See COPYRIGHT in top-level directory.
+#
+
+CC          = @CC@
+F77         = @F77@
+AR          = @AR@
+RANLIB      = @RANLIB@
+OPTFLAGS    = @OPTFLAGS@
+OPTFLAGSC   = @OPTFLAGSC@
+prefix      = @prefix@
+top_srcdir  = @top_srcdir@
+srcdir      = @srcdir@
+libbuild_dir = @libbuild_dir@
+ARCH        = @ARCH@
+
+DEFS        = -DMPI_@ARCH@ -DMPIR_LIB_CODE @DEFS@ ${MPIPROFILE} -I. -I${srcdir} -I$(top_srcdir)/mpid/ch2 \
+		@mpich_includes@
+CFLAGS      = @CFLAGS@ 
+
+SHELL       = /bin/sh
+
+@VPATH@
+
+.SUFFIXES:
+.SUFFIXES: .o .c .f .s
+
+LIBS = ${libbuild_dir}/lib@MPILIBNAME@.a
+
+MPI_CSOURCES = 	allocmem.c freemem.c accumulate.c errhandler.c fence.c \
+		get.c getattr.c getgrp.c put.c wincomplete.c wincreate.c \
+		winfree.c winlock.c winpost.c winstart.c wintest.c \
+		winunlock.c winwait.c
+
+MPI_TSOURCES =  
+
+# fortran wrappers need to be added here. 
+# re-enable these if everything is working fine
+#MPI_WSOURCES =  allocmemf.c freememf.c accumulatef.c fencef.c \
+#		getf.c getattrf.c getgrpf.c putf.c wincompletef.c wincreatef.c \
+#		winfreef.c winlockf.c winpostf.c winstartf.c wintestf.c \
+#		winunlockf.c winwaitf.c
+MPI_WSOURCES =  
+
+MPI_COBJECTS = 	allocmem.o freemem.o accumulate.o errhandler.o fence.o \
+		get.o getattr.o getgrp.o put.o wincomplete.o wincreate.o \
+		winfree.o winlock.o winpost.o winstart.o wintest.o \
+		winunlock.o winwait.o
+
+# re-enable these if everything is working fine
+#MPI_WOBJECTS =  allocmemf.o freememf.o accumulatef.o fencef.o \
+#		getf.o getattrf.o getgrpf.o putf.o wincompletef.o wincreatef.o \
+#		winfreef.o winlockf.o winpostf.o winstartf.o wintestf.o \
+#		winunlockf.o winwaitf.o
+MPI_WOBJECTS =  
+
+MPI_AOBJECTS = 
+
+default: ${libbuild_dir}/lib@MPILIBNAME@.a
+
+MPI_SOURCES = ${MPI_CSOURCES} ${MPI_WSOURCES} 
+MPI_OBJECTS = ${MPI_COBJECTS} ${MPI_WOBJECTS} ${MPI_AOBJECTS}
+
+profile: ${libbuild_dir}/libp@MPILIBNAME@.a
+
+# default_all is the same as default, but without the RANLIB.  This
+# can speed up the build (ranlibs can take a LONG time).  profile_all 
+# is the same, but for the profile library
+default_all: ${MPI_OBJECTS}
+	${AR} ${libbuild_dir}/lib@MPILIBNAME@.a $?
+profile_all: ${MPI_OBJECTS}
+	${AR} ${libbuild_dir}/libp@MPILIBNAME@.a $?
+wrapperlib: ${MPI_WOBJECTS}
+	${AR} ${libbuild_dir}/libf@MPILIBNAME@.a $?	
+
+source_names:
+	@echo ${MPI_CSOURCES}
+
+.c.o:
+	${CC} ${DEFS} ${INCLUDES} ${CFLAGS} ${OPTFLAGSC} ${OPTFLAGS} -c $<
+
+.s.o:
+	as $*.s -o $*.o
+
+${libbuild_dir}/lib@MPILIBNAME@.a: ${MPI_OBJECTS} 
+	${AR} $@ $?
+	${RANLIB} $@
+
+${libbuild_dir}/libp@MPILIBNAME@.a: ${MPI_OBJECTS} 
+	${AR} $@ $?
+	${RANLIB} $@
+
+${libbuild_dir}/libf@MPILIBNAME@.a: ${MPI_WOBJECTS} 
+	${AR} $@ $?
+	${RANLIB} $@
+
+# We need to clean the srcdir of any .o files because they can confuse the
+# VPATH build process
+clean:
+	@/bin/rm -f *.o *~ ${srcdir}/*.o
+
+distclean:
+	-rm -f Makefile

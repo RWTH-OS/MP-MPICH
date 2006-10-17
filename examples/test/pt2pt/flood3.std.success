@@ -1,0 +1,7 @@
+This is Linux, running on .*
+This is Linux, running on .*
+Blocking sends: 1 4 16 64 256 1024 4096 16384 65536 262144 1048576 
+Unexpected recvs: 1 4 16 64 256 1024 4096 16384 65536 262144 1048576 
+Synchronous sends: 1 4 16 64 256 1024 4096 16384 65536 262144 1048576 
+Expected recvs and Rsend: 1 4 16 64 256 1024 4096 16384 65536 262144 1048576 
+No errors

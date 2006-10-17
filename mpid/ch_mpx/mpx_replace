@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# ch_mpx
+#
+
+if [ $# -ne 4 ] ; then
+  exit 1
+fi
+
+cd $1
+find . -type f -name "$2" | xargs grep -l "$3" > "mpx_replace.log"
+for replace in `cat mpx_replace.log`
+do      
+  chmod u+rw $replace
+  cp $replace $replace.replace
+  cat $replace.replace | sed "s#$3#$4#g" > $replace
+# rm -rf $replace.replace
+done
+rm -f  "mpx_replace.log.*"
+cd - &> /dev/null
+

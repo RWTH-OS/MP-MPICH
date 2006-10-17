@@ -1,0 +1,21 @@
+#! /bin/sh
+#
+# Special args for the ch_usock
+# givenPGFile="suckit"
+case $arg in 
+    -pg)
+      	if [ $np -gt 1 ] ; then
+	    echo "-pg and -np are mutually exclusive; -np $np being ignored."
+            np=1
+	fi
+        machineFile="$1"
+	givenPGFile="$machineFile"
+        shift
+        device_knows_arg=1
+	;;
+    -usage | --usage)
+cat <<EOF
+    Special Options for ch_usock device:
+    -pg <file>      Specifies the procgroup file.
+EOF
+esac

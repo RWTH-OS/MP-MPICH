@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML3.2 EN">
+<HTML>
+<HEAD>
+<META NAME="GENERATOR" CONTENT="DOCTEXT">
+<TITLE>Jumpshot</TITLE>
+</HEAD>
+<BODY BGCOLOR="FFFFFF">
+<A NAME="Jumpshot"><H1>Jumpshot</H1></A>
+Graphical Visualization Tool for Parallel Programs   
+<H2>Description</H2>
+Jumpshot is a graphical tool for understanding the performance of parallel
+programs.  It has evolved from <TT>upshot</TT> and is written in java.  Jumpshot
+interprets binary CLOG tracefiles and displays them onto a canvas object.
+<P>
+<H2>Configuring Jumpshot</H2>
+Jumpshot can be configured in 3 ways
+<P>
+<TABLE BORDER=0>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>As part of the mpich configure</B></TD><TD VALIGN=TOP>The configure in the <TT>mpich</TT> directory can invoke the configure in the 
+<TT>mpe</TT> subdirectory which can invoke the configure in the <TT>jumpshot</TT>
+subdirectory.  This is the default way in which MPICH is configured
+but can be overridden by configuring MPICH with the <TT>-nompe</TT> option.
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>As part of the mpe configure</B></TD><TD VALIGN=TOP>The configure in the <TT>mpe</TT> subdirectory can invoke the configure in the
+<TT>jumpshot</TT> subdirectory.  This is the default if the <TT>mpe</TT> library was
+configured with MPICH.  Otherwise, the configure option
+<BR></TD></TR><BR><TT>--with-jumpshot_home=JUMP_HOME</TT> must be given to the <TT>mpe</TT> configure.
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>By itself</B></TD><TD VALIGN=TOP>Jumpshot can be configured by typing <TT>./configure &lt;configure options&gt;</TT>
+in the <TT>jumpshot</TT> directory.
+<BR></TD></TR></TABLE>
+<P>
+<H2>Mandatory Configure Options</H2>
+<P>
+<TABLE BORDER=0>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--with-bindir=DIR </B></TD><TD VALIGN=TOP>Specifies the directory where <TT>jumpshot's</TT> executable will be 
+located.  Without this flag, <TT>jumpshot</TT> can not be configured.  If
+configuring with MPICH or just the  <TT>mpe</TT> library, this will be
+automatically determined by default ( but can be overridden ).
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--with-jumpshot_home=JUMP_HOME</B></TD><TD VALIGN=TOP>Specifies the path of the top-level directory where <TT>jumpshot</TT> is
+installed.  Without this directory, <TT>jumpshot</TT> can not be configured.
+When configuring with MPICH, this will be automatically determined
+by default ( but can be overridden ).
+<BR></TD></TR></TABLE>
+<P>
+<H2>Optional Configure Options</H2>
+<P>
+<TABLE BORDER=0>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--enable-echo</B></TD><TD VALIGN=TOP>This switch will turn on strong echoing.  The default is enable=no.
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--with-arch_bindir=DIR </B></TD><TD VALIGN=TOP>Specifies an optional directory where <TT>jumpshot's</TT> executable will
+be located.  For example, when configuring with MPICH, this will be
+the <TT>build/ARCH/DEVICE/bin</TT> directory.
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--with-java=DIR</B></TD><TD VALIGN=TOP>Specifes the path of JAVA's top-level directory.  If omitted,
+configure will attempt to locate java.
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--with-java_version=VERSION</B></TD><TD VALIGN=TOP>Specifies the version of JAVA.  If omitted, configure will attempt
+to locate your java's version.
+<BR></TD></TR></TABLE>
+<P>
+<H2>Additional Information</H2>
+<P>
+To view a list of configure options, type <TT>./configure --help</TT> in the
+top-level <TT>jumpshot</TT> directory.
+<P>
+In the Installation Manual, there is a section on Jumpshot which gives
+instructions and examples for each type of installation.
+<P>
+The INSTALL in the top-level <TT>jumpshot</TT> directory.
+<P>
+In the Users Guide, there is a section describing how to use Jumpshot.
+<P>
+In the <TT>jumpshot/lib/data</TT> directory, <TT>jumpshot.help</TT> describes how to use
+Jumpshot.  Clicking the <TT>help</TT> button on the Jumpshot display will also
+bring up this same information.
+<P>
+There is a URL for Jumpshot at
+<BR><TT>http://www-c.mcs.anl.gov/~zaki/JS/home.html
+</TT>
+<P>
+In the <TT>jumpshot/src</TT> directory, <TT>jumpshot.doc</TT> is the originial documentation
+written by the author of Jumpshot, <TT>Omer Zaki</TT>.
+<P>
+<P><B>Location:</B>/home/MPI/mansrc/jumpshot<P>
+</BODY></HTML>

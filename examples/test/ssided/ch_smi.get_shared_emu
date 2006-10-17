@@ -1,0 +1,4 @@
+#ssided_enabled		1
+alloc_minsize		0
+alloc_poolsize		1M
+async_progress		1

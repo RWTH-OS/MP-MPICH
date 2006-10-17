@@ -1,0 +1,420 @@
+* COPYRIGHT NOTICE
+
+SCI-MPICH (the ch_smi device) ("the software") is copyrighted 
+software by the Lehrstuhl fuer Betriebssysteme ("the copyright 
+holder"). It is licensed to the organzation ("the Licensee") at 
+no charge for internal, non-commercial use. The Licensee has the 
+right to modify the software for its own needs as long as the 
+copyright holder is informed on this modifications and is given 
+access to the modification on source level upon request. The 
+Licensee has no rights to distribute the software or derivative
+work in any form without written consent of the copyright holder. 
+
+BECAUSE THE SOFTWARE IS LICENSED FREE OF CHARGE, THERE IS
+NO WARRANTY FOR THE SOFTWARE, TO THE EXTENT PERMITTED BY
+APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING
+THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE
+SOFTWARE "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND
+PERFORMANCE OF THE SOFTWARE IS WITH THE LICENSEE. SHOULD
+THE SOFTWARE PROVE DEFECTIVE, THE LICENSEE ASSUMES THE
+COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION. 
+
+IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED
+TO IN WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER
+PARTY WHO MAY MODIFY AND/OR REDISTRIBUTE THE SOFTWARE
+AS PERMITTED ABOVE, BE LIABLE TO THE LICENSEE FOR DAMAGES,
+INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR
+CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY
+TO USE THE SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF
+DATA OR DATA BEING RENDERED INACCURATE OR LOSSES
+SUSTAINED BY THE LICENSEE OR THIRD PARTIES OR A FAILURE OF
+THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN
+IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGES. 
+
+You already agreed to these terms and conditions when you
+downloaded the software. So here we go:
+
+
+* More Information / Support
+
+If you have problems, comments, suggestions, need for updates etc.,
+look at http://www.lfbs.rwth-aachen.de/~joachim/SCI-MPICH or
+mail to scimpich@lfbs.rwth-aachen.de. We'll be happy to hear from
+you. However:
+
+SUPPORT IS NOT GUARANTEED - WE'LL DO WHAT WE ARE ABLE TO.
+
+
+* Installation
+
+1. 	If you did not get SCI-MPICH as a complete archive, but only the 
+	ch_smi device, it is necessary to integrate it into the MPICH
+	source tree. To do so, you have to
+	- change to the mpid/ch_smi directory
+	- execute ./install.sh
+	The script should give no error messages.
+
+2.	The next step is to configure SCI-MPICH as usual:
+	- change to the SCI-MPICH root directory
+	- launch the configure script. All standard options are supported
+	  (as applicable), but in any case you'll need the following:
+		-device=ch_smi
+		-arch=solaris86       (for Solaris x86)
+		OR
+		-arch=LINUX           (for Linux)
+		-smidir=/path/to/SMI  (default is $HOME/SMI)
+		-v                    (if you want verbose output)
+	  Example:
+	  ./configure -device=ch_smi -arch=solaris86 -smidir=/usr/local/SMI -v 
+
+	Use configure --help to get a complete help text.
+
+3.	After the configure, just launch "make". Everything should compile fine,
+	and the results can be found under build/solaris86/ch_smi/... or	
+	build/LINUX/ch_smi/...
+
+	NOTE: we tested the compilation with under Solaris with Sun cc/CC (v5)
+	and under Linux with gcc 2.7.2. The MPI C++ interface causes some 
+	trouble under Linux, but we can't do anything about that. For a quick
+	test, we recommend to configure with the additional options
+	 -noc++ -noromio -nompe -nof77
+	
+4.	The SISCI releases dating earlier than Juli '99 need to be patched to 
+	be usable for SMI/ch_smi. You should use a newer release which already 
+	contains the required functionality.
+
+	If you need assistance regarding this problem, ask us.
+
+
+* Usage
+
+1.	To compile MPI applications, use the mpicc/mpiCC/mpif77/mpif90 scripts 
+	from build/.../ch_smi/bin as usual.
+
+2.	To run the compiled application, use the mpirun script from
+	build/.../ch_smi/bin . It can be used with the following options:
+		-np N        (run with N processes. If this option is omitted,
+			      one process will be launched on every host 
+ 			      in the machinefile used)
+		-xterm       (do open a separate xterm for each process,so
+		              that the output of the processes is cleanly 
+			      separated. The enviroment variable DISPLAY
+			      must be set correctly on the host on which the
+ 			      mpirun-command is issued.)
+		-pager	     (in conjunction with -xterm, stderr and stdout 
+			      are piped to a pager)
+		-v           (be verbose on startup AND pipe the output of
+		              the processes to a pager if the option -xterm
+                              is used)
+                -t           (just show the commands mpirun would issue, but
+		              do not execute them)
+		-machinefile FILE
+		             (use FILE to describe the hosts on which to start
+		              the processes - see section "Hosts" below)
+		-devconf FILE
+			      (use FILE to supply a device configuration for
+			       ch_smi. This information can also be contained
+			       in the machinefile (see section "Device Setup"
+			       below)).
+		-smidebug     (let the SMI library generate debug output - useful
+		               if you have problems which seem to be SCI related)
+		-nolocal      (do always use SCI memory even if all processes are
+		               running on a single node. In this case, the SMI
+		               library would normally use SYS-V share memory) 
+
+	NOTE 1: mpirun uses "rsh" to launch the processes on the remote hosts. 
+	Make sure that ~/.rhosts is configured accordingly to enable rsh to 
+	execute	without explicit authentification (entering the password).
+
+	NOTE 2: mpirun needs the command "sciid". This is included with ch_smi
+	and is placed in build/.../ch_smi/bin during the make process. Check
+	for this if problems occur. "sciid" should return the SCI ID of the
+	first PCI-SCI adapter installed in the system.
+
+	NOTE 3: For the startup synchronization of the SMI library, you need to 
+	have write access to one of the following directories:
+	- current directory (".") from where mpirun is executed
+	- the directory in which the executable is located 
+	- $HOME. 
+	If this is not possible (why should this ever be the case?), you have to 
+	set the	environment variable SMI_SYNCDIR to contain the path to a 
+	directory with write access and which is identical on all machines to be 
+	used. "/tmp" very often is *not identical* on all machines!
+	
+
+* Hosts
+
+The mpirun-script uses a "machine file" to determine the hosts on which to run
+the MPI processes. Consider the following rules and limitations when creating 
+or using such a file or look at the file 'machines' for an example:
+1.	Each line in the file contains exactly one host name. No comments, please.
+	However, you may include device configuration information in the 
+	machine file which has to be located *below* the lines containing the
+	host names, separated from the host section by a blank line (see
+	machines.conf for an example)
+2.	Only ONE MPI process of one application can be executed on a single host 
+	at the same time - even if it is a dual/quad CPU system. This is a 
+	limitation of the current SCI driver. The behaviour of the system if 
+	more than one process is launched is undefined.
+	NOTE 1: It is well possible to launch multiple MPI processes *of different
+	applications* on a single host!
+        NOTE 2: on Windows NT, multiple processes of one application per host are 
+	allowed, but you don't use the machine file on NT, anyway. 
+3.	The mpirun script selects the required number of hosts from the machine
+	file from top to bottom. It launches one process on each of the hosts -
+	and only on these (like ch_p4 with the -nolocal option).
+4.	If the option -machinefile is ommitted from the mpirun call, it uses the
+	folowing strategy to find a machine file:
+	- look for ./machines
+	- if not found, look for ~/.machines
+	- if still not found, look for $MPIR_HOME/util/machines
+	- start all processes on the current machine (from which mpirun was
+	  started).
+	  NOTE: currently, the SCI-drivers do not support SMP-usage correctly. 
+   		Therefore, mpirun aborts if no machine file could be found.
+
+
+* Device Setup
+
+The three different protocols for communication (short, eager, rendezvous) use
+a certain layout & dimension of their memory pools/queues. These definitions
+can now be set at the startup of the application by supplying a dedicated device 
+configuration file or by including the required settings in the machine file.
+
+The following variables are defined for the available protocols:
+
+- SHORT protocol
+
+SHORT_bufsize		The size of the buffers for short messages & control packets.
+			default: 64 
+			DO NOT SUPPLY A VALUE OTHER THAN '64' - SCI-MPICH WILL PROBABLY
+			FAIL! The maximum message size for short messages does NOT
+			equal SHORT_bufsize (for SHORT_bufsize=64, it is 47).
+			NOTE: this value is aligned to multiples of 64 internally.
+SHORT_nbrbufs		The number of buffers for short messages & control packets.
+			default: 63
+			Other values (lower or higher) are possible. Lower values lead
+			to more frequent remote updates of the related counter (=> less
+			performance), higher values lead to more memory consumption.
+
+Memory usage *for each process*: NBR_PROCESSES*SHORT_bufsize*SHORT_nbrbufs (+ alignment)
+
+- EAGER protocol
+
+EAGER_bufsize		The maximum size of a messsage to be transfered via the eager 
+			protocol.
+			default: 16384
+			Other values (lower or higher) are possible. Lower values lead
+			to less performance since the rendezvous protocol is used
+			for messages > EAGER_bufsize, higher values lead to more memory 
+			consumption.
+			NOTE: this value is aligned to multiples of 64 internally.
+EAGER_nbrbufs		The number of buffers (each EAGER_bufsize bytes long) which are
+			allocated for each sender-receiver pair.
+			default: 8
+			Other values (lower or higher) are possible. Lower values lead
+			to (potentially) less performance because the rendezvous protocol 
+			is used if no free eager buffer is available on the receiving 
+			process. Higher values lead to more memory consumption.
+EAGER_maxcheckdev	The number of call to CheckDevice if no free eager buffer is 
+			available before the rendez-vous protocol is used (this is more an
+			internal parameter)
+			default: 1
+			Other values >= 0 are possible. The performance impact of this 
+			parameter heavily depends on the communication pattern.
+
+Memory usage *for each process*: NBR_PROCESSES*EAGER_bufsize*EAGER_nbrbufs (+ alignment)
+
+- RENDEZ-VOUS protocol
+
+RNDV_memorysize		The pool of locally shared memory from which the buffers for the	
+			rendez-vous message transmission are dynamically allocated.
+			default: 262144
+			Other values (lower or higher) are possible. Lower values lead
+			to less performance since partial message transfers will occur
+			more often (at least for every message > RNDV_memorysize).
+			Higher values lead to more memory consumption.
+RNDV_blocksize		The block size for the interleaving of writes and reads.
+			default: 16384
+			Other values (lower or higher) are possible. The smaller the
+			value, the more protocol overhead will be created. The bigger
+			the value, the lesser the effective bandwidth will be since
+			the interleaving-effect will be less significant.
+			NOTES: 
+			 - this value is aligned to multiples of 64 internally.
+			 - a value of 0 turns off the interleaving 
+
+Memory usage *for each process*: RNDV_memorysize
+
+Additionally, there are a number of options which have effect not only on a single protocol,
+but on multiple protocols or the whole device.
+
+If you want to create runtime statistics for a variety of functions in the device, use the
+STATISTICS option. To use this option, the device has to be compiled with MPID_STATISTICS 
+being defined (which is the default). You than can control the generation of
+the statistics with the following option:
+
+STATISTICS 		Switch to turn statistics on or off with the supplied value:
+			0 turns them off
+			1 turns them on
+			default: 0
+			NOTE 1: the use of this function is mainly for internal debugging
+			and tuning and is probably of no meaning to the average user.
+			NOTE 2: if you want to minimize any overhead in the device, remove
+			the define -DMPID_STATISTICS from the Makefile.
+
+Depending on the MPI-Applications you are running, it may be desirable to use an implemen-
+tation of MPI_Isend which does really work asynchronously  to allow the overlap of computation
+and communication. SCI-MPICH allows this kind of communication, using DMA or a thread. However,
+depending on the application it may not always improve performance. Therefore, you can control
+the use of non-blocking Sends via the following option:
+
+NON_BLOCKING	        Switch to turn the usage of non-blocking Isends on or off with the 
+                        supplied value:
+                        0 turns them off
+                        1 turns them on
+ 		        default: 0
+			NOTE: non-blocking is currently only implemented for the eager protocol.
+
+In the case of a process sending a message to itself, a shortcut has been implemented which
+uses a single-copy variant for the eager and rendez-vous protocol (copying directly between the
+send- and receive user buffer). As this acceleration is usually desired, it is turned on by 
+default.
+
+SENDSELF		Switch to turn on single-copy variant of eager and rendez-vous 
+			protocol for messages send to itself.
+                        0 turns them off
+                        1 turns them on
+ 		        default: 1
+
+The PCI-SCI adapter boards support DMA between shared memory segments. We have implemented support
+for DMA transfers - check for yourself if it helps with your application. Use the DMA_MINSIZE option
+to select a threshold from which DMA is efficient on your system.
+
+USE_DMA			Switch to turn on DMA transfer mode for messages send via asynchronous
+			MPI send calls.
+                        0 turns them off
+                        1 turns them on
+ 		        default: 0
+			NOTE 1: DMA transfer is currently only implemented for the eager protocol.
+			NOTE 2: Setting USE_DMA to 1 implies setting SENDSELF to 1, to 
+				(this is done internally independent from the user setting of 
+				 SENDSELF)
+
+Setting up a DMA transfer includes some overhead, especially if a transfer from non-shared to 
+shared memory is to be performed. Therefor, you can adjust the minimum size for a message to
+be transfered via DMA.
+
+DMA_MINSIZE		Threshold value for the size of a message which is to be transfered 
+			using DMA (instead of PIO in form of memcpy()).
+			default: 4096
+	
+SCI-MPICH uses the Watchdog of the SMI library to shut down the whole application in the that 
+one or more processes have crashed. For debugging, this behaviour is not desired, thus you can 
+control the watchdog with a switch:
+
+WATCHDOG		Switch to turn the watchdog on and off.
+			0	turns the watchdog off
+			1	turns the watchdog on
+			default: 1
+
+
+You may supply any of these parameters in the form
+PARAMETER VALUE
+PARAMTER must be one of the identifiers listed above (case doe not matter). 
+VALUE must be an integer (usually the number of bytes). 
+For each parameter which is not found, the default value will be used. Look at the 
+file ch_smi.conf for an example.
+
+If the option -devconf is ommitted from the mpirun call, it uses the following 
+strategy to find device configuration information:
+	- look for ./ch_smi.conf
+	- look for ~/.ch_smi.conf
+	- look for device configuration information in the machines file which
+  	  is used (see section HOSTS, paragraph 1.)
+	- use the built-in default settings
+
+For more information on the protocols, look for documentation at our WWW site.
+
+
+* Launching SCI-MPICH applications manually
+
+If for any reason (i.e. for debugging), you do not want to launch an SCI-MPICH 
+application via the mpirun script (or via rexecshell for Windows NT), you may 
+also start it manually. The options which are *required* are as follows:
+
+- Identication of the master SCI node for startup:
+  -i node_id
+- Total number of process to form the application:
+  -n number_of_processes
+- Rank of the individual process:
+  -r rank_of_process
+- Name of the SMI synchronization file:
+  -f filename
+
+  NOTE 1: The rank 0 *must* be given to a process which runs on the master SCI
+          node as indicated by the -i option.
+  NOTE 2: the file specified by "filename" must be the same on all machines! So
+          take care that any path you supply means the same volume on all machines!
+
+Optional are:
+
+- Use a specified device configuration file:
+  -d filename
+- Indicate that all processes are running on the same node
+  (this will improve performance as only local shared memory will be used):
+  -l
+- disable the watchdog (required for debugging):
+  -w
+- enable debug ouput of the SMI library
+  -s 
+
+The order of these options does not matter. These SCI-MPICH options must be terminated 
+by a "--". Parameters for the application itself can be appended.
+
+Example:
+- to run an application called "myprog" on nodes A and B (SCI-IDs 16 (A) and 24 (B))
+  and give each one the parameters "-foo 0" with activated SMI debug output:
+  on A:  myprog -i 16 -r 0 -n 2 -f ./smisync -s -- -foo 0
+  on B:  myprog -i 16 -r 1 -n 2 -f ./smisync -s -- -foo 0
+
+	
+* Bugs, Limits, Cave-ats
+
+For a brief release history, look at cvs_tags.txt.
+
+If you find any bugs, limits, annoyance, inform us via mail to 
+scimpich@lfbs.rwth-aachen.de !
+
+C-1 	28/05/99, joachim
+   	The rendezvous-protocol works fully asynchronous - this leads to the
+   	behaviour that an MPI_I*send() is not completed until the corresponding
+   	MPI_Wait() is issued.
+
+C-2	28/05/99, joachim
+	Only ONE MPI process can be executed on a single host at the same time -
+	even if it is a dual/quad CPU system. This is a limitation of the
+	current SCI driver. The behaviour of the system if more than one
+	process is launched is undefined. 
+	Note: the NT version supports SMPs because our SCI-NT-driver does.
+
+C-3	04/06/99 joachim
+	Some comments in the code are still from ch_shmem and have nothing to do
+	with the current code. This will be fixed soon.
+
+B-1 	28/05/99, joachim
+	MPI_Issend() does not work correctly for non-basic dataype 
+	This problem corresponds to C-1; the example testall.c works
+	if you use Isend() instead of Issend()
+   	(see examples/test/pt2pt/testall.c)
+	=> solved in 08/99
+
+B-2	28/05/99, joachim
+   	- examples/test/pt2pt/dtypelife.c hangs
+   	(reason to be determined)
+	=> solved at 16/07/99 by switching to rndv if no eager buffers are
+  	   available

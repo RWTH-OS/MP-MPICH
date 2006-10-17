@@ -1,0 +1,1 @@
+--with-device=ch_p4 --disable-cxx --disable-romio --disable-mpe

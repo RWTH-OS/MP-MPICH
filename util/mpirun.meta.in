@@ -1,0 +1,181 @@
+#!/bin/sh
+# launch the real application on the participating hosts
+# via the standard mpirun script as it is configured on the host
+# 
+# make sure that the paths are correct on each host
+# and that gawk is available on the machine that launches the meta
+# application (this should change in the future)
+# set -x
+
+if [ ${mpirun_verbose} != 0 ] ; then
+    echo "*** mpirun.meta: running on META environment" 
+fi
+OIFS=$IFS
+IFS=%
+
+if [ -n "$progname" ] ; then
+   BASENAME=`basename $progname`
+   DIRNAME=`dirname $progname`
+else
+# hope that name and path are stated in the config file...
+   BASENAME=""
+   DIRNAME=$PWD
+fi
+
+MPIR_HOME="`dirname $scriptdir`"
+
+show_opt=""
+if [ $just_testing = 1 ] ; then
+    show_opt="-show"
+fi
+
+if [ $mpirun_verbose -eq 1 ] ; then
+    verbose_opt="-v"
+fi
+if [ $mpirun_verbose -eq 2 ] ; then
+    verbose_opt="-V"
+fi
+
+# check temp dir
+if test "x$TMPDIR" == 'x' ; then
+    METATMP="/tmp"
+else
+    METATMP=$TMPDIR
+fi
+
+# Select a "magic meta key":
+# --> this ID can later be used e.g. for authentication purpose!
+metaKey=$$
+
+#metacfg=`echo "$metacfg"`
+#echo metacfg ${metacfg}
+# check if metacfg is an URL
+if test -n "`echo \"$metacfg\" | grep http`" ; then
+#    echo metaconfig is a URL
+    cfgname=`echo "$metacfg" | sed 's#http\.*://\([^/]*/\)*##g'`
+ #   echo local name of config is $METATMP/$cfgname
+#    wget "$metacfg" -O $METATMP/$cfgname
+    localmetacfg=`$scriptdir/wgetMetaConfig $metacfg`
+    wgetcmd="$scriptdir/wgetMetaConfig $metacfg $localmetacfg ;"
+#    echo wgetcmd: $wgetcmd
+    metaurl=$metacfg
+    metacfg=`basename $localmetacfg`
+
+    sLines=`$scriptdir/metapars -r $metaurl -metaparam  $metaparam $localmetacfg`
+ else
+    localmetacfg=$metacfg
+    wgetcmd="";
+
+    sLines=`$scriptdir/metapars -metaparam $metaparam $localmetacfg`
+fi
+
+
+if [ ${mpirun_verbose} -gt 1 ] ; then
+    echo "*** mpirun.meta: configuration file is $metacfg" 
+fi
+
+p=0;
+n=1
+
+confName=`basename $metacfg`
+confPath=`dirname $metacfg`
+
+for i in $sLines ; do
+    # this is for the first metahost, we just save the command and execute it at last without
+    # the ampersand to keep it connected to the user shell
+    if [ $n = 1 ] ; then
+	# i contains a hostname 
+	if [ $p = 0 ] ; then
+	    lastHost=$i
+	    p=1
+	# i contains a skeleton for commands to be executed
+	else
+	    eLine=$(echo ${i} | sed s%@SHOW@%$show_opt%g)
+	    eLine=$(echo ${eLine} | sed s%@VERBOSE@%$verbose_opt%g)
+	    eLine=$(echo ${eLine} | sed s%@EXECPATH@%${DIRNAME}%g)
+	    eLine=$(echo ${eLine} | sed "s%source @ENVFILE@;% %g")
+	    eLine=$(echo ${eLine} | sed s%@MPIROOT@%${MPIR_HOME}%g)
+	    eLine=$(echo ${eLine} | sed s%@EXECNAME@%${BASENAME}%g)
+	    eLine=$(echo ${eLine} | sed s%@CMDLINEARGS@%${cmdLineArgs}%g)
+	    eLine=$(echo ${eLine} | sed s+@CONFPATH@+${confPath}+g)
+	    eLine=$(echo ${eLine} | sed s+@CONFNAME@+${confName}+g)
+	    eLine=$(echo ${eLine} | sed s+@METAKEY@+${metaKey}+g)
+
+	    # for the meta case, we use this parameter to toggle additional output from the meta code
+	    if [ ${mpirun_verbose} != 0 ] ;  then
+		eLine="$eLine -metaverbose"
+	    fi
+
+	    lastLine=$eLine
+	    p=0
+	    n=2
+	fi
+    # this is not for the first metahost, we directly execute the command
+    else
+	# i contains a hostname 
+	if [ $p = 0 ] ; then
+	    eHost=$i
+	    p=1
+	# i contains a skeleton for commands to be executed
+	else
+	    eLine=$(echo ${i} | sed s%@SHOW@%$show_opt%g) 
+	    eLine=$(echo ${eLine} | sed s%@VERBOSE@%$verbose_opt%g)
+	    eLine=$(echo ${eLine} | sed s%@EXECPATH@%${DIRNAME}%g)
+	    eLine=$(echo ${eLine} | sed "s%source @ENVFILE@;% %g")
+	    eLine=$(echo ${eLine} | sed s%@MPIROOT@%${MPIR_HOME}%g)
+	    eLine=$(echo ${eLine} | sed s%@EXECNAME@%${BASENAME}%g)
+	    eLine=$(echo ${eLine} | sed s%@CMDLINEARGS@%${cmdLineArgs}%g)
+	    eLine=$(echo ${eLine} | sed s+@CONFPATH@+${confPath}+g)
+	    eLine=$(echo ${eLine} | sed s+@CONFNAME@+${confName}+g)
+	    eLine=$(echo ${eLine} | sed s+@METAKEY@+${metaKey}+g)
+	    # we show the command for this metahost and then execute mpirun
+	    # for the metahost with the -show option (included via show_opt)
+
+	    # for the meta case, we use this parameter to toggle additional output from the meta code
+	    if [ ${mpirun_verbose} != 0 ] ;  then
+		eLine="$eLine -metaverbose"
+	    fi
+
+	    # for the shell to be able to interprete the command line correctly
+	    IFS=$OIFS
+
+	    if [ $just_testing = 1 ] ; then
+		echo
+		echo $rshcmd $eHost $eLine
+		echo
+
+		# for unicore, we just show the first remote shell calls, but don't execute them
+		if [ $unicore = 0 ] ; then
+		    $rshcmd $eHost $eLine &
+		fi    
+	    else	
+		$rshcmd $eHost $eLine &
+	    fi
+
+	    # for the shell to execute the for-loop 
+	    IFS=%
+
+	    p=0
+	fi
+    fi
+done
+
+# for the shell to be able to interprete the command line correctly
+IFS=$OIFS
+
+# we show the command for this metahost and then execute mpirun
+# for the metahost with the -show option (included via show_opt)
+if [ $just_testing = 1 ] ; then
+    echo
+    echo $rshcmd $lastHost $lastLine
+    echo
+
+    # for unicore, we just show the first remote shell calls, but don't execute them
+    if [ $unicore = 0 ] ; then
+        $rshcmd $lastHost $lastLine &
+    fi    
+
+else
+    $rshcmd $lastHost $lastLine
+fi
+

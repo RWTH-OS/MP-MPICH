@@ -1,0 +1,666 @@
+#! /bin/sh
+# smirun, based on mpirun
+#
+# $Id: smirun.in,v 1.1 2004/03/19 22:14:48 joachim Exp $
+#
+jobid=$$
+progname=
+fake_progname=
+np=0
+arch=
+default_arch='solaris86'
+machine='smi'
+cmdLineArgs=
+cmdLineArgsExecer=
+cmdline=
+CAC=
+#use_execer=0
+mpirun_verbose=0
+nolocal=0
+just_testing=0
+machineFile=
+debugger=""
+commandfile=""
+rmcommandfile=""
+rshcmd=rsh
+narch=0
+stdinfile=
+stdoutfile=
+stderrfile=
+batch=1
+Show=eval
+# MetaMPICH options
+# Name of the MetaMPICH configuration file
+metacfg=""
+Machines="meta paragon p4 sp1 ibmspx anlspx sgi_mp ipsc860 inteldelta cray_t3d execer smp symm_ptx"
+# options for ch_smi
+xterm=0
+devFile=""
+pager=0
+nodes=""
+smidebugon=0
+smitimeson=0
+sminowatchdog=0
+smistaton=0
+use_smp=0
+# Usage limits
+max_time=15
+max_mem=32
+
+PrintHelp() {
+#
+# If you change this, make the corresponding changes in README so that
+# the man pages are updated.
+#
+cat <<EOF
+smiirun [smirun_options...] <progname> [options...]
+
+  smiirun_options:
+    -h      This help
+
+    -machinefile <machine-file name>
+            Take the list of possible machines to run on from the
+            file <machine-file name>.  This is a list of all available
+            machines; use -np <np> to request a specific number of machines.
+
+    -np <np> | -n <np>
+            specify the number of processors to run on
+
+    -stdin filename
+            Use filename as the standard input for the program.  This
+            is needed for programs that must be run as batch jobs, such
+            as some IBM SP systems and Intel Paragons using NQS (see 
+            -paragontype below).
+	    use 
+                  -stdin /dev/null 
+            if there is no input and you intend to run the program in the
+            background.  An alternate is to redirect standard input from
+            /dev/null, as in 
+                  mpirun -np 4 a.out < /dev/null
+
+    -t      Testing - do not actually run, just print what would be
+            executed
+
+    -v      Verbose - throw in some comments
+
+    -xterm 
+         open a separate xterm for each process
+
+    -pager
+	 pipe stdout and stderr to a pager (only valid if -xterm is used)
+
+    -debug
+         Force the SMI-library to print debugging/tracing informations
+	    
+    -nolocal
+	 Do not use SYS-V shared memory (but SCI shared memory) even if
+	 all processes run on the same node.
+
+    -nodes <hostname{,hostname}> or -hosts <hostname{,hostname}>
+	 Supply the hostnames of the nodes to run the processes on via a comma-
+	 separated list on the commandline instead of the machinefile. 
+
+	 If there are less hosts provided than processes requested, 
+	 the processes are scheduled in a round-robin style manner.      
+	 
+    -smp 
+	 allow SMP configurations of the machine file (more than 1 process of
+	 an application running on one node). Older SCI drivers do not allow
+	 such a configuration!
+
+EOF
+}
+
+#    -xdbx   Start the first process under xdbx where possible
+while [ 1 -le $# ] ; do
+  arg=$1
+  #echo $arg
+  #echo $#
+  shift
+  case $arg in 
+    -np|-n)
+	np="$1"
+        nodigits=`echo $np | sed 's/^[0-9]*$//'`
+        if [ "$nodigits" != "" -o $np -lt 1 ] ; then
+           echo np: $np is an invalid number of processors.  Exiting.
+           exit 1
+	fi
+	eval np$narch=$1
+	shift
+	;;
+    -machine)
+	machine="$1"
+	shift
+	;;
+    -machinefile)
+        machineFile="$1"
+	eval machineFile$narch="$1"
+	shift
+	;;
+    -nodes|-hosts|-host)
+	nodenbr=0
+	nodestr=`echo $1 | sed "s/,/ /g"`
+	shift
+	if [ $np = 0 ]; then
+	    # no -np or -n option is given OR has not yet been parsed
+	    for node in $nodestr ; do
+		nodes=${nodes}" "$node
+		nodenbr=`expr $nodenbr + 1`
+	    done
+	    np=$nodenbr
+	    eval np$narch=$nodenbr
+	else
+	    # -np or -n option has been supplied
+	    for node in $nodestr ; do
+		if [ $nodenbr -lt $np ] ; then
+		    nodes="$nodes $node"
+		    nodenbr=`expr $nodenbr + 1`
+		fi
+	    done
+	fi
+	;;
+    -smp)
+	use_smp=1
+	;;
+    -stdin)
+	# Name of a file to use for standard input.
+	stdinfile="$1"
+	shift
+	;;
+    -stdout)
+        # Name of a file to use for standard output.
+        stdoutfile="$1"
+        shift
+        ;;
+    -stderr)
+        # Name of a file to use for standard error.
+        stderrfile="$1"
+        shift
+        ;;
+    -nolocal)
+        nolocal=1
+	;;
+    -h)
+	PrintHelp
+	exit 1
+	;;
+    -xterm)
+        xterm=1
+        ;;
+    -pager)
+        pager=1
+        ;;
+    -v|-verbose)
+	mpirun_verbose=1
+	;;
+    -t|-show|-test)
+	just_testing=1
+	Show=echo
+	;;
+    -usage|-help|-\?)
+	# Accept these for help until the program name is provided.
+	if [ "$progname" = "" ] ; then
+	   PrintHelp
+	   exit 1
+	fi
+	;;
+    -debug|-smidebug)
+        smidebugon=1
+        ;;
+    -times)
+        smitimeson=1
+        ;;
+    -nowd)
+        sminowatchdog=1
+        ;;
+    -stat|-statistics)
+        smistaton=1
+        ;;
+    *)
+        # First see if the device knows about this argument:
+        if [ -x $MPIRUN_HOME/mpirun.$default_device.args ] ; then
+            device_knows_arg=0
+	    . $MPIRUN_HOME/mpirun.$default_device.args
+            # If the device handled it, skip to the top of the while loop
+            # on arguments.  ? Does this need to do a shift?  If so, 
+	    # should the number of shifts be the value of the arg?
+            if [ $device_knows_arg != 0 ] ; then continue ; fi
+        fi
+	# The first unrecognized argument is assumed to be the name of
+	# the program, but only if it is executable
+	proginstance=`echo $arg | sed "s/%a/$arch/g"`
+	if [ "$progname" = "" -a "$fake_progname" = "" -a \
+		! -x "$proginstance" ] ; then
+	    fake_progname="$arg"
+	elif [ "$progname" = "" -a -x "$proginstance" ] ; then 
+	    progname="$arg"
+            # any following unrecognized arguments are assumed to be arguments
+            # to be passed to the program, as well as all future args
+	    # We can't use use_execer here to decide how to store the
+	    # arguments, since we may later change it (see the switch on arch)
+	    # Thus we store the args in two forms:
+	    # cmdLineArgsExecer and cmdLineArgs.  Notes that we need
+	    # to preserve strings in cmdLineArgs, so 
+	    while [ 1 -le $# ] ; do
+	        arg="$1"
+	        case $arg in 
+	           *\'*) 
+                   cmdLineArgsExecer="$cmdLineArgsExecer -arg=\"$arg\""
+                   cmdLineArgs="$cmdLineArgs \"$arg\""
+		   ;;
+	           *\"*)
+                   cmdLineArgsExecer="$cmdLineArgsExecer -arg='$arg'"
+                   cmdLineArgs="$cmdLineArgs '$arg'"
+		   ;;
+	           *)
+                   cmdLineArgsExecer="$cmdLineArgsExecer -arg=\"$arg\""
+                   cmdLineArgs="$cmdLineArgs \"$arg\""
+		   ;;
+	       esac
+	       shift
+            done
+         else
+	    echo "Warning: Command line arguments for program should be given"
+            echo "after the program name.  Assuming that $arg is a"
+            echo "command line argument for the program."
+            case $arg in 
+	        *\'*) 
+                cmdLineArgsExecer="$cmdLineArgsExecer -arg=\"$arg\""
+                cmdLineArgs="$cmdLineArgs \"$arg\""
+	        ;;
+	        *\"*)
+                cmdLineArgsExecer="$cmdLineArgsExecer -arg='$arg'"
+                cmdLineArgs="$cmdLineArgs '$arg'"
+		;;
+	        *)
+                cmdLineArgsExecer="$cmdLineArgsExecer -arg=\"$arg\""
+                cmdLineArgs="$cmdLineArgs \"$arg\""
+		;;
+	    esac
+         fi
+	 # note that the commandline args should get one more eval to 
+	 # strip off any quotes
+      ;;
+  esac
+done
+
+# We need at least the program name
+
+if [ "$globuspgfile" = "" -a "$progname" = "" ] ; then
+  echo "Missing: program name"
+  if [ "$fake_progname" != "" ] ; then
+      echo "Program $fake_progname either does not exist, is not "
+      echo "executable, or is an erroneous argument to mpirun."
+  fi
+  exit 1
+fi
+#
+if [ -n "$fake_progname" -a -n "$progname" ] ; then
+    # found an unrecognized argument, followed by a program
+    echo "Unrecognized argument $fake_progname ignored."
+    # Should this exit?
+fi
+# 
+# Warning: Some systems (OSF 1 at least) have a command called dbx
+# with different command-line arguments.  In particular, it needs
+# -c here (and that does not implement the remove part of the -sr).
+#
+# Turns out that this doesn't matter so much, because the dbx is terribly,
+# terribly crippled (on Alpha).  
+#
+larch=$arch
+if [ -z "$larch" ] ; then larch=$default_arch ; fi
+if [ "$debugger" = "dbx" -a \( "$larch" = "alpha" -o "$larch" = "IRIX" \
+	-o "$larch" = "SGI" -o "$larch" = "IRIX64" \) ] ; then
+    commandfile="-c"
+    rmcommandfile="/bin/rm -f"
+fi
+#
+# Fill out relative program pathnames
+#
+# Get the current directory
+# Note that PWD may NOT be `pwd` if an explicit "cd", outside of the csh
+# shell, is used.  A downside of this is that PWD may have a more reasonable
+# version of the path.  To try and fix this, we create a test file and see
+# if it is accessible from PWD and pwd; if so, we take the PWD value
+# 
+# Why can't automounters work!???!!
+#
+# For those unfamiliar with the problem, the automounter creates
+# paths like /tmp_mnt/.... .  But if you try to open a file with that path, 
+# and the ACTUAL path has not been accessed before, the automounter fails
+# to mount the partition.  In otherwords, the automounter is so mind-bogglingly
+# stupid as to not recognize its OWN MOUNTS.  Network computing indeed.
+#
+# Note that PWD may ALSO be damaged, so we need to sed PWD as well...
+#
+# We should move this to the point in the code where it needs to know a
+# particular filename, since this will fail if the directory is not
+# writable by the user.
+# 
+if [ -n "sed -e s@/tmp_mnt/@/@g" ] ; then
+    PWDtest=`pwd | sed -e s@/tmp_mnt/@/@g`
+    if [ ! -d $PWDtest ] ; then
+        PWDtest=`pwd`
+    fi
+    if [ -n "$PWD" ] ; then
+	# Use a process-specific filename
+	PWDtest2=`echo $PWD | sed -e s@/tmp_mnt/@/@g`
+        /bin/rm -f $PWDtest/.mpirtmp$$ $PWDtest2/.mpirtmp$$
+        if `eval "echo test > $PWDtest2/.mpirtmp$$" 2>/dev/null` ; then
+            if [ ! -s $PWDtest/.mpirtmp$$ ] ; then
+	        /bin/rm -f $PWDtest2/.mpirtmp$$
+                PWD=$PWDtest
+	    else
+		PWD=$PWDtest2
+	    fi
+	else
+	    # Current directory is not writable.  Hope for the best
+            PWD=$PWDtest        
+        fi
+        /bin/rm -f $PWDtest/.mpirtmp$$ $PWDtest2/.mpirtmp$$
+    else 
+        PWD=$PWDtest
+    fi
+else
+    PWD=`pwd`
+fi
+#
+if [ -n "$PWD" ] ; then
+    PWD_TRIAL=$PWD
+else
+    PWD_TRIAL=$PWDtest
+fi
+# The test for PWD_TRIAL usable is within the p4/execer test (since that
+# is where it matters)
+#
+tail=`echo $progname | sed 's/\/.*//'` 
+if  [ "$tail" = "" ] ; then
+  #echo Absolute path, don't need to change anything
+  true
+else
+  #echo Relative path
+  progname="$PWD_TRIAL/$progname"
+fi
+
+#set -x
+
+# options for the pager
+PAGEROPTS=
+
+# function definitions
+nbr() { echo $#;}
+
+firsthost() { echo $1;}
+
+# where are we?
+BASENAME=`basename $progname`
+DIRNAME=`dirname $progname`
+
+# did the user supply the names of the nodes to run on on the command line?
+if [ -n "$nodes" ] ; then
+    NBR_HOSTS=`nbr $nodes`
+    HOSTS=$nodes
+    all_local=0
+else
+    # find a machine file and find the hosts to use
+    if [ -z "$machineFile" ] ; then
+	if [ -f ./machines ] ; then
+	    machineFile=$DIRNAME"/machines"
+	elif [ -f $HOME/.machines ] ; then
+	    machineFile="$HOME/.machines"
+	elif [ -f $MPIR_HOME/util/machines ] ; then
+	    machineFile="$MPIR_HOME/util/machines"
+	fi
+    fi
+    
+    if [ -n "$machineFile" ] ; then
+	if [ $mpirun_verbose = 1 ] ; then
+	echo "using "$machineFile" to specify the hosts"
+	fi
+	HOSTS=`cat $machineFile | awk 'NF==0 {exit} {print}'` 
+	NBR_HOSTS=`nbr $HOSTS`
+	if [ ! -n "$np0" ] ; then
+	    np=$NBR_HOSTS
+	fi  
+	all_local=0
+    else
+	# no machineFile found - run all processes on the local host
+	i=0
+	HOSTNAME=`hostname`
+	while [ $i -lt $np ] ; do 
+	    HOSTS="$HOSTS $HOSTNAME"
+	    i=`expr $i + 1`;
+	done
+	if [ $mpirun_verbose = 1 ] ; then
+	    echo "no machines file found, running all $np processes on $HOSTNAME"
+	fi
+	NBR_HOSTS=`nbr $HOSTS`
+	all_local=1
+    fi
+fi
+
+if [ $all_local -eq 0 ] ; then
+
+    # if more processes are requested than nodes are given in the command line, 
+    # schedule the processes in round-robin manner
+    if [ $np -gt $NBR_HOSTS ] ; then
+	NEWHOSTS=$HOSTS
+	while [ $NBR_HOSTS -lt $np ] ; do
+	    for h in $HOSTS ; do
+		NEWHOSTS="$NEWHOSTS $h"
+	    	NBR_HOSTS=`expr $NBR_HOSTS + 1`;
+		if [ $NBR_HOSTS = $np ] ; then
+		    break;
+		fi
+	    done
+	done
+	HOSTS=$NEWHOSTS
+    fi
+
+    # sort the hosts alphabtically - this is how the ranks in ch_smi are determined, too
+    #
+    # exit if /tmp does not exist or is not a directory
+    if [ ! -d /tmp ] ; then
+	echo "/tmp does not exist or is not a directory - exiting"
+	exit 1
+    fi
+    # exit if /tmp is not writable
+    if [ ! -w /tmp ] ; then
+	echo "cannot write to /tmp - exiting"
+	exit 1
+    fi
+
+    SORTFILE=/tmp/__${BASENAME}_${NBR_HOSTS}_${i}
+    i=0
+    while [ -r $SORTFILE ] ; do
+	i=`expr $i + 1`
+	SORTFILE=${SORTFILE}_${BASENAME}_${i}
+    done
+    i=0
+    for host in $HOSTS ; do
+	echo $host >> $SORTFILE
+	i=`expr $i + 1`
+	if [ $i = $np ] ; then
+	    break
+	fi
+    done
+    HOSTS=`cat $SORTFILE | sort`
+    rm $SORTFILE
+
+    # check for SMP usage with SCI (which is not properly supported on all platforms)
+    if [ $use_smp = "0" ] ; then
+	for host in $HOSTS ; do
+	    i=0;
+	    for check_host in $HOSTS ; do
+		if [ $host = $check_host ] ; then
+		    i=`expr $i + 1`
+		fi
+	    done
+	    if [ $i -gt "1" -a $i != $NBR_HOSTS -o $nolocal = "1" ] ; then
+		echo "*** error: node $host is defined $i times -> SMP mode selected"
+		echo "           use -smp option to enable SMP usage with SCI"
+		echo "           WARNING: requires SMP support by the SCI driver and the platform!"
+		exit 1
+	    fi
+	done
+    fi
+fi
+
+# if device configuration file is specified, add it to the command line options
+if [ -n "$devFile" ] ; then
+   if [ $mpirun_verbose = 1 ] ; then
+     echo "using "$devFile" as device configuration file"
+   fi
+   options="-d $devFile"
+fi
+
+# set initialization host
+INIT_HOST=`firsthost $HOSTS`
+
+if [ $mpirun_verbose = 1 ] ; then
+    echo "using $INIT_HOST as initialization host"
+fi
+
+# generate random magic number
+MAGIC_NUMBER=`date '+%S'`
+options="$options -h $INIT_HOST -m $MAGIC_NUMBER"
+  
+# verbose startup in ch_smi, too ?
+if [ $mpirun_verbose = 1 ] ; then
+    options="$options -v"
+fi
+
+# use user-defined port for synchronization, if available
+if [ -n "$SMI_SYNCPORT" ] ; then
+    options="$options -p $SMI_SYNCPORT"
+fi
+
+# set number of processes
+if [ ! -n "$np" ] ; then
+    if [ -n "$machineFile"] ; then
+	np=$NBR_HOSTS
+    else
+	np=1
+    fi
+fi
+
+# are enough hosts specified for the desired number of processes ?
+if [ $NBR_HOSTS -lt $np ] ; then
+  echo "not enough hosts: $NBR_HOSTS hosts specified in $machineFile, $np processes desired"
+  echo "each process must have one host to run on - exiting."
+  exit 1
+fi
+
+# if we need a pager, we're trying to get a good one
+if [ "$pager" = 1 ] ; then
+  FINDLESS=`which less`
+  if [ -n "$PAGER" ] ; then
+    LESS=$PAGER
+  elif [ -n "$FINDLESS" ] ; then
+    LESS=$FINDLESS
+  else
+    LESS=more
+  fi
+  LESS="$LESS $PAGEROPTS"
+  if [ $mpirun_verbose = 1 ] ; then
+    echo "using $LESS as pager"
+  fi
+fi
+
+# check if all processes will be running on the same host
+# but only use the SMP option of SMI if the -nolocal flag was not given
+if [ $nolocal = 0 ] ; then
+    smp=0
+    i=0
+    for host in $HOSTS ; do
+	if [ $INIT_HOST = $host ] ; then 
+	    smp=`expr $smp + 1`
+	fi
+	# only check the first np hosts  
+	i=`expr $i + 1`
+	if [ $i = $np ] ; then
+	    break;
+	fi
+    done
+    if [ $np = $smp ] ; then 
+	options="$options -l"
+    fi
+fi
+    
+# check if user wants SMI to print debugging informations
+if [ $smidebugon = 1 ] ; then
+    options="$options -s"
+fi
+
+if [ $smitimeson = 1 ] ; then
+    options="$options -T"
+fi
+
+if [ $sminowatchdog = 1 ] ; then
+    options="$options -w"
+fi
+
+# check if user wants SMI to gather runtime statistics
+if [ $smistaton = 1 ] ; then
+    options="$options -t"
+fi
+
+# now launch the processes 
+BG="&"
+np_minus_one=`expr $np - 1`
+i=0
+for host in $HOSTS
+do
+    # more info
+    if [ $mpirun_verbose = 1 ] ; then
+	echo "launching process $i of $np on $host"
+    fi
+
+    # set stderr/stdout/stdin
+    if [ -n "$stderrfile" ] ; then
+	err="2>"${stderrfile}"_"${i}
+    fi
+    if [ -n "$stdoutfile" ] ; then
+	out="1>"${stdoutfile}"_"${i}
+    fi
+    if [ -n "$stdinfile" ] ; then
+	input="<"${stdinfile}
+    fi
+     
+    xtitle="\"$BASENAME on $host ($i/$np)\""
+
+    rcmd="(cd $DIRNAME; ./$BASENAME -r $i -n $np $options -- $cmdLineArgs $out $err $input)"
+    xrcmd="$progname -r $i -n $np $options -- $cmdLineArgs $input 2>&1"
+    xprcmd="$progname -r $i -n $np $options -- $cmdLineArgs $input 2>&1 | $LESS"
+    # mpirun is not supposed to return until the MPI application has exited
+
+    # launch processes
+    if [ "$xterm" = 0 ] ; then
+	batchcmd="$rshcmd $host \"$rcmd\""
+	$Show $batchcmd $BG
+	retcode=$?
+    else  
+	# xterms with a pager
+	if [ "$pager" = 1 ] ; then	
+	    xtermcmd="xterm -title $xtitle -e bash -c \"$rshcmd $host $xprcmd\""
+	else
+	    xtermcmd="xterm -title $xtitle -e bash -c \"$rshcmd $host $xrcmd\""
+	fi
+	$Show $xtermcmd $BG
+	retcode=$?
+	# xxx improve: remember all PIDs
+	pid=$!
+    fi
+  
+    # check if we are done
+    i=`expr $i + 1`
+    if [ $i = $np ] ; then
+	# xxx improve: wait for individual PIDs and collect return codes
+	wait
+	if [ $mpirun_verbose = 1 ] ; then
+	    echo "Application terminated." 
+	fi
+	exit $retcode
+    fi
+done

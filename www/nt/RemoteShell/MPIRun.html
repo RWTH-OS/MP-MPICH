@@ -1,0 +1,100 @@
+<html>
+
+<head>
+<title></title>
+</head>
+
+<body>
+
+<p><a href="index.html">main</a></p>
+
+<p><big><big><big>MPIRun.exe</big></big></big></p>
+
+<p>Use MPIRun.exe to launch an mpich application. It is in the [MPICH Launcher Home]\bin
+directory. You will probably want to add this directory to your path environment variable.</p>
+
+<p>Usage: 
+
+<ul>
+  <li><font face="Courier">MPIRun configfile [-logon] [args ...]</font></li>
+  <li><font face="Courier">MPIRun -np #processes [-logon] [-env
+    &quot;var1=val1|var2=val2...&quot;] executable [args ...]</font></li>
+  <li><font face="Courier">MPIRun -localonly #processes&nbsp;[-env
+    &quot;var1=val1|var2=val2...&quot;] executable [args ...]</font> </li>
+</ul>
+
+<p><big>Configuration files</big>.</p>
+
+<p>The config file format is as follows: </p>
+
+<blockquote style="MARGIN-RIGHT: 0px">
+  <font face="Courier"><pre>
+exe c:\somepath\myapp.exe
+ OR \\host\share\somepath\myapp.exe
+[args arg1 arg2 arg3 ...]
+[env VAR1=VAL1|VAR2=VAL2|...|VARn=VALn]
+hosts
+hostA #procs [path\myapp.exe]
+hostB #procs [\\host\share\somepath\myapp2.exe]
+hostC #procs
+...
+</pre>
+  </font>
+</blockquote>
+
+<p>Bracketed lines are optional. The # character will comment out a line.&nbsp; You may
+specify a path to an executable on each host line, thus enabling MPMD programming. &nbsp;
+If you do not specify a path, then the default is used from the exe line.</p>
+
+<p>Here is a sample configuration file:</p>
+
+<blockquote style="MARGIN-RIGHT: 0px">
+  <font face="Courier"><pre>
+exe c:\temp\slave.exe
+env MINX=0|MAXX=2|MINY=0|MAXY=2
+args -i c:\temp\cool.points
+hosts
+fry 1 c:\temp\master.exe
+fry 1 
+#light 1
+jazz 2
+</pre>
+  </font>
+</blockquote>
+
+<p><big>Command line options for MPIRun</big></p>
+
+<p><strong>-np #procs</strong></p>
+
+<p>Launch #procs, starting on the current machine and then one on each of the rest of the
+machines specified at install time until #procs are launched.&nbsp; This mechanism loops
+if more processes are specified than there are machines available.</p>
+
+<p><strong>-localonly #procs</strong></p>
+
+<p>This runs the application on the local machine using the shared memory device.</p>
+
+<p><strong>-localonly #procs -tcp</strong></p>
+
+<p>Add the -tcp switch to force the use of sockets instead of shared memory</p>
+
+<p><strong>-env&nbsp;&quot;var1=val1|var2=val2|var3=val3|...varn=valn&quot;</strong></p>
+
+<p>This will set the environment variables specified in the string before each process is
+launched.&nbsp; Remember to quote the string so the command prompt doesn't interpret the
+vertical bar as a pipe command.</p>
+
+<p><strong>-logon</strong></p>
+
+<p>This option will cause mpirun to prompt for an account and password.&nbsp; If you use
+this option then you can specify an executable that is located in a shared directory.
+&nbsp; If you don't -logon then the executable must reside on each host locally.&nbsp; Use
+mpiregister.exe to encrypt an account and password into the registry and avoid the prompt.</p>
+
+<p><a href="index.html">main</a><br>
+MPIRun <br>
+<a href="MPIRegister.html">MPIRegister</a><br>
+<a href="MPIConfig.html">MPIConfig</a><br>
+</p>
+</body>
+</html>

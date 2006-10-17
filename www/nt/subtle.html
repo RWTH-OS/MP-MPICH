@@ -1,0 +1,86 @@
+<html>
+
+<head>
+<title></title>
+</head>
+
+<body>
+
+<p><a href="../index.html">main</a></p>
+
+<p><font size="3">::SUBTLE OPTIONS</font></p>
+
+<p><font size="3">There&nbsp;are some lesser used options available to MPICH which can be
+used to fine tune the performance&nbsp;to a specific machine.</font></p>
+
+<p><strong><font size="3">MPICH.NT</font></strong></p>
+
+<p>MPICH.NT has the following environment variables used to set runtime options:</p>
+
+<p>MPICH_USE_POLLING</p>
+
+<p>Set this variable to 1 to enable polling.&nbsp; The default is to use event objects to
+wait on.&nbsp; Polling has lower latency but burns the CPU and can decrease performance in
+certain situations.</p>
+
+<p>MPICH_SINGLETHREAD</p>
+
+<p>Set this variable to 1 to cause the shared memory and via devices to be single
+threaded.&nbsp; Single threaded devices have much lower latency but they obey different
+progress rules than the multithreaded versions.&nbsp; They only make progress on messge
+passing when MPI calls are made.&nbsp; The multi-threaded devices make progress on
+messages asynchronously when the message arives.</p>
+
+<p>MPICH_SHMQSIZE</p>
+
+<p>This value is the size, in bytes, of the shared memory queue for each process. The
+default value is 1MB.</p>
+
+<p>MPICH_MAXSHMMSG</p>
+
+<p>This value is the largest message, measured in bytes, that can be put in the shared
+memory queue.&nbsp; This value must be less than or equal to MPICH_SHMQSIZE.&nbsp;
+Messages larger than this value are copied directly from the address space of the sender
+to the receiver. The default value is 15k.</p>
+
+<p>MPICH_LONGVLONGTHRESH</p>
+
+<p>This value is the message size, in bytes, when the message sending protocol changes
+from eager to rendezvous. The default value is 20k.</p>
+
+<p>MPICH_NUMCOMMPORTS</p>
+
+<p>This value is the number of completion port threads that will be launched by each
+process to handle all socket communication. The default is 2.</p>
+
+<p>MPICH_NOCOMMPORT</p>
+
+<p>If this variable exists then there will be no completion port threads created and there
+can not be any socket communication between processes.&nbsp; This is provided to allow mpi
+applications to be run on a Windows9x system.&nbsp; The application must be run using
+shared memory communication only (ie. mpirun -localonly n app.exe).&nbsp; This option is
+included to allow developers to run applications on a Win9x system, like a laptop, that
+doesn't support completion ports.</p>
+
+<p>MPICH_VI_USE_POLLING</p>
+
+<p>Set this variable to 1 to enable polling in the VIA device.&nbsp; The default is to use
+the wait interface.&nbsp; Polling has lower latency but burns the CPU and can decrease
+performance in certain situations.</p>
+
+<p>Examples:</p>
+
+<p>High performance ping pong shared memory test:</p>
+
+<p>mpirun -localonly 2 -env &quot;MPICH_USE_POLLING=1|MPICH_SINGLETHREAD=1&quot;
+netpipe.exe</p>
+
+<p>High performance ping pong via test</p>
+
+<p>mpirun -np 2 -env
+&quot;MPICH_USE_POLLING=1|MPICH_SINGLETHREAD=1|MPICH_VI_CLICKS=*&quot; netpipe.exe</p>
+
+<p><a href="../index.html">main</a><br>
+</p>
+</body>
+</html>

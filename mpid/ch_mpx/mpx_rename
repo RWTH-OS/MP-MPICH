@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# ch_mpx
+#
+
+if [ $# -ne 3 ] ; then
+  exit 1
+fi
+
+cd $1
+find . -type f -name "*$2*" > "mpx_rename.log"
+for rename in `cat mpx_rename.log`
+do      
+  newname=`echo "$rename" | sed "s#$2#$3#g"`
+  mv $rename $newname
+done
+rm -f  "mpx_rename.log.*"
+cd - &> /dev/null
+

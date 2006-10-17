@@ -1,0 +1,15 @@
+ALL: 
+	ln -s mpicc mpiCC
+#
+# Remove all of the derived scripts
+clean:
+	-rm -f mpirun.ch_smi mpirun.meta mpirun.anlspx mpirun.args \
+		mpirun.ch_cmmd mpirun.ch_mpl mpirun.ch_p4 mpirun.ch_shmem \
+		mpirun.ch_tcp mpirun.execer mpirun.p4shmem mpirun.pg mpirun \
+		mpirun.sh mpirun.globus mpicompile.args mpicc mpif77 mpif90 \
+		mpiCC mpiman tstmachines chp4_servs mpiinstall mpireconfig \
+		mpiuninstall tkrun_smi \
+
+distclean: clean
+	-rm -f chkmachine chkserv Makefile
+

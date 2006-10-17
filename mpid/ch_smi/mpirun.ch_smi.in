@@ -1,0 +1,726 @@
+#!/bin/sh
+# $Id$
+
+# mpirun.smi for starting MPI applications on an SMI driven SCI-cluster
+# uses 'np', 'machineFile', 'mpirun_verbose', 'Show', 'rshcmd' from mpirun.args
+
+#set -x
+
+# options for the pager
+PAGEROPTS=
+
+# function definitions
+nbr() { echo $#;}
+
+firsthost() { echo $1;}
+
+# where are we, and where should the programm run?
+BASENAME=`basename $progname`
+DIRNAME=`dirname $progname`
+if [ -z "$workingdir" ] ; then
+    EXENAME=./$BASENAME
+    WDNAME=$DIRNAME
+else
+    EXENAME=$progname
+    WDNAME=$workingdir
+fi
+
+# find an echo command which understands the -n option
+ECHO=echo
+echo_test=`$ECHO -n`
+if [ -n "$echo_test" ] ; then
+    # the echo prints the -n - test another one
+    for p in `echo $PATH | sed s/:/' '/g` ; do
+	ECHO=$p/echo
+	if [ -x $ECHO ] ; then
+	    echo_test=`$ECHO -n`
+	    if [ -z "$echo_test" ] ; then break; fi
+	fi
+    done
+fi    
+# fallback if no other echo was found
+if [ ! -x $ECHO ] ; then ECHO=echo; fi
+
+# tell the world who I am
+if [ $mpirun_verbose -gt 1 ] ; then
+    $ECHO "*** This is mpirun.ch_smi running on `hostname`"
+fi
+
+# did the user supply the names of the nodes to run on on the command line?
+if [ -n "$nodes" ] ; then
+    NBR_HOSTS=`nbr $nodes`
+    HOSTS=$nodes
+    all_local=0
+else
+    # find a machine file and find the hosts to use
+    if [ -z "$machineFile" ] ; then
+	if [ -f ./machines ] ; then
+	    machineFile=$DIRNAME"/machines"
+	elif [ -f $HOME/.machines ] ; then
+	    machineFile="$HOME/.machines"
+	elif [ -f $MPIR_HOME/util/machines ] ; then
+	    machineFile="$MPIR_HOME/util/machines"
+	fi
+    fi
+    
+    if [ -n "$machineFile" ] ; then
+	if [ $mpirun_verbose != 0 ] ; then
+	    $ECHO "using "$machineFile" to specify the hosts"
+	fi
+	HOSTS=`cat $machineFile | awk -F: 'NF==0 {exit} NF==1 { print $1 } NF==2 { for (i = $2; i > 0; i--) print $1 }'` 
+	NBR_HOSTS=`nbr $HOSTS`
+	if [ "$np" = "0" ] ; then
+	    np=$NBR_HOSTS
+	fi  
+	all_local=0
+    else
+	# no machineFile found - run all processes on the local host
+	if [ -z "$np" ] ; then
+	    $ECHO "*** mpirun.ch_smi: no number of processes specified and no machines file found! Exiting."
+	    exit 1
+	fi
+	i=0
+	HOSTNAME=`hostname`
+	while [ $i -lt $np ] ; do 
+	    HOSTS="$HOSTS $HOSTNAME"
+	    i=`expr $i + 1`;
+	done
+	if [ $mpirun_verbose != 0 ] ; then
+	    $ECHO "*** mpirun.ch_smi: no machines file found, running all $np processes on $HOSTNAME"
+	fi
+	NBR_HOSTS=`nbr $HOSTS`
+	all_local=1
+    fi
+fi
+
+# evaluate "processes per node" option if supplied
+if [ $ppn -gt 0 ] ; then
+    if [ -z "$np0" ] ; then
+	# no number of processes given - determine it from the information we have
+	np=`expr $NBR_HOSTS \* $ppn`
+    else
+	if [ `expr $np0 \% $ppn` -gt 0 ] ; then
+	    $ECHO "*** mpirun.ch_smi: -ppn $ppn is not a divider of -np $np ! Exiting."
+	    exit 1
+	fi
+	if [ `expr $np0 \/ $ppn` -gt "$NBR_HOSTS" ] ; then
+	    $ECHO "*** mpirun.ch_smi: not enough nodes specified for $np processes with $ppn processes on each node! Exiting."
+	    exit 1
+	fi
+	PPN_HOSTS=""
+	for h in $HOSTS ; do
+	    i=$ppn
+	    while [ $i -gt 0 ] ; do 
+		PPN_HOSTS="$PPN_HOSTS $h"
+		i=`expr $i - 1`;
+	    done
+	done
+	HOSTS=$PPN_HOSTS
+	NBR_HOSTS=`nbr $HOSTS`
+    fi
+fi
+
+if [ $all_local -eq 0 ] ; then
+    # if more processes are requested than nodes are given in the command line, 
+    # schedule the processes in round-robin manner
+    if [ $np -gt $NBR_HOSTS ] ; then
+	NEWHOSTS=$HOSTS
+	while [ $NBR_HOSTS -lt $np ] ; do
+	    for h in $HOSTS ; do
+		NEWHOSTS="$NEWHOSTS $h"
+	    	NBR_HOSTS=`expr $NBR_HOSTS + 1`;
+		if [ $NBR_HOSTS = $np ] ; then
+		    break;
+		fi
+	    done
+	done
+	HOSTS=$NEWHOSTS
+    fi
+
+    # Sort the hosts alphabtically - this is just for startup.
+    # The MPI ranks in ch_smi are determined by the SCI node id's.
+    #
+    # exit if /tmp does not exist or is not a directory
+    if [ ! -d /tmp ] ; then
+	$ECHO "*** mpirun.ch_smi: /tmp does not exist or is not a directory - exiting"
+	exit 1
+    fi
+    # exit if /tmp is not writable
+    if [ ! -w /tmp ] ; then
+	$ECHO "*** mpirun.ch_smi: cannot write to /tmp - exiting"
+	exit 1
+    fi
+
+    SORTFILE=/tmp/__${BASENAME}_${NBR_HOSTS}_${i}
+    i=0
+    while [ -r $SORTFILE ] ; do
+	i=`expr $i + 1`
+	SORTFILE=${SORTFILE}_${BASENAME}_${i}
+    done
+    i=0
+    for host in $HOSTS ; do
+	$ECHO $host >> $SORTFILE
+	i=`expr $i + 1`
+	if [ $i = $np ] ; then
+	    break
+	fi
+    done
+    HOSTS=`cat $SORTFILE | sort`
+    rm $SORTFILE
+
+    # used check for SMP usage with SCI (which was not properly supported on all platforms)
+    #
+    # we disable this check as it is no longer relevant
+    use_smp=1
+    if [ $use_smp = "0" ] ; then
+	for host in $HOSTS ; do
+	    i=0;
+	    for check_host in $HOSTS ; do
+		if [ $host = $check_host ] ; then
+		    i=`expr $i + 1`
+		fi
+	    done
+#	    if [ $i -gt "1" -a $i != $NBR_HOSTS -o $nolocal = "1" ] ; then
+	    if [ $i -gt "1" -a $i != $NBR_HOSTS ] ; then
+		$ECHO "*** mpirun.ch_smi:"
+		$ECHO "    ERROR: node $host is defined $i times -> SMP mode selected"
+		$ECHO "           use -smp option to enable SMP usage with SCI"
+		$ECHO "           WARNING: requires SMP support by the SCI driver and the platform!"
+		exit 1
+	    fi
+	done
+    fi
+fi
+
+# find a device configuration file
+if [ ! -n "$devFile" ] ; then
+    if [ -f ./ch_smi.conf ] ; then
+	devFile=$DIRNAME"/ch_smi.conf"
+    elif [ -f $HOME/.ch_smi.conf ] ; then
+	devFile="$HOME/.ch_smi.conf"
+    elif [ -n "$machineFile" ] ; then
+	NBR_VALIDLINES=`cat $machineFile | awk 'NF > 0 {print}' | wc -l`
+	if [ $NBR_VALIDLINES -gt $NBR_HOSTS ] ; then
+	    devFile="$machineFile"
+	else
+	    if [ $mpirun_verbose != 0 ] ; then
+		$ECHO "*** mpirun.ch_smi: no device configuration file found, using defaults"
+	    fi
+	fi  
+    else
+	if [ $mpirun_verbose != 0 ] ; then
+	    $ECHO "*** mpirun.ch_smi: no device configuration file found, using defaults"
+	fi
+    fi
+else
+    if [ ! -f $devFile ] ; then
+	if [ $mpirun_verbose != 0 ] ; then
+	    $ECHO "*** mpirun.ch_smi: device configuration $devFile file not found, aborting!"
+	fi
+	exit 1
+    fi
+fi
+
+# by default, disable interrupts in SMI initialization to save resources
+# to toggle this default, change the default value for "async_progress" in smidef.h 
+# to '1' and init 'smi_interrupt_option' as an empty string.
+smi_irq_opt="-g"
+# if device configuration file is found/specified, add it to the command line options
+if [ -n "$devFile" ] ; then
+   if [ $mpirun_verbose != 0 ] ; then
+     $ECHO "*** mpirun.ch_smi: using "$devFile" as device configuration file"
+   fi
+   options="-d $devFile"
+
+   # we need to check here if asynchronous progress is specified, because this info
+   # is needed when SMI is initialized - to init remote SCI interrupts or not   
+   async=`cat $devFile | grep -i async_progress | awk '{ print $2}'` 
+   irq=`cat $devFile | grep -i msgchk_type | awk '{ print $2}'` 
+   if [ "(" -n "$async" -a "$async" != "0" ")" -o "(" -n "$irq" -a "$irq" != "0" ")" ] ; then
+	# this means "do not disable interrupts in SMI initialization"
+	smi_irq_opt=""
+   fi
+fi
+options="$options $smi_irq_opt"
+
+# set initialization host
+INIT_HOST=`firsthost $HOSTS`
+
+# generate random magic number
+MAGIC_NUMBER=`date '+%S'`
+options="$options -h $INIT_HOST -m $MAGIC_NUMBER"
+  
+# verbose startup in ch_smi, too ?
+if [ $mpirun_verbose = 2 ] ; then
+    options="$options -v"
+fi
+
+# use user-defined port for synchronization, if available
+if [ -n "$SMI_SYNCPORT" ] ; then
+    options="$options -p $SMI_SYNCPORT"
+fi
+
+# set number of processes
+if [ ! -n "$np" ] ; then
+    if [ -n "$machineFile"] ; then
+	np=$NBR_HOSTS
+    else
+	np=1
+    fi
+fi
+
+# are enough hosts specified for the desired number of processes ?
+if [ $NBR_HOSTS -lt $np ] ; then
+  $ECHO "*** mpirun.ch_smi: not enough hosts: $NBR_HOSTS hosts specified in $machineFile, $np processes desired"
+  $ECHO "                   each process must have one host to run on - exiting."
+  exit 1
+fi
+
+# if we need a pager, we're trying to get a good one
+if [ "$pager" = 1 ] ; then
+  FINDLESS=`which less`
+  if [ -n "$MPI_PAGER" ] ; then
+    LESS=$MPI_PAGER
+  elif [ -n "$PAGER" ] ; then
+    LESS=$PAGER
+  elif [ -n "$FINDLESS" ] ; then
+    LESS=$FINDLESS
+  else
+    LESS=more
+  fi
+  LESS="$LESS $PAGEROPTS"
+  if [ $mpirun_verbose != 0 ] ; then
+    $ECHO "using $LESS as pager"
+  fi
+fi
+
+# determine the command to open a terminal window
+if [ "$xterm" = 1 -o "$console" = 1 ] ; then
+  if [ -n "$MPI_XTERM" ] ; then
+    XTERMCMD=$MPI_XTERM
+  elif [ -n "$XTERM" ] ; then
+    XTERMCMD=$XTERM
+  else
+    XTERMCMD=xterm
+  fi
+  if [ $mpirun_verbose != 0 ] ; then
+    $ECHO "*** mpirun.ch_smi: using $XTERMCMD as terminal command"
+  fi
+fi
+
+# check if all processes will be running on the same host
+# but only use the SMP option of SMI if the -nolocal flag was not given
+if [ $nolocal = 0 ] ; then
+    smp=0
+    i=0
+    for host in $HOSTS ; do
+	if [ $INIT_HOST = $host ] ; then 
+	    smp=`expr $smp + 1`
+	fi
+	# only check the first np hosts  
+	i=`expr $i + 1`
+	if [ $i = $np ] ; then
+	    break;
+	fi
+    done
+    if [ $np = $smp ] ; then 
+	options="$options -l"
+    fi
+fi
+    
+# check if user wants SMI to print debugging/trace informations
+if [ $smitraceon = 1 ] ; then
+    options="$options -T"
+elif [ $smidebugon = 1 ] ; then
+    options="$options -s"
+fi
+
+# check if user wants SMI to gather runtime statistics
+if [ $smistaton = 1 ] ; then
+    options="$options -t"
+fi
+
+# check if user has turned of the watchdog
+if [ $watchdog = "no" ] ; then
+    options="$options -w"
+fi    
+
+# get number of ch_smi-device as specified in mpichconf.h and add
+# according usedevice-switch to command line
+device_nbr=`cat $includedir/mpichconf.h | grep DEVICE_ch_smi_nbr | awk  '{ print $3 }'`
+options="$options -usedevice $device_nbr"
+
+# depending on the login-shell of the user, we need to use "setenv" or "export" to
+# set environment variablesA
+ENV_HOST=`echo $HOSTS | cut -f 1 -d " "`
+# first, test if rsh towards master node works
+$rshcmd $ENV_HOST 'echo rcmd_works' | grep rcmd_works >/dev/null
+if [ $? != "0" ] ; then
+    $ECHO "*** mpirun.ch_smi:"
+    $ECHO "    ERROR: can not launch process on node $ENV_HOST"
+    $ECHO "           Make sure that $rshcmd works without password and"
+    $ECHO "           that the host names are correct. Aborting."
+    exit 1
+fi
+# This test is quiet costly (1 or 2 rsh calls), but is the only reliable way to test
+# for the user's login shell on (one of the) actual compute node.
+ENV_RETCODE=`$rshcmd $ENV_HOST 'export T=t >& /dev/null; echo $?' | tail -1`
+if [ "$ENV_RETCODE" = "0" ] ; then
+    SET_ENV=export
+    ENV_EQU="="
+else
+    ENV_RETCODE=`$rshcmd $ENV_HOST 'setenv T t >& /dev/null; echo $?' | tail -1`
+    if [ "$ENV_RETCODE" = "0" ] ; then
+	SET_ENV=setenv
+	ENV_EQU=" "
+    else
+#	$ECHO "*** mpirun.ch_smi:"
+#	$ECHO "    WARNING: can not set environment variables (neither export nor setenv are usable)"
+	SET_ENV=""
+    fi
+fi
+
+# set required environment variables for the processes that will be launched
+EXP_ENV=""
+if [ -n "$SET_ENV" ] ; then
+    if [ -n "$ld_lib_path" ] ; then
+	MPIJOBENV="$MPIJOBENV LD_LIBRARY_PATH=$ld_lib_path"
+    fi
+    for item in $MPIJOBENV ; do
+	env_item=`echo "$item" | sed "s/=/$ENV_EQU/"`
+	EXP_ENV="$SET_ENV $env_item; $EXP_ENV"
+    done
+fi
+
+# Determine the base name of a file to which the processes write their PIDs.
+# This is required for a reliable application-kill from within this script.
+PIDBASE="/tmp/._sci-mpich_${BASENAME}_`date +%H%M%S`"
+
+USE_JOBCONTROL=""
+if [ -n "$USE_JOBCONTROL" ] ; then
+    # job control
+    set -m
+	
+    # catch signals
+    job_pids=""
+    trap '$ECHO "received signal, terminating remote application processes:"; \
+	job=1 ; while [ $job -lt $NBR_HOSTS ] ; do \
+	$ECHO " job "$job ;\
+	kill %$job ;\
+	job=`expr $job + 1` ;\
+    done ; exit 1' 1 2 3 15
+fi
+
+# now launch the processes 
+mpipids=""
+trap '$ECHO "*** mpirun.ch_smi: starting up - try again later.";'  1 2 3 15
+BG="&"
+np_minus_one=`expr $np - 1`
+i=0
+
+# if cmdLineArgs already contain --, we get rid of it first, to not have it twice
+# this happens when using the meta device
+tmpLineArgs=""
+for c in $cmdLineArgs
+do
+    if [ "$c" != '"--"' ] ; then
+	tmpLineArgs="$tmpLineArgs $c"
+    fi
+done
+cmdLineArgs=$tmpLineArgs
+
+PIDHOST=""
+CHILD_PIDS=""
+for host in $HOSTS
+do
+    # check if we shall skip this process (because it will be
+    # started manually by the debugger
+    if [ $i = "$skipproc" -o $host = "$skipproc" ] ; then
+	Skip=1
+    else
+	Skip=0
+    fi
+
+    if [ -z "$PIDHOST" ] ; then
+	PIDHOST=$host
+    fi
+    
+    # set stderr/stdout/stdin and make backupfiles if they exist
+    if [ -n "$stderrfile" ] ; then
+	err="2>"${stderrfile}"_"${i}
+	if [ -r ${stderrfile}"_"${i} ] ; then
+	    mv ${stderrfile}"_"${i} ${stderrfile}"_"${i}~
+	fi
+    fi
+    if [ -n "$stdoutfile" ] ; then
+	out="1>"${stdoutfile}"_"${i}
+	if [ -r ${stdoutfile}"_"${i} ] ; then
+	    mv ${stdoutfile}"_"${i} ${stdoutfile}"_"${i}~
+	fi
+    fi
+    if [ -n "$stdinfile" ] ; then
+	input="<"${stdinfile}
+    fi
+     
+    # construct the launch command line
+    xtitle="\"$BASENAME on $host ($i/$np)\""
+    
+    ## disabled due to timing problems when closing pid-files (the process hung)
+    # pidarg="-f ${PIDBASE}_$i"
+    pidarg=""
+    rcmd="(cd $WDNAME; $EXP_ENV $EXENAME -r $i -n $np $pidarg $options -- $cmdLineArgs $out $err $input)"
+    xrcmd="$progname -r $i -n $np $options -- $cmdLineArgs $input 2>&1"
+    xprcmd="$progname -r $i -n $np $options -- $cmdLineArgs $input 2>&1 | $LESS"
+    if [ -n "$debugprocs" ] ; then
+      case $debugger in
+      gdb)
+	gdbcmd="gdb -exec $progname -x $progname.$MAGIC_NUMBER.$i"
+	$ECHO "set args -r $i -n $np $options -- $cmdLineArgs" >$progname.$MAGIC_NUMBER.$i
+	$ECHO "file $progname" >>$progname.$MAGIC_NUMBER.$i
+	if [ -n "$breakpoint" ] ; then
+	    $ECHO "break $breakpoint" >>$progname.$MAGIC_NUMBER.$i
+	fi
+	$ECHO "run" >>$progname.$MAGIC_NUMBER.$i
+      ;;
+      dbx)
+	dbxcmd="dbx -r $progname -r $i -n $np $options -- $cmdLineArgs"
+      ;;
+      ddd)
+        dddcmd="(cd $WDNAME; $EXP_ENV ddd $EXENAME)"
+	$ECHO "set args -r 0 -n $np $options -- $cmdLineArgs" >$WDNAME/.gdbinit
+	if [ -n "$breakpoint" ] ; then
+	    $ECHO "break $breakpoint" >>$WDNAME/.gdbinit
+	fi
+      ;;
+      *) 
+	$ECHO "*** mpirun.ch_smi: The debugger $debugger is not supported (yet)."
+	exit 1
+      ;;
+      esac
+    fi
+
+    if [ "$xterm" = 0 -a "$console" = 0 ] ; then
+        launch_cmd="$rshcmd $host \"$rcmd\""
+    elif [ "$console" = 1 ] ; then
+	launch_cmd="$rshcmd $host \"$rcmd\""
+	# search host and rank in console list
+	for cons in $consoles; do
+	    if [ "$cons" = "all" -o "$cons" = "$host" -o "$cons" = "$i" ] ; then
+		if [ -n "$BV" -a "$BV" -gt "1" -a "${is_debug[$i]}" = "1" ] ; then
+                  case $debugger in
+		    gdb)
+		      launch_cmd=$XTERMCMD" -title $xtitle -e bash -c \"$rshcmd $host $gdbcmd\""
+		    ;; 
+		    dbx)
+		      launch_cmd=$XTERMCMD" -title $xtitle -e bash -c \"$rshcmd $host $dbxcmd\""
+		    ;;
+		    ddd)
+		      launch_cmd="$rshcmd $host \"$dddcmd\""
+		    ;;
+		    *)
+		      $ECHO "*** mpirun.ch_smi: the debugger $debugger currently is not supported"
+		      exit 1
+		    ;;
+		  esac
+		else
+		  if [ "$pager" = 1 ] ; then	
+		    launch_cmd=$XTERMCMD" -title $xtitle -e bash -c \"$rshcmd $host $xprcmd\""
+		  else
+		    launch_cmd=$XTERMCMD" -title $xtitle -e bash -c \"$rshcmd $host $xrcmd\""
+		  fi
+                fi
+	    fi
+	done
+    else
+	# xterms (with a pager)
+	if [ "$pager" = 1 ] ; then
+	    launch_cmd=$XTERMCMD" -title $xtitle -e bash -c \"$rshcmd $host $xprcmd\""
+	else
+	    launch_cmd=$XTERMCMD" -title $xtitle -e bash -c \"$rshcmd $host $xrcmd\""
+	fi
+    fi
+    
+    # more info
+    if [ $mpirun_verbose != 0 ] ; then
+	if [ $i != "0" ] ; then
+	    $ECHO -n " $host"
+	    if [ `expr $i % 8` = "0" ] ; then $ECHO ""; $ECHO -n "  "; fi
+	fi
+	if [ $Skip != "0" ] ; then
+	    $ECHO ""; $ECHO "*** mpirun.ch_smi:"
+	    $ECHO "skipping launch of process $i on host $host - start it manually with:"
+	    $ECHO $launch_cmd
+	    $ECHO "***"
+	fi
+    fi
+    
+    # finally, launch the process
+    if [ $Skip = "0" ] ; then
+	# to let the user see what's happening
+	if [ $i = 0 -a $mpirun_verbose != 0 ] ; then  
+	    $ECHO "*** mpirun.ch_smi: launching $np processes:"
+	    $ECHO "                   startup master on $host"
+	    $ECHO "                   other $np_minus_one processes on hosts:"
+            $ECHO -n "                   "
+	fi
+	$Show $launch_cmd $BG && mpipids="$mpipids $!"
+	# these two are currently not used
+	retcode=$?
+	pid=$!
+    fi	   
+    i=`expr $i + 1`
+    CHILD_PIDS="$CHILD_PIDS $!"
+
+done
+if [ $mpirun_verbose != 0 ] ; then
+    $ECHO ""
+fi
+if [ $mpirun_verbose = 2 ] ; then  $ECHO "*** mpirun.ch_smi: Initializing SCI-MPICH:"; fi
+ 
+# Install trap to ensure proper shutdown. We first kill process 0, which will then usually
+# make all other processes quit as well. To be sure, we check for correct abort of all 
+# processes (with some delay) of the application by testing if all the pid-files on the nodes are gone. 
+# This may take some seconds, but aborting needs not to be especially fast, but should
+# be reliable.
+in_trap=""
+
+# this trap is disabled, see next one
+# trap 'if [ -z "$in_trap" ] ; then \
+# in_trap="yes"; $ECHO "";$ECHO "*** User requested application abort - shutting down processes."; \
+# rmtpid=`$rshcmd $PIDHOST cat ${PIDBASE}_0 2>/dev/null`; $rshcmd $PIDHOST kill $rmtpid 2>/dev/null; \
+# sleep 2; idx=0; \
+# for host in $HOSTS ; do \
+#    rmtpid=`$rshcmd $host cat ${PIDBASE}_$idx 2>/dev/null` ; \
+#    nodigits=`echo $rmtpid | sed 's/^[0-9]*$//'` ; \
+#    if [ -z "$nodigits" -a -n "$rmtpid" ] ; then \
+#	echo "*** killing process $rmtpid on $host explicitely" ; \
+#	$rshcmd $host kill -9 $rmtpid 2>/dev/null; \
+#	$rshcmd $host rm -f ${PIDBASE}_$idx 2>/dev/null; \
+#    fi ; idx=`expr $idx + 1` ; \
+# done ; fi ; ' 1 2 3 15
+
+# this trap is used due to the fact we have removed the pid files from the smicall
+trap 'if [ -z "$in_trap" ] ; then \
+in_trap="yes"; $ECHO "";$ECHO "*** User requested application abort - shutting down processes."; \
+for pid in $CHILD_PIDS ; do \
+        echo "*** killing process $pid" ; \
+        kill $pid 2>/dev/null; \
+done ; fi ; ' 1 2 3 15
+
+
+# START PAPI-Perfserv
+if [ "$MPIPAPI" = "true" ] ; then
+  eval "$EXP_ENV" 
+
+  # Start the Papi-Server, when all clients are ready
+  declare -i CNT=0;
+
+  PERFSERVPATH="$PAPI_PATH/bin"
+  if [ -z "$PAPI_PROCLIST" ] ; then
+    for item in $HOSTS ; do
+	PERFPROCS="$PERFPROCS $CNT"
+	CNT=$CNT+1	
+    done
+  else
+    PERFPROCS="$PAPI_PROCLIST"
+  fi
+  
+  PERFHOSTLIST=""
+  PERFOPTS=""
+
+  if [ -n "$PAPI_NOGUI" ] ; then
+     PERFOPTS="$PERFOPTS -nogui $PAPI_NOGUI"
+  fi
+
+  if [ -n "$PAPI_FILE" ] ; then
+     PERFOPTS="$PERFOPTS -f $PAPI_FILE"
+  fi
+
+  if [ $mpirun_verbose != 0 ] ; then  $ECHO "*** mpirun.ch_smi: Waiting for processes starting perfometer"; fi
+
+  for item in $PERFPROCS ; do
+    while [ ! -s $MPIRUNWD/$MPIRUNPID.$item ] ; do
+      # $ECHO "waiting for $MPIRUNWD/$MPIRUNPID.$item"
+      sleep 1
+    done
+    PERFHOST=`cat $MPIRUNWD/$MPIRUNPID.$item`
+    if [ $mpirun_verbose = 2 ] ; then $ECHO "host $item: $PERFHOST ready"; fi 
+    PERFHOSTLIST="$PERFHOSTLIST $PERFHOST"
+    rm $MPIRUNWD/$MPIRUNPID.$item
+  done
+  
+  # $ECHO " $PERFSERVPATH/perfometerserver $PERFHOSTLIST"
+  $PERFSERVPATH/perfometerserver $PERFOPTS $PERFHOSTLIST&
+fi
+# END PAPI-Perfserv
+
+# Wait for processes returning and collect return codes (the latter one will
+# not always work)
+i=0
+rc_mpirun=0
+# waiting for PIDs makes problems with bash 1.x
+if [ -n "$BV" -a "$BV" -gt "1" ] ; then
+  for pid in $mpipids ; do
+    wait $pid 
+    rc_proc=$?
+    if [ $rc_proc != 0 -a $mpirun_verbose != 0 ] ; then
+	$ECHO "*** mpirun.ch_smi: process $i had non-zero return-code:" $rc_proc
+	rc_mpirun=$rc_proc
+    fi
+    i=`expr $i + 1`
+  done
+else
+  wait
+fi
+
+trap - 1 2 3 15
+wait
+
+# Clean up output files. If only one proc created output, 
+# rename its file from 'filename_procrank' to 'filename';
+# empty output files are deleted.
+for op_file in "$stdoutfile" "$stderrfile" ; do
+    if [ -n "$op_file" ] ; then
+	i=0
+	no_op_proc=0
+	op_proc=0
+	while [ $i -lt $np ] ; do
+	    op=${op_file}"_"${i}
+	    if [ -r $op -a ! -s $op -a ! -d $op ]; then
+		rm $op
+		no_op_proc=`expr $no_op_proc + 1`
+		else
+		op_proc=$i
+	    fi
+	    i=`expr $i + 1`
+	done
+	no_op_proc=`expr $no_op_proc + 1`
+	    if [ $no_op_proc = $np ] ; then
+	    # only one proc created output
+	    mv ${op_file}"_"${op_proc=$i} ${op_file}
+	fi
+    fi
+done
+
+# delete debug helpskript
+if [ -n "$debugprocs" ] ; then 
+  case $debugger in
+      gdb)
+	rm $progname.$MAGIC_NUMBER.* ;;
+      dbx)
+      ;;
+      ddd)
+        rm $WDNAME/.gdbinit ;;
+      *) 
+	$ECHO "*** mpirun.ch_smi: the debugger $debugger currently is not supported"
+	exit 1
+      ;;
+  esac
+fi
+
+
+if [ $mpirun_verbose != 0 ] ; then
+    $ECHO "*** mpirun.ch_smi: Application terminated." 
+fi
+
+exit $rc_mpirun

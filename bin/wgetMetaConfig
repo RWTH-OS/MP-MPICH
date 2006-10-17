@@ -1,0 +1,10 @@
+#!/bin/sh
+if test -z $2 ; then
+	tmpname=$PWD/metacfg-$$.cfg
+else 
+	tmpname=$2
+fi
+wget $1 -O $tmpname >& /dev/null
+if test -z $2 ; then
+	echo $tmpname
+fi

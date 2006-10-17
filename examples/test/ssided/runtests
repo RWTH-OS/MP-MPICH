@@ -1,0 +1,46 @@
+#!/bin/sh
+# $Id$
+
+MPIRUN="${1:-mpirun}"
+
+echo "Testing MPI_Put ..."
+
+echo "with shared memory (direct copy)"
+$MPIRUN -devconf ch_smi.put_shared put_contig_test1 -n 100
+$MPIRUN -devconf ch_smi.put_shared put_contig_test2 -n 100
+$MPIRUN -devconf ch_smi.put_shared put_sametype_test1 -n 100
+$MPIRUN -devconf ch_smi.put_shared put_sametype_test2 -n 100
+
+echo "with private memory (emulate)"
+$MPIRUN -devconf ch_smi.put_private put_contig_test1 -n 100
+$MPIRUN -devconf ch_smi.put_private put_contig_test3 -n 100
+$MPIRUN -devconf ch_smi.put_private put_sametype_test1 -n 100
+$MPIRUN -devconf ch_smi.put_private put_difftype_test -n 100
+
+
+echo "Testing MPI_Get ..."
+
+echo "with shared memory (direct copy) - no remote put"
+$MPIRUN -devconf ch_smi.get_shared get_contig_test1 -n 100
+$MPIRUN -devconf ch_smi.get_shared get_contig_test2 -n 100
+$MPIRUN -devconf ch_smi.get_shared get_sametype_test1 -n 100
+#$MPIRUN -devconf ch_smi.get_shared get_sametype_test2 -n 100
+
+echo "with shared memory - remote put"
+$MPIRUN -devconf ch_smi.get_shared_emu get_contig_test1 -n 100
+$MPIRUN -devconf ch_smi.get_shared_emu get_contig_test2 -n 100
+$MPIRUN -devconf ch_smi.get_shared_emu get_sametype_test1 -n 100
+#$MPIRUN -devconf ch_smi.get_shared_emu get_sametype_test2 -n 100
+
+echo "with private memory (emulate)"
+$MPIRUN -devconf ch_smi.get_private get_contig_test1 -n 100
+$MPIRUN -devconf ch_smi.get_private get_sametype_test1 -n 100
+#$MPIRUN -devconf ch_smi.get_private get_difftype_test -n 100
+
+
+echo "Testing MPI_Accumulate ..."
+$MPIRUN -devconf ch_smi.get_private accu_test -n 100 -b 5
+$MPIRUN -devconf ch_smi.get_private accu_test -n 100 -b 30
+
+exit 0
+

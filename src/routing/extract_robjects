@@ -1,0 +1,12 @@
+#!/bin/bash
+    LIB_PATH=../../lib
+    LIB_ROUTER=$LIB_PATH/librouter.a
+    LIB_METAMPI=$LIB_PATH/libmetampi.a
+    for i in `ar t $LIB_ROUTER`
+    do
+        OBJ_FILES="$OBJ_FILES $i"
+    done
+    echo "Files $OBJ_FILES are successefuly extracted from $LIB_ROUTER"
+    ar d $LIB_METAMPI $OBJ_FILES
+    ranlib $LIB_METAMPI
+

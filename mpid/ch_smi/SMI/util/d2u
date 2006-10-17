@@ -1,0 +1,15 @@
+
+
+# dos2unix for all files in the directory
+#
+
+
+for file in *
+do
+    if test -f $file  
+    then
+        dos2unix $file > d2u.tmp
+        mv d2u.tmp $file
+    fi
+done
+

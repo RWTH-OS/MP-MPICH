@@ -1,0 +1,85 @@
+#! /bin/sh
+#
+
+COMPSKRIPT=`basename $0`
+# first find ourselfs
+rundir=`pwd`
+cd "`dirname $0`"
+scriptdir=`pwd`
+cd "$rundir"
+if [ ! -x "$scriptdir/$COMPSKRIPT" ]
+then
+	echo "Cannot find myself. How did you manage to call this script?"
+	exit 1
+fi
+
+. $scriptdir/mpicompile.args
+#
+# Set the module directory
+if [ -n "$F90MODINC" ] ; then
+    if [ $choice -lt 2 ] ; then
+        moduledir="$F90MODINC$includedir/f90choice"
+        modulelib=${MPILIBNAME}f90
+    else
+        moduledir="$F90MODINC$includedir/f90base"
+        modulelib=${MPILIBNAME}f90base
+    fi
+    compileargs="$compileargs $moduledir"
+    linkargs="$linkargs -l$modulelib"
+fi
+
+#
+# Take care of mpif.h; try to add the link if necessary
+# We'll need to edit mpif.h to remove comments if we use mpif.h instead
+# of an MPI module
+#
+status=0
+if [ $DoCompile = 1 -o $show_compile = 1 ] ; then 
+    if [ $HasDashC != 1 ] ; then
+        compileargs="-c $compileargs"
+    fi
+    $Show $F90 $ROMIO_TFFLAGS $F90INC $F90FLAGS $compileargs
+    status=$?
+    if [ $status != 0 ] ; then 
+	exit $status
+    fi
+fi
+if [ $DoLink = 1 -o $show_link = 1 ] ; then
+    # If the profiling library doesn't exist, or MPICH_NO_PROF environment
+    # variable is set, skip the profiling library.
+    if [ -n "$MPICH_NO_PROF" -o ! -s "$proflibfullname" ] ; then
+        proflib=""
+    fi
+    # IRIX complains if we include a library twice.  In the case of a
+    # library using weak symbols, we don't need the proflib.  Just
+    # in case we do, there is an enviroment variable that
+    # can be used to override this test.
+    if [ "$HAS_WEAK_SYMBOLS" = "1" -a "$MPICH_INCLUDE_PROFLIB" != yes ] ; then
+        proflib=""
+    fi
+    # See the comment in mpicc about UseSharedLib
+    # Also, don't use if the shared libraries don't exist yet
+    # (because -lmpichfarg.a won't exist yet)
+    MPI_LIBS="$DEVICELFLAGS -l$MPILIBNAME -lmpidutil"
+    if [ "$SHAREDKIND" != "ignore" -a $UseSharedLib = "1" -a \
+	-s $libdir/lib${MPILIBNAME}farg.a ] ; then
+	# We also add a library containing MPI_Init and the routines
+        # that it uses to call getarg/iarg.
+	LIB_PATH="-L$sharedlib_dir -L$libdir $LIB_PATH"
+        if [ "$UseLibPath" = "1" -a -n "$SHARED_LIB_SEARCH_PATH_LEADER" ] ; then
+	    flibpath="$SHARED_LIB_SEARCH_PATH_LEADER$sharedlib_dir $flibpath"
+	fi
+	farglib="-l${MPILIBNAME}farg $farglib"
+    else
+	   
+        # if we link statically, we need additional flags to force the linker
+        # to link against the device libs, because there are no unresolved symbols
+        # which could be resolved with the device libs
+        # plus, we need the static device libs here
+	MPI_LIBS="$MPI_LIBS -ldl"
+    fi
+    
+    $Show $F90LINKER $ROMIO_LFLAGS $ROMIO_TFFLAGS $flibpath $F90LIB_PATH $LDFLAGS $LIB_PATH $linkobjs $MPILOG $linkargs $proflib $MPI_LIBS $mpiolib $farglib $BASE_LIB_LIST $FLIB_LIST $ROMIO_DEVLIBS
+    status=$?
+fi
+exit $status

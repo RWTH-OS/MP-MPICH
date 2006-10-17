@@ -1,0 +1,211 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML3.2 EN">
+<HTML>
+<HEAD>
+<META NAME="GENERATOR" CONTENT="DOCTEXT">
+<TITLE>MPE</TITLE>
+</HEAD>
+<BODY BGCOLOR="FFFFFF">
+<A NAME="MPE"><H1>MPE</H1></A>
+MultiProcessing Environment 
+<H2>Description</H2>
+The main benefit the MultiProcessing Environment library, <TT>mpe</TT>, offers is a
+set of routines that will create logfiles from MPI programs which can be
+examined by <TT>jumpshot</TT> or <TT>upshot.</TT>  These logfiles can be created manually by
+inserting calls to <TT>mpe</TT> routines in your code, automatically by linking
+with the appropriate MPE libraries, or by combining the two methods.
+Currently, the <TT>mpe</TT> library offers 3 profiling libraries.
+<P>
+<TABLE BORDER=0>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>Tracing Library </B></TD><TD VALIGN=TOP>Trace all MPI calls.  Each MPI call is preceded by a line that 
+contains the rank in MPI_COMM_WORLD of the calling process, and
+followed by another line indicating that the call has completed.  
+Most send and receive routines also indicate the values of count, tag,
+and partner (destination for sends, source for receives).  Output 
+is to standard output.
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>Animation Library </B></TD><TD VALIGN=TOP>This is a simple form of real-time program animation and requires X 
+window routines.  
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>Logging Library </B></TD><TD VALIGN=TOP>This is the most useful profiling library and is the most widely 
+used.  Logfiles (files of timestamped events) are generated and can 
+be analyzed with graphical tools such as <TT>jumpshot</TT> (preferrably) or 
+<TT>upshot.</TT>
+<BR></TD></TR></TABLE>
+<P>
+<H2>Configuring the MPE library</H2>
+The <TT>mpe</TT> library can be configured and installed as an extension of your
+current MPI implementation, or automatically during MPICH's configure and make
+process.  The only requirement is that you configure with a specific MPI
+implementation switch.  Currently, we have configured the <TT>mpe</TT> library to
+work with MPICH, SGI's MPI, IBM's MPI, and CRAY's MPI (not thoroughly
+tested).  There are 3 types of configure options or switches.
+<P>
+<BR>MPI implementation switch (mandatory)
+<P>
+<BR>Generic configure flags (mandatory/optional)
+<P>
+<BR>User option switches/flags (optional)
+<P>
+<H2>Specific MPI Implementation Switches</H2>
+<P>
+<TABLE BORDER=0>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--with-mpich=dir           </B></TD><TD VALIGN=TOP>Specifies the top-level directory where MPICH (version 1.0.13 or 
+later) was installed.
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--with-mpichdev=subdir          </B></TD><TD VALIGN=TOP>Specifies the subdirectory of which architecture\device you wish to 
+use.
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--with-sp                       </B></TD><TD VALIGN=TOP>Specifies use of the native IBM POE\MPI implementation.
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--with-sgi                      </B></TD><TD VALIGN=TOP>Specifies use of the native SGI MPI implementation.
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--with-sgi64                    </B></TD><TD VALIGN=TOP>Specifies use of the native SGI MPI implementation, forcing it to 
+compile in 64 bit mode.
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--with-cray                     </B></TD><TD VALIGN=TOP>Specifies use of the native Cray MPI implementation.
+<BR></TD></TR></TABLE>
+<P>
+<H2>Generic flags</H2>
+<TABLE BORDER=0>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>-prefix=DIR                     </B></TD><TD VALIGN=TOP>Specifies the destination install directory for the <TT>mpeinstall</TT> 
+script.  If configuring with MPICH, it must be the same install
+directory as the one given as an option to <TT>mpich's</TT> configure or the
+<TT>mpiinstall</TT> script in the <TT>mpich/util</TT> directory.  If omitted, and
+<TT>-prefix</TT> was given as an option to the <TT>mpich</TT> configure, then this
+directory will be automatically configured.  The <TT>mpeinstall</TT> script 
+installs into DIR only the required libraries and include files, and 
+a small subset of the examples. 
+<BR></TD></TR>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>-libdir=DIR                     </B></TD><TD VALIGN=TOP>Specifies the top-level directory where the <TT>mpe</TT> libraries will be 
+installed.  If this directory does not exist, it will be created.
+This flag is mandatory when not using MPICH and irrelevant when using 
+MPICH (-libdir is replaced by -mpichdev).
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>-bindir=DIR                     </B></TD><TD VALIGN=TOP>This flag is only relevant if you will be installing <TT>jumpshot</TT> along 
+with the <TT>mpe</TT> library.  This directory will be passed to 
+<TT>jumpshot's</TT> configure and will be where <TT>jumpshot's</TT> executable 
+will be installed.  If configuring with MPICH, this is automatically
+configured for you.  If not, and this flag is omitted, this directory 
+will be <TT>$libdir/../bin.</TT>  If this directory does not exist, it will 
+be created.
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--x-includes=DIR                </B></TD><TD VALIGN=TOP>This is an optional flag which specifies that X include files are in 
+DIR.  If omitted, configure will attempt to locate them.
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--x-libraries=DIR               </B></TD><TD VALIGN=TOP>This is an optional flag which specifies that X library files are in 
+DIR.  If omitted, configure will attempt to locate them.
+<BR></TD></TR></TABLE>
+<P>
+<H2>User Option Switches</H2>
+<P>
+<TABLE BORDER=0>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--enable-echo                   </B></TD><TD VALIGN=TOP>This switch will turn on strong echoing.  The default is enable=no.
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--enable-mpe_graphics           </B></TD><TD VALIGN=TOP>This switch will allow the <TT>mpe</TT> graphics routines to be built.  If 
+disabled, then the <TT>mpe</TT> routines that make use of X11 graphics 
+will not be built.  This is appropriate for systems that either do 
+not have the X11 include files or that do not support X11 graphics.  
+The default is enable=yes.
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--enable-f77                    </B></TD><TD VALIGN=TOP>This switch will allow the compilation of routines that require a 
+Fortran compiler.  If configuring with MPICH, the configure in the 
+top-level <TT>mpich</TT> directory will choose the appropriate value for
+you.  However, it can be overridden.  The default is enable=yes.
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--enable-jumpshot               </B></TD><TD VALIGN=TOP>This switch will allow the configuration of the graphical tool 
+<TT>jumpshot.</TT>  The default for this option is enable=yes.  If this 
+option is enabled and you are not configuring with MPICH, then you 
+will also need to supply the directory path where <TT>jumpshot</TT> has 
+already been installed ( <TT>--with-jumpshot_home</TT> ).
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--with-tcldir=TCL_DIR           </B></TD><TD VALIGN=TOP>This switch specifies that <TT>tcl</TT> is located in TCL_DIR.  This can only 
+be version 7 and TCL_DIR must have <TT>lib/libtcl.a</TT> and <TT>include/tcl.h.</TT>
+These files are only used for <TT>nupshot.</TT>  If this switch is omitted, 
+configure will attempt to locate these files.
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--with-tkdir=TK_DIR             </B></TD><TD VALIGN=TOP>This switch specifies that <TT>tk</TT> is located in TK_DIR.  This can only 
+be version 3 if you want to use <TT>nupshot</TT> and TK_DIR must have
+<TT>lib/libtcl.a</TT> and <TT>include/tk.h.</TT>  This may be the same as TCL_DIR.  
+If this switch is omitted, configure will attempt to locate these
+files.
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--with-wishloc=WISHLOC          </B></TD><TD VALIGN=TOP>This switch specifies the name of <TT>tcl/tk</TT> wish executable.  If this 
+switch is omitted, configure will attempt to locate a version.  This 
+is used only for <TT>nupshot</TT> and <TT>upshot.</TT>  
+<BR></TD></TR><BR>Note: Because <TT>tcl</TT> and <TT>tk</TT> keep changing in incompatible ways, we
+will soon be dropping support for any tool that uses <TT>tcl/tk.</TT>  The
+newest version of <TT>upshot</TT>, <TT>jumpshot</TT>, is written in Java.
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--with-jumpshot_home=JUMP_DIR   </B></TD><TD VALIGN=TOP>This switch specifies the path of the top-level directory where 
+<TT>jumpshot</TT> is installed.  When configuring with MPICH, this option is 
+automaticaly configured by default.  However, it can be overridden 
+If not configuring with MPICH, then you need to specify JUMP_DIR in 
+order to configure <TT>jumpshot</TT> along with the <TT>mpe</TT> library.
+<BR></TD></TR>
+<P>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>--with-jumpshot_opts=JUMP_OPTS  </B></TD><TD VALIGN=TOP>This switch allows you to pass specific options to <TT>jumpshot's</TT> 
+configure.  Unfortunately, because of the way <TT>autoconf 2.12</TT> 
+processes multiple arguments with <TT>AC_ARG_WITH</TT>, only 1 option may be
+passed to <TT>jumpshot's</TT> configure.  If more options are required, 
+then configure <TT>jumpshot</TT> separately.  
+<BR></TD></TR></TABLE>
+<P>
+<H2>Example MPE Programs</H2>
+As previously noted, the <TT>mpe</TT> library is composed of 3 different profiling
+libraries.  Each MPI implementation requires a slightly different way in which
+to link with these libraries.  During configure, the link path and appropriate
+libraries are determined and assigned to variables.  These variables are
+substituted in the Makefile in the <TT>mpe/contrib/test</TT> directory.  The
+following is a list of these variables.
+<P>
+<BR>LOG_LIB   =  link path needed to link with the logging library
+<P>
+<BR>TRACE_LIB =  link path needed to link with the tracing library
+<P>
+<BR>ANIM_LIB  =  link path needed to link with the animation library
+<P>
+In the  <TT>mpe/test</TT> directory there is a variable FLIB_PATH which is the link
+path needed to link fortran programs with the logging library.
+<P>
+During make, a small C program <TT>cpi</TT> (in the <TT>mpe/contrib/test</TT> directory) will
+be linked with each of the above libraries.  In the output from Make, a
+message will be written regarding the success of each attempted link test.
+Also, in the <TT>mpe/test</TT> directory a small Fortran program <TT>fpi</TT> will be linked
+with logging library using FLIB_PATH.  The success of this link test will also
+be included in the Make output.  If the link tests were successful, then these
+library paths should be used for your programs as well.
+<P>
+<H2>Additional Information</H2>
+To view a list of configure options, type <TT>./configure --help</TT> in the
+top-level <TT>mpe</TT> directory.
+<P>
+In the Installation Manual, there is a section on MPE which gives
+instructions and examples for each type of installation.
+<P>
+The README in the top-level <TT>mpe</TT> directory.
+<P>
+In the Users Guide, there is additional information describing the MPE
+routines and the profiling libraries.
+<P>
+The man pages included in the distribution has information regarding the MPE
+routines.  The command <TT>mpich/bin/mpiman</TT> is a script that runs <TT>xman</TT> on
+these man pages.
+<P>
+<P><B>Location:</B>/home/MPI/mansrc/mpepage<P>
+</BODY></HTML>

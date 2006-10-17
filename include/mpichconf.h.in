@@ -1,0 +1,260 @@
+/* include/mpichconf.h.in.  Generated from configure.in by autoheader.  */
+
+/* These provide information for initutil about the configuration options */
+#undef CONFIGURE_ARGS_CLEAN
+
+/* Define if extra traceback information should be kept */
+#undef DEBUG_TRACE
+
+/* device number of ch_gm */
+#undef DEVICE_ch_gm_nbr
+
+/* device number of ch_p4 */
+#undef DEVICE_ch_p4_nbr
+
+/* device number of ch_shmem */
+#undef DEVICE_ch_shmem_nbr
+
+/* device number of ch_smi device */
+#undef DEVICE_ch_smi_nbr
+
+/* device number of ch_usock */
+#undef DEVICE_ch_usock_nbr
+
+/* device number of ch_mpx */
+#undef DEVICE_ch_mpx_nbr
+
+/* Define if Fortran functions are pointers to pointers */
+#undef FORTRAN_SPECIAL_FUNCTION_PTR
+
+/* Define is C supports volatile declaration */
+#undef HAS_VOLATILE
+
+/* Define if XDR libraries available */
+#undef HAS_XDR
+
+/* Define this if the weak symbol support is __attribute__ ((weak, alias
+   "alias")) (i.e. GNU C) */
+#undef HAVE_ATTRIBUTE_WEAK
+
+/* Define to 1 if you have the `catclose' function. */
+#undef HAVE_CATCLOSE
+
+/* Define to 1 if you have the `catgets' function. */
+#undef HAVE_CATGETS
+
+/* Define to 1 if you have the `catopen' function. */
+#undef HAVE_CATOPEN
+
+/* Define if message catalog programs available */
+#undef HAVE_GENCAT
+
+/* Define if getdomainname function available */
+#undef HAVE_GETDOMAINNAME
+
+/* Define in gethostbyname function available */
+#undef HAVE_GETHOSTBYNAME
+
+/* Define to 1 if you have the `gethostname' function. */
+#undef HAVE_GETHOSTNAME
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define if the 'long double' type works. */
+#undef HAVE_LONG_DOUBLE
+
+/* Define if C has long long int */
+#undef HAVE_LONG_LONG_INT
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the `mmap' function. */
+#undef HAVE_MMAP
+
+/* Define to 1 if you have the <netdb.h> header file. */
+#undef HAVE_NETDB_H
+
+/* Define to 1 if you have the `nice' function. */
+#undef HAVE_NICE
+
+/* Define to 1 if you have the <nl_types.h> header file. */
+#undef HAVE_NL_TYPES_H
+
+/* Define if mmap does not work correctly for anonymous memory */
+#undef HAVE_NO_ANON_MMAP
+
+/* Define if C does NOT support const */
+#undef HAVE_NO_C_CONST
+
+/* Define this if the weak symbol support is pragma _CRI duplicate */
+#undef HAVE_PRAGMA_CRI_DUP
+
+/* Define this if the weak symbol support is pragma _HP_SECONDARY_DEF */
+#undef HAVE_PRAGMA_HP_SEC_DEF
+
+/* Define this if the weak symbol support is pragma weak */
+#undef HAVE_PRAGMA_WEAK
+
+/* Define if C supports prototypes (but isn't ANSI C) */
+#undef HAVE_PROTOTYPES
+
+/* Define to 1 if you have the `sigaction' function. */
+#undef HAVE_SIGACTION
+
+/* Define to 1 if you have the <signal.h> header file. */
+#undef HAVE_SIGNAL_H
+
+/* Define if you have the <stdarg.h> header file. */
+#undef HAVE_STDARG_H
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if you have the `sysinfo' function. */
+#undef HAVE_SYSINFO
+
+/* Define to 1 if you have the `system' function. */
+#undef HAVE_SYSTEM
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/systeminfo.h> header file. */
+#undef HAVE_SYS_SYSTEMINFO_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define if uname function available */
+#undef HAVE_UNAME
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Define this if weak symbols are supported */
+#undef HAVE_WEAK_SYMBOLS
+
+/* Define if an int is smaller than void * */
+#undef INT_LT_POINTER
+
+/* Define if malloc returns void * (and is an error to return char *) */
+#undef MALLOC_RET_VOID
+
+/* Define if MPE extensions are included in MPI libraries */
+#undef MPE_USE_EXTENSIONS
+
+/* Define to turn on MPI device debugging code. */
+#undef MPID_DEBUG_ALL
+
+/* Define if Fortran is NOT available */
+#undef MPID_NO_FORTRAN
+
+/* Define if MPID supports ADI collective */
+#undef MPID_USE_ADI_COLLECTIVE
+
+/* Define if device(s) use(s) threads */
+#undef MPID_USE_DEVTHREADS
+
+/* MPI device */
+#undef MPIRUN_DEVICE
+
+/* MPI machine */
+#undef MPIRUN_MACHINE
+
+/* Define if memory debugging should be enabled */
+#undef MPIR_MEMDEBUG
+
+/* Define if object debugging should be enabled */
+#undef MPIR_OBJDEBUG
+
+/* Define if ptr conversion debugging should be enabled */
+#undef MPIR_PTRDEBUG
+
+/* Define if library uses threads */
+#undef MPIR_USE_LIBTHREADS
+
+/* Define if ADI is ADI-2 (required!) */
+#undef MPI_ADI2
+
+/* Define is ADI should maintain a send queue for debugging */
+#undef MPI_KEEP_SEND_QUEUE
+
+/* Define if mpe debug features should NOT be included */
+#undef MPI_NO_MPEDBG
+
+/* Define if C preprocessor does not accept ## for concatenation */
+#undef OLD_STYLE_CPP_CONCAT
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* Define if void * is 8 bytes */
+#undef POINTER_64_BITS
+
+/* The number of processors expected on an SMP. Usually undefined */
+#undef PROCESSOR_COUNT
+
+/* The size of a `double', as computed by sizeof. */
+#undef SIZEOF_DOUBLE
+
+/* The size of a `long double', as computed by sizeof. */
+#undef SIZEOF_LONG_DOUBLE
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* Define if MPI Structs should align on the largest basic element */
+#undef USE_BASIC_ALIGNMENT
+
+/* Define if oldstyle stdarg (one arg va_start) can be used */
+#undef USE_OLDSTYLE_STDARG
+
+/* Define if stdarg can be used */
+#undef USE_STDARG
+
+/* Define if your processor stores words with the most significant byte first
+   (like Motorola and SPARC, unlike Intel and VAX). */
+#undef WORDS_BIGENDIAN
+
+/* Define to 1 if on AIX 3.
+   System headers sometimes define this.
+   We just want to avoid a redefinition error message.  */
+#ifndef _ALL_SOURCE
+# undef _ALL_SOURCE
+#endif
+
+/* Define to 1 if on MINIX. */
+#undef _MINIX
+
+/* Define to 2 if the system does not provide POSIX.1 features except with
+   this defined. */
+#undef _POSIX_1_SOURCE
+
+/* Define to 1 if you need to in order for `stat' and other things to work. */
+#undef _POSIX_SOURCE
+
+/* For Cray, define two word character descriptors in use */
+#undef _TWO_WORD_FCD

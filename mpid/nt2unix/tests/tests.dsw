@@ -1,0 +1,194 @@
+Microsoft Developer Studio Workspace File, Format Version 6.00
+# WARNUNG: DIESE ARBEITSBEREICHSDATEI DARF NICHT BEARBEITET ODER GELÖSCHT WERDEN!
+
+###############################################################################
+
+Project: "pagefault_test"=.\pagefault_test.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "test_architecture"=.\test_architecture.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "test_environment"=.\test_environment.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "test_file_mapping"=.\test_file_mapping.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "test_file_mapping_2"=.\test_file_mapping_2.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "test_file_mapping_3"=.\test_file_mapping_3.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "test_pagesize"=.\test_pagesize.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "test_sockets"=.\test_sockets.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "test_threads"=.\test_threads.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "test_threads_2"=.\test_threads_2.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "test_threads_3"=.\test_threads_3.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "tests"=.\tests.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name test_file_mapping
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name test_file_mapping_2
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name test_file_mapping_3
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name test_pagesize
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name test_sockets
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name pagefault_test
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name test_architecture
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name test_threads
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name test_threads_2
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name test_threads_3
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name test_environment
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Global:
+
+Package=<5>
+{{{
+}}}
+
+Package=<3>
+{{{
+}}}
+
+###############################################################################
+

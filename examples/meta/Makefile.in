@@ -1,0 +1,98 @@
+ALL: default
+##### User configurable options #####
+
+MPIR_HOME   := @MPIR_HOME@
+CC          := @MPICC@
+CLINKER     := @MPICC@
+CCC         := @MPICPLUSPLUS@
+CCLINKER    := $(CCC)
+F77         := @MPIF77@
+FLINKER     := @MPIF77@
+OPTFLAGS    := @OPTFLAGS@
+MPIFDEP     := @MPIFDEP@
+CFLAGS      := @CFLAGS@
+### End User configurable options ###
+
+SHELL := /bin/sh
+
+PROFLIB :=
+#CFLAGS  := $(CFLAGS) 
+CCFLAGS := $(CFLAGS)
+FFLAGS  := $(OPTFLAGS)
+#OPTFLAGS := $(OPTFLAGS) $(CFLAGS)
+# Use LIBS to add any special libraries for C programs
+LIBS := 
+# Use FLIBS to add any special libraries for Fortran programs
+FLIBS := 
+EXECS := hetero metatest coll mpi_speed pingpong unexpected
+OTHEREXECS :=
+
+SUBDIRS := metabench
+
+default: $(EXECS)
+
+#
+# Note that runtests builds the executables as required
+testing: 
+	  -./runtests $(TESTARGS)
+
+all: $(EXECS)
+
+hetero: hetero.o
+	$(CLINKER) $(OPTFLAGS) -o hetero hetero.o $(LIBS)
+
+mpi_speed: mpi_speed.o
+	$(CLINKER) $(OPTFLAGS) -o mpi_speed mpi_speed.o $(LIBS)
+
+metatest: metatest.o
+	$(CLINKER) $(OPTFLAGS) -o metatest metatest.o $(LIBS)
+
+coll: coll.o
+	$(CLINKER) $(OPTFLAGS) -o coll coll.o $(LIBS)
+
+pingpong: pingpong.o
+	$(CLINKER) $(OPTFLAGS) -o pingpong pingpong.o $(LIBS)
+
+
+#
+# Some systems have no test for a symbolic link and return false for
+# a link that exists
+mpif.h: $(MPIR_HOME)/include/mpif.h
+	if test \! -f mpif.h ; then \
+	    rm -f mpif.h ; \
+	    ln -s $(MPIR_HOME)/include/mpif.h . ; \
+	fi
+
+#
+# Make sure that we remove executables for specific architectures
+clean:
+	@for dir in $(SUBDIRS) ;\
+		do \
+			if [ ! -d $$dir -o ! -s $$dir/Makefile ] ; then \
+				continue ; fi ; \
+			echo "   cleaning directory $$dir" ;\
+			(cd $$dir; $(MAKE) clean) ;\
+		done
+	@rm -f *.o *~ PI* $(EXECS) *.out core pt2pt.diff $(OTHEREXECS) \
+		*.trace rdb.* startup.* 
+	@for file in $(EXECS) ; do \
+	   rm -f $$file.sun4 $$file.alpha $$file.IRIX $$file.freebsd ;\
+	done
+
+distclean: clean
+	@for dir in $(SUBDIRS) ;\
+		do \
+			if [ ! -d $$dir -o ! -s $$dir/Makefile ] ; then \
+				continue ; fi ; \
+			$(MAKE) -C $$dir distclean ;\
+		done
+	@rm -f Makefile
+
+.c.o:
+	$(CC) $(CFLAGS) $(OPTFLAGS) -c $*.c
+.f.o:
+	$(F77) $(FFLAGS) -c $*.f
+
+# This is MPICH specific
+#$(MPIR_HOME)/util/mpirun:
+#	(cd $(MPIR_HOME) ; $(MAKE) mpirun )

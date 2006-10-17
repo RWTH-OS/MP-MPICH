@@ -1,0 +1,68 @@
+/* shmem-mpid.h.in.  Generated from configure.in by autoheader.  */
+
+/* Define to 1 if you have the `thread' library (-lthread). */
+#undef HAVE_LIBTHREAD
+
+/* Define to 1 if you have the `mmap' function. */
+#undef HAVE_MMAP
+
+/* Define to 1 if you have the `msem_init' function. */
+#undef HAVE_MSEM_INIT
+
+/* Define to 1 if you have the `mutex_init' function. */
+#undef HAVE_MUTEX_INIT
+
+/* Define to 1 if you have the `semop' function. */
+#undef HAVE_SEMOP
+
+/* Define to 1 if you have the `shmat' function. */
+#undef HAVE_SHMAT
+
+/* Define to 1 if you have the `sigaction' function. */
+#undef HAVE_SIGACTION
+
+/* Define to 1 if you have the `sigmask' function. */
+#undef HAVE_SIGMASK
+
+/* Define to 1 if you have the `signal' function. */
+#undef HAVE_SIGNAL
+
+/* Define to 1 if you have the `sigprocmask' function. */
+#undef HAVE_SIGPROCMASK
+
+/* Define to 1 if you have the `sigset' function. */
+#undef HAVE_SIGSET
+
+/* Define to 1 if you have the `strerror' function. */
+#undef HAVE_STRERROR
+
+/* Define if struct msemaphore rather than msemaphore required */
+#undef MSEMAPHORE_IS_STRUCT
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* Define as the return type of signal handlers (`int' or `void'). */
+#undef RETSIGTYPE
+
+/* Define this is semctl requires a union semun */
+#undef SEMCTL_ARG_UNION
+
+/* Define this if the union semun that is REQUIRED for semctl is NOT defined
+   by ANY system header file */
+#undef SEMUN_UNDEFINED
+
+/* Define this to force a choice of shared memory allocator */
+#undef SHMEM_PICKED

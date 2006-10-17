@@ -1,0 +1,33 @@
+#! /bin/sh
+#set -x
+#
+# This script is invoked from the topdir (not top_srcdir in a VPATH build)
+# by mpich/Makefile to create the mpirun program.  The install script
+# specific to the device must know how to install the resulting mpirun.
+#
+if [ -z "${binbuild_dir}" ] ; then
+    echo "The variable binbuild_dir must contain the directory "
+    echo "in which to install the mpirun programs for ch_gm."
+    exit 1
+fi
+#
+cp util/tstmachines ${binbuild_dir}/tstmachines
+/bin/rm -f ${binbuild_dir}/mpirun
+
+MPIRUNLIST=${srcdir}/mpid/ch_gm/mpirun.ch_gm
+MPIRUNLIST="$MPIRUNLIST ${srcdir}/mpid/ch_gm/mpirun.ch_gm.args"
+MPIRUNLIST="$MPIRUNLIST ${srcdir}/mpid/ch_gm/mpirun.ch_gm.pl"
+for file in util/mpirun.args.in $MPIRUNLIST ; do 
+    bfile=`basename $file .in` 
+    /bin/rm -f ${binbuild_dir}/$bfile
+    if test -f $file ; then 
+      cp $file ${binbuild_dir}/$bfile
+    else 
+      cp ${srcdir}/$file ${binbuild_dir}/$bfile
+    fi
+    chmod 775 ${binbuild_dir}/$bfile
+done
+if [ ! -x ${binbuild_dir}/tarch ] ; then
+    cp ${top_srcdir}/bin/tarch ${binbuild_dir}
+fi
+

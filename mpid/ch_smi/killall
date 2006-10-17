@@ -1,0 +1,30 @@
+#!/bin/csh 
+
+
+#######################################################################
+################################ CLEAN  ###############################
+#######################################################################
+# This part of the shell script removes all pending processes from
+# visualization/Simulations runs from all machines specified in
+# ALL_MACHINES
+#######################################################################
+set ACTPATH = `pwd`
+set MACHINES = `cat machines`
+foreach i ($MACHINES)
+     echo $i
+
+     set MPIID = `rsh $i /usr/bin/ps -ef | grep $ACTPATH/$1| awk '{print $2}'`
+     rsh $i kill -9 $MPIID
+     echo $MPIID
+
+#    set MPIID = `rsh $i /usr/bin/ps -ef | grep \<defunct\>| awk '{print $2}'`
+#    rsh $i kill -9 $MPIID
+#    echo $MPIID
+end
+
+ 
+#/bin/rm core
+
+
+ 
+ 

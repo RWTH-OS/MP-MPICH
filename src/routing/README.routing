@@ -1,0 +1,18 @@
+This directory contains the source code of the routing process.
+The routing process is a MPI-Process which runs on a dedicated node 
+with a network interface.
+
+The application node on the localhost send the messages to other hosts
+via the routing process, using a special ADI device named gateway device.
+
+The routing processes support multiple connections to multiple hosts, 
+therefore each router-node has to server 1 or more tcp-connections.
+At startup time, these connections have to be defined using a special
+input file, which contains the addresses and the ports of the other routers.
+
+It is also important to set up the directions for the tcp connections:
+for each connection a client and a server - side must be defined.
+To avoid  Deadlocks, it is recommended that the client / server
+relationship is defined equal for all routing processes of 2 hosts.
+
+

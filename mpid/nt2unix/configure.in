@@ -1,0 +1,54 @@
+dnl $Id$
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT([nt2unix],[0])
+AC_REVISION($Revision$)
+AC_CONFIG_SRCDIR([src/process.cc])
+
+# Evil hack to get PACKAGE_* out of the header file
+echo > confdefs.h
+
+AC_CONFIG_HEADER(config.h)
+
+AC_CANONICAL_TARGET([])
+AM_INIT_AUTOMAKE([foreign no-define])
+AM_MAINTAINER_MODE
+
+dnl Checks for programs.
+AC_PROG_LIBTOOL
+AC_PROG_CXX
+
+dnl Checks for libraries.
+AC_CHECK_LIB(socket, socket)
+AC_CHECK_LIB(dl,dlopen)
+AC_CHECK_LIB(nsl, gethostbyname)
+
+ACX_PTHREAD([
+    LIBS="$PTHREAD_LIBS $LIBS"
+    CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+    CXXFLAGS="$CXXFLAGS $PTHREAD_CFLAGS"
+    CC="$PTHREAD_CC"],AC_MSG_ERROR([nt2unix needs pthreads!]))
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS([fcntl.h sys/ioctl.h sys/time.h unistd.h stdarg.h])
+AC_HEADER_TIME
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_C_INLINE
+AC_TYPE_OFF_T
+AC_TYPE_SIZE_T
+
+dnl Checks for library functions.
+dnl AC_PROG_GCC_TRADITIONAL
+AC_FUNC_MMAP
+AC_TYPE_SIGNAL
+AC_CHECK_FUNCS(gethostname gettimeofday putenv select socket strerror)
+
+case "$target" in
+*sparc*) CPPFLAGS="${CPPFLAGS} -Dsparc" ;;
+*linux*) CPPFLAGS="${CPPFLAGS} -Dlinux" ;;
+esac
+
+AC_CONFIG_FILES([Makefile lib/Makefile include/Makefile tests/Makefile])
+AC_OUTPUT

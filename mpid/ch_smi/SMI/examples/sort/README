@@ -1,0 +1,67 @@
+This directory contains a small example program: the iterative solution 
+of a Poisson-Equation on a square grid.
+If you try this example on a UNIX-platform with the Argonne MPICH 
+version of MPI, the result can be displayed graphically.
+
+
+********
+* UNIX *
+********
+
+1. Adjust  all path variables and MPI-related issues according to your
+   system installation (considering compiler, libraries (MPI, SMI, 
+   compiler, architecture). Also adjust the OS variable to be either
+   SOLARIS or LINUX
+
+ 
+2. Adjust the GRAPHICS variable according to the MPI-version you use. If
+   you have installed the MPE-extention of ANL that offers some graphic
+   facilities, the variable should be set to
+
+	GRAPHICS = -DGRAPHICS
+
+   otherwise, it should not be defined.
+
+3. Type 'make'
+
+4. Start the program, using the facilities of your MPI-implementation 
+   to do so. For the ANL implementation of MPI, MPICH, the files 
+   'machines' and 'run_script' will support you in doing so:
+
+   a. Change directory to 'run/SOLARIS' or 'run/LINUX' respectively.
+
+   a. Specify the machine names on that the processes shall execute on 
+      in the 'machines' file.
+
+   b. Specify the number of processes that shall be spawned in the 
+      'run_script' script and whether one of the processes shall run 
+      on the initiating machine ('-nolocal' or not).
+
+   c. Type 'run_script' and enjoy !!!
+
+5. To clean-up processes and Unix shared-segments if you terminate an
+   execution with 'Control-C', use the scripts 'mpikill' and
+   'remove_shseg' in the 'tools' directory. Before you can use them, 
+   you must adapt them such that they will find the right processes/segments.
+
+    
+*********
+* WIN32 *
+*********
+
+1. Assuming you use the Microsoft Visual C++ Compiler/Development Environment,
+   this directory contains a suitable project workspace file. Invoke it.
+
+2. Adjust the paths to include files and libraries (e.g. the MPI libraries)
+
+3. Build the executable.
+
+4. Assuming that you use the Argonne MPICH version of MPI for WIN32, the 
+   following steps describe the start-procedure:
+
+   a. 
+
+   b.
+
+   c. 
+

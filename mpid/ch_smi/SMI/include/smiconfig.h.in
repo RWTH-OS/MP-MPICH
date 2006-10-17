@@ -1,0 +1,163 @@
+/* include/smiconfig.h.in.  Generated from configure.in by autoheader.  */
+
+/* Define the type of PCI-SCI adapter to use (only relevant for Scali, Dolphin
+   supports autoprobe) */
+#undef D31x
+
+/* see D31x */
+#undef D32x
+
+/* see D31x */
+#undef D33x
+
+/* Disable the use of threads within SMI */
+#undef DISABLE_THREADS
+
+/* Dolphin SISCI is used */
+#undef DOLPHIN_SISCI
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
+/* Define to 1 if you have the <fcntl.h> header file. */
+#undef HAVE_FCNTL_H
+
+/* Define to 1 if you have the `gettimeofday' function. */
+#undef HAVE_GETTIMEOFDAY
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the `-local' library (-l-local). */
+#undef HAVE_LIB_LOCAL
+
+/* Define to 1 if you have the <limits.h> header file. */
+#undef HAVE_LIMITS_H
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Define if you have POSIX threads libraries and header files. */
+#undef HAVE_PTHREAD
+
+/* Very old SISCI versions have *no* SCIInitialize() */
+#undef HAVE_SCIINITIALIZE
+
+/* define if SCIMemCopy is available */
+#undef HAVE_SCIMEMCOPY
+
+/* define if SCIMemWrite is available */
+#undef HAVE_SCIMEMWRITE
+
+/* Define to 1 if you have the <sisci_api.h> header file. */
+#undef HAVE_SISCI_API_H
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* define if SCI streambuffer queries are available */
+#undef HAVE_STREAM_QUERIES
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/time.h> header file. */
+#undef HAVE_SYS_TIME_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Size of the internal shared memory segments (one per node) */
+#undef INT_SHMSEG_BASESIZE
+
+/* no SISCI is used */
+#undef NO_SISCI
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* Define to necessary symbol if this constant uses a non-standard name on
+   your system. */
+#undef PTHREAD_CREATE_JOINABLE
+
+/* SCALI SISCI is used */
+#undef SCALI_SISCI
+
+/* Define if a SCI device is present */
+#undef SCIDEV_PRESENT
+
+/* Very old SISCI versions have another prototype for SCIStoreBarrier() */
+#undef SCISTOREBARRIER_TWOARGS
+
+/* Where is the SISCI we use? */
+#undef SISCIDIR
+
+/* Which kind of SISCI is used, if any? */
+#undef SISCI_TYPE
+
+/* Enable the use of C++ code (loop scheduling stuff) */
+#undef SMI_NOCPP
+
+/* Historical: this one is always set nowadays. */
+#undef SMI_NONFIXED_MODE
+
+/* SMP only, no SCI */
+#undef SMP
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
+#undef TIME_WITH_SYS_TIME
+
+/* Define to use callback watchdog */
+#undef WD_TYPE_CALLBACK
+
+/* Define to use no watchdog */
+#undef WD_TYPE_NONE
+
+/* Define to use signal watchdog */
+#undef WD_TYPE_SIGNAL
+
+/* Define to use thread watchdog */
+#undef WD_TYPE_THREAD
+
+/* Define to empty if `const' does not conform to ANSI C. */
+#undef const
+
+/* Define to `__inline__' or `__inline' if that's what the C compiler
+   calls it, or to nothing if 'inline' is not supported under any name.  */
+#ifndef __cplusplus
+#undef inline
+#endif
+
+/* Define to `unsigned' if <sys/types.h> does not define. */
+#undef size_t
+
+/* Define to empty if the keyword `volatile' does not work. Warning: valid
+   code using `volatile' can become incorrect without. Disable with care. */
+#undef volatile

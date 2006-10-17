@@ -1,0 +1,9 @@
+cp $1/arg.conf .
+cp $1/machines .
+./smirun memcpy_bench -debug
+echo hit enter when benchmark is done
+read
+rm $1/membench.out*
+mv ~/membench.out* $1
+cp arg.conf $1
+cp machines $1

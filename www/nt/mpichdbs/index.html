@@ -1,0 +1,116 @@
+<html>
+
+<head>
+<title></title>
+</head>
+
+<body>
+
+<p><big><big><big>MPICH Database Server</big></big></big></p>
+
+<p>The database server, mpichdbs.exe, is a program which manages a database to be used by
+mpich applications. </p>
+
+<p>Usage: 
+
+<ul>
+  <li><font face="Courier">mpichdbs</font></li>
+  <li><font face="Courier">mpichdbs -port portnumber</font></li>
+  <li><font face="Courier">mpichdbs -feed filename host port</font></li>
+  <li><font face="Courier">mpichdbs -connect host port id</font></li>
+</ul>
+
+<p><big>Running as a database server:</big></p>
+
+<p><strong>mpichdbs</strong></p>
+
+<p>When run without any arguments, mpchdbs acquires a port and becomes a database server,
+waiting in a loop for incoming tcp connection requests.&nbsp; Remote clients can then
+connect and issue commands to the database.</p>
+
+<p><strong>mpichdbs -port portnumber</strong></p>
+
+<p>This option forces the server to use a specific port.&nbsp; This is useful if
+you want to stop and start the database server without having to change the
+mpirun configuration files or scripts.</p>
+
+<p><big>Running as a database client:</big></p>
+
+<p><strong>mpichdbs -feed filename host port</strong></p>
+
+<p>With this option the program does the following: 
+
+<ol>
+  <li>Connects to the database server already running on <strong>host</strong> and <strong>port</strong>.</li>
+  <li>Parses the mpich job configuration file - <strong>filename</strong>.</li>
+  <li>Puts the data in the database server</li>
+  <li>Disconnects and exits</li>
+</ol>
+
+<p><strong>mpichdbs -connect host port id</strong></p>
+
+<p>With this option the program does the following: 
+
+<ol>
+  <li>Connect to the database server already running on <strong>host</strong> and <strong>port</strong>.</li>
+  <li>Sets itself up to issue commands to the node in the database represented by <strong>id</strong>.</li>
+  <li>Waits for commands to be issued from the command prompt until a quit command is typed.</li>
+  <li>Disconnects from the database and exits.</li>
+</ol>
+
+<p><big><big>MPICH Job configuration file formats:</big></big></p>
+
+<p>1)</p>
+
+<p><font face="Courier">id shortuniquestring</font><br>
+<font face="Courier">[env var1=val1|var2=val2...]</font><br>
+<font face="Courier">nproc numberofprocesses</font></p>
+
+<p>2)</p>
+
+<p><font face="Courier">id shortuniquestring</font><br>
+<font face="Courier">[env var1=val1|var2=val2...]</font><br>
+<font face="Courier">hosts</font><br>
+<font face="Courier">hostA nprocesses</font><br>
+<font face="Courier">hostB nprocesses</font><br>
+<font face="Courier">...</font></p>
+
+<p>The bracketed lines are optional.&nbsp; The second format is similar to the
+configuration files used by MPIRun.&nbsp; In fact the same file can be used by both
+programs because they ignore lines that they don't understand (mpirun ignores the 'id'
+line and mpichdbs ignores the 'exe', 'arg', etc lines).</p>
+
+<p><big><big>Using the database server to launch mpich applications:</big></big></p>
+
+<p>If you have a launcher for your cluster that can provide only a single environment for
+all processes launched then you can use the database server in conjunction with your
+launcher to start mpich applications: 
+
+<ol>
+  <li>Start the database server on HostA: <p>mpichdbs.exe -port 1234&nbsp;&nbsp; </p>
+    <p>This process will hang around until &quot;exit&quot; or &quot;quit&quot; is entered.</p>
+  </li>
+  <li>create the job configuration file: job.txt&nbsp;&nbsp;&nbsp; <p><font face="Courier">id
+    job1 &nbsp;&nbsp;&nbsp; <br>
+    nproc 3</font></p>
+  </li>
+  <li>Send the file to the database: <p>mpichdbs.exe -feed job.txt HostA 1234</p>
+  </li>
+  <li>Create the environment:&nbsp;&nbsp;&nbsp; <p><font face="Courier">MPICH_JOBID=job1&nbsp;&nbsp;&nbsp;
+    <br>
+    MPICH_DBS_HOST=HostA&nbsp;&nbsp;&nbsp; <br>
+    MPICH_DBS_PORT=1234</font></p>
+ <p><font face="Courier">or</font></p>
+ <p><font face="Courier">MPICH_JOBID=job1&nbsp;&nbsp;&nbsp;
+    <br>
+ MPICH_DBS=HostA:1234</font></p>
+  </li>
+  <li>Launch the app.exe processes with your own launcher.</li>
+  <li>Wait for them to finish</li>
+  <li>Send an exit command to mpichdbs.exe started in step 1.</li>
+</ol>
+
+<p>Steps 1 and 7 need only occur once because the database server can be used repeatedly
+for multiple jobs.</p>
+</body>
+</html>

@@ -1,0 +1,50 @@
+# $Id: Makefile.in,v 1.2 2001/01/18 11:23:37 joachim Exp $
+ALL: default
+##### User configurable options #####
+
+SHELL       = /bin/sh
+ARCH        = @ARCH@
+COMM        = @COMM@
+MPIR_HOME   = @MPIR_HOME@
+CC          = @MPICC@
+CLINKER     = $(CC)
+F77         = @MPIF77@
+FLINKER     = $(F77)
+F90         = @MPIF90@
+F90LINKER   = $(F90)      
+CCC         = @MPICPLUSPLUS@
+CCLINKER    = $(CCC)
+AR          = @AR@
+RANLIB      = @RANLIB@
+LOG_LIB     = -mpilog -lm
+PROF_LIB    = -lmpe -lm
+OPTFLAGS    = @OPTFLAGS@
+MPE_DIR     = @MPE_DIR@
+#
+
+### End User configurable options ###
+
+CFLAGS	  = $(OPTFLAGS) 
+CFLAGSMPE = $(CFLAGS) -I$(MPE_DIR) 
+CCFLAGS	  = $(CFLAGS)
+FFLAGS	  = $(OPTFLAGS)
+EXECS	  = sendself asyncperf segv mhostperf usertime
+
+all: $(EXECS)
+
+default: $(EXECS)
+
+sendself: sendself.o
+asyncperf: asyncperf.o
+segv: segv.o
+mhostperf: mhostperf.o
+usertime: usertime.o
+
+.o:
+	$(CLINKER) $(OPTFLAGS) -o $* $*.o -lm
+
+.c.o:
+	$(CC) $(CFLAGS) -c $*.c
+
+clean:
+	/bin/rm -f *.o *~ PI* $(EXECS) 

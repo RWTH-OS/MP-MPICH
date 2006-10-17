@@ -1,0 +1,4 @@
+This is Linux, running on .*
+This is Linux, running on .*
+\[(0|1)\] 100 msg of 1048576 bytes (sent|received) at .[0-9]+\.[0-9]+ MB/s, time .[0-9]+\.[0-9]+ s, latency .[0-9]+\.[0-9]+ ms
+\[(0|1)\] 100 msg of 1048576 bytes (sent|received) at .[0-9]+\.[0-9]+ MB/s, time .[0-9]+\.[0-9]+ s, latency .[0-9]+\.[0-9]+ ms

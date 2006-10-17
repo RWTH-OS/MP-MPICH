@@ -1,0 +1,161 @@
+<html>
+
+<head>
+<title></title>
+</head>
+
+<body>
+
+<p><a href="../index.html">main</a></p>
+
+<p><strong>::UNATTENDED INSTALLATION:</strong></p>
+
+<p>On each machine do the following: </p>
+
+<blockquote>
+  <p>a) Unzip the archive <br>
+  b) Run setup.exe -u flags</p>
+  <blockquote>
+    <p>flags:<br>
+    <strong>Required</strong>:<br>
+    -account domain\username</p>
+    <blockquote>
+      <p>The launcher will run under this account.&nbsp; It is recommended that this user be an
+      administrator on the local machine but it isn't required. </p>
+    </blockquote>
+    <p>-password password<br>
+    <strong>Optional</strong>:<br>
+    -bin, -min, or -src </p>
+    <blockquote>
+      <p>bin: default, binaries only
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      &lt;= run mpi applications<br>
+      min: binaries + include files and libraries
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;= compile and run mpi
+      applications<br>
+      src: bin + min + source code and project files&nbsp; &lt;= compile and run mpi
+      applications and rebuild mpich </p>
+    </blockquote>
+    <p>-home path<br>
+    If the path does not exist it will be created.&nbsp; If this option is not specified, the
+    default path is \mpich </p>
+  </blockquote>
+  <p>Example:</p>
+  <blockquote>
+    <p>setup -u -account mcs\ashton -password a$7B%<br>
+    setup -u -src -account mcs\ashton -password bubba123 -home &quot;c:\Program
+    Files\mpich&quot; </p>
+  </blockquote>
+  <p>c) Wait for setup to finish and then delete the files unzipped from the package. </p>
+</blockquote>
+
+<p>Warning:</p>
+
+<p>Setup.exe is not a console application so the command prompt will return immediately
+but setup will not be finished.&nbsp; If you watch the task manager you will see the
+application running for a while.&nbsp; The CPU usage won't go up very much while it is
+running because it is I/O bound. When setup finishes you will not know whether or not it
+succeeded unless you look at the MPICH registry entry under HKLM::SOFTWARE and see if the
+default value is &quot;Installed&quot;.&nbsp; Also the -np option for MPIRun will not work
+as expected after using the unattended install.&nbsp; You will have to use configuration
+files to launch applications or you will have to set the Hosts value in the registry as
+explained in step 11.3 of the long manual installation below.</p>
+
+<p>&nbsp;</p>
+
+<p><strong>::UNATTENDED UNINSTALLATION:</strong></p>
+
+<p>On each machine do the following: </p>
+
+<blockquote>
+  <p>a) Unzip the archive <br>
+  b) Run setup.exe -u -UnInstall [-KeepSrc]</p>
+  <blockquote>
+    <p>If you use the -KeepSrc flag then the source code will not be deleted, only the dlls
+    and launcher will be removed.</p>
+  </blockquote>
+  <p>c) Wait for setup to finish and then delete the files unzipped from the package. </p>
+  <p>&nbsp;</p>
+</blockquote>
+
+<p><strong>::SHORT MANUAL INSTALLATION: </strong></p>
+
+<p>On each machine do the following: </p>
+
+<blockquote>
+  <p>a) unzip the archive <br>
+  b) run setup.exe <br>
+  c) follow the wizard selecting 'local host only' on the Location page <br>
+  d) Run regedit and set the Hosts value in the MPICH key as described in step 11.3 below. <br>
+  </p>
+</blockquote>
+
+<p>&nbsp;</p>
+
+<p><strong>::LONG MANUAL INSTALLATION: </strong>
+
+<ol>
+  <li>Extract the files from the zipped archive. </li>
+  <li>Create a home directory of your choosing for mpich on each node. </li>
+  <li>Copy mpich.nt.bin.1.0.exe to the home directory on each node. </li>
+  <li>Copy mpich.nt.min.1.0.exe to the home directory on each node that you wish to be able to
+    compile mpi applications from. </li>
+  <li>Copy mpich.nt.src.1.0.exe to the home directory on each node that you wish to contain
+    source code. </li>
+  <li>Run the three(two or one) self-extracting executables you just copied. </li>
+  <li>Move the mpich dlls to the system32 directory <p>[mpich home
+    directory]\lib\mpich_tcp_shm.dll -&gt; winnt\system32\mpich_tcp_shm.dll <br>
+    [mpich home directory]\lib\mpich_tcp_shmd.dll -&gt; winnt\system32\mpich_tcp_shmd.dll <br>
+    [mpich home directory]\lib\pmpich_tcp_shm.dll -&gt; winnt\system32\pmpich_tcp_shm.dll <br>
+    [mpich home directory]\lib\pmpich_tcp_shmd.dll -&gt; winnt\system32\pmpich_tcp_shmd.dll </p>
+  </li>
+  <li>Now you have the necessary files on each node. </li>
+  <li>From the bin subdirectory on each node run the following commands: <ol>
+      <li>MPIJobServer -RegServer </li>
+      <li>MPILaunchServer -Service </li>
+      <li>MPISystemServer -RegServer </li>
+    </ol>
+  </li>
+  <li>Repeat the following on each node: <ol>
+      <li>Run DCOMCNFG </li>
+      <li>Double click MPIJobServer </li>
+      <li>Select the Identity tab </li>
+      <li>Select [This user] and fill in the information for a user that the job server can run
+        as. </li>
+      <li>hit OK twice </li>
+    </ol>
+  </li>
+  <li>Run Regedit (or regedt32) Connect to the registry on each node and do the following: <ol>
+      <li>Navigate to HKEY_LOCAL_MACHINE\SOFTWARE\MPICH (This key was created by running
+        MPIJobServer -RegServer) </li>
+      <li>Add a string value named &quot;Home&quot; and set the value to the directory you created
+        on the node Do not leave a trailing '\' - example: good &quot;c:\mpich&quot;, bad
+        &quot;c:\mpich\&quot; </li>
+      <li>Add a string value named &quot;Hosts&quot; Set this value to a '|' deliminated string of
+        host names where you plan to install mpich excluding the current host<ul>
+          <li>Example: If I am going to install on four machines - NodeA, NodeB, NodeC, NodeD </li>
+          <li>On NodeA &quot;Hosts&quot; -&gt; &quot;NodeB|NodeC|NodeD&quot; </li>
+          <li>On NodeB &quot;Hosts&quot; -&gt; &quot;NodeA|NodeC|NodeD&quot; </li>
+          <li>On NodeC &quot;Hosts&quot; -&gt; &quot;NodeA|NodeB|NodeD&quot; </li>
+          <li>On NodeD &quot;Hosts&quot; -&gt; &quot;NodeA|NodeB|NodeC&quot; </li>
+        </ul>
+      </li>
+      <li>Add a string value named &quot;Include&quot; Set this value to a '|' deliminated string
+        of include directories. This should look like the following:
+        &quot;[home]\include|[home]\mpid\nt_tcp|[home]\mpid\ch2|[home]\mpid\util&quot; where
+        [home] is expanded to the home directory you created. </li>
+    </ol>
+  </li>
+  <li>Delete mpich.nt.bin.1.0.exe, mpich.nt.min.1.0.exe and mpich.nt.src.1.0.exe </li>
+</ol>
+
+<p><a href="../index.html">main</a><br>
+<a href="install.html">Installation</a><br>
+<a href="compiling.html">Compiling an MPI application</a><br>
+<a href="MPIRun.html">MPIRun </a><br>
+<a href="compilingMPICH.html">Re-Building MPICH.NT</a><br>
+<a href="MPILauncher.html">Launcher</a><br>
+<a href="noLauncher.html">Running applications without using the launcher</a><br>
+<a href="subtle.html">Subtle configuration options</a> </p>
+</body>
+</html>

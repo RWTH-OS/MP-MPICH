@@ -1,0 +1,41 @@
+
+This is MP-MPICH, Version 1.3.0, March 2002, an MPI-Implementation for Linux, Solaris and 
+Windows NT/2000/XP/.NET, supporting TCP/IP and the Scalable Coherent Interface (SCI) for 
+high-performance inter-process communication.
+
+For more information (installation & usage), please read doc/mp-mpich_manual.pdf. Also
+take a look at http://www.lfbs.rwth-aachen.de/users/joachim/MP-MPICH for up-to-date
+information.
+
+Bugs should be submitted via the GNATS inteface, accessable from the URL given above.
+
+General comments and license inquiries for commercial exploitation of MP-MPICH should
+be sent to mp-mpich@lfbs.rwth-aachen.de.
+
+Contributors to MP-MPICH are:
+  Martin Pöppe        (MetaMPICH (inofficial))
+  Karsten Scholtyssik (all Windows related stuff)
+  Silke Schuch        (all Windows related stuff, successor of Karsten)
+  Joachim Worringen   (all SCI & Unix related stuff, interface extensions, ...)
+
+and others from the "Lehrstuhl für Betriebssysteme", RWTH Aachen, Germany.
+(http://www.lfbs.rwth-aachen.de)
+
+
+MP-MPICH is based on MPICH by ANL:
+
+		      Portable MPI Model Implementation
+
+        		  Version 1.2.0, December 1999
+
+                                 David Ashton
+                                 Anthony Chan
+				  Bill Gropp
+				  Rusty Lusk
+                                 Debbie Swider
+                                 Rajeev Thakur
+			 Argonne National Laboratory
+
+However, it has developed apart from MPICH, featuring an exented device interface and 
+other features like MPI-2 one-sided communication. Nevertheless, a vast part of 
+MP-MPICH is still MPICH.

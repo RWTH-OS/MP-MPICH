@@ -1,0 +1,335 @@
+#! /bin/sh
+#
+# $Id: makesharedlib,v 1.11 2002/08/15 10:38:36 martin Exp $
+#
+# Simple script to build shared libraries
+#
+
+kind=""
+nolink=0
+islocal=0
+created_shared=0
+Verbose=echo
+setecho=0
+GetPathSpec="no"
+GetPathSep="no"
+# the directory in which the object files are stored if keepobjs = "yes"
+# (these are required if you want to debug the MPICH library which was built
+#  as a shared library)
+objdir=""
+keepobjs="no"
+
+for arg in "$@" ; do
+    case $arg in
+	-lib=*) lib=`echo A$arg | sed -e 's/A-lib=//g'`
+	SHLIBS="$SHLIBS $lib"
+	;;
+	-obj=*) objs=`echo A$arg | sed -e 's/A-obj=//g'`
+	;;
+	# exceptobjs are the files NOT to include in the shared library
+	-exceptobjs=*) except_objs=`echo A$arg | sed -e 's/A-exceptobjs=//g'`
+	;;
+	-kind=*) kind=`echo A$arg | sed -e 's/A-kind=//g'`
+	;;
+	-suffix=*) slsuffix=`echo A$arg | sed -e 's/A-suffix=//g'`
+	;;
+	-cc=*) CC=`echo A$arg | sed -e 's/A-cc=//g'`
+	;;
+	-echo) set -x ;;
+	-noecho) set +x ; setecho=0 ;;
+	-local) nolink=1 ; islocal=1 ;;
+	-link) nolink=0 ;;
+	-verbose) Verbose=echo ;;
+	-noverbose) Verbose=true ;;
+	-getpathspec) GetPathSpec="yes" ;;
+	-getpathsep) GetPathSep="yes" ;;
+	-keepobjs) keepobjs="yes" ;;
+	-nokeepobjs) keepobjs="no" ;;
+	*)
+	echo "Unrecognized option $arg"
+	exit 1
+	;;	
+    esac
+done
+#
+# This allows us to turn echo on by default, but suppress EVERYTHING
+# with -noecho
+if [ "$SHELL_ECHO" = "on" -o $setecho = 1 ] ; then 
+    set -x 
+fi
+#
+# This is the default
+if [ "$kind" = "ignore" ] ; then
+    exit 0
+fi
+
+if [ "$GetPathSpec" = "yes" ] ; then
+    # Return only the path leader used for specifying the location of a shared library
+    case $kind in 
+        gcc) echo "-Wl,-rpath," ;;
+	intel )echo "-Qoption,ld,-rpath=" ;;
+	solaris) echo "-R " ;;
+        rs6000|aix|aix-4) echo "-L" ;; # ???
+        irix|irix64|sgi) echo "-rpath " ;;
+	*) echo "" ;;
+    esac
+    exit 0
+fi
+
+if [ "$GetPathSep" = "yes" ] ; then
+    # Return only the path separator used to concatenate multiple search pathes
+    # for dynamic loading of a shared library
+    case $kind in 
+        gcc) echo "," ;;
+        intel) echo "," ;;
+	solaris) echo ":" ;;
+        rs6000|aix|aix-4) echo "," ;; # ???
+        irix|irix64|sgi) echo "," ;; # ???
+	*) echo "" ;;
+    esac
+    exit 0
+fi
+
+#
+# Put other system-dependent option output here
+#
+# Actually build the library
+if [ -z "$slsuffix" ] ; then
+    slsuffix=so.1.0
+    req_slsuffix=so
+fi
+if [ -z "$req_slsuffix" ] ; then
+    req_slsuffix=$slsuffix
+fi
+if [ -z "$AR" ] ; then
+    AR=ar
+fi
+if [ -z "$LD" ] ; then
+    LD=ld
+fi
+if [ -z "$CLINKER" ] ; then
+    if [ -n "$kind" ] ; then
+        CLINKER=$kind
+    else
+	echo "No C linker or C compiler specified!"
+	exit 1
+    fi
+fi
+if [ -z "$SHLIBS" ] ; then
+    echo "No libraries specified!"
+    exit 1
+fi
+#
+# Check that there are libraries 
+foundlib=0
+for libname in $SHLIBS ; do
+   libnamelocal=`basename $libname`
+   if [ -s $libnamelocal ] ; then 
+       foundlib=1
+       break
+   fi
+done
+if [ -n "$objs" ] ; then
+    foundlib=1
+    for file in $objs ; do
+        if [ ! -s $file ] ; then
+	    foundlib=0
+	    break
+	fi
+    done
+fi
+if [ $foundlib = 0 ] ; then
+    if [ -n "$objs" ] ; then
+        echo "Could not find $objs"
+    else
+        echo "Could not find $SHLIBS"
+    fi
+    exit 1
+fi
+if [ ! -d shared ] ; then 
+    mkdir shared
+    created_shared=1
+fi
+#
+# Note on except_objs:
+# It is NOT an error to fail to find these files; if they aren't present,
+# they are ignored.
+case $kind in
+    gcc|intel)
+    for libname in $SHLIBS ; do
+        $Verbose "Making a shared library of $libname"
+        libbase=`basename $libname .a`
+
+	objdir=$libbase.obj
+        rm -rf $objdir
+        mkdir $objdir
+
+	if [ -z "$objs" ] ; then
+            cd $objdir
+            $AR x ../$libname
+	    if [ -n "$except_objs" ] ; then
+	        rm -f $except_objs
+	    fi
+            #$CLINKER -shared -Wl,-soname,$libbase.$slsuffix \
+	    #	-o ../shared/$libbase.$slsuffix *.o
+	else
+	    cp $objs $objdir
+	    cd $objdir
+	fi
+	OBJECTS="";
+	# (delete later) if  ls "*.o" &> /dev/null ; then OBJECTS="*.o"; fi
+	# (delete later) if  ls "*.a" &> /dev/null ; then OBJECTS="$OBJECTS *.a"; fi
+	OBJECTS=`ls *.o 2>/dev/null`
+	ARCHIVES=`ls *.a 2>/dev/null`
+	OBJECTS="$OBJECTS $ARCHIVES"
+        $CLINKER -shared -o ../shared/$libbase.$slsuffix ${OBJECTS}
+        cd ..
+        # Make a link in the library directory to the shared library in the
+        # shared directory.
+	if [ $islocal = 1 ] ; then
+	    mv shared/$libbase.$slsuffix .
+  	    if [ $slsuffix != $req_slsuffix -a $nolink = 0 ] ; then
+	        ln  -s $libbase.$slsuffix $libbase.$req_slsuffix
+	    fi
+	else
+  	    if [ $slsuffix != $req_slsuffix -a $nolink = 0 ] ; then
+	        (cd shared ; \
+		 rm -f $libbase.$req_slsuffix ; \
+                 ln  -s $libbase.$slsuffix $libbase.$req_slsuffix )
+            fi
+	fi
+	if [ $keepobjs = "no" ] ; then
+	    rm -rf $objdir
+	fi
+    done
+    ;;
+    solaris)
+    for libname in $SHLIBS ; do
+        $Verbose "Making a shared library of $libname"
+	libbase=`basename $libname .a`
+
+	objdir=$libbase.obj
+        rm -rf $objdir
+        mkdir $objdir
+	if [ -z "$objs" ] ; then
+            cd $objdir
+            $AR x ../$libname
+	    if [ -n "$except_objs" ] ; then
+	        rm -f $except_objs
+	    fi
+        else
+	    cp $objs $objdir
+	    cd $objdir
+	fi
+        $LD -G -h $libbase.$slsuffix -o ../shared/$libbase.$slsuffix *.o
+        cd ..
+	if [ $islocal = 1 ] ; then
+	    mv shared/$libbase.$slsuffix .
+  	    if [ $slsuffix != $req_slsuffix  -a $nolink = 0 ] ; then
+		/bin/rm -f $libbase.$req_slsuffix
+	        ln -s $libbase.$slsuffix $libbase.$req_slsuffix
+            fi
+	else
+  	    if [ $slsuffix != $req_slsuffix  -a $nolink = 0 ] ; then
+	        ( cd shared ; /bin/rm -f $libbase.$req_slsuffix; ln -s $libbase.$slsuffix $libbase.$req_slsuffix )
+            fi
+        fi
+	if [ $keepobjs = "no" ] ; then
+	    rm -rf $objdir
+	fi
+    done
+    ;;
+
+    rs6000|aix|aix-4)
+    # Untested
+    for libname in $SHLIBS ; do
+        $Verbose "Making a shared library of $libname"
+	libbase=`basename $libname .a`
+
+	objdir=$libbase.obj
+        rm -rf $objdir
+        mkdir $objdir
+	if [ -z "$objs" ] ; then
+            cd $objdir
+            ar x ../$libname
+	    if [ -n "$except_objs" ] ; then
+	        rm -f $except_objs
+	    fi
+	else
+	    cp $objs $objdir
+	    cd $objdir
+	fi
+        # Another alternative is to export everything.  The following
+        # has been suggested:
+        # ld -o ../shared/$libbase.so *.o -bexpall -bnoentry -G
+	libbase=`basename $libname .a`
+        nm -g -p *.o | awk '{ if ($2 == "T") { print $1 ; }}' | \
+	    sed -e 's/^\.//g' >  $libbase.exp
+        # xlC doesn't work with this!
+        # cc misses the iargc/getarg libraries
+        xlf -r -o ../shared/$libbase.so *.o -bE:$libbase.exp -bM:SRE -bnoentry
+        # create new shared file name
+        newfile="${libbase}shared.a"
+        /bin/rm -f $newfile
+        ar qv $newfile ../shared/$libbase.so
+        /bin/rm -f *.o
+        cd ..
+	if [ $keepobjs = "no" ] ; then
+	    /bin/rm -rf $objdir
+	fi
+    done
+    ;;
+
+    irix|irix64|sgi)
+    for libname in $SHLIBS ; do
+        $Verbose "Making a shared library of $libname"
+	libbase=`basename $libname .a`
+
+	objdir=$libbase.obj
+        rm -rf $objdir
+        mkdir $objdir
+	if [ -z "$objs" ] ; then
+            cd $objdir
+            $AR x ../$libname
+	    if [ -n "$except_objs" ] ; then
+	        rm -f $except_objs
+	    fi
+        else
+	    cp $objs $objdir
+	    cd $objdir
+	fi
+        $CLINKER -elf -no_library_replacement -shared -rdata_shared -all \
+	    -o ../shared/$libbase.$slsuffix *.o
+        cd ..
+	if [ $islocal = 1 ] ; then
+	    mv shared/$libbase.$slsuffix .
+  	    if [ $slsuffix != $req_slsuffix  -a $nolink = 0 ] ; then
+		/bin/rm -f $libbase.$req_slsuffix
+	        ln -s $libbase.$slsuffix $libbase.$req_slsuffix
+            fi
+	else
+  	    if [ $slsuffix != $req_slsuffix  -a $nolink = 0 ] ; then
+	        ( cd shared ; 		/bin/rm -f $libbase.$req_slsuffix; ln -s $libbase.$slsuffix $libbase.$req_slsuffix )
+            fi
+        fi
+	if [ $keepobjs = "no" ] ; then
+	    rm -rf $objdir
+	fi
+    done
+    ;;
+
+    *)	
+    if [ -z "$kind" ] ; then
+        echo "Shared library type not specified"
+    else
+        echo "Unknown shared library type $kind"
+    fi 
+    exit 1
+    ;;
+esac
+# Remove the shared directory if local and we created it
+if [ $islocal = 1 -a $created_shared = 1 ] ; then
+   rm -rf shared
+fi
+
+

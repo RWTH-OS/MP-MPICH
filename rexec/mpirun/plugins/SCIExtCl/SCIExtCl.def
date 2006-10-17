@@ -1,0 +1,10 @@
+; SCIExtCl.def : Declares the module parameters for the DLL.
+
+LIBRARY      "SCIExtCl"
+
+
+EXPORTS
+    ; Explicit exports can go here
+
+_PlgDescription @1
+

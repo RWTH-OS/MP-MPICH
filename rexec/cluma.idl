@@ -1,0 +1,202 @@
+[
+uuid(f3d150be-4b47-11d3-a8e4-00104b755369),
+//uuid(1f55c73e-8d46-11d3-aacf-0000c0010ded),
+version(1.0)
+]
+ 
+#define MAX_SIZE 255
+#define MAX_PATH MAX_SIZE
+#define MAX_USER_NAME_LEN MAX_SIZE
+
+interface cluma
+{
+
+typedef struct {
+	[string, ref] char ServerString[100];
+	// OS Information
+	struct { 
+		unsigned long dwMajorVersion; 
+		unsigned long dwMinorVersion; 
+		unsigned long dwBuildNumber; 
+		unsigned long dwPlatformId; 
+		char szCSDVersion[ 128 ]; 
+	} OS;
+
+	struct {
+		unsigned long dwNumberOfProcessors;
+		unsigned long dwActiveProcessorMask; 
+		unsigned short wProcessorArchitecture; 
+		unsigned short wProcessorLevel; 
+		unsigned short wProcessorRevision; 
+		unsigned long Mhz;
+		unsigned long dwTotalPhysMem;
+	} HW;
+
+	struct {
+		[string,ref] char Hostname_ip[MAX_SIZE];
+		unsigned long NumEntries;
+		[length_is(NumEntries)] unsigned long IPS[100];
+		[length_is(NumEntries)] unsigned long Speeds[100];
+	} IP;
+
+} R_MACHINE_INFO;
+
+
+typedef struct { 
+    unsigned long   cb; 
+    [string,unique] char *lpReserved; 
+    [string,unique] char *lpDesktop; 
+    [string,unique] char *lpTitle; 
+    unsigned long dwX; 
+    unsigned long dwY; 
+    unsigned long dwXSize; 
+    unsigned long dwYSize; 
+    unsigned long dwXCountChars; 
+    unsigned long dwYCountChars; 
+    unsigned long dwFillAttribute; 
+    unsigned long dwFlags; 
+    unsigned short wShowWindow; 
+    unsigned short cbReserved2; 
+    unsigned long lpReserved2; 
+	long hStdInput; 
+    long hStdOutput; 
+    long hStdError;
+	[string,unique] char *lpPassword; 
+} R_STARTUPINFO; 
+
+typedef struct {
+    long hProcess; 
+    long hThread; 
+    unsigned long dwProcessId; 
+    unsigned long dwThreadId; 
+} R_PROCESS_INFORMATION;
+
+/*
+//	PDH counter structure
+typedef struct {
+	int value_int;
+	double value_double;
+	__int64 value_int64bit;
+} R_PDH_COUNTER_VALUES;
+*/
+
+typedef struct {
+	unsigned long ID;
+	[string, ref] char *name;
+} R_PROC_ENUM_T;	
+
+typedef pipe byte byte_pipe;
+
+error_status_t
+	Ping([in] handle_t Binding);
+
+error_status_t
+	R_GetLockStatus([in] handle_t Binding,[out,ref] int *locked,[out,string] char User[MAX_SIZE]);
+
+error_status_t
+	R_LockServer([in] handle_t Binding);
+
+error_status_t
+	R_UnlockServer([in] handle_t Binding);
+
+error_status_t
+	R_GetConsoleUser([in] handle_t Binding,[out, string] char User[MAX_SIZE]);
+
+error_status_t
+	R_GetUserData([in] handle_t Binding, [in, string] char *DllName, 
+	            [in, out,unique,size_is(BufferSize)] byte result[],
+				[in] long BufferSize,
+				[out,ref] long *ResultSize);
+
+[callback] error_status_t 
+	R_GetClientName([out,ref,size_is(*size)] char ClientName[],
+	                [in,out,ref] unsigned long *size);
+
+error_status_t
+	R_Transfer([in] handle_t binding, 
+	           [in,ref] byte_pipe *data
+			  );
+
+error_status_t
+	R_CreateProcess([in] handle_t Binding,
+	[in,unique,string] char *lpApplicationName, 
+ // pointer to name of executable module 
+	[in,unique,string]char *lpCommandLine, 
+ // pointer to command line string 
+ 	[in] unsigned long dwCreationFlags, 
+ // creation flags 
+ 	[in,unique,size_is(EnvSize)] byte *lpEnvironment, 
+ // pointer to new environment block 
+	[in] unsigned long EnvSize,
+ // The number of bytes in the Environment Block
+ 	[in,unique,string] char *lpCurrentDirectory, 
+ // pointer to current directory name 
+ 	[in,ref] R_STARTUPINFO *lpStartupInfo, 
+ // pointer to STARTUPINFO 
+ 	[out, ref] R_PROCESS_INFORMATION *lpProcessInformation
+ // pointer to PROCESS_INFORMATION 
+); 
+
+error_status_t
+	R_TerminateProcess([in] handle_t Binding,[in, ref] R_PROCESS_INFORMATION *lpProcessInformation, [in] unsigned long RetValue);
+
+error_status_t
+	R_GetSystemInfo([in, out, ref] R_MACHINE_INFO *lpMachineInfo);
+
+error_status_t
+	R_GetProcs([in] handle_t Binding);
+
+[callback] error_status_t 
+	R_ProcEnumCallback([in] unsigned long id,
+	                   [in,string,ref] char *name,
+					   [in,string,ref] char *Owner);
+
+
+error_status_t 
+	R_KillProcess([in] handle_t Binding,[in] unsigned long id);
+
+error_status_t 
+	R_ShutDown([in] long restart);
+/*
+error_status_t 
+	R_PutFile([in] handle_t binding,
+		 	  [in, ref] char Filename[MAX_SIZE],
+			  [in, ref] byte_pipe *data
+			 );
+			*/
+
+//://////////////////////////////////////////////////////////////////
+//:	PDH functionality
+//://////////////////////////////////////////////////////////////////
+/*
+//	ascertain percent of system time
+error_status_t
+	R_AscertainProcessorUtilization([in] handle_t Binding, [out, ref] double *utilization);
+
+//	open query for reading system data
+error_status_t
+	R_OpenSystemQuery([in] handle_t Binding);
+
+//	open query for reading data of special process
+error_status_t
+	R_OpenProcessQuery([in] handle_t Binding);
+
+//	collect system data
+error_status_t
+	R_GetSpecifiedSystemData([in] handle_t Binding, int *wanted_counter_values,
+								[in] int number_of_values,
+								[out, ref] R_PDH_COUNTER_VALUES *counter_values);
+
+//	open query for reading process list
+error_status_t
+	R_GetProcesslist([in] handle_t Binding, [in, out, ref] unsigned int *dwInstanceListSize,
+						[out, ref] char *zsInstanceListBuffer,
+						[in, out, ref] unsigned int *dwCounterListSize,
+						[out, ref] char *szCounterListBuffer);
+
+//	open query for reading data of special process
+error_status_t
+	R_GetProcessData([in] handle_t Binding);
+
+*/
+}

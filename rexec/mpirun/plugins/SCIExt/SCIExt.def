@@ -1,0 +1,9 @@
+; SCIExtCl.def : Declares the module parameters for the DLL.
+
+LIBRARY      "SCIExt"
+
+
+EXPORTS
+    ; Explicit exports can go here
+
+_QueryUserData = __QueryUserData@8

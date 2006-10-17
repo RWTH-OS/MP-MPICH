@@ -1,0 +1,244 @@
+#! /bin/sh
+VERBOSE=0    # some more output or not
+NPMAX=4      # maximum number of processes with which each test is run
+NBRRUNS=1    # number of times each test is run with a given number of processes
+MPIRUN=@MPIRUN@ # path of the mpirun script
+
+
+############################### Start of Function PrintUsageInfo ###################################################################
+PrintUsageInfo() {
+	    echo "Usage: $0 [-h] [-v] [-n <max no of procs>] [-r <number of runs>]"
+}
+############################### End of Function PrintUsageInfo ###################################################################
+
+
+############################### Start of Function VerboseOutput ###################################################################
+
+# This function prints out the given message if VERBOSE is equal to 1. VERBOSE must be set to an integer value for the function to
+# work properly.
+# Usage: VerboseOutput <message>
+
+VerboseOutput() {
+	if [ ${VERBOSE} -eq 1 ] ; then
+	    echo "${1}"
+	fi
+}
+
+############################### End of Function VerboseOutput ###################################################################
+
+
+############################### Start of Function VerboseOutputNoNL ###################################################################
+
+# This function prints out the given message if VERBOSE is equal to 1. VERBOSE must be set to an integer value for the function to
+# work properly. This function suppresses the trailing newline.
+# Usage: VerboseOutputNoNL <message>
+
+VerboseOutputNoNL() {
+	if [ ${VERBOSE} -eq 1 ] ; then
+	    echo -n "${1}"
+	fi
+}
+
+############################### End of Function VerboseOutputNoNL ###################################################################
+
+
+############################### Start of Function PrintGlobalConfig ###################################################################
+
+PrintGlobalConfig() {
+    VerboseOutput "Maximum number of processes: ${NPMAX}"
+    VerboseOutput "Number of times each test is run with a given number of processes: ${NBRRUNS}"
+    VerboseOutput "Script used to start the tests: ${MPIRUN}"
+}
+
+############################### End of Function PrintGlobalConfig ###################################################################
+
+
+############################### Start of Function RunTest ###################################################################
+
+# This function runs a sigle test program with an increasing number of processes.
+# For each number of processes, the test is run multiple times. An output is made
+# about which test program is being run, including a message which may contain some information
+# about what is tested by the program. If it shows an error, a file containing the output showing
+# the error is written to the current directory. E.g., if the execution of "testprg" shows an error
+# when being run with 3 processes and the error occurred in run 15, a file testprg-3-15.err contains
+# the error messages afterwards.
+# Usage: RunTest <prg> <npmin> <npmax> <nbrruns> <message>
+# Global variables used: MPIRUN
+
+RunTest() {
+    # initialize local variables with the function parameters
+    prg=$1
+    npmin=$2
+    npmax=$3
+    nbrruns=$4
+    testmsg=$5
+
+    # output
+    echo "*** (${prg}): ${testmsg} ***"
+
+    # loop over number of processes
+    i=${npmin}
+    while [ ${i} -le ${npmax} ] ; do
+
+
+	VerboseOutput "  # Procs: ${i}."
+
+
+	# loop over number of runs
+	j=1
+	while [ ${j} -le ${nbrruns} ] ; do
+
+	    VerboseOutputNoNL "      Run No ${j}: "
+
+	    # do a single run
+	    filename="${prg}-${i}-${j}.err"
+	    ${MPIRUN} -np ${i} ${prg} > ${filename}
+
+	    #
+	    # check output
+	    #
+
+	    err=0
+	    # check if output file contains exactly one line
+	    filelines=$(wc -l ${filename} | awk '{print $1}')
+	    if [ ${filelines} -ne 1 ] ; then
+		err=1
+	    else
+		# check if sole line reads exactly " No Errors"
+		firstline=$(head -n 1 ${filename})
+		if [ x"${firstline}" != x" No Errors" ] ; then
+		    err=1
+		fi
+	    fi
+
+	    # delete output file in case of no error
+	    if [ ${err} -eq 0 ] ; then
+		VerboseOutput "O.k."
+		rm ${filename}
+            else
+		echo "Error! Have a look at ${filename}"
+	    fi
+
+	    let j=${j}+1 # increase number of run
+	done # end of loop over number of runs
+
+        let i=${i}+1 # increase number of processes
+    done # end of loop over number of processes
+}
+
+############################### End of Function RunTest ###################################################################
+
+
+############################### Start of Main Part ###################################################################
+
+# check for command line arguments
+# NOTE: getopts is bash-specific
+while getopts ":hvn:r:" opt ; do
+    case ${opt} in
+	h )
+	    PrintUsageInfo
+	    exit 0 # exit with no error
+	    ;;
+	    
+	v )
+	    VERBOSE=1
+	    ;;
+
+	n )
+	    NPMAX=${OPTARG}
+	    ;;
+
+	r )
+	    NBRRUNS=${OPTARG}
+	    ;;
+
+	\? )
+	    PrintUsageInfo
+	    exit 1 # exit with error because of wrong command line argument
+    esac
+done
+
+PrintGlobalConfig
+
+RunTest barrier 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest bcast 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest bcastvec 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest coll1 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest coll2 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest coll3 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest coll4 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest coll5 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest coll6 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest coll7 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest coll8 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest coll9 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest coll10 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest coll11 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest coll12 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest scantst 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest longuser 1 ${NPMAX} ${NBRRUNS} ""
+
+# the old runtests script suggests to run allredmany several times
+# to try and catch timing/race conditions in managing the flood of
+# one-way messages
+RunTest allredmany 1 ${NPMAX} 20 "run 20 times for each number of processes"
+
+RunTest grouptest 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest allred 1 ${NPMAX} ${NBRRUNS} ""
+
+# the allred_prod test program doesn't work
+# with more than 9 processes
+if [ ${NPMAX} -gt 9 ] ; then
+    RunTest allred_prod 1 9 ${NBRRUNS} "run with at most 9 processes"
+else    
+    RunTest allred_prod 1 ${NPMAX} ${NBRRUNS} "run with at most 9 processes"
+fi
+
+RunTest allred2 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest scatterv 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest scattern 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest redscat 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest allgather 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest allgatherv 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest alltoall 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest alltoallv 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest shortint 2 ${NPMAX} ${NBRRUNS} "run with at least 2 processes"
+
+RunTest bcastbug 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest bcastbug2 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest nbcoll 3 ${NPMAX} ${NBRRUNS} "run with at least 3 processes"
+
+RunTest redtst 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest reduce 1 ${NPMAX} ${NBRRUNS} ""
+
+RunTest scatter 2 ${NPMAX} ${NBRRUNS} "run with at least 2 processes"
+
+############################### End of Main Part ###################################################################

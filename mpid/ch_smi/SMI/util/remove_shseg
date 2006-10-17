@@ -1,0 +1,30 @@
+#!/bin/sh
+#############################################################
+# This script removes all (!) Unix shared-memory segments
+# on the machine on that it was started. 
+# If a SMI-programm terminates without calling SMI_Finalize,
+# such segments remain on the system.
+#############################################################
+
+
+
+#########################
+# The SOLARIS Version 
+#########################
+
+shseg=`ipcs | cut -b1-8 | grep m\ |cut -b2-8`
+for i in $shseg
+do
+  ipcrm -m $i
+done
+
+
+#########################
+# The LINUX Version 
+#########################
+
+#shseg=`ipcs | cut -b1-8 `
+#for i in $shseg
+#do
+#  ipcrm shm $i
+#done

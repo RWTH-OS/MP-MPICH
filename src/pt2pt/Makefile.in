@@ -1,0 +1,138 @@
+#
+#  (C) 1993 by Argonne National Laboratory and Mississipi State University.
+#      All rights reserved.  See COPYRIGHT in top-level directory.
+#
+
+CC          = @CC@
+F77         = @F77@
+AR          = @AR@
+RANLIB      = @RANLIB@
+OPTFLAGS    = @OPTFLAGS@
+OPTFLAGSC   = @OPTFLAGSC@
+prefix      = @prefix@
+top_srcdir  = @top_srcdir@
+srcdir      = @srcdir@
+libbuild_dir = @libbuild_dir@
+ARCH        = @ARCH@
+
+DEFS        = -DMPI_@ARCH@ -DMPIR_LIB_CODE @DEFS@ @DEV_DEFS@ ${MPIPROFILE} -I. -I${srcdir} @mpich_includes@
+CFLAGS      = @CFLAGS@
+
+SHELL       = /bin/sh
+
+@VPATH@
+
+.SUFFIXES:
+.SUFFIXES: .o .c .f
+
+LIBS = ${libbuild_dir}/lib@MPILIBNAME@.a
+
+MPI_CSOURCES = mperror.c isend.c irecv.c wait.c test.c \
+               address.c cancel.c commreq_free.c probe.c \
+               start.c testany.c waitall.c send.c recv.c \
+	       sendrecv.c iprobe.c testall.c waitany.c create_recv.c \
+	       create_send.c sendrecv_rep.c getcount.c \
+	       bsend.c ssend.c rsend.c bufattach.c buffree.c \
+	       ibsend.c issend.c irsend.c \
+	       waitsome.c testsome.c testcancel.c bsend_init.c \
+	       rsend_init.c ssend_init.c sendutil.c \
+	       startall.c \
+	       type_commit.c type_contig.c \
+	       type_extent.c type_free.c type_hind.c \
+	       type_hvec.c type_ind.c type_lb.c type_size.c \
+	       type_struct.c type_ub.c type_util.c \
+	       type_vec.c getelements.c pack_size.c pack.c unpack.c \
+               type_ff.c
+
+# All done by hand now
+MPI_TSOURCES =
+
+MPI_WSOURCES = isendf.c irecvf.c waitf.c testf.c \
+	       addressf.c cancelf.c commreqfreef.c probef.c \
+	       startf.c testanyf.c waitallf.c sendf.c recvf.c \
+	       sendrecvf.c iprobef.c testallf.c waitanyf.c create_recvf.c \
+	       create_sendf.c sendrecvrepf.c getcountf.c \
+	       bsendf.c ssendf.c rsendf.c bufattachf.c buffreef.c \
+	       ibsendf.c issendf.c irsendf.c waitsomef.c testsomef.c \
+	       testcancelf.c bsend_initf.c rsend_initf.c ssend_initf.c \
+	       startallf.c \
+	       type_commitf.c type_contigf.c \
+	       type_extentf.c type_freef.c type_hindf.c \
+	       type_hvecf.c type_indf.c type_lbf.c type_sizef.c \
+	       type_structf.c type_ubf.c type_vecf.c getelementsf.c \
+	       pack_sizef.c packf.c unpackf.c
+
+
+MPI_COBJECTS = isend.o irecv.o wait.o test.o mperror.o \
+               address.o cancel.o commreq_free.o probe.o \
+               start.o testany.o waitall.o send.o recv.o \
+	       sendrecv.o iprobe.o testall.o waitany.o create_recv.o \
+	       create_send.o sendrecv_rep.o getcount.o \
+	       bsend.o ssend.o rsend.o bufattach.o buffree.o \
+	       ibsend.o issend.o irsend.o waitsome.o testsome.o \
+	       testcancel.o bsend_init.o rsend_init.o ssend_init.o \
+	       startall.o sendutil.o \
+	       type_commit.o type_contig.o \
+	       type_extent.o type_free.o type_hind.o \
+	       type_hvec.o type_ind.o type_lb.o type_size.o \
+	       type_struct.o type_ub.o type_util.o \
+	       type_vec.o getelements.o pack_size.o pack.o unpack.o \
+               type_ff.o
+
+MPI_WOBJECTS = isendf.o irecvf.o waitf.o testf.o \
+	       addressf.o cancelf.o commreqfreef.o probef.o \
+	       startf.o testanyf.o waitallf.o sendf.o recvf.o \
+	       sendrecvf.o iprobef.o testallf.o waitanyf.o create_recvf.o \
+	       create_sendf.o sendrecvrepf.o getcountf.o \
+	       bsendf.o ssendf.o rsendf.o bufattachf.o buffreef.o \
+	       ibsendf.o issendf.o irsendf.o waitsomef.o testsomef.o \
+	       testcancelf.o bsend_initf.o rsend_initf.o ssend_initf.o \
+	       startallf.o \
+	       type_commitf.o type_contigf.o \
+	       type_extentf.o type_freef.o type_hindf.o \
+	       type_hvecf.o type_indf.o type_lbf.o type_sizef.o \
+	       type_structf.o type_ubf.o type_vecf.o getelementsf.o \
+	       pack_sizef.o packf.o unpackf.o
+
+MPI_SOURCES = ${MPI_CSOURCES} ${MPI_WSOURCES}
+MPI_OBJECTS = ${MPI_COBJECTS} ${MPI_WOBJECTS}
+
+default: ${libbuild_dir}/lib@MPILIBNAME@.a
+
+# default_all is the same as default, but without the RANLIB.  This
+# can speed up the build (ranlibs can take a LONG time).  profile_all 
+# is the same, but for the profile library
+default_all: ${MPI_OBJECTS}
+	${AR} ${libbuild_dir}/lib@MPILIBNAME@.a $?
+profile_all: ${MPI_OBJECTS}
+	${AR} ${libbuild_dir}/libp@MPILIBNAME@.a $?
+wrapperlib: ${MPI_WOBJECTS}
+	${AR} ${libbuild_dir}/libf@MPILIBNAME@.a $?	
+
+default_conly: ${MPI_COBJECTS}
+	${AR} ${libbuild_dir}/lib@MPILIBNAME@.a $?
+	${RANLIB} ${libbuild_dir}/lib@MPILIBNAME@.a
+
+profile: ${libbuild_dir}/libp@MPILIBNAME@.a
+
+source_names:
+	@echo ${MPI_CSOURCES}
+
+.c.o:
+	${CC} ${DEFS} ${INCLUDES} ${CFLAGS} ${OPTFLAGSC} ${OPTFLAGS} -c $<
+
+${libbuild_dir}/lib@MPILIBNAME@.a: ${MPI_OBJECTS} 
+	${AR} $@ $?
+	${RANLIB} $@
+
+${libbuild_dir}/libp@MPILIBNAME@: ${MPI_OBJECTS} 
+	${AR} $@ $?
+	${RANLIB} $@
+
+# We need to clean the srcdir of any .o files because they can confuse the
+# VPATH build process
+clean:
+	@/bin/rm -f *.o *~ ${srcdir}/*.o
+
+distclean:
+	-rm -f Makefile

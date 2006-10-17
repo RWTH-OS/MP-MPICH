@@ -1,0 +1,9 @@
+; SVMlib.def : Declares the module parameters for the DLL.
+
+LIBRARY      "ch_wsock"
+
+
+EXPORTS
+    ; Explicit exports can go here
+
+_PlgDescription @1

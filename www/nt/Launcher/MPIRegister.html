@@ -1,0 +1,44 @@
+<html>
+
+<head>
+<title></title>
+</head>
+
+<body>
+
+<p><a href="index.html">main</a></p>
+
+<p><big><big><big>MPIRegister.exe</big></big></big></p>
+
+<p>Use MPIRegister.exe to encrypt an account and password into the registry for the
+current user. It is in the [MPICH Launcher Home]\bin directory.&nbsp; This information is
+used by MPIRun.exe to launch applications in the context of that user.&nbsp; If you don't
+use mpiregister then mpirun will prompt for an account and password each time it is
+invoked. </p>
+
+<p>Usage: 
+
+<ul>
+  <li><font face="Courier">MPIRegister</font></li>
+  <li><font face="Courier">MPIRegister -remove</font></li>
+</ul>
+
+<p>First it prompts for an account. Enter the name in the form [Domain\]Account where the
+domain name is optional (ie mcs\ashton or ashton).&nbsp; Then it prompts for the password
+twice.&nbsp; Finally it asks if you wish to make the action persistent.&nbsp; If you say
+yes then then data will be saved to the hard drive.&nbsp; If you say no then the data will
+only remain in memory.&nbsp; This means that you may run mpirun various times and it will
+not prompt you for an account and password.&nbsp; But, when you re-boot the machine and
+use mpirun again, it will prompt for an account and password.</p>
+
+<p>-remove</p>
+
+<p>This will delete the information from the registry.</p>
+
+<p><a href="index.html">main</a><br>
+<a href="MPIRun.html">MPIRun</a> <br>
+MPIRegister<br>
+<a href="MPIConfig.html">MPIConfig</a><br>
+</p>
+</body>
+</html>

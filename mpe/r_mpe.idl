@@ -1,0 +1,125 @@
+/*
+    $Id: r_mpe.idl,v 1.6 2000/11/14 08:57:31 karsten Exp $
+*/
+[
+uuid(5a3c0ad6-7d85-11d4-b07f-00104b755369),
+version(1.0)
+]
+interface R_MPE
+{
+typedef [context_handle] void * PCONTEXT_HANDLE_TYPE;
+typedef [ref] PCONTEXT_HANDLE_TYPE * PPCONTEXT_HANDLE_TYPE;
+
+typedef unsigned int Color_type;
+
+typedef enum{REQU_POINT,REQU_LINE,REQU_RECT,REQU_CIRCLE} Request_type;
+
+typedef struct {
+	int Palette;
+	unsigned long Maxcolors;
+} DisplayInfo;
+
+typedef struct {
+  int x, y;
+  Color_type c;
+} Point_type;
+
+typedef struct {
+	int x1,y1,x2,y2;
+	Color_type c;
+} Line_type;
+ 
+typedef struct {
+	int x1,y1,x2,y2;
+	Color_type c;
+	unsigned int fill;
+} Rect_type;
+
+typedef struct {
+	int x,y,radius;
+	Color_type c;
+	unsigned int fill;
+} Circle_type;
+
+typedef struct {
+	Request_type type;
+	[switch_type(Request_type),switch_is(type)] union {
+		[case(REQU_POINT)]
+			Point_type point;
+		[case(REQU_LINE)]
+			Line_type line;
+		[case(REQU_RECT)]
+			Rect_type rect;
+		[case(REQU_CIRCLE)]
+			Circle_type circle;
+		[default]
+			;
+	} data;
+} Graphic_request;
+
+error_status_t Ping([in] handle_t Binding);
+
+error_status_t R_Create_window( [in] handle_t Binding, [out] PPCONTEXT_HANDLE_TYPE pphContext,
+								[in] int x, [in] int y, [in] int w,[in] int h,
+								[in, string,ref] char *title,
+								[out,ref] int *WindowId,[out,ref] DisplayInfo *info);
+
+error_status_t R_Connect_window([in] handle_t Binding, [out] PPCONTEXT_HANDLE_TYPE pphContext,
+		                        [in] int WindowId,[out,ref] DisplayInfo *info);
+
+error_status_t R_Draw([in] PPCONTEXT_HANDLE_TYPE pphContext, 
+					  [in, size_is(nr), length_is(nr), ref] Graphic_request *requs, 
+                      [in] int nr);
+
+error_status_t R_Draw_string([in] PPCONTEXT_HANDLE_TYPE pphContext, 
+							 [in] int x, [in] int y, 
+                             [in] Color_type color, 
+							 [in, string] char * txt);
+
+
+error_status_t R_Close_window([in,out] PPCONTEXT_HANDLE_TYPE pphContext);
+
+
+error_status_t R_Draw_logic([in] PPCONTEXT_HANDLE_TYPE pphContext, [in] int ROp);
+
+error_status_t R_Line_thickness([in] PPCONTEXT_HANDLE_TYPE pphContext, [in] int num_pixels);
+
+error_status_t R_Draw_dashes([in] PPCONTEXT_HANDLE_TYPE pphContext, [in] int dashlen);
+
+error_status_t R_Dash_offset([in] PPCONTEXT_HANDLE_TYPE pphContext, [in] int offset);
+
+
+error_status_t R_Get_DIB([in] PPCONTEXT_HANDLE_TYPE pphContext,
+						   [out,ref] unsigned long *PixelStart, 
+						   [in,out,unique,size_is(*size),length_is(*allocated)] byte *image,
+						   [in,out,ref] unsigned long *size,
+						   [in,out,ref] unsigned long *allocated);
+
+
+error_status_t R_Save_bitmap([in] PPCONTEXT_HANDLE_TYPE pphContext,
+                             [in, string, ref] char *Filename);
+
+error_status_t R_Set_colortable([in] PPCONTEXT_HANDLE_TYPE pphContext,
+								[in] unsigned long NumColors,
+								[in,ref,size_is(NumColors),length_is(NumColors)] unsigned long *colors);
+
+error_status_t R_Add_color([in] PPCONTEXT_HANDLE_TYPE pphContext,[in] unsigned long color);
+/* xmouse */
+error_status_t R_Get_mouse_press([in] PPCONTEXT_HANDLE_TYPE pphContext, 
+								 [out,ref] int *x, 
+                                 [out,ref] int *y, 
+                                 [out,ref] int *Button);
+
+error_status_t R_Iget_mouse_press([in] PPCONTEXT_HANDLE_TYPE pphContext,
+                                  [out,ref] int *x, [out,ref] int *y, 
+                                  [out,ref] int *Button, [out,ref] int *was_pressed);
+
+
+error_status_t R_Get_drag_region([in] PPCONTEXT_HANDLE_TYPE pphContext, 
+								 [in] int dragVisual,[in] double ratio,
+								 [out,ref] int *x1, [out,ref] int *y1, 
+								 [out,ref] int *x2, [out,ref] int *y2);
+
+
+}
+

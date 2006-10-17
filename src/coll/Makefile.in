@@ -1,0 +1,151 @@
+#
+#  (C) 1993 by Argonne National Laboratory and Mississipi State University.
+#      All rights reserved.  See COPYRIGHT in top-level directory.
+#
+
+CC          = @CC@
+F77         = @F77@
+AR          = @AR@
+GCC         = @GCC@
+NASM        = @NASM@
+RANLIB      = @RANLIB@
+OPTFLAGS    = @OPTFLAGS@
+OPTFLAGSC   = @OPTFLAGSC@
+prefix      = @prefix@
+top_srcdir  = @top_srcdir@
+srcdir      = @srcdir@
+libbuild_dir = @libbuild_dir@
+
+ARCH        = @ARCH@
+DEFS        = -DMPIR_LIB_CODE @DEFS@ ${MPIPROFILE} -I. -I${srcdir} @mpich_includes@ -DMPI_@ARCH@
+CFLAGS      = @CFLAGS@ 
+
+SHELL       = /bin/sh
+
+@VPATH@
+
+.SUFFIXES:
+.SUFFIXES: .o .c .f .s
+
+LIBS = ${libbuild_dir}/lib@MPILIBNAME@.a
+
+MPI_CSOURCES = barrier.c bcast.c gather.c gatherv.c scatter.c scatterv.c \
+               allgather.c allgatherv.c alltoall.c alltoallv.c reduce.c \
+               allreduce.c red_scat.c scan.c global_ops.c \
+	       opcreate.c opfree.c oputil.c intra_fns.c inter_fns.c \
+	       intra_scan.c
+
+
+MPI_TSOURCES = global_ops.c 
+
+MPI_WSOURCES = barrierf.c bcastf.c gatherf.c gathervf.c scatterf.c scattervf.c\
+               allgatherf.c allgathervf.c alltoallf.c alltoallvf.c reducef.c \
+               allreducef.c red_scatf.c scanf.c global_opsf.c \
+	       opcreatef.c opfreef.c
+
+MPI_COBJECTS = barrier.o bcast.o gather.o gatherv.o scatter.o scatterv.o \
+               allgather.o allgatherv.o alltoall.o alltoallv.o reduce.o \
+               allreduce.o red_scat.o scan.o global_ops.o \
+	       opcreate.o opfree.o oputil.o intra_fns.o inter_fns.o \
+	       intra_scan.o
+
+MPI_WOBJECTS = barrierf.o bcastf.o gatherf.o gathervf.o scatterf.o scattervf.o\
+               allgatherf.o allgathervf.o alltoallf.o alltoallvf.o reducef.o \
+               allreducef.o red_scatf.o scanf.o \
+	       opcreatef.o opfreef.o
+
+MPI_AOBJECTS = 
+ifeq ($(ARCH),LINUX)
+MPI_AOBJECTS = test_cpu.o
+endif
+ifeq ($(ARCH),solaris86)
+MPI_AOBJECTS = test_cpu.o mmx_ops_gcc.o
+endif
+
+# check if system is ready for mmx and sse
+# mmx implementation needs gcc inline assembler
+# sse implementation need nasm assembler (intel syntax)
+ifeq ($(ARCH),LINUX)
+ifeq ($(GCC), yes)
+MPI_CSOURCES += mmx_ops_gcc.c x86_ops.c
+MPI_COBJECTS += mmx_ops_gcc.o x86_ops.o
+ifneq ($(NASM),)
+MPI_CSOURCES += sse_ops_gcc.c
+MPI_COBJECTS += sse_ops_gcc.o sse_ops_nasm.o
+else
+CFLAGS += -DNOSSE
+endif
+endif
+endif
+
+ifeq ($(ARCH),solaris86)
+ifeq ($(GCC), yes)
+MPI_CSOURCES += x86_ops.c
+MPI_COBJECTS += x86_ops.o
+ifneq ($(NASM),)
+MPI_CSOURCES += sse_ops_gcc.c
+MPI_COBJECTS += sse_ops_gcc.o sse_ops_nasm.o
+else
+CFLAGS += -DNOSSE
+endif
+endif
+endif
+
+
+default: ${libbuild_dir}/lib@MPILIBNAME@.a
+
+MPI_SOURCES = ${MPI_CSOURCES} ${MPI_WSOURCES} 
+MPI_OBJECTS = ${MPI_COBJECTS} ${MPI_WOBJECTS} ${MPI_AOBJECTS}
+
+profile: ${libbuild_dir}/libp@MPILIBNAME@.a
+
+# default_all is the same as default, but without the RANLIB.  This
+# can speed up the build (ranlibs can take a LONG time).  profile_all 
+# is the same, but for the profile library
+default_all: ${MPI_OBJECTS}
+	${AR} ${libbuild_dir}/lib@MPILIBNAME@.a $?
+profile_all: ${MPI_OBJECTS}
+	${AR} ${libbuild_dir}/libp@MPILIBNAME@.a $?
+wrapperlib: ${MPI_WOBJECTS}
+	${AR} ${libbuild_dir}/libf@MPILIBNAME@.a $?	
+
+source_names:
+	@echo ${MPI_CSOURCES}
+
+# this needs to be GCC because of the inline assembly (the as needs to understand MMX!)
+mmx_ops_gcc.o: mmx_ops_gcc.s
+	as mmx_ops_gcc.s -o mmx_ops_gcc.o
+mmx_ops_gcc.s: mmx_ops_gcc.c
+	gcc -w -fpic -S ${DEFS} ${INCLUDES} ${CFLAGS} ${OPTFLAGSC} -c $<
+sse_ops_gcc.o: sse_ops_gcc.c
+	gcc -w -fpic ${DEFS} ${INCLUDES} ${CFLAGS} ${OPTFLAGSC} -c $<
+
+# only NASM understands SSE opcodes...
+sse_ops_nasm.o: sse_ops_nasm.s
+	$(NASM) -f elf sse_ops_nasm.s -o sse_ops_nasm.o
+
+.c.o:
+	${CC} ${DEFS} ${INCLUDES} ${CFLAGS} ${OPTFLAGSC} ${OPTFLAGS} -c $<
+
+.s.o:
+	as $*.s -o $*.o
+
+${libbuild_dir}/lib@MPILIBNAME@.a: ${MPI_OBJECTS} 
+	${AR} $@ $?
+	${RANLIB} $@
+
+${libbuild_dir}/libp@MPILIBNAME@.a: ${MPI_OBJECTS} 
+	${AR} $@ $?
+	${RANLIB} $@
+
+${libbuild_dir}/libf@MPILIBNAME@.a: ${MPI_WOBJECTS} 
+	${AR} $@ $?
+	${RANLIB} $@
+
+# We need to clean the srcdir of any .o files because they can confuse the
+# VPATH build process
+clean:
+	@/bin/rm -f mmx_ops_gcc.s *.o *~ ${srcdir}/*.o
+
+distclean:
+	-rm -f Makefile

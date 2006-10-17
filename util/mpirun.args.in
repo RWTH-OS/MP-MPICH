@@ -1,0 +1,1030 @@
+#!/bin/bash
+#
+# $Id$
+#
+MEIKO_RUN=prun
+SP1_RUN=/usr/lpp/euih/eui/cotb0
+jobid=$$
+progname=
+fake_progname=
+np=0
+ppn=0
+arch=
+default_arch='@DEFAULT_ARCH@'
+# machine='@DEFAULT_MACHINE@'
+default_device='@DEFAULT_DEVICE@'
+machine='@DEFAULT_DEVICE@'
+execer_machine=1
+cmdLineArgs=
+cmdLineArgsExecer=
+cmdline=
+CAC=
+#use_execer=0
+mpirun_verbose=0
+nolocal=0
+#leavePGFile=0
+#p4pgfile=
+globuspgfile=
+globusdbfile=
+globusargs=
+#p4ssport=
+just_testing=0
+machineFile=
+if [ -n "$PBS_NODEFILE" ] ; then
+  machineFile=$PBS_NODEFILE
+fi
+debugger=""
+debugprocs=""
+breakpoint="MPI_Init"
+commandfile=""
+rmcommandfile=""
+rshcmd="@RSHCOMMAND@"
+mvhome=0
+mvback=
+workingdir=
+narch=0
+stdinfile=
+stdoutfile=
+stderrfile=
+batch=1
+ld_lib_path=
+#p4wd=""
+easy_jid=
+keepsendQ=
+Show=eval
+# options for ch_usock
+port_nbr=""
+port_range=""
+master_ip_addr=""
+# Option to support the UNICORE scheduler with some special features
+unicore=0
+# MetaMPICH options
+# Name of the MetaMPICH configuration file
+metacfg=""
+metaparam=0
+usemeta=0
+META_MULTI_DEVICE="@META_MULTI_DEVICE@"
+Machines="meta paragon p4 sp1 ibmspx anlspx sgi_mp ipsc860 inteldelta cray_t3d execer smp symm_ptx"
+# options for ch_smi
+xterm=0
+console=0
+devFile=""
+pager=0
+nodes=""
+smidebugon=0
+smitraceon=0
+smistaton=0
+use_smp=0
+# skipproc is an internal option for easier debugger start
+skipproc=""
+watchdog="yes"
+# Usage limits
+max_time=15
+max_mem=32
+
+#variablie for environment passings to the remote processes
+MPIRUNHOST=`hostname`
+MPIJOBENV="MPIRUNPID=$MPIRUNHOST.$$"
+
+#variables for papi-performace tools
+MPIPAPI=false
+PAPI_FILE=""
+PAPI_NOGUI=""
+
+prefix="@prefix@"
+bindir="@bindir@"
+includedir="@includedir@"
+libdir="@libdir@"
+sharedlib_dir="@sharedlib_dir@"
+datadir="@datadir@"
+# $scriptdir is clean if it comes from one of the other mpi* scripts, $bindir may not,
+# so we try to sanitize it:
+rundir="`pwd`"
+cd "$bindir"
+bindir="`pwd`"
+cd "$rundir"
+if [ "$scriptdir" = "$bindir" ]
+then
+	installed="yes"
+else
+	installed="no"
+	MPIR_HOME="`dirname $scriptdir`"
+	bindir="$MPIR_HOME/bin"
+	includedir="$MPIR_HOME/include"
+	libdir="$MPIR_HOME/include"
+	sharedlib_dir="$MPIR_HOME/lib/shared"
+	datadir="$MPIR_HOME/util"
+fi
+
+# Setup device's default variables
+if [ -f $scriptdir/mpirun.$default_device.args ] ; then
+    arg="--INIT"
+    . $scriptdir/mpirun.$default_device.args
+fi
+
+#
+# polling_mode is for systems that can select between polling and 
+# interrupt-driven operation.  Currently, only IBM POE is so supported
+# (TMC CMMD has some support for this choice of mode, but we do not use it.)
+polling_mode=1
+#
+PrintHelp() {
+#
+# If you change this, make the corresponding changes in README so that
+# the man pages are updated.
+#
+if test "$0" = "PrintHelp" ; then
+    mpirun_arg=$scriptdir/mpirun
+else
+    mpirun_arg=$0
+fi
+#
+cat <<EOF
+mpirun [mpirun_options...] <progname> [options...]
+
+  mpirun_options:
+    -arch <architecture>
+            specify the architecture (must have matching machines.<arch>
+            file in ${scriptdir}/machines) if using the execer
+    -h      This help
+    -machine <machine name>
+            use startup procedure for <machine name>
+            Currently supported:
+EOF
+for machine in $Machines ; do
+  echo "              $machine"
+done
+cat <<EOF
+
+    -machinefile <machine-file name>
+            Take the list of possible machines to run on from the
+            file <machine-file name>.  This is a list of all available
+            machines; use -np <np> to request a specific number of machines.
+    -np <np>
+            specify the number of processes to run
+    -ppn <ppn>
+            specify the number of processes per node 
+    -stdin filename
+            Use filename as the standard input for the program.  This
+            is needed for programs that must be run as batch jobs, such
+            as some IBM SP systems and Intel Paragons using NQS (see 
+            -paragontype below).
+	    use 
+                  -stdin /dev/null 
+            if there is no input and you intend to run the program in the
+            background.  An alternate is to redirect standard input from
+            /dev/null, as in 
+                  mpirun -np 4 a.out < /dev/null
+    -t | -testing | -show
+	    Testing - do not actually run, just print what would be
+            executed
+    -v | -verbose
+	    Verbose - throw in some comments
+    -V | -Verbose
+	    Very verbose - throw in a lot of comments
+    -dbx all | <rank | host,...,rank | host>
+            Start the specified processes under dbx 
+    -gdb all | <rank | host,...,rank | host>
+            Start the specified processes under gdb 
+    -ddd all | <rank | host,...,rank | host>   
+            Start the specified processes under ddd
+    -xxgdb all | <rank | host,...,rank | host>   
+            Start the specified processes under xxgdb
+    -tv     Start under totalview
+    -break  <specification>
+	    Set a breakpoint at the location specified. The syntax of the
+	    specification needs to match the selected debugger.
+    -ksq    Keep the send queue. This is useful if you expect later
+            to attach totalview to the running (or deadlocked) job, and
+	    want to see the send queues. (Normally they are not maintained 
+            in a way which is visible to the debugger).
+    -ld_lib_path <path>
+            Adds <path> at the beginning of LD_LIBRARY_PATH before executing
+            the executable (implemented for ch_smi and ch_shmem).
+
+Special options for the ch_usock device
+    -port <nbr>
+	    use port number <nbr> for synchronization of processes; if this option
+	    is not given, a default port numer is used
+
+Special options or different meaning of existing options for SCI-conected cluster 
+(using the ch_smi device):
+
+    -console all | <rank | host,...,rank | host>
+    -pager
+	 pipe stdout and stderr to a pager (onyl valid if -xterm is used)
+    -np or -n
+         the behaviour of this option is slightly different in that, if a
+         machine-file is given, the number of processes equals the number
+         of hosts therein in case -np is not specified
+    -nodes <hostname{,hostname}> or -hosts <hostname{,hostname}>
+	 Supply the hostnames of the nodes to run the processes on via a comma-
+	 separated list on the commandline instead of the machinefile. 
+
+	 If there are less hosts provided than processes requested, 
+	 the processes are scheduled in a round-robin style manner.	 
+    -wd | -workingdir
+         Specify a working directory. Default is the directory in which the
+         executable is located.
+    -smp 
+	 allow SMP configurations of the machine file (more than 1 process of
+	 an application running on one node). Older SCI drivers do not allow
+	 such a configuration!
+    -pager
+	 pipe stdout and stderr to a pager (onyl valid if -console is used)    
+    -devconf <device-config-file>
+         Use <device-config-file> for configuration of the device;
+         if not specified, <machine-file name> is used or the defaults are
+	 used.
+    -smidebug
+         Let the SMI-library print extensive debugging informations.
+    -smitrace
+         Let the SMI-library print tracing informations (same as -smidebug
+         but with timestamps for each function entry/exit).
+    -smistat
+         Let the SMI-library print a summary profiling report for the usage
+         of the library (including some statistics).
+    -nolocal
+	 Do not use SYS-V shared memory (but SCI shared memory) even if
+	 all processes run on the same node.
+    -env <VAR=VALUE[,VAR2=VALUE2,...]>
+	 Set environment variables for remote shell
+    -mpipapi gui | nogui[=eventname1[@eventname2@...]][,logfile=<filename>][,<rank1>,<rank2>,...]>
+	 Start the papi-performance server use if executable has been compiled
+	 with -mpipapi option.
+	 "gui" will start the server for online visualization whith the 
+	 perfometer GUI.
+	 "nogui" will allow applications to be monitored without the GUI. Multiple
+         events to be monitored can be specified, separated by @.  
+	 Eventnames are recognized by beginning with PAPI_. If something else
+         is given for eventname, the results are unspecified. If no event
+         is specified as the default of PAPI_TOT_CYC@PAPI_FP_INS will be used.
+	 "logfile" gives the name for a trace file that the GUI which can later
+	 read and used to graph the results.
+	 The ranks can be used to specify certain processes to be monitored
+         only. If no ranks are given all processes will be monitored
+	 Examples:
+	   -mpipapi gui    
+		starts up the job with GUI monitoring all processes
+   	   -mpipapi nogui,logfile=foo.bar
+		starts up the job without GUI, tracing the events PAPI_TOT_CYC
+		and PAPI_FP_INS of all processes to file foo.bar
+	   -mpipapi nogui=PAPI_TOT_CYC@PAPI_MEM_SCY,logfile=foo.bar,0,2,3
+		starts up the job without GUI, tracing the events PAPI_TOT_CYC
+		and PAPI_MEM_SCY of process 0,2 and 3 to file
+		foo.bar
+	where PAPI_TOT_CYC determines any processor-cycle to be reported
+	      PAPI_FP_INS   " any floating point operation
+	      PAPI_MEM_SCY  " any stalled cycles waiting for memory access
+	a detailed list of events can be found in src/papiStrings.h of your
+	papi distribution.
+
+   Special Options for MetaMPICH	   
+
+    -meta name
+           Start an MPI application on a MetaMPICH configuration, giving
+           the name of the configuration file. With this option, mpirun
+           launches mpirun on each machines participating in the configuration.
+
+
+On exit, mpirun returns a status of zero unless mpirun detected a problem, in
+which case it returns a non-zero status (currently, all are one, but this 
+may change in the future).
+
+Multiple architectures may be handled by giving multiple -arch and -np 
+arguments.  For example, to run a program on 2 sun4s and 3 rs6000s, with 
+the local machine being a sun4, use
+
+    $mpirun_arg -arch sun4 -np 2 -arch rs6000 -np 3 program
+
+This assumes that program will run on both architectures.  If different
+executables are needed, the string '%a' will be replaced with the arch name.
+For example, if the programs are program.sun4 and program.rs6000, then the
+command is
+
+    $mpirun_arg -arch sun4 -np 2 -arch rs6000 -np 3 program.%a
+
+If instead the executables are in different directories; for example, 
+/tmp/me/sun4 and /tmp/me/rs6000, then the command is
+
+    $mpirun_arg -arch sun4 -np 2 -arch rs6000 -np 3 /tmp/me/%a/program
+
+It is important to specify the architecture with -arch BEFORE specifying
+the number of processors.  Also, the FIRST -arch command must refer to the
+processor on which the job will be started.  Specifically, if -nolocal is 
+NOT specified, then the first -arch must refer to the processor from which
+mpirun is running.
+
+EOF
+
+if [ -f $scriptdir/mpirun.$default_device.args ] ; then
+    # Here is the easiest way to set the arg list to -usage
+    set "--usage"
+    . $scriptdir/mpirun.$default_device.args
+fi
+}
+
+#    -xdbx   Start the first process under xdbx where possible
+while [ 1 -le $# ] ; do
+  arg=$1
+  #echo $arg
+  #echo $#
+  shift
+  case $arg in 
+     -port)
+	port_nbr=$1
+	port_range=$1
+	shift
+	;;
+     -masternic)
+	master_ip_addr=$1
+	shift
+	;;
+     -meta)
+	metacfg=$1
+	usemeta=1
+	shift
+	;;
+     -metaparam)
+	metaparam="$1"
+        nodigits=`echo $metaparam | sed 's/^[0-9]*$//'`
+        if [ "$nodigits" != "" -o $metaparam -lt 1 ] ; then
+           echo metaparam: $metaparam is an invalid number of processes.  Exiting.
+           exit 1
+	fi
+	shift
+	;;
+     -unicore)
+     	unicore=1
+	;; 
+     -metacon)
+     	metacon=1
+	;;
+     -arch) 
+     	arch=$1
+	narch=`expr $narch + 1`
+	eval arch$narch=$1
+	shift
+	;;
+    -np | -n)
+	np="$1"
+        nodigits=`echo $np | sed 's/^[0-9]*$//'`
+        if [ "$nodigits" != "" -o $np -lt 1 ] ; then
+           echo np: $np is an invalid number of processes.  Exiting.
+           exit 1
+	fi
+	eval np$narch=$1
+	shift
+	;;
+    -ppn)
+	ppn="$1"
+        nodigits=`echo $ppn | sed 's/^[0-9]*$//'`
+        if [ "$nodigits" != "" -o $ppn -lt 1 ] ; then
+           echo ppn: $ppn is an invalid number of processes per node.  Exiting.
+           exit 1
+	fi
+	eval ppn$narch=$1
+	shift
+	;;
+    -machine)
+	machine="$1"
+	default_device="$1"
+	shift
+	;;
+    -machinefile)
+        machineFile="$1"
+	eval machineFile$narch="$1"
+	shift
+	;;
+    -nodes | -node | -hosts | -host)
+	nodenbr=0
+	# is the node specifier a filename or a textual expression?
+	if [ -s "$1" ] ; then
+	    nodestr=`cat $1`
+	else
+	    nodestr=`eval echo $1 | sed "s/,/ /g"`
+	fi
+	shift
+	if [ $np = 0 ]; then
+	    # no -np or -n option is given OR has not yet been parsed
+	    for node in $nodestr ; do
+		nodes=${nodes}" "$node
+		nodenbr=`expr $nodenbr + 1`
+	    done
+	    np=$nodenbr
+	else
+	    # -np or -n option has been supplied
+	    for node in $nodestr ; do
+		if [ $nodenbr -lt $np ] ; then
+		    nodes="$nodes $node"
+		    nodenbr=`expr $nodenbr + 1`
+		fi
+	    done
+	fi
+	;;
+    -skip)
+	skipproc="$1"
+	shift
+	;;
+    -nowatchdog)
+	watchdog="no"
+	;;
+    -smp)
+	use_smp=1
+	;;
+    -device)
+ 	default_device="$1"
+	shift
+	;;
+    -wd | -workingdir)
+        workingdir="$1"
+        shift
+        ;;
+    -stdin)
+	# Name of a file to use for standard input.
+	stdinfile="$1"
+	shift
+	;;
+    -stdout)
+        # Name of a file to use for standard output.
+        stdoutfile="$1"
+        shift
+        ;;
+    -stderr)
+        # Name of a file to use for standard error.
+        stderrfile="$1"
+        shift
+        ;;
+    -nolocal)
+        nolocal=1
+	;;	
+    -h)
+	if [ "$hasprinthelp" = 1 ] ; then
+	   PrintHelp
+        fi
+      	exit 1
+	;;	
+#    -e)
+#      	use_execer=1
+#	;;
+#    -pg)
+#      	use_execer=0
+#      	;;
+#    -leave_pg|-keep_pg)
+#      	leavePGFile=1
+#	;;
+    -xterm)
+        xterm=1
+        ;;
+    -console)
+	console=1
+	consolestr=`echo $1 | sed "s/,/ /g"`
+	shift
+	# If processes should start up with debugger, the consoles will be controled
+	# by the concerned option.
+	if [ -z "$debugger" ] ; then
+	    for cons in $consolestr ; do
+		consoles=${consoles}" "$cons
+	    done
+	fi
+	;;
+    -pager)
+        pager=1
+        ;;
+    -jid)
+        easy_jid="$1"
+        shift
+        ;;
+    -env)
+	MPIJOBENV="$MPIJOBENV $1"
+        shift
+	;;
+    -globusrsl)
+	if [ $np -gt 1 ] ; then
+	    echo "*** mpirun.args: -globusrsl and -np are mutally exlusive; -np $np being ignored."
+	    np=1
+	fi
+	globuspgfile="$1"
+	shift
+	leavePGFile=1
+	;;
+    -globusdb)
+	globusdbfile="$1"
+	shift
+	;;
+    -globusargs)
+	globusargs="$1"
+	shift
+	;;
+#    -p4pg)
+#      	if [ $np -gt  1 ] ; then
+#	    echo "-p4pg and -np are mutually exclusive; -np $np being ignored."
+#            np=1
+#	fi
+#	p4pgfile="$1"
+#	shift
+#      	leavePGFile=1
+#	;;
+#    -p4wd)
+#	p4workdir="$1"
+#	shift
+#	;;
+#    -p4ssport)
+#      	p4ssport="$1"
+#	shift
+#        if [ $p4ssport = "0" -a "$MPI_P4SSPORT" != "" ] ; then
+#	    p4ssport=$MPI_P4SSPORT
+#      	fi
+#	;;
+    -v|-verbose)
+       	mpirun_verbose=1
+	;;
+    -V|-Verbose)
+       	mpirun_verbose=2
+	;;
+    -t|-testing|-show)
+      	just_testing=1
+	Show=echo
+	;;
+    -tv|-totalview)
+        debugger="totalview"
+	;;
+    -ld_lib_path)
+        ld_lib_path="$1"
+        shift
+        ;;
+    -ksq)
+        cmdLineArgs="$cmdLineArgs -mpichksq"
+        ;;
+    -dbx)
+      	debugger="dbx"
+ 	commandfile="-sr %f"
+	debugargs=`echo $1 | sed "s/,/ /g"`
+	console=1
+	shift
+	for d in $debugargs ; do
+	    debugprocs=${debugprocs}" "$d
+	    consoles=${consoles}" "$d
+	done
+	# For some systems, commandfile="-c %f" will ALMOST work (it
+        # will leave the file behind)
+      	;;
+    -gdb)
+      	debugger="gdb"
+      	commandfile="-x %f"
+	debugargs=`echo $1 | sed "s/,/ /g"`
+	console=1
+	shift
+	for d in $debugargs ; do
+	    debugprocs=${debugprocs}" "$d
+	    consoles=${consoles}" "$d
+	done
+	;;
+    -dbx)
+	debugger="dbx"
+        commandfile="-x %f"
+        debugargs=`echo $1 | sed "s/,/ /g"`
+        console=1
+        shift
+        for d in $debugargs ; do
+            debugprocs=${debugprocs}" "$d
+            consoles=${consoles}" "$d
+        done
+        ;;
+    -xxgdb)
+      	debugger="xxgdb"
+      	commandfile="--command=%f"
+	debugargs=`echo $1 | sed "s/,/ /g"`
+	console=1
+	shift
+	for d in $debugargs ; do
+	    debugprocs=${debugprocs}" "$d
+	    consoles=${consoles}" "$d
+	done
+	;;
+    -ddd)
+	debugger="ddd"
+        commandfile="--command=%f"
+	debugargs=`echo $1 | sed "s/,/ /g"`
+	console=1
+	shift
+	for d in $debugargs ; do
+	    debugprocs=${debugprocs}" "$d
+	    consoles=${consoles}" "$d
+	done
+	;;
+    -break)
+	breakpoint=$1
+	shift
+	;;
+    -nopoll)
+	polling_mode=0
+	;;
+    -maxtime|-cpu)
+        max_time="$1"
+	shift
+	;;
+    -mem)
+	mem="$1"
+	if [ $mem -gt $max_mem ];then
+            echo "*** mpirun.args:"
+	    echo "    ERROR: Memory requested ($mem MB/node) greater than"
+	    echo "           maximum available ($max_mem MB/node). Exiting..."
+	    exit 1
+	fi
+	shift
+	;;
+    -mvhome)
+        mvhome=1
+	;;
+    -mvback)
+	mvback="$1"
+	shift
+	;;
+    -cac)
+        CAC="$1"
+	shift
+	;;
+    -echo)
+	# this is for debugging
+	set -x
+	echo "default_arch   = $default_arch"
+	echo "default_device = $default_device"
+	echo "machine	     = $machine"
+	;;
+    -usage|-help|-\?)
+      	# Accept these for help until the program name is provided.
+      	if [ "$progname" = "" ] ; then
+	   if [ "$hasprinthelp" = "1" ] ; then
+	      PrintHelp
+           fi
+	   exit 1
+      	fi
+	;;
+    -devconf)
+        devFile="$1"
+	shift
+	;;
+    -smidebug)
+        smidebugon=1
+        ;;
+    -smitrace)
+        smitraceon=1
+        ;;
+    -smistat)
+        smistaton=1
+        ;;
+    -mpipapi)
+	MPIPAPI=true
+        PAPI_PATH="@PAPI_PATH@"
+	MPIPAPIARGS=`echo $1 | sed 's/,/ /g'`
+	shift
+	PAPI_PROCLIST=""
+	for item in $MPIPAPIARGS ; do 
+	    case $item in
+	    gui)
+		PAPI_NOGUI=""
+		;;
+	    nogui)
+		PAPI_NOGUI="PAPI_TOT_CYC@PAPI_FP_INS"
+		;;
+	    nogui=*)
+		PAPI_NOGUI=`echo $item | sed 's/nogui=//g'`
+		;;
+	    logfile=*)
+		PAPI_FILE=`echo $item | sed 's/logfile=//g'`
+		;;
+	    *)
+		PAPI_PROCLIST="$PAPI_PROCLIST:$item"
+		;;
+	    esac
+	done
+	if test -n "$PAPI_PROCLIST" ; then
+	    MPIJOBENV="$MPIJOBENV MPIPAPI_PROCS=$PAPI_PROCLIST"
+	    PAPI_PROCLIST=`echo $PAPI_PROCLIST | sed 's/:/ /g'`
+	fi
+
+	;;
+    *)
+        # First see if the device knows about this argument:
+        if [ -f $scriptdir/mpirun.$default_device.args ] ; then
+            device_knows_arg=0
+	    . $scriptdir/mpirun.$default_device.args
+            # If the device handled it, skip to the top of the while loop
+            # on arguments.  ? Does this need to do a shift?  If so, 
+	    # should the number of shifts be the value of the arg?
+            if [ $device_knows_arg != 0 ] ; then continue ; fi
+        fi
+	# The first unrecognized argument is assumed to be the name of
+      	# the program, but only if it is executable
+	proginstance=`echo $arg | sed "s/%a/$arch/g"`
+      	if [ "$progname" = "" -a "$fake_progname" = "" -a \
+		! -x "$proginstance" ] ; then
+	    fake_progname="$arg"
+      	elif [ "$progname" = "" -a -x "$proginstance" ] ; then 
+	    progname="$arg"
+            # any following unrecognized arguments are assumed to be arguments
+            # to be passed to the program, as well as all future args
+	    # We can't use use_execer here to decide how to store the
+	    # arguments, since we may later change it (see the switch on arch)
+	    # Thus we store the args in two forms:
+	    # cmdLineArgsExecer and cmdLineArgs.  Notes that we need
+	    # to preserve strings in cmdLineArgs, so 
+	    while [ 1 -le $# ] ; do
+	        arg="$1"
+	        case $arg in 
+	           *\'*) 
+                   cmdLineArgsExecer="$cmdLineArgsExecer -arg=\"$arg\""
+                   cmdLineArgs="$cmdLineArgs \"$arg\""
+		   ;;
+	           *\"*)
+                   cmdLineArgsExecer="$cmdLineArgsExecer -arg='$arg'"
+                   cmdLineArgs="$cmdLineArgs '$arg'"
+		   ;;
+	           *)
+                   cmdLineArgsExecer="$cmdLineArgsExecer -arg=\"$arg\""
+                   cmdLineArgs="$cmdLineArgs \"$arg\""
+		   ;;
+	       esac
+	       shift
+            done
+         else
+	    echo "*** mpirun.args:"
+            echo "    WARNING: Command line arguments for program should be given"
+            echo "             after the program name.  Assuming that $arg is a"
+            echo "             command line argument for the program."
+            case $arg in 
+	        *\'*) 
+                cmdLineArgsExecer="$cmdLineArgsExecer -arg=\"$arg\""
+                cmdLineArgs="$cmdLineArgs \"$arg\""
+	        ;;
+	        *\"*)
+                cmdLineArgsExecer="$cmdLineArgsExecer -arg='$arg'"
+                cmdLineArgs="$cmdLineArgs '$arg'"
+		;;
+	        *)
+                cmdLineArgsExecer="$cmdLineArgsExecer -arg=\"$arg\""
+                cmdLineArgs="$cmdLineArgs \"$arg\""
+		;;
+	    esac
+         fi
+	 # note that the commandline args should get one more eval to 
+	 # strip off any quotes
+      ;;
+  esac
+done
+
+if [ "x$machine" = "x" ] ; then
+    machine=""
+fi
+if [ "x$default_arch" = "x" ] ; then
+    default_arch=sun4
+fi
+if [ "x$default_device" = "x" ] ; then
+    default_device=ch_p4
+fi
+
+# We need at least the program name
+if [ -z "$metacfg" ] ; then
+# This is not a meta-run
+  if [ "$globuspgfile" = "" -a "$progname" = "" ] ; then
+     echo "*** mpirun.args:"
+     echo "    ERROR: Missing program name"
+     if [ "$fake_progname" != "" ] ; then
+        echo "           Program $fake_progname either does not exist, is not "
+        echo "           executable, or is an erroneous argument to mpirun."
+     fi
+     exit 1
+  fi
+if [ -n "$fake_progname" -a -n "$progname" ] ; then
+     # found an unrecognized argument, followed by a program
+     echo "*** mpirun.args: Unrecognized argument $fake_progname ignored."
+     # Should this exit?
+  fi
+#
+else
+# This is a meta-run and the program name may be given in the config-file:
+  if [ "$globuspgfile" = "" -a "$progname" = "" ] ; then
+     if [ "$fake_progname" != "" ] ; then
+        echo "*** mpirun.args: (meta-run)"
+        echo "    WARNING: Cannot check if $fake_progname is a valid executable!"
+	progname=$fake_progname
+     else
+        if [ $mpirun_verbose -gt 0 ] ; then
+           echo "*** mpirun.args: (meta-run)"
+           echo "    WARNING: Missing program name -- hope that it is stated in the meta-config-file!"
+	fi
+     fi 
+  fi
+fi
+# 
+# Warning: Some systems (OSF 1 at least) have a command called dbx
+# with different command-line arguments.  In particular, it needs
+# -c here (and that does not implement the remove part of the -sr).
+#
+# Turns out that this doesn't matter so much, because the dbx is terribly,
+# terribly crippled (on Alpha).  
+#
+larch=$arch
+if [ -z "$larch" ] ; then larch=$default_arch ; fi
+if [ "$debugger" = "dbx" -a \( "$larch" = "alpha" -o "$larch" = "IRIX" \
+	-o "$larch" = "SGI" -o "$larch" = "IRIX64" \) ] ; then
+    commandfile="-c"
+    rmcommandfile="rm -f"
+fi
+#
+# Fill out relative program pathnames
+PWD_TRIAL=`pwd`
+
+# The test for PWD_TRIAL usable is within the p4/execer test (since that
+# is where it matters)
+#
+tail=`echo $progname | sed 's/\/.*//'` 
+if  [ "$tail" = "" ] ; then
+  #echo Absolute path, don't need to change anything
+  true
+else
+  #echo Relative path
+  progname="$PWD_TRIAL/$progname"
+fi
+
+#
+# Get the architecture and the device
+# Note that some architecture/device combinations have their own, private
+# devices
+#
+if [ "$arch" = "" ] ; then
+  arch=`$scriptdir/tarch`
+fi
+
+archlist="$arch"
+case $arch in 
+    HP-UX) archlist="hpux hp9000s700 hp9000s735 HP-UX" 
+	;;
+    IRIX|sgi|SGI) archlist="IRIX sgi"
+	;;
+    i386|symm_ptx) archlist="i386 symm_ptx"
+	;;
+    IP19|IP21) archlist="IRIX IP19 IP21"
+	arch="IRIX"
+	# Was sgi_mp instead of IRIX
+	;;
+    ipsc860|i860|ipsc)
+      	arch="ipsc860"
+      	archlist="ipsc860 i860 ipsc"
+	;;
+    freebsd|386BSD)
+	arch="386BSD"
+	archlist="386BSD freebsd"
+	;;
+    hpux|hp9000s700)
+	arch="hpux"
+	archlist="hpux hp9000s700"
+	;;
+esac
+
+#
+# Try to find the machine
+if [ "$machine" = "" ] ; then 
+  machine=$arch
+  case $arch in 
+    sun4|solaris)
+      # This device should only exits on sun4s that are actually
+      # MEIKO machines.
+      if [ -r /dev/elan ] ; then
+	machine="meiko"
+      elif [ "$default_device" = "ch_p4" -a $use_execer = 0 ] ; then
+	machine="p4"
+      elif [ "$default_device" = "globus" ] ; then
+	machine="globus"
+      else
+        machine="execer"
+      fi
+      ;;
+    
+    rs6000)
+      # This only works on the ANL sp system
+      # -e for "exists" isn't available on all systems
+      echo `hostname` | grep spnode > /dev/null
+      if [ $? = 0 ] ; then
+        # This is the correct version to use once we're on a node
+	machine="ibmspx"
+      elif [ "$default_device" = "globus" ] ; then
+        # We need this before the anlspx check, because the Globus device
+        # can be used on the ANL SP, as well, but the mpirun script for
+        # it does not use Globus by default.
+	machine="globus"
+      elif [ -d /etc/FRAMES -a -d /mcs ] ; then
+        machine="anlspx"
+      elif [ "$default_device" = "ch_p4" -a $use_execer = 0 ] ; then
+	machine="p4"
+      elif [ "$default_device" = "ch_p4" -a $use_execer = 1 ] ; then
+	machine="execer"
+      elif [ -d /usr/lpp/euih ] ; then
+        machine="sp1"
+      elif [ -x /usr/bin/poe -o -x /usr/lpp/poe/bin/poe ] ; then
+        # should work for other users
+        machine="ibmspx"
+      else
+         echo "*** mpirun.args: Can't determine the type of the machine this is."
+         echo "                 Specifiy it with -machine <machine_type>."
+      fi
+      ;;
+    ipsc860|i860|ipsc)
+        machine="ipsc860"
+	;;
+    symm_ptx|i386)
+        machine="symm_ptx"
+	;;
+    *)
+      if [ "$default_device" = "ch_p4" -a $use_execer = 0 ] ; then
+	machine="p4"
+      elif [ "$default_device" = "globus" ] ; then
+	machine="globus"
+      else
+        machine="execer"
+      fi
+      #echo "Can't determine the type of the machine this is."
+      #echo "it with -machine <machine_type>."
+      ;;
+  esac
+fi
+
+# Get value of host if necessary
+if [ "$machine" = p4 -o "$machine" = execer -o \
+	"$machine" = sgi_mp -o "$machine" = ch_p4 -o \
+	"$machine" = ch_p4-2 -o "$machine" = globus -o \
+        "$machine" = globus ] ; then
+  if [ "$MPI_HOST" = "" ] ;  then
+    MPI_HOST=""
+    if [ "$arch" = "ipsc860" ] ; then
+	MPI_HOST=`hostname`
+    else
+        # Which is not supported in many sh's.  head isn't on some as well.
+#	HOSTNAMEPGM="`which hostname | head -1`"
+#        if [ -x "$HOSTNAMEPGM" ] ; then MPI_HOST="`hostname`" ; fi
+	MPI_HOST=`hostname`
+    fi
+    # Note that uname -n may not produce a usable hostname.  Any suggestions?
+    if [ "$MPI_HOST" = "" ] ; then MPI_HOST="`uname -n`" ; fi
+  fi
+fi
+
+
+if [ -z "$metacfg" ] ; then
+ if [ $mpirun_verbose -gt 0 ] ; then
+  cnt=1
+  if [ $narch -gt 1 ] ; then
+      while [ $cnt -le $narch ] ; do
+        eval mp=\$"np$cnt"
+        eval archm=\$"arch$cnt"
+	proginstance=`echo $progname | sed "s/%a/$archm/"`
+	if [ $mpirun_verbose -gt 1 ] ; then
+	    echo "*** mpirun.args:" `date`
+	fi
+        echo "*** mpirun.args: running $proginstance on $mp $archm $machine processors"
+	cnt=`expr $cnt + 1`
+      done
+  else
+      if [ $mpirun_verbose -gt 1 ] ; then
+	  echo "*** mpirun.args:" `date`
+      fi
+      echo "*** mpirun.args: running $progname on $np $arch $machine processors"
+  fi
+ fi
+else
+ if [ $mpirun_verbose -gt 0 ] ; then
+  echo "*** mpirun.args: starting meta mpirun..." 
+ fi
+fi
+
+if test -n "$PAPI_NOGUI" -a -z "$PAPI_FILE" ; then
+  echo "*** mpirun.args:"
+  echo "    WARNING: you are using papi-performance monitoring whithout output destination!"
+fi
+
+#variablie for environment passings to the remote processes
+MPIJOBENV="$MPIJOBENV MPIRUNWD=$PWD_TRIAL"
+MPIJOBENV=`echo $MPIJOBENV | sed s/,/" "/g`
+
+# set the array to determine procs to be debugged
+# (arrays only works for bash version > 1)
+BV=`echo $BASH_VERSION | cut -d . -f 1`
+if [ -n "$BV" -a "$BV" -gt "1" ] ; then
+i=0
+while test  $i -lt $np ; do
+  is_debug[$i]=0
+  i=`expr $i + 1`
+done
+for item in $debugprocs ; do
+  if [ "$item" = "all" ] ; then
+    i=0
+    while test  $i -lt $np ; do
+      is_debug[$i]=1
+      i=`expr $i + 1`
+    done
+  else
+    is_debug[$item]=1
+  fi
+done
+fi

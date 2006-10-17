@@ -1,0 +1,335 @@
+			MPI Message Queue Dumping
+                        -------------------------
+
+Author : James Cownie <jcownie@dolphinics.com>
+Version: 1.03
+Date   : May 28 1998
+Status : *** DRAFT DOCUMENT FOR DISCUSSION ***
+
+Change log :
+May 23 1998: JHC Added extra information results on operations
+May 21 1998: JHC Added name for library TV uses on AIX.
+
+This document describes the interface between TotalView (or any other
+debugger) and a dynamic library which is used for extracting message
+queue information from an MPI program. Further details are contained in
+comments in the "mpi_interface.h" include file, which should be taken as
+definitive.
+
+If you want to use this interface with debuggers other than TotalView,
+please talk to us. It is extremely unlikely that we will object, however
+we would like to know who is using it, so that we can consult them before
+making changes to the interface (and it's bound to change !).
+
+The fundamental principle here is that the debugger dynamically loads a
+library *into* the debugger itself. Functions in the library are called
+by the debugger whenever it needs information about message queues in MPI
+processes. Since the library is running inside the debugger, it makes use
+of callbacks to the debugger to read target process store, and to convert
+the target byte ordered data into the format of the host on which the
+debugger is running (remember, we could be cross debugging...).
+
+The debugger also provides callbacks which allow the dll to extract
+information about the sizes of fundamental target types, and to look up
+structure types defined in the debug information in the executable image
+being debugged and find out field offsets within them.
+
+
+Startup
+-------
+
+Before any functions in the dll can be called, the debugger has to load
+the dynamic library. To do this it must find the name of the library
+to be loaded.
+
+The way that this work is outside the scope of the specification for
+the message queue dumping interface, however since this information is
+likely to be useful to people working with TotalView, here is a
+description of the way that we have chosen to implement it.
+
+After it has started up (or attached to) a parallel program, TotalView
+looks for a global symbol
+
+char MPIR_dll_name[];
+
+in the target image (*NOT* the dll of course, since that hasn't been
+loaded yet). If this symbol exists, then its value is expected to be
+the name of a shared library to be loaded.
+
+If this symbol does not exist (or its value is an empty string), then
+TotalView will use a default library name which depends on the process
+attachment mechanism which was used, as follows
+
+AIX poe attachment		libtvibmmpi.so then libtvmpich.so
+All platforms MPICH attachment  libtvmpich.so
+SGI SGI/MPI attachment		libxmpi.so
+
+If no library can be found, then MPI message queue dumping is disabled.
+
+On some platforms it may be necessary to take additional steps at
+compile or link time to prevent the apparently unreferenced global
+variable from being removed. This is compiler/linker specific.
+
+Startup calls in the DLL
+------------------------
+
+Once the debugger has loaded the library it will first check that all the
+functions it expects are present in the library, and that the library
+compatibility version number is that which it requires. 
+
+If any of these tests fail, then it will issue a complaint and disable
+message queue dumping.
+
+These tests occur through the functions 
+
+char *mqs_version_string ();
+int   mqs_version_compatibility();
+
+in the DLL.
+
+Once these tests have been successfully passed, the debugger will call
+the initialisation function
+
+void mqs_setup_basic_callbacks (const mqs_basic_callbacks *);
+
+passing it an initialised structure containing the addresses of the
+call back functions in the debugger. This function is called *only* when
+the library is loaded, the DLL should save the pointer to the callback
+structure so that it can call the functions therein as required.
+
+For each executable image which is used by the processes that go to
+make up the parallel program TotalView will call the function
+
+int mqs_setup_image (mqs_image *, const mqs_image_callbacks *);
+
+This call should save image specific information by using the
+callback the debugger callback
+
+mqs_put_image_info (mqs_image *, mqs_image_info *);
+
+if it requires any, and return mqs_ok, or an error value.
+
+Provided that mqs_setup_image completes successfully,
+the debugger will then call
+
+int mqs_image_has_queues (mqs_image *, char **);
+
+mqs_image_has_queues returns mqs_ok or an error indicator to show
+whether the image has queues or not, and an error string to be used in
+a pop-up complaint to the user, as if in 
+
+printf (error_string,name_of_image); 
+
+The pop-up display is independent of the result. (So you can silently
+disable things, or loudly enable them).
+
+For each image which passes the mqs_image_has_queues test, the debugger
+will call 
+
+int mqs_setup_process (mqs_process *, const mqs_process_callbacks *);
+
+on each process which is an instance of the image. This should be used
+to setup process specific information using 
+
+void mqs_put_process_info (mqs_process *, mqs_process_info *);
+
+If this succeeds, then, to allow a final verification that the process
+has all of the necessary data in it to allow message queue display, 
+
+int mqs_process_has_queues (mqs_process *, char **);
+
+will be called in an exactly analogous way to mqs_image_has_queues.
+
+Whenever an error code is returned from the DLL, the debugger should
+use the function char * mqs_dll_error_string (int errcode) to obtain a
+printable representation of the error, and provide it to the user in
+some appropriate way.
+
+That completes the initialisation.
+
+Queue display
+-------------
+
+Before displaying the message queues the debugger will call the function
+
+void mqs_update_communicator_list (mqs_process *);
+
+The DLL can use this to check that it has an up to date model of the
+communicators in the process and (if necessary) update its list of
+communicators.
+
+The debugger will then iterate over each communicator, and within each
+communicator over each of the pending operations in each of the
+message queues using the functions
+
+int mqs_setup_communicator_iterator (mqs_process *);
+int mqs_get_communicator (mqs_process *, mqs_communicator *);
+int mqs_next_communicator (mqs_process *);
+
+to iterate over the communicators and
+
+int mqs_setup_operation_iterator (mqs_process *, int);
+int mqs_next_operation (mqs_process *, mqs_pending_operation *);
+
+to iterate over each of the operations on a specific queue for the
+current communicator.
+
+mqs_setup_*_iterator should return either
+mqs_ok			     if it has information
+mqs_no_information	     if no information is available about the
+			     requested queue
+or, if it can tell 
+mqs_end_of_list		     if it has information but there are no operations
+
+It is permissible to return mqs_ok, but then have mqs_next_operation
+immediately return mqs_end_of_list, and similarly the debugger is at
+liberty to call mqs_next_* even if the initialisation function
+returned mqs_end_of_list.
+
+mqs_next_* should return 
+
+   mqs_ok           if there is another element to look at (in the case of the
+   	            operation iterator it has returned the operation),
+
+   mqs_end_of_list  if there are no more elements (in the case of the
+		    operation iterator it has *not* returned anything
+		    in the pending_operation).
+
+   some other error code if it detects an error
+
+
+The useful information is returned in the structures
+/* A structure to represent a communicator */
+typedef struct
+{
+  taddr_t unique_id;				/* A unique tag for the communicator */
+  tword_t local_rank;				/* The rank of this process (Comm_rank) */
+  tword_t size;					/* Comm_size  */
+  char    name[64];				/* the name if it has one */
+} mqs_communicator;
+
+and
+
+
+typedef struct
+{
+  /* Fields for all messages */
+  int status;					/* Status of the message (really enum mqs_status) */
+  mqs_tword_t desired_local_rank;		/* Rank of target/source -1 for ANY */
+  mqs_tword_t desired_global_rank;		/* As above but in COMM_WORLD  */
+  int tag_wild;					/* Flag for wildcard receive  */
+  mqs_tword_t desired_tag;			/* Only if !tag_wild */
+  mqs_tword_t desired_length;			/* Length of the message buffer */
+  int system_buffer;				/* Is it a system or user buffer ? */
+  mqs_taddr_t buffer;				/* Where data is */
+
+  /* Fields valid if status >= matched or it's a send */
+  mqs_tword_t actual_local_rank;		/* Actual local rank */
+  mqs_tword_t actual_global_rank;		/* As above but in COMM_WORLD */
+  mqs_tword_t actual_tag;				
+  mqs_tword_t actual_length;
+  
+  /* Additional strings which can be filled in if the DLL has more
+   * info.  (Uninterpreted by the debugger, simply displayed to the
+   * user).  
+   *
+   * Can be used to give the name of the function causing this request,
+   * for instance.
+   *
+   * Up to five lines each of 64 characters.
+   */
+  char extra_text[5][64];
+} mqs_pending_operation;
+
+The debugger will display communicators in the order in which they are
+returned by the communicator iterator, and pending operations in the
+order returned by the operation iterator. It is up to the DLL to
+ensure that communicators are sorted into a sensible order, and that
+operations are shown in the order in which MPI would match them.
+
+Note that the name string can be used by the library to display any
+useful information about the communicator (the debugger does not
+interpret it at all, so you can put whatever string you like into the
+"name"); 
+
+Similarly any additional information about a pending operation can be
+returned in the extra_text strings. For instance, if it is available, the
+name of the function which created the request could be returned.
+
+The extra_text strings are displayed until a zero length one is
+encountered, or all 5 have been displayed, so if any extra information
+has been returned the library must ensure that it nulls out the next
+string e.g.
+
+       strcpy (res->extra_text[0],"Funny message");
+       res->extra_text[1][0] = 0;
+
+Otherwise uninitialized store will likely be displayed as characters :-(
+
+Shutdown
+--------
+
+When the debugger terminates a process, or unloads information about an
+executable image, it will call back into the DLL to allow it to clean
+up any information it had associated with the process or image.
+
+Note that once loaded, the DLL itself is never unloaded, so you cannot
+rely on static variables in the DLL being re-initialized.
+
+Store allocation
+----------------
+
+Callbacks are provided to allow the DLL to use the debugger's heap
+package. These should be used in preference to calling malloc/free
+directly, since better debug information from store corruption may be
+possible.
+
+Type safety across the interface
+--------------------------------
+All of the functions in the interface have complete prototypes, and there
+are opaque structures defined for all of the different types.
+
+This means that inside the functions in the library you will need
+explicit casts from these opaque types to the corresponding concrete
+types that you require. 
+
+The use of explicit casts is unpleasant, however it seems hard to avoid
+this without mixing implementation and interface issues in the
+mpi_interface.h file.
+
+Miscellaneous issues
+--------------------
+
+The debugger may be written in C++, and may not have been compiled
+with the "default" C++ compiler for the host on which it is
+running. You are extremely likely to run into library compatibility
+and version problems if you try to write the DLL in C++ as well.
+
+The dll should *not* perform operations which could cause it to block
+(such as reading from sockets, calling sleep or wait()), since this
+could cause the whole debugger to be blocked and unresponsive to user
+input. 
+
+The dll should avoid declarations of external functions, ideally by
+using static functions. If this is not possible (because the DLL
+becomes larger than one file), then it should use external names with
+a suitable prefix, such as the vendor of the MPI library,
+e.g. "Mqs_sgi_", or "Mqs_ibm_". 
+
+Sample code
+-----------
+
+With this README you should also have
+
+mpi_interface.h	     The header which defines the interface
+
+Makefile.simple	     A simple makefile to build a dynamic library on Solaris
+dll_mpich.c	     Sample example code which uses this interface to
+		     provide message queue dumping for MPICH 1.1.0
+mpich_dll_defs.h     Header for the sample code.
+
+The last three files are not a part of the interface, or definition,
+but rather a sample user of the interface, provided on an as is basis
+so that you can see how the interface can actually be used.
+
+

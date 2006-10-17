@@ -1,0 +1,213 @@
+#! /bin/sh
+#
+# ch_mpx
+#
+
+upcase() { echo $*|awk '{print (toupper($0))}';}
+
+echo "ch_mpx: running device specific setup"
+
+#indicate presence of device
+CFLAGS="$CFLAGS -DCH_MPX_PRESENT"
+FFLAGS="$FFLAGS -DCH_MPX_PRESENT"
+
+
+# force linking of device lib in static case
+CLINKERSTATICOPTS="${CLINKERSTATICOPTS} -u MPID_CH_MPX_InitMsgPass"
+F77LINKERSTATICOPTS="${F77LINKERSTATICOPTS} -uMPID_CH_MPX_InitMsgPass"
+
+CHMPX_LIBS="-lstdc++ -lpthread -ldl"
+DEFAULT_MACHINE="mpx"
+
+LIB_LIST="$LIB_LIST $CHMPX_LIBS"
+
+# get path to this script (= path to mpx device):
+if test -z "$device_setupfile" ; then
+  device_setupfile="."
+fi
+device_dir=`dirname $device_setupfile`
+
+# test path to root of mp-mpich source tree:
+if test -z "$srcdir" ; then
+# --> the script was locally invoked
+  srcdir="."
+fi
+
+# set MPX source tree and install directory:
+MPX_HOME="$device_dir/MPX"
+MPX_INST="$MPX_HOME/install"
+
+# extend path to use local tools:
+PATH="$PATH:$device_dir"
+chmod u+x $device_dir/mpx_*
+
+if test -z "$MPX_DIR" ; then
+  if test -d $MPX_HOME ; then
+    echo "ch_mpx: WARNING! No MPX source directory specified, using $MPX_HOME"
+    MPX_DIR="$MPX_HOME"
+  else
+    echo "ch_mpx: ERROR! No MPX source directory specified! (use --with-mpx-dir=[dir])"
+    exit 1
+  fi
+fi
+
+if ! test -d $MPX_DIR ; then
+  echo "ch_mpx: ERROR! MPX source directory $MPX_DIR not found!"
+  exit 1
+fi
+
+#
+# Check for the underlying MPI implementation:
+#
+MPX_IMPL=""
+#
+# check for MVAPICH:
+MPX_IMPL=`cat $MPX_DIR/make* | grep "mvapich"`
+if test -n "$MPX_IMPL" ; then
+  MPX_IMPL="mvapich"
+else
+# check for MPICH2:
+  MPX_IMPL=`cat $MPX_DIR/configure | grep "mpich2"`
+  if test -n "$MPX_IMPL" ; then
+    MPX_IMPL="mpich2"
+  else
+#
+# check for MPICH:
+    MPX_IMPL=`cat $MPX_DIR/configure | grep "mpich"`
+    if test -n "$MPX_IMPL" ; then
+      MPX_IMPL="mpich"
+    else
+# check for LAM/MPI:
+      MPX_IMPL=`cat $MPX_DIR/configure | grep "LAM/MP"`
+      if test -n "$MPX_IMPL" ; then
+        MPX_IMPL="lam/mpi"   
+# NO known lib found:
+      else
+        MPX_IMPL=""	
+      fi
+    fi
+  fi
+fi
+
+if test -z "$MPX_IMPL" ; then
+  echo "ch_mpx: ERROR! No known MPI implementation found!"
+  exit 1
+else
+  echo "ch_mpx: found `upcase $MPX_IMPL` in $MPX_DIR"
+fi
+
+
+#
+# Create implementation dependent links:
+# 
+case "$MPX_IMPL" in
+"mpich")
+# make links to the include files:
+  ln -fs "$MPX_INST/include/mpi.h" "$device_dir/mpx.h" ; echo "$device_dir/mpx.h" >> "$device_dir"/mpx.linklist
+  ln -fs "$MPX_INST/include/mpidefs.h" "$device_dir/mpidefs.h" ; echo "$device_dir/mpidefs.h" >> "$device_dir"/mpx.linklist
+  ;;
+
+"mpich2")
+  ;;
+
+"lam/mpi")
+# make links to the include files:
+  ln -fs "$MPX_INST/include/mpi.h" "$device_dir/mpx.h" ; echo "$device_dir/mpx.h" >> "$device_dir"/mpx.linklist
+  ln -fs "$MPX_INST/include/lam_config.h" "$device_dir/lam_config.h" ; echo "$device_dir/lam_config.h" >> "$device_dir"/mpx.linklist
+  ln -fs "$MPX_INST/include/lam_config_bottom.h" "$device_dir/lam_config_bottom.h" ; echo "$device_dir/lam_config_bottom.h" >> "$device_dir"/mpx.linklist
+# make links to the LAM executables:
+  if test -d "$srcdir/bin" ; then
+    ln -fs "$MPX_INST/bin/tkill" "$srcdir/bin/tkill" ; echo "$srcdir/bin/tkill" >> "$device_dir"/mpx.linklist
+    ln -fs "$MPX_INST/bin/hboot" "$srcdir/bin/hboot" ; echo "$srcdir/bin/hboot" >> "$device_dir"/mpx.linklist
+    ln -fs "$MPX_INST/bin/lamd" "$srcdir/bin/lamd" ; echo "$srcdir/bin/lamd" >> "$device_dir"/mpx.linklist
+    ln -fs "$MPX_INST/bin/lamboot" "$srcdir/bin/lamboot" ; echo "$srcdir/bin/lamboot" >> "$device_dir"/mpx.linklist
+    ln -fs "$MPX_INST/bin/lamhalt" "$srcdir/bin/lamhalt" ; echo "$srcdir/bin/lamhalt" >> "$device_dir"/mpx.linklist
+    ln -fs "$MPX_INST/bin/lamexec" "$srcdir/bin/lamexec" ; echo "$srcdir/bin/lamexec" >> "$device_dir"/mpx.linklist
+    ln -fs "$MPX_INST/bin/lamnodes" "$srcdir/bin//lamnodes" ; echo "$srcdir/bin//lamnodes" >> "$device_dir"/mpx.linklist
+  fi
+  ;;
+
+"mvapich")
+# make links to the include files:
+  ln -fs "$MPX_INST/include/mpi.h" "$device_dir/mpx.h" ; echo "$device_dir/mpx.h" >> "$device_dir"/mpx.linklist
+  ln -fs "$MPX_INST/include/mpidefs.h" "$device_dir/mpidefs.h" ; echo "$device_dir/mpidefs.h" >> "$device_dir"/mpx.linklist
+  ;;
+esac
+
+#
+# Copy the source tree and rename all MPI symbols:
+#
+if ! test -f "$MPX_HOME/mpx_replace.log" ; then 
+  if test "$MPX_DIR" != "$MPX_HOME" ; then
+    echo "ch_mpx: copying the `upcase $MPX_IMPL` source tree to $MPX_HOME"
+    if ! test -d "$MPX_HOME" ; then
+      mkdir $MPX_HOME
+    else
+      rm -rf $MPX_HOME/*
+    fi
+    cp -r $MPX_DIR/* $MPX_HOME/. &> /dev/null
+  fi
+
+  echo "ch_mpx: renaming all MPI symbols in $MPX_HOME (please hold on...)"
+  mpx_replace $MPX_HOME "*" "MPI" "MPX" &> /dev/null
+
+# Correct false renaming, if necessary:
+  case "$MPX_IMPL" in
+  "lam/mpi")
+    mpx_replace $MPX_HOME "*" "COMPXLE" "COMPILE" &> /dev/null
+  ;;
+  esac
+
+# Rename also files containing MPI in their names:
+  echo "ch_mpx: renaming all files containing MPI in their names in $MPX_HOME"
+  mpx_rename $MPX_HOME "MPI" "MPX" &> /dev/null
+
+else
+  echo "ch_mpx: symbols seem to be already renamed in $MPX_HOME"
+fi
+
+#
+# Copy implementation dependend patches and
+# configure with all unnecessary parts disabled:
+#
+case "$MPX_IMPL" in
+"mpich")
+    MPX_CONF="$MPX_CONF --without-romio"
+    MPX_CONF="$MPX_CONF --disable-cxx"
+    MPX_CONF="$MPX_CONF --without-mpe"
+    MPX_CONF="$MPX_CONF --disable-f77"
+    ;;
+"mpich2")
+    ;;
+"lam/mpi")
+    MPX_CONF="$MPX_CONF --without-romio"
+    MPX_CONF="$MPX_CONF --without-mpi2cpp"
+    MPX_CONF="$MPX_CONF --without-profiling"
+    ;;
+"mvapich")
+    if ! test -f "$MPX_HOME/configure_mvapich" ; then
+       mv $MPX_HOME/configure $MPX_HOME/configure_mvapich
+       cp $device_dir/patches_mvapich/configure $MPX_HOME/.
+    fi
+    MPX_CONF="$MPX_CONF --without-romio"
+    MPX_CONF="$MPX_CONF --disable-cxx"
+    MPX_CONF="$MPX_CONF --without-mpe"
+    MPX_CONF="$MPX_CONF --disable-f77"
+    ;;
+esac
+echo "ch_mpx: configuring `upcase $MPX_IMPL` with $MPX_CONF"
+
+(cd $MPX_HOME; ./configure -prefix=$MPX_INST $MPX_CONF)
+
+#
+# Set Implementation dependent enviornment variables:
+#
+case "$MPX_IMPL" in
+"mvapich")
+    set `cat $MPX_HOME/config.status | grep BASE_LIB_LIST=`
+    eval BASE_LIB_LIST=`echo $BASE_LIB_LIST`
+    LIB_LIST="$LIB_LIST $BASE_LIB_LIST"
+;;
+esac
+
+echo "ch_mpx: end of device specific setup."

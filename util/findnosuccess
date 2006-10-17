@@ -1,0 +1,103 @@
+#! /bin/sh
+#
+# Some systems have limits on the number of pipe stages.  We break this into
+# steps of no more than 10 stages, using .tmp as the intermediate
+/bin/rm -f .tmp
+sed -e '/^Making testing/,/\*\*\* Checking for diff/d' $1 | \
+sed -e '/^--->/,/^---</d' | \
+sed -e '/^\*# --->/,/^\*# ---</d' | \
+egrep -v '^[ 	]*\(cd .* clean\)' | \
+egrep -v 'if \[ .* \] ; then ln -s .* fi' |\
+egrep -v '^checking|^rm |^/bin/rm|^creating|^cleaning|^Creating|^cp ' | \
+egrep -v '^[ 	]rm -rf |^[ 	]rm -f ' | \
+egrep -v '^cc |^gcc |^Copying |^chmod |^cat |^U |^Making |^for file' | \
+egrep -v '^[ 	]*cc|^[ 	] *gcc|^Configuring |^setting |^ar |^ranlib |^ *if \[' |
+egrep -v '^[ 	]*xlc |^[ 	] *xlC |^[ 	]*f77|^[ 	]*f90' > .tmp 2>&1
+if [ -n "$MPICH_WARNING_SEP" ] ; then
+    /bin/rm -f .tmp2
+    sed -e '/>'"$MPICH_WARNING_SEP"/,'/<'"$MPICH_WARNING_SEP"/d .tmp > .tmp2
+    /bin/rm -f .tmp
+    mv .tmp2 .tmp
+fi
+#
+/bin/rm -f .tmp2
+egrep -v '^[ 	]*mpcc |^[ 	] *mpCC ' .tmp |
+egrep -v '^[- 	a-zA-Z0-9/_\.]*mpicc |^making|^ *$|^[	 ]*ln -s|^ *done$' | \
+egrep -v '^[- 	a-zA-Z0-9/_\.]*mpif77 |^[	 ]ar |^a - |^s - ' | \
+egrep -v '^[- 	a-zA-Z0-9/_\.]*mpif90 ' | \
+egrep -v '^[- 	a-zA-Z0-9/_\.]*mpiCC |^building pro|^compiling ROMIO|^make ' | \
+egrep -v '/X11R5/.*/Xlib.h:.*function declaration.*a prototype' | \
+egrep -v '/X11/Xlib.h:.*function declaration.*a prototype' | \
+egrep -v '^ar: creating|^ar: writing|^true |^Setting |^C integer' | \
+egrep -v 'Warning .*declared EXTERNAL but never used' | \
+egrep -v '/usr/local/gcc-2\.7\.2.*termios.h.* warning: .* redefined' >.tmp2 2>&1
+#
+/bin/rm -f .tmp
+egrep -v '/usr/include/sys/ioctl.h.*this is the location' .tmp2 | \
+egrep -v '^[ 	]*ranlib [- 	a-zA-Z0-9/_\.]*' | \
+egrep -v '^[ 	]*true [- 	a-zA-Z0-9/_\.]*' | \
+egrep -v '^Fortran linker needs|^Fortran externals ' | \
+egrep -v '^About to|^Finished |^Generating message' |\
+egrep -v '^[ 	]*mpir_[ig][a-z_]*:$' |\
+egrep -v '^[a-z]*\.f:$' |\
+egrep -v 'libsun\.a is not used for ' |\
+egrep -v 'libpmpich\.a is not used for resolving' |\
+egrep -v 'libmpich\.a is not used for resolving' > .tmp 2>&1
+#
+/bin/rm -f .tmp2
+egrep -v '^[ 	]*done[ 	]*$' .tmp |\
+egrep -v '^\+ /bin/rm|^[	 ]*/bin/rm |^[	 ]*for file|.*make clean\)' |\
+egrep -v '^[ 	]*make[ ]*[a-zA-Z0-9\./]*[ 	]*$' |\
+egrep -v 'WARNING 85: definition of' |\
+egrep -v 'WARNING 134: weak definition of ' |\
+egrep -v 'WARNING 84: .* is not used for resolving any symbol' |\
+egrep -v '^Testing if |^Application can be linked|^Fortran application can' |\
+egrep -v 'Attempting to|Adding a symbolic' |\
+egrep -v '^[ 	]*\./makelinks|making adjlogs|not making server' > .tmp2 2>&1
+#
+/bin/rm -f .tmp
+egrep -v 'cd lib;|cd alog;|cd usc' .tmp2 |\
+egrep -v 'MPILIBNAME=.* p4inmpi' |\
+egrep -v 'preparing mpif.h for ROMIO' |\
+egrep -v '^[ 	]*-DMPIRUN_' |\
+egrep -v '^[ 	]*if \[ "[01]" = "[01]" .* \] ; then' |\
+egrep -v 'mpir_.*=== End of Compilation ? ===' |\
+egrep -v 'Compilation successful' |\
+egrep -v 'Target .* is up to date' |\
+egrep -v 'for dir in contrib|contrib/test test|^[	 ]*if test -s' |\
+egrep -v '^[ 	]*fi[ ]*;\\$' > .tmp 2>&1
+#
+/bin/rm -f .tmp2
+egrep -v 'Configuration completed' .tmp |\
+egrep -v '\(cd \./p4;|cd \.\./\.\./include' |\
+egrep -v 'if test -n ".*" -a ".*" != "ignore"' |\
+egrep -v '^[ 	]*-DMPICH_INFODLL|^[ 	]*msgqdllloc.c ; \\$' |\
+egrep -v 'cd src/infoexport|^[ 	]*fi$|^[ 	]*else[ ]*\\$' |\
+egrep -v 'mpe/profiling/nupshot has|use it on another|You must have java' |\
+egrep -v 'cd contrib/test; make linktest|Application can use both' |\
+egrep -v 'defining MPI_Offset|ROMIO home directory is|configuring for file' |\
+egrep -v 'Compiling C\+\+|Include C\+\+ bindings' |\
+egrep -v 'When building multiple|include instead of bin/ and ' >.tmp2 2>&1
+#
+/bin/rm -f .tmp
+egrep -v 'if test ".*" != "ignore"' .tmp2 |\
+egrep -v 'export CC|util/makesharedlib -lib'  |\
+egrep -v '^[ 	]*-kind=.* -local|^[ 	]*MAIN main:$|^pi3.f:$' |\
+egrep -v 'updating cache ./config|config.h is unchanged' |\
+egrep -v 'Testing that MPI applications' |\
+egrep -v '^[ 	]*/bin/mv |may be used to remove the ' |\
+egrep -v 'Created util/machines|You may want to edit|These hosts are used' |\
+egrep -v '^[ 	]*if test "." = 1 ; then|Installing MPE'  |\
+egrep -v '^[ 	]*if \[ ["!]|mpeconf.h is unchanged|^[ 	]*if \[ -n' |\
+egrep -v '^[ 	]*mpif.h[ 	]*$' |\
+egrep -v 'End of Compilation|Trying GETARG' |\
+egrep -v '^[ 	]*xlf90 ' |\
+egrep -v '^[ 	]*[/a-zA-Z]*cc ' >.tmp 2>&1
+#
+/bin/rm -f .tmp2
+egrep -v 'solaris/doctext|^[ ]*[a-zA-Z0-9/\._]*cc |^\*\* Testing|^\*\* C app' .tmp |\
+    egrep -v '^\*\* Fortran77 app'
+#
+# Try for ld messages
+sed -n -e '/Unresolved:/,/^[ ]*$/p' $1
+/bin/rm -f .tmp .tmp2

@@ -1,0 +1,51 @@
+#! /bin/sh
+#
+# ch_mpx
+#
+
+if [ $# -ne 3 ] ; then
+  exit 1
+fi
+
+case $1 in
+
+"mpich")
+  echo "ch_mpx: absorbing MPICH ..."
+  cd $2/lib/
+  ar x libmpich.a
+  ar x libpmpich.a
+  ar crl $3 *.o
+  rm *.o
+  cd -
+;;
+
+"mpich2")
+  echo "ch_mpx: absorbing MPICH2 ..."
+
+;;
+
+
+"lam/mpi")
+  echo "ch_mpx: absorbing LAM/MPI ..."
+  cd $2/lib/
+  ar x libmpi.a
+  cd -
+  ./mpx_rename $2/lib/ ".o" "..o"
+  cd $2/lib/
+  ar x liblam.a
+  ar crl $3 *.o
+  rm *.o
+  cd -
+;;
+
+"mvapich")
+  echo "ch_mpx: absorbing MVAPICH ..."
+  cd $2/lib/
+  ar x libmpich.a
+  ar x libpmpich.a
+  ar crl $3 *.o
+  rm *.o
+  cd -
+;;
+
+esac

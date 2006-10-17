@@ -1,0 +1,126 @@
+#
+#  $Id: Makefile.in 3534 2005-05-19 15:01:00Z tobias $
+#
+#
+##### User configurable options #####
+
+DEVICE       := ch_usock
+ARCH         := @ARCH@
+COMM         := @COMM@
+MPIR_HOME    := @MPIR_HOME@
+NT2UNIX_HOME := @MPIR_HOME@/mpid/nt2unix
+CC           := @CC@
+CXX          := @CXX@
+AR           := @AR@
+RANLIB       := @RANLIB@
+OPTFLAGS     := @OPTFLAGS@
+SHELL        := /bin/sh
+ASMFILES_O   :=
+prefix       := @prefix@
+top_srcdir   := @top_srcdir@
+srcdir       := @srcdir@
+libbuild_dir := @libbuild_dir@
+INCLUDE_DIR  := -I${top_srcdir}/include -I${top_srcdir}/src/coll \
+		-I${top_srcdir}/mpid/util -I${top_srcdir}/mpid/lfbs_common \
+		-I${top_srcdir}/mpid -I${top_srcdir}/mpid/$(DEVICE) \
+		-I${NT2UNIX_HOME}/include
+UseSharedLibs := @UseSharedLibs@
+### End User configurable options ###
+
+@VPATH@
+
+ALL: default
+
+LIBNAME  := ${libbuild_dir}/lib$(DEVICE).a
+
+CFLAGS   := @CFLAGS@ $(OPTFLAGS) $(INCLUDE_DIR) @OPTFLAGSC@ \
+	    -DMPI_@ARCH@ -DMPID_DEVICE_CODE @GETNAME_DEFS@ @DEVCFLAGS@ @DEFS@ -DUSE_NT2UNIX @DEV_DEFS@ \
+	    -DUSE_NT2UNIX
+
+CCFLAGS  := @CCFLAGS@  @CXXFLAGS@ $(INCLUDE_DIR) -DUSE_NT2UNIX
+
+CFLAGSNOOPT   := @CFLAGS@ $(INCLUDE_DIR) -DMPI_@ARCH@ \
+		-DMPID_DEVICE_CODE @GETNAME_DEFS@ @DEVCFLAGS@ @DEV_DEFS@ @DEFS@
+
+DEVSOURCE  := usockdebug.c usockbeager.c usockcancel.c usockinit.c usockpriv.cpp \
+              usockchkdev.c usockneager.c usockshort.c \
+              usocktcpcomm.c usockinsocket.c usockgetopt.c
+
+DEVOBJECTS := usockdebug.o usockbeager.o usockcancel.o usockinit.o usockpriv.o \
+              usockbrndv.o usockchkdev.o usockneager.o usockshort.o \
+              usocktcpcomm.o usockinsocket.o usockgetopt.o \
+	       $(ASMFILES_O) @DEVOFILES@ 
+
+DEVHEADERS := usockdev.h usockpriv.h usockinsocket.h usocktcpcomm.h usockpackets.h usockdebug.h usockgetopt.h \
+	      channel.h usockdev.h mpid.h mpid_threads.h cookie.h reqalloc.h mpid_bind.h req.h sbcnst2.h \
+	      adi2config.h chhetero.h comm.h datatype.h attach.h objtrace.h req.h reqrndv.h calltrace.h mpimem.h \
+              tr2.h dev.h sside_protocol.h adi3types.h flow.h mpid_debug.h mpid_common.h
+
+STL2C      := stl2c_basic.c stl2c_vector.c stl2c_list.c stl2c_map.c
+
+stl2c:  $(STL2C:.c=.o)
+	$(CC) -c $(STL2C)
+
+default: $(LIBNAME)
+	@echo "building nt2unix in directory ${NT2UNIX_HOME}"
+	$(MAKE) stl2c
+	@cd ${NT2UNIX_HOME}; $(MAKE)
+	$(AR) $(LIBNAME) $(NT2UNIX_HOME)/lib/*.o $(STL2C:.c=.o) USI/*.o
+	$(RANLIB) $(LIBNAME)
+
+$(LIBNAME): $(DEVOBJECTS) 
+	$(AR) $@ $?
+	$(RANLIB) $@
+
+$(DEVOBJECTS): $(DEVHEADERS)
+
+#usockpriv.o: usockpriv.cpp
+#	c++ $(CFLAGS) $(BASEOPT) -c $*.cpp $(MPI_PROFILE)
+
+# default_all is the same as default, but without the RANLIB.  This
+# can speed up the build (ranlibs can take a LONG time).  profile_all 
+# is the same, but for the profile library
+
+default_all: setlinks default_files
+default_files: default
+profile_all: 
+sharedlib: default
+	@(cd ${MPIR_HOME}; $(MAKE) sharedlibs; cd ${MPIR_HOME}/mpid/${DEVICE};)
+
+distclean: clean
+	@cd ${NT2UNIX_HOME}; $(MAKE) distclean
+	@for file in ${DEVHEADERS} ${DEVSOURCE} ; do  \
+	    if [ -h $$file ] ; then \
+	        /bin/rm -f $$file ; fi \
+	done
+	@if [ -d p2ptest -a -s p2ptest/Makefile ] ; then \
+	    /bin/rm -f p2ptest/Makefile ; fi
+	/bin/rm -f Makefile
+
+clean:	
+	@cd ${NT2UNIX_HOME}; $(MAKE) clean
+	/bin/rm -f *~ $(DEVOBJECTS) mprerr.o $(STL2C:.c=.o)
+
+setlinks:
+	@for file in $(DEVHEADERS) $(DEVSOURCE) ; do  \
+	    if [ ! -s $$file -a -s ../lfbs_common/$$file ] ; then \
+	 	ln -s ../lfbs_common/$$file $$file ; fi ; \
+	    if [ ! -s $$file -a -s ../ch2/$$file ] ; then \
+	 	ln -s ../ch2/$$file $$file ; fi ; \
+	    if [ ! -s $$file -a -s ../util/$$file ] ; then \
+		ln -s ../util/$$file $$file ; fi ; \
+	done
+
+.c.o:
+	$(CC) $(CFLAGS) $(BASEOPT) -c $*.c $(MPI_PROFILE)
+
+.cpp.o:
+	$(CXX) $(CCFLAGS) $(BASEOPT) -c $*.cpp $(MPI_PROFILE)
+
+.s.o:
+	as $*.s -o $*.o
+
+lint:
+	lint -chvuz -I../.. -I../../include -I../ch2 \
+		-I./ \
+	-DMPID_DEVICE_CODE $(SOURCE) $(LIBDEVSOURCE) ../util/queue.c ../util/cmnargs.c

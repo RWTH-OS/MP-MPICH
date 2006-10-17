@@ -1,0 +1,76 @@
+<html>
+
+<head>
+<title></title>
+</head>
+
+<body>
+
+<p><a href="../index.html">main</a></p>
+
+<p>::COMPILING MPICH APPLICATIONS: </p>
+
+<p>Here are the settings necessary to compile an mpi application written in C/C++ with MS
+Visual C++.</p>
+
+<p>Create a new makefile or project and make the following compiler settings:</p>
+
+<p>include path: 
+
+<ul>
+  <li>[MPICH Home]\include </li>
+</ul>
+
+<p>switches: 
+
+<ul>
+  <li>Debug - /MTd </li>
+  <li>Release - /MT </li>
+</ul>
+
+<p>libraries: </p>
+
+<blockquote>
+  <p>For tcp/ip shmem applications use:<ul>
+    <li>Debug - ws2_32.lib mpich_tcp_shmd.lib pmpich_tcp_shmd.lib </li>
+    <li>Release - ws2_32.lib mpich_tcp_shm.lib pmpich_tcp_shm.lib </li>
+    <li>Note: the pmpich*.lib libraries are only necessary if you make PMPI_ * calls in your
+      code.</li>
+  </ul>
+  <p>If you have Giganet hardware for VIA use:<ul>
+    <li>Debug - ws2_32.lib mpich_ipvishmd.lib pmpich_tcp_shmd.lib vipl.lib</li>
+    <li>Release - ws2_32.lib mpich_ipvishm.lib pmpich_tcp_shm.lib vipl.lib</li>
+    <li>Note: the pmpich*.lib libraries are only necessary if you make PMPI_ * calls in your
+      code.</li>
+  </ul>
+</blockquote>
+
+<p>lib path: 
+
+<ul>
+  <li>[MPICH Home]\lib </li>
+</ul>
+
+<p>Add your source files to the project and then build. </p>
+
+<p>&nbsp;</p>
+
+<p>VI applications.</p>
+
+<p>You need to tell the mpi application which processes can communicate by VI through an
+environment variable at runtime.&nbsp; <a href="via.html">VI instructions</a>.</p>
+
+<p>FORTRAN applications.</p>
+
+<p>You will have to set your compiler to use the &quot;C declaration by reference&quot;
+calling convention in order to link to the dlls.&nbsp; If you are not using Digital Visual
+Fortran then you will have to recompile mpich because I don't distribute the DVF
+libraries.&nbsp; You will have to change farg.f in the nt_fortran project to use the
+corresponding &quot;getarg&quot; and &quot;nargs&quot; calls provided by your compiler and
+set the USE lines to the appropriate modules. Look in farg.f and you'll see what I mean.</p>
+
+<p><a href="../index.html">main</a><br>
+<a href="compilingMPICH.html">Re-Building MPICH.NT</a><br>
+</p>
+</body>
+</html>

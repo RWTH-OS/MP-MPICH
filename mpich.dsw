@@ -1,0 +1,437 @@
+Microsoft Developer Studio Workspace File, Format Version 6.00
+# WARNUNG: DIESE ARBEITSBEREICHSDATEI DARF NICHT BEARBEITET ODER GELÖSCHT WERDEN!
+
+###############################################################################
+
+Project: "CPP"=".\MPI-2-C++\CPP.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "ampi"=".\mpe\ampi.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "ch_ntshmem"=".\mpid\ch_ntshmem\ch_ntshmem.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name romio
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name mpe
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name shmem_device
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "ch_ntshmem_meta"=".\mpid\ch_ntshmem\ch_ntshmem_meta.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name shmem_meta_device
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name mpe
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name romio
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "ch_smi"=".\mpid\ch_smi\ch_smi.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name romio
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name mpe
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name smi_device
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name smi
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "ch_smi_meta"=".\mpid\ch_smi\ch_smi_meta.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name romio
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name mpe
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name smi_meta_device
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name unix2nt
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "ch_usock"=".\MPID\ch_usock\ch_usock.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name mpe
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name romio
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name usock_device
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "ch_wsock2"=".\MPID\ch_wsock2\ch_wsock2.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name romio
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name wsock2_device
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name mpe
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "lmpi"=".\mpe\lmpi.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "mpe"=".\mpe\mpe.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name slog_api
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name mpe_client
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "mpe_client"=".\mpe\win_mpe_client\mpe_client.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "mpe_server"=".\mpe\win_mpe_server\mpe_server.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name ch_ntshmem
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "mpe_server_frontend"=".\mpe\win_mpe_server\Frontend\mpe_server_frontend.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name mpe_server
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "nt_fortran_bindings"=".\src\nt_fortran_bindings\nt_fortran_bindings.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "romio"=".\romio\romio.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "shmem_device"=".\mpid\ch_ntshmem\shmem_device.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "shmem_meta_device"=".\mpid\ch_ntshmem\shmem_meta_device.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "slog_api"=".\mpe\slog_api\slog_api.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "smi"=".\mpid\ch_smi\SMI\smi.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "smi_device"=".\mpid\ch_smi\smi_device.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "smi_meta_device"=".\mpid\ch_smi\smi_meta_device.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name unix2nt
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "smpi"=".\mpe\smpi.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "tmpi"=".\mpe\tmpi.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "unix2nt"=".\unix2nt\unix2nt.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "usock_device"=".\MPID\CH_USOCK\usock_device.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "wrappergen"=".\mpe\profiling\wrappergen\wrappergen.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "wsock2_device"=".\mpid\ch_wsock2\wsock2_device.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "wsock2static"=".\mpid\ch_wsock2\wsock2static.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name mpe
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name romio
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name wsock2_device
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Global:
+
+Package=<5>
+{{{
+}}}
+
+Package=<3>
+{{{
+}}}
+
+###############################################################################
+

@@ -1,0 +1,11 @@
+## Process this file with automake to produce Makefile.in
+## $Id: Makefile.am,v 1.1.2.1 2004/12/20 17:26:44 tobias Exp $
+
+noinst_LTLIBRARIES = libproper_shutdown.la
+
+AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/include
+
+SRCS = resource_list.c sci_desc.c watchdog.c
+
+libproper_shutdown_la_SOURCES = $(SRCS)
+

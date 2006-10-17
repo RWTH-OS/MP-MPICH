@@ -1,0 +1,1 @@
+--with-device=ch_smi --with-sisci=/usr/local/dolphin/active --disable-cxx --disable-romio --disable-mpe

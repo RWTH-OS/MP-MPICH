@@ -1,0 +1,100 @@
+#  (C) 1997 by Argonne National Laboratory and Mississipi State University.
+#      All rights reserved.  See COPYRIGHT in top-level directory.
+#
+
+CC          = @CC@
+F77         = @F77@
+AR          = @AR@
+RANLIB      = @RANLIB@
+OPTFLAGS    = @OPTFLAGS@
+OPTFLAGSC   = @OPTFLAGSC@
+prefix      = @prefix@
+top_srcdir  = @top_srcdir@
+srcdir      = @srcdir@
+libbuild_dir = @libbuild_dir@
+ARCH        = @ARCH@
+
+DEFS        = -DMPI_@ARCH@ -DMPIR_LIB_CODE @DEFS@ ${MPIPROFILE} -I. -I${srcdir} @mpich_includes@
+CFLAGS      = @CFLAGS@ 
+
+SHELL       = /bin/sh
+
+@VPATH@
+
+.SUFFIXES:
+.SUFFIXES: .o .c .f
+
+LIBS = ${libbuild_dir}/lib@MPILIBNAME@.a
+
+FFLAGS = @FFLAGS@ ${OPTFLAGS} @OPTFLAGSF@
+
+MPI_FOBJECTS = 
+MPI_COBJECTS = finalized.o requestc2f.o statusc2f.o statusf2c.o type_blkind.o\
+      subarray.o darray.o  info_create.o info_dup.o info_get.o info_getnth.o \
+      info_set.o info_delete.o info_free.o info_getnks.o info_getvln.o \
+      info_c2f.o info_f2c.o
+MPI_FSOURCES = 
+MPI_CSOURCES = finalized.c requestc2f.c statusc2f.c statusf2c.c type_blkind.c \
+               subarray.c darray.c info_create.c info_dup.c info_get.c \
+               info_getnth.c info_set.c info_delete.c info_free.c \
+                info_getnks.c info_getvln.c info_c2f.c info_f2c.c
+
+MPI_TSOURCES = 
+MPI_WSOURCES = finalizedf.c type_blkindf.c subarrayf.c darrayf.c \
+               info_createf.c info_dupf.c info_getf.c info_getnthf.c \
+               info_setf.c info_deletef.c info_freef.c info_getnksf.c \
+               info_getvlnf.c
+
+MPI_WOBJECTS = finalizedf.o type_blkindf.o subarrayf.o darrayf.o \
+               info_createf.o info_dupf.o info_getf.o info_getnthf.o \
+               info_setf.o info_deletef.o info_freef.o info_getnksf.o \
+               info_getvlnf.o
+
+
+MPI_SOURCES = ${MPI_CSOURCES} ${MPI_WSOURCES}
+MPI_OBJECTS = ${MPI_COBJECTS} ${MPI_WOBJECTS}
+
+default: ${libbuild_dir}/lib@MPILIBNAME@.a
+
+profile: ${libbuild_dir}/libp@MPILIBNAME@.a
+
+wrapperlib: ${MPI_WOBJECTS}
+	${AR} ${libbuild_dir}/libf@MPILIBNAME@.a $?	
+
+# default_all is the same as default, but without the RANLIB.  This
+# can speed up the build (ranlibs can take a LONG time).  profile_all 
+# is the same, but for the profile library
+default_all: default_objs
+default_objs: ${MPI_OBJECTS} @MPI_FOBJECTS@ 
+	${AR} ${libbuild_dir}/lib@MPILIBNAME@.a $?
+profile_all: ${MPI_OBJECTS} @MPI_FOBJECTS@
+	${AR} ${libbuild_dir}/libp@MPILIBNAME@.a $?
+
+${MPI_OBJECTS} :  ${MPI_INCLUDE}
+# We can't use a definition like this on some systems unless MPI_FOBJECTS is
+# non-null
+#${MPI_FOBJECTS} :  ${MPI_INCLUDE}
+
+source_names:
+	@echo ${MPI_CSOURCES}
+
+.c.o:
+	${CC} ${DEFS} ${INCLUDES} ${CFLAGS} ${OPTFLAGSC} ${OPTFLAGS} -c $<
+.f.o:
+	${F77} ${FFLAGS} -c $<
+
+${libbuild_dir}/lib@MPILIBNAME@.a: ${MPI_OBJECTS} @MPI_FOBJECTS@ 
+	${AR} $@ $?
+	${RANLIB} $@
+
+${libbuild_dir}/libp@MPILIBNAME@.a: ${MPI_OBJECTS} @MPI_FOBJECTS@
+	${AR} $@ $?
+	${RANLIB} $@
+
+# We need to clean the srcdir of any .o files because they can confuse the
+# VPATH build process
+clean:
+	@/bin/rm -f *.o *~ ${srcdir}/*.o
+
+distclean:
+	-rm -f Makefile

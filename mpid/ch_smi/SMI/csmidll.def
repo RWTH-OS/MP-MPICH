@@ -1,0 +1,67 @@
+; csmilib.def : Declares the module parameters for the DLL.
+
+LIBRARY      "csmidll"
+
+
+EXPORTS
+    ; Explicit exports can go here
+
+SMI_Init @1
+SMI_Finalize @2
+SMI_Abort @3
+SMI_Proc_rank @4
+SMI_Local_proc_rank @5
+SMI_Node_rank @6
+SMI_Proc_size @7
+SMI_Local_proc_size @8
+SMI_Max_local_proc_size @9
+SMI_Node_size @10
+SMI_Proc_to_node @11
+SMI_First_proc_on_node @12
+SMI_Query @13
+SMI_Create_shreg @14
+SMI_Connect_shreg @15
+SMI_Free_shreg @16
+SMI_Adr_to_region @17
+SMI_Region_layout @18
+SMI_Page_size @19
+SMI_Init_shregMMU @20
+SMI_Imalloc @21
+SMI_Cmalloc @22
+SMI_Ifree @23
+SMI_Cfree @24
+SMI_Mutex_destroy @25
+SMI_Mutex_lock @26
+SMI_Mutex_trylock @27
+SMI_Mutex_unlock @28
+SMI_Location_of_mutex @29
+SMI_Get_timer @40
+SMI_Get_timespan @41
+SMI_Wtime @42
+SMI_Get_ticks @43
+SMI_Check_transfer @44
+SMI_Check_transfer_addr @45
+SMI_Check_transfer_proc @46
+SMI_Init_PC  @47
+SMI_Reset_PC @48
+SMI_Increment_PC @49
+SMI_Get_PC @50
+SMI_Wait_individual_PC @51
+SMI_Wait_collective_PC @52
+SMI_Redirect_IO @53
+SMI_Memcpy @54
+SMI_Imemcpy @55
+SMI_Memwait @56
+SMI_Memtest @57
+SMI_MemwaitAll @58
+SMI_MemtestAll @59
+SMI_Debug @60
+SMI_Watchdog @61
+SMI_MUTEX_INIT @62
+SMI_BARRIER_INIT @63
+SMI_BARRIER_DESTROY @64
+SMI_BARRIER @65
+SMI_Signal_wait @74
+SMI_Signal_setCallBack @75
+SMI_Signal_joinCallBack @76
+SMI_Signal_send @77

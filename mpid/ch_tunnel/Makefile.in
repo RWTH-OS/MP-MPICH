@@ -1,0 +1,108 @@
+#
+#  $Id$
+#
+#  (C) 1993,1995 by Argonne National Laboratory and Mississipi State University.
+#      All rights reserved.  See COPYRIGHT in top-level directory.
+#
+# Eventually, there will be two sets of routines
+#
+#
+##### User configurable options #####
+
+DEVICE      := ch_tunnel
+META        := @META@
+ARCH        := @ARCH@
+COMM        := @COMM@
+MPIR_HOME   := @MPIR_HOME@
+INCLUDE_DIR := @INCLUDE_PATH@ -Impid/@DEVICE@ -Iinclude
+CC          := @CC@
+AR          := @AR@
+RANLIB      := @RANLIB@
+OPTFLAGS    := @OPTFLAGS@
+SHELL       := /bin/sh
+libbuild_dir := @libbuild_dir@
+top_srcdir  := @top_srcdir@
+DEFS        := @DEFS@ -I. -I${srcdir} @mpich_includes@ -DHAVE_MPICH_MPID_H \
+		-DMPID_DEVICE_CODE @GETNAME_DEFS@ @DEVCFLAGS@ @DEV_DEFS@
+UseSharedLibs := @UseSharedLibs@
+
+### End User configurable options ###
+
+
+ALL: default
+#ALL: libdev
+
+# In static libs one big libmpich.a is created because of interacting function calls
+# In case of shared libs we put tunnel and gateway to the mpidutil library
+ifeq ($(UseSharedLibs),1)
+LIBNAME  := ${libbuild_dir}/libmpidutil.a
+else
+LIBNAME  := ${libbuild_dir}/lib@MPILIBNAME@.a
+endif
+
+CFLAGS   := @CFLAGS@ $(OPTFLAGS) @OPTFLAGSC@ -I../$(DEVICE) \
+	   	-I../.. -I../../include -I./ -I../ch2 \
+		-I../util -I../../src/routing -I../../src/coll -I../../src/env \
+		-DMPID_DEVICE_CODE -DMPI_@ARCH@ @GETNAME_DEFS@ @DEVCFLAGS@ @DEV_DEFS@
+# See mpid/ch_adi2/Makefile.in for a full list
+
+DEVSOURCE := tunnelinit.c tunnelpriv.c tunnelshort.c tunneleager.c tunnelnrndv.c \
+	    tunnelchkdev.c $(ASMFILES_O) @DEVCFILES@
+
+DEVHEADERS := ../ch2/mpid.h chdef.h mpiddev.h @MPIR_HOME@/include/mpi.h \
+	     @MPIR_HOME@/include/metampi.h ../../src/routing/mpi_router.h
+
+DEVOBJECTS := tunnelinit.o tunnelpriv.o tunnelshort.o tunneleager.o tunnelnrndv.o tunnelchkdev.o \
+             $(ASMFILES_O) @DEVOFILES@
+
+
+default: $(LIBNAME)
+#$(DEVOBJECTS)
+# we have to touch the devobjects because LIBNAME already exists (the primary device) and
+# the objectfiles can be older than the library 
+#	@touch $(DEVOBJECTS)
+#	@sleep 2
+#	@make $(LIBNAME)
+
+$(LIBNAME): $(DEVOBJECTS)
+	@echo "META: adding tunnel device files ($(DEVOBJECTS)) to $(LIBNAME) ..."
+	$(AR) $@ $(DEVOBJECTS)
+	$(RANLIB) $@
+
+$(DEVOBJECTS): $(DEVHEADERS)
+
+# default_all is the same as default, but without the RANLIB.  This
+# can speed up the build (ranlibs can take a LONG time).  profile_all 
+# is the same, but for the profile library
+default_all: setlinks default_files
+default_files: $(DEVOBJECTS)
+	$(AR) $(LIBNAME) $?
+
+profile_all: 
+
+clean:
+	/bin/rm -f *~ $(DEVOBJECTS)
+
+distclean: clean
+	@for file in ${DEVHEADERS} ${DEVSOURCE} ; do  \
+	    if [ -h $$file ] ; then \
+	        /bin/rm -f $$file ; fi \
+	done
+	-rm -f Makefile
+
+setlinks:
+	@for file in $(DEVSOURCE) ; do  \
+	    if [ ! -s $$file -a -s ../ch2/$$file ] ; then \
+	 	ln -s ../ch2/$$file $$file ; fi ; \
+	    if [ ! -s $$file -a -s ../util/$$file ] ; then \
+		ln -s ../util/$$file $$file ; fi ; \
+	done
+.c.o:
+	@if [ ! -s $*.c ] ; then ln -s ../ch2/$*.c $*.c ; fi
+	$(CC) $(CFLAGS) $(BASEOPT) -c $*.c $(MPI_PROFILE)
+
+.o.s:
+	$(CC) $(CFLAGS) $(BASEOPT) -c -S $*.c $(MPI_PROFILE)
+
+
+.PHONY : $(LIBNAME)

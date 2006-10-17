@@ -1,0 +1,70 @@
+
+readme-file for rcluma 
+
+
+rcluma.exe is a RPC Server for ntrexec and RexecShell
+
+
+
+file description of windows source code:
+
+Message Compiler:
+
+messages.mc:	definition file for the Message Compiler (mc.exe)
+				
+				this file is responsible for the messages of the event logging
+				(Systemsteuerung->Verwaltung->Ereignisanzeige)
+
+				
+				some entries:
+
+				MessageID=<[digit| +digit]>
+				16 Bit value for message identification
+				
+				SymbolicName=<SymbolName>
+				name of the message to use in the generated headerfile
+
+				Severity=<Success,Informational,Warning,Error>
+				type of message
+
+				Language=<LanguageName>
+				<message text>
+				.
+
+				one supported language of this message followed by message text 
+				terminated by a line containing a single period
+
+
+				the message compiler generated files:
+
+				messages.rc
+					Ressource Control Script contains used languages and specifies the .bin-file(s) 
+
+				messages.h
+					definitions for message codes
+
+				MSGxxxxx.bin
+				    this binary file contains the message texts (one .bin-file for each supported language)
+
+
+
+				further information:  mc.hlp
+
+
+
+Remote Procedure Call:
+
+cluma.idl:		This file (interface definition file) contains type definitions, attributes and function prototypes
+				that describe how data is transmitted on the network.
+				The uuid is an unique identifier for the RPC communication.
+
+
+cluma.acf:		This application configuration file contains the abstract interface definition.
+
+
+				The MIDL compiler (MIDL.EXE) generates the header file cluma.h and server stubs cluma_s.c 
+				using the idl and acf-files.
+			
+
+
+

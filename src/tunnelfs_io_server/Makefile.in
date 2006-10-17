@@ -1,0 +1,93 @@
+###########################################################################
+# TunnelFS IO Server                                                      # 
+###########################################################################
+#                                                                         # 
+# Copyright (c) 2005 Forschungszentrum Juelich GmbH, Germany              # 
+# Copyright (c) 2005 University of Applied Science Bonn-Rhein-Sieg,       #
+#     Germany                                                             #
+#                                                                         # 
+# See COPYRIGHT notice in base directory for details                      # 
+###########################################################################
+###########################################################################
+# File:         Makefile.in                                               # 
+# Description:  Skeleton for Makefile                                     # 
+# Author(s):    Marc-Andre Hermanns <m.a.hermanns@fz-juelich.de>          # 
+###########################################################################
+
+CC          = @@CC@
+F77         = @@F77@
+AR          = @@AR@
+RANLIB      = @@RANLIB@
+prefix      = @prefix@
+exec_prefix = ${prefix}
+bindir      = ${exec_prefix}/bin
+top_srcdir  = @top_srcdir@
+srcdir      = @srcdir@
+MPILIB      = @LIBNAME@
+execname    = tunnelfs_io_server
+
+INSTALL     = `which install`
+
+CFLAGS      = @CFLAGS@ \
+                -D NOLOGGING -ansi -Wall -g -lpthread \
+                -I $(top_srcdir)/adio/ad_tunnelfs/ \
+                -I $(top_srcdir)/adio/ad_memfs/ \
+                -I $(top_srcdir)/adio/common/ \
+                -I $(top_srcdir)/adio/include
+
+OBJS        = tunnelfs_log.o \
+              tunnelfs_srv.o \
+              tunnelfs_srv_buffer.o \
+              tunnelfs_srv_coll.o \
+              tunnelfs_srv_comm.o \
+              tunnelfs_srv_comminfo.o \
+              tunnelfs_srv_datatype.o \
+              tunnelfs_srv_file.o \
+              tunnelfs_srv_fileinfo.o \
+              tunnelfs_srv_fileview.o \
+              tunnelfs_srv_fptr.o \
+              tunnelfs_srv_ioreq.o \
+              tunnelfs_srv_info.o \
+              tunnelfs_srv_main.o \
+              tunnelfs_srv_parts.o \
+              tunnelfs_srv_schedule.o \
+              tunnelfs_srv_service.o \
+              tunnelfs_srv_sync.o
+
+@VPATH@
+
+default: clean install
+
+tidy:
+	@echo [Cleaning up source code]
+	@indent *.c *.h
+	@rm -f *.c~ *.h~
+
+clean:
+	@echo [Deleting object files]
+	@rm -f *.o $(execname)
+
+distclean: clean
+	@rm -f Makefile
+
+all: clean lib
+
+%.o: %.c %.h
+	@echo [Building $@]
+	$(CC) -c $*.c -o $@ $(CFLAGS)
+
+%.o: %.c  
+	@echo [Building $@]
+	$(CC) -c $*.c -o $@ $(CFLAGS)
+
+lib: $(OBJS)
+	$(AR) $(MPILIB) $(OBJS)
+
+binary: tunnelfs_io_server.c lib
+	@echo [Linking $(execname)]
+	$(CC) tunnelfs_io_server.c $(OBJS) -o $(execname) $(CFLAGS)
+
+install: binary
+	@echo [Installing $(execname)]
+	@cp tunnelfs_io_server $(bindir); 
+	@chmod 755 $(bindir)/tunnelfs_io_server;

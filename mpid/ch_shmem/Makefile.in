@@ -1,0 +1,114 @@
+#
+#  $Id$
+#
+#  (C) 1993,1995 by Argonne National Laboratory and Mississipi State University.
+#      All rights reserved.  See COPYRIGHT in top-level directory.
+#
+# Eventually, there will be two sets of routines
+#
+#
+##### User configurable options #####
+
+DEVICE        := ch_shmem
+CC            := @CC@
+AR            := @AR@
+RANLIB        := @RANLIB@
+OPTFLAGS      := @OPTFLAGS@
+SHELL         := /bin/sh
+ASMFILES_O    := 
+prefix        := @prefix@
+top_srcdir    := @top_srcdir@
+srcdir        := @srcdir@
+libbuild_dir  := @libbuild_dir@
+DEFS          := @DEFS@ @GETNAME_DEFS@ @DEVCFLAGS@ @DEV_DEFS@ \
+		 -DMPID_DEVICE_CODE -DHAVE_SHMEM_MPID_H
+INCLUDE_DIR   := -I${top_srcdir}/include \
+		 -I${top_srcdir}/mpid/util \
+                 -I${top_srcdir}/mpid -I${top_srcdir}/mpid/$(DEVICE)
+UseSharedLibs := @UseSharedLibs@
+
+### End User configurable options ###
+
+@VPATH@
+
+ALL: default
+
+LIBNAME  := ${libbuild_dir}/lib$(DEVICE).a
+
+CFLAGS   := @CFLAGS@  $(INCLUDE_DIR) $(OPTFLAGS) @OPTFLAGSC@ \
+	   -DMPID_DEVICE_CODE @GETNAME_DEFS@ @DEVCFLAGS@ @DEV_DEFS@
+CFLAGSNOOPT  := @CFLAGS@ $(INCLUDE_DIR) \
+		-DMPID_DEVICE_CODE @GETNAME_DEFS@ @DEVCFLAGS@ @DEV_DEFS@
+# See mpid/ch2/Makefile.in for a full list
+# Many of the chxxxx files are replaced with shmemxxxx files because the
+# shared memory version uses a slightly different form, in particular, it
+# allocates packets from a shared area rather than on the call stack.
+# chbeager.c chbrndv.c 
+DEVSOURCE  := shmemdebug.c shmemchkdev.c shmemshort.c shmemneager.c shmemsysv.c \
+	      shmemnrndv.c shmempriv.c shmeminit.c shmemcancel.c p2p.c @DEVCFILES@
+
+DEVHEADERS := adi2config.h dev.h mpid.h req.h comm.h datatype.h chhetero.h attach.h objtrace.h \
+	      calltrace.h cookie.h mpid_bind.h reqrndv.h reqalloc.h tr2.h mpimem.h shmemsysv.h \
+	      sbcnst2.h flow.h chpackflow.h mpid_threads.h sside_protocol.h adi3types.h mpid_common.h
+
+DEVOBJECTS := shmemdebug.o shmemchkdev.o shmemshort.o shmemneager.o shmemsysv.o \
+              shmemnrndv.o shmempriv.o p2p.o shmeminit.o shmemcancel.o \
+	      $(ASMFILES_O) @DEVOFILES@
+
+default: $(LIBNAME)
+
+$(LIBNAME): $(DEVOBJECTS) 
+	$(AR) $@ $?
+	$(RANLIB) $@
+
+$(DEVOBJECTS): ${top_srcdir}/mpid/ch2/mpid.h ${srcdir}/shmemdev.h
+
+#
+# shmempriv is sensitive to memory access ordering.  Despite the use
+# of VOLATILE statements, some compilers may be over-aggressive when
+# compiling this file.  
+#
+shmempriv.o: ${srcdir}/shmempriv.c
+	$(CC) ${DEFS} $(CFLAGSNOOPT) -c ${srcdir}/shmempriv.c
+
+# default_all is the same as default, but without the RANLIB.  This
+# can speed up the build (ranlibs can take a LONG time).  profile_all 
+# is the same, but for the profile library
+default_all: setlinks default_files
+default_files: $(DEVOBJECTS)
+	$(AR) $(LIBNAME) $?
+
+profile_all: 
+
+clean:
+	-rm -f *~ $(DEVOBJECTS) libmpid.a ${srcdir}/*.o
+
+# 
+# This doesn't remove the symbolic links, because there is no general easy
+# way to identify that a filename is really a link (test -l works only on a 
+# few systems; test -h works on more but not all).
+distclean: clean
+	@for file in ${DEVHEADERS} ${DEVSOURCE} ; do  \
+	    if [ -h $$file ] ; then \
+	        rm -f $$file ; fi \
+	done
+	@if [ -d p2ptest -a -s p2ptest/Makefile ] ; then \
+	    rm -f p2ptest/Makefile ; fi
+	-rm -f Makefile config.log config.status localdefs shmem-mpid.h
+
+setlinks:
+	@for file in $(DEVSOURCE) $(DEVHEADERS) ; do  \
+	    if [ ! -s $$file -a -s ${top_srcdir}/mpid/ch2/$$file ] ; then \
+	 	ln -s ${top_srcdir}/mpid/ch2/$$file $$file ; fi ; \
+	    if [ ! -s $$file -a -s ${top_srcdir}/mpid/util/$$file ] ; then \
+		ln -s ${top_srcdir}/mpid/util/$$file $$file ; fi ; \
+	done
+
+.c.o:
+	$(CC) ${DEFS} $(CFLAGS) -c $< $(MPI_PROFILE)
+
+configure: configure.in ../../aclocal.m4
+	autoheader --localdir=../..
+	autoconf   --localdir=../..
+
+

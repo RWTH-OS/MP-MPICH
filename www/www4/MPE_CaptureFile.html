@@ -1,0 +1,32 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML3.2 EN">
+<HTML>
+<HEAD>
+<META NAME="GENERATOR" CONTENT="DOCTEXT">
+<TITLE>MPE_CaptureFile</TITLE>
+</HEAD>
+<BODY BGCOLOR="FFFFFF">
+<A NAME="MPE_CaptureFile"><H1>MPE_CaptureFile</H1></A>
+Sets the base filename used to capture output from updates 
+<H2>Synopsis</H2>
+<PRE>
+#include &lt;stdio.h&gt;
+#include "mpe.h"
+int MPE_CaptureFile( handle, fname, freq )
+MPE_XGraph handle;
+char       *fname;
+int        freq;
+</PRE>
+<H2>Input Parameters</H2>
+<TABLE BORDER=0>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>handle </B></TD><TD VALIGN=TOP>MPE graphics handle
+<BR></TD></TR>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>fname  </B></TD><TD VALIGN=TOP>base file name (see below)
+<BR></TD></TR>
+<TR><TD WIDTH=20></TD><TD ALIGN=LEFT VALIGN=TOP><B>freq   </B></TD><TD VALIGN=TOP>Frequency of updates
+<BR></TD></TR></TABLE>
+<P>
+<H2>Notes</H2>
+The output is written in xwd format to <TT>fname%d</TT>, where <TT>%d</TT> is the number
+of the file (starting from zero).
+<P><B>Location:</B>mpe_graphics.c<P>
+</BODY></HTML>

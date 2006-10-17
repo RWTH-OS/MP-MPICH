@@ -1,0 +1,849 @@
+#  
+# $Id$
+#
+# create Makefile from this file with configure script
+
+# our main version number
+MPMPICHVERSION := @PACKAGE_VERSION@
+
+##### User configurable options #####
+LARCH       := @ARCH@
+META        := @META@
+DEVICES     := @DEVICES@
+DEVICE_DIRS := @DEVICE_DIRS@
+MPIRUNLIST  := @MPIRUNLIST@
+COMM        := @COMM@
+MPIR_HOME   := @MPIR_HOME@
+MAKE        := @MAKE@
+AR          := @AR@
+RANLIB      := @RANLIB@
+CPRP        := @CPRP@
+CC          := @CC@
+CLINKER     := @CLINKER@
+RSHCOMMAND  := @RSHCOMMAND@
+DEFAULT_MACHINE   := @DEFAULT_MACHINE@
+DEFAULT_DEVICE    := @DEFAULT_DEVICE@
+ROMIO       := @ROMIO@
+ROMIO_DIR   := @ROMIO_DIR@
+CXX         := @CXX@
+CCLINKER    := @CCLINKER@
+F77         := @F77@
+NOMPE       := @NOMPE@
+MPILIBNAME  := @MPILIBNAME@
+MPIOLIBNAME := @MPIOLIBNAME@
+HAS_WEAK_SYMBOLS := @HAS_WEAK_SYMBOLS@
+ENABLE_MPEDBG := @ENABLE_MPEDBG@
+MPE_OPTS    := @MPE_OPTS@
+JUMSHOT_OPTS := @JUMPSHOT_OPTS@
+
+INSTALL         := @INSTALL@
+INSTALL_DATA    := @INSTALL_DATA@
+INSTALL_PROGRAM := @INSTALL_PROGRAM@
+INSTALL_SCRIPT  := @INSTALL_SCRIPT@
+LN_S            := @LN_S@
+
+### End User configurable options ###
+
+SHELL := /bin/bash
+
+@VPATH@
+
+MPIDIRS  := src/pt2pt src/env src/dmpi src/util src/context src/coll \
+	   src/topol src/profile mpid/ch2 mpid/util \
+	   src/ssided src/infoexport
+MPI2DIRS := src/misc2 src/external
+
+ifeq ($(META),yes)
+MPIDIRS  += src/routing
+METADEVS := mpid/ch_tunnel mpid/ch_gateway
+endif
+
+DIRS     := $(MPIDIRS) $(MPI2DIRS) $(DEVICE_DIRS) $(METADEVS) examples src/routing
+
+# This is a list of the devices that are available
+AVAILDEVICES  := mpid/ch_p4 mpid/ch_lfshmem mpid/ch_shmem mpid/ch_smi mpid/ch_usock mpid/ch_gm $(METADEVS)
+
+# Installation directories
+prefix           := @prefix@
+exec_prefix      := @exec_prefix@
+bindir           := @bindir@
+sbindir          := @sbindir@
+includedir       := @includedir@
+libdir           := @libdir@
+mandir           := @mandir@
+datadir          := @datadir@
+messagecat_dir   := @messagecat_dir@
+sharedlib_dir    := @sharedlib_dir@
+# Build directories
+libbuild_dir     := @libbuild_dir@
+binbuild_dir     := @binbuild_dir@
+includebuild_dir := @includebuild_dir@
+top_srcdir       := @top_srcdir@
+srcdir           := @srcdir@
+
+STATICLIBNAMES    := @STATICLIBNAMES@
+DYNAMICLIBNAMES   := @DYNAMICLIBNAMES@
+STATICLIBS_TARGET := staticlibs_multidev
+
+use_shared_libs  := @UseSharedLibs@
+ifeq ($(use_shared_libs),1)
+LIBS_TARGET_SHARED := sharedlibs $(STATICLIBS_TARGET)
+endif
+
+#
+# Build the device(s) FIRST in case the device include, used in mpiimpl.h,
+# needs to be built (e.g., ch_p4 device)
+# We need MPI2DIRS for the Fortran interface, among other things
+DEVDIRS := $(DEVICE_DIRS) $(METADEVS) 
+LIBDIRS := $(MPIDIRS) $(MPI2DIRS) 
+
+ALL: mpi
+
+#
+# The order here was chosen to identify problems early in the build
+# In particular, we try a linktest as soon as the libraries are available,
+# with a second link test after the profiling libraries are built just to
+# be sure that they still succeed.  There are "make clean"s around the 
+# whole thing so that there is reduced danger of finding the "wrong" 
+# object files .
+#
+# Notes on C++ interface:
+# This is still incomplete.  In particular, there are a LOT of include
+# files, including one name "config.h" in the C++ interface.  The
+# C++ library is named libmpi++.a .
+#	${top_srcdir}/makelinks
+mpi: clean rmlib
+	@echo ""
+	@echo "*# building devices"
+	@$(MAKE) mpidevs
+	@echo ""
+	@echo "*# building MPI library (C)"
+	@$(MAKE) mpilib
+	@echo "*#  building MPI library (Fortran)"
+	@$(MAKE) mpiflib
+	@echo ""
+	@$(MAKE) profile
+	@if [ $(ROMIO) = 1 -a -d romio ] ; then \
+	    echo "" ; \
+	    echo "*# building MPI-IO (ROMIO) in ${ROMIO_DIR}" ;  \
+            (cd ${ROMIO_DIR} ; $(MAKE) )    \
+        fi
+	@-if [ -s f90modules/Makefile -a -n "@F90MODINC@" ] ; then \
+	    echo "" ; \
+	    echo "*# building Fortran 90 module for MPI" ; \
+	    (cd f90modules ; $(MAKE) ) ;\
+	fi
+	@$(MAKE) mpelib
+	@$(MAKE) profileliblink
+	@-if [ "$(use_shared_libs)" = 1 ] ; then \
+		touch $(STATICLIBNAMES) $(libbuild_dir)/libmpidutil.a ;\
+		if [ $(ROMIO) = 1 -a -d ${ROMIO_DIR} ] ; then \
+			for devlib in " " @ROMIO_DEVLIBS@ ;\
+			do \
+				devlib=lib`echo $$devlib | sed s/-l//`.a ; \
+				if [ -r "$(libbuild_dir)/$$devlib" ] ; then \
+			   		touch $(libbuild_dir)/$$devlib ;\
+				fi ;\
+			done ; \
+		fi ;\
+		sleep 2; \
+		echo"" ;\
+		echo "*# building shared libraries" ;\
+		$(MAKE) sharedlibs ;\
+		echo"" ;\
+		echo "*# creating  unified static libraries" ;\
+		$(MAKE) $(STATICLIBS_TARGET) ;\
+		if [ $(ROMIO) = 1 -a -d ${ROMIO_DIR} ] ; then \
+			$(MAKE) staticlibs_romio ; \
+		fi ; \
+	else \
+		echo "" ; \
+		echo "*# building NO shared libraries" ; \
+	fi
+	@-if [ "$(CXX)" -a -d MPI-2-C++ ] ; then \
+		echo "" ; \
+		echo "*# building C++ interface" ; \
+		$(MAKE) cpplib ; \
+		if [ "$(use_shared_libs)" = 1 ] ; then \
+			$(MAKE) sharedlibs_cpp ; \
+		fi ; \
+	fi
+ifeq ($(META),yes)
+	@echo "building dedicated meta router"
+	@$(MAKE) metarouter
+endif
+
+	@echo ""
+	@echo "*# Testing that MPI applications can be linked..."
+	@$(MAKE) linktest
+	@echo '--->'
+	@echo "Completed build of MP-MPICH ${MPMPICHVERSION}. Check the output for errors"
+	@echo "Also try executing 'make testing' in examples/test"
+	@echo " "
+	@echo "Send comments to mp-mpich@lfbs.rwth-aachen.de; bug reports"
+	@echo "can be submitted directly using Trac at"
+	@echo "https://svn.lfbs.rwth-aachen.de/projects/mp-mpich"
+	@echo " "
+	@echo "With any bug report, please send:"
+	@echo "  - the version of MP-MPICH (${MPMPICHVERSION})"
+	@echo "  - the output of running your program with the -mpiversion argument"
+	@echo "    (e.g., mpirun -np 1 a.out -mpiversion)"
+	@echo "  - the output of uname -a for your system. "
+	@echo " "
+	@echo "If the problem is with a script like configure or mpirun, run the"
+	@echo "script with the -echo argument "
+	@echo "(e.g., mpirun -echo -np 4 a.out )"
+	@echo " "
+	@echo "If you are using a network of workstations, also send the output of"
+	@echo "${binbuild_dir}/tstmachines."
+	@echo '---<'
+
+metarouter:
+	@cd src/routing; $(MAKE) metarouter; cp metarouter ../../bin; cd ../..
+examples: ${binbuild_dir}/mpirun
+	cd examples ; $(MAKE) default
+
+#
+# When building shared *and* static libs, the user might wish to use static libs
+# for performance or conveniance reasons. This it not possible with the
+# static libs having the same modulized structure as the shared libs (for
+# symbol resolving reaonns); instead we have to put everything into one
+# big libmpich.a again.
+# This target is not required if MP-MPICH was configured to build only
+# static libraries - in this case, the Makefiles are set up to put 
+# everything into one library archive right on compile time.
+#
+# We need to remove the old static core libraries and then rebuild them because
+# they may contain the code from the other libraries if we don't do so. 
+# This would lead to confusion if we in turn would create the shared library
+# from this unified libary core again.
+#
+# Likewise, for profiling without weak symbols, we need to rebuild the 
+# libraries from source to make sure that we get the right object files into 
+# the library. This could possibly be optimized, but as weak symbols usually
+# are available, this overhead should rarely occur.
+#
+# The 'touch' of the shared libs at the end avoids that the shared libs will be
+# rebuild due to the modified static libs on the next build - this has to be avoided
+# as the contents of the static mpich lib is a superset of the shared libs!
+# Use the target 'libs' to clean this up manually, if necessary.
+staticlibs_multidev: 
+	@echo "  MPI core library"
+	@rm -f $(libbuild_dir)/lib$(MPILIBNAME).a
+	@if [ "$(HAS_WEAK_SYMBOLS)" = 0 ] ; then \
+		echo "  cleaning and re-building non-profiling library"; \
+		$(MAKE) clean ; \
+	fi
+	@$(MAKE) mpilib
+	@if [ "$(HAS_WEAK_SYMBOLS)" = 1 ] ; then \
+		if [ ! -f $(libbuild_dir)/libp$(MPILIBNAME).a ] ; then \
+			$(LN_S) $(libbuild_dir)/lib$(MPILIBNAME).a \
+		$(libbuild_dir)/libp$(MPILIBNAME).a ; \
+		fi ; \
+	fi
+	@sleep 3;
+	@touch $(DYNAMICLIBNAMES) $(libbuild_dir)/shared/libmpidutil.so \
+	   $(libbuild_dir)/shared/lib$(MPILIBNAME).so
+
+	@if [ "$(HAS_WEAK_SYMBOLS)" = 0 ] ; then \
+		@echo "  cleaning and re-building profiling library"; \
+		$(MAKE) clean ; \
+		$(MAKE) profile ; \
+		sleep 3; \
+		touch $(DYNAMICLIBNAMES) $(libbuild_dir)/shared/libmpidutil.so \
+		   $(libbuild_dir)/shared/libp$(MPILIBNAME).so; \
+	fi
+	@if [ $(ROMIO) = 1 -a -d ${ROMIO_DIR} -a ! -f $(libbuild_dir)/libp$(MPIOLIBNAME).a ] ; then \
+		$(LN_S) $(libbuild_dir)/lib$(MPIOLIBNAME).a \
+		$(libbuild_dir)/libp$(MPIOLIBNAME).a ; \
+	fi 
+
+staticlibs: 
+	@echo "  MPI core library"
+	@rm -f $(libbuild_dir)/lib$(MPILIBNAME).a
+	@if [ "$(HAS_WEAK_SYMBOLS)" = 0 ] ; then \
+		echo "  cleaning and re-building non-profiling library"; \
+		$(MAKE) clean ; \
+	fi
+	@$(MAKE) mpilib
+	@if [ "$(HAS_WEAK_SYMBOLS)" = 1 ] ; then \
+		if [ ! -f $(libbuild_dir)/libp$(MPILIBNAME).a ] ; then \
+			$(LN_S) $(libbuild_dir)/lib$(MPILIBNAME).a \
+		$(libbuild_dir)/libp$(MPILIBNAME).a ; \
+		fi ; \
+	fi
+	@( rm -rf $(libbuild_dir)/tmp ; \
+	   mkdir $(libbuild_dir)/tmp ; \
+	   cd $(libbuild_dir)/tmp ; \
+	   for i in $(DEVICES); do ar x $(libbuild_dir)/lib$$i.a; done ; \
+	   ar x $(libbuild_dir)/libmpidutil.a ; \
+	   $(AR) $(libbuild_dir)/lib$(MPILIBNAME).a *.o ; \
+	   cd $(libbuild_dir); $(RANLIB) $(libbuild_dir)/lib$(MPILIBNAME).a; \
+	   cd $(MPIR_HOME) ; rm -rf $(libbuild_dir)/tmp; \
+	   sleep 3; \
+	   for i in $(DEVICES); do touch $(libbuild_dir)/shared/lib$i.so; done; \
+	   touch $(libbuild_dir)/shared/libmpidutil.so \
+	   $(libbuild_dir)/shared/lib$(MPILIBNAME).so )
+	@if [ "$(HAS_WEAK_SYMBOLS)" = 0 ] ; then \
+		@echo "  cleaning and re-building profiling library"; \
+		$(MAKE) clean ; \
+		$(MAKE) profile ; \
+		rm -rf $(libbuild_dir)/tmp ; \
+		mkdir $(libbuild_dir)/tmp ; \
+		cd $(libbuild_dir)/tmp ; \
+		for i in $(DEVICES); do ar x $(libbuild_dir)/lib$$i.a; done ; \
+		ar x $(libbuild_dir)/libmpidutil.a ; \
+		$(AR) $(libbuild_dir)/libp$(MPILIBNAME).a *.o ; \
+		cd $(libbuild_dir); $(RANLIB) $(libbuild_dir)/libp$(MPILIBNAME).a; \
+		cd $(MPIR_HOME) ; rm -rf $(libbuild_dir)/tmp; \
+		sleep 3; \
+		for i in $(DEVICES); do touch $(libbuild_dir)/shared/lib$$i.so; done; \
+		touch $(libbuild_dir)/shared/libmpidutil.so \
+		$(libbuild_dir)/shared/libp$(MPILIBNAME).so; \
+	fi
+	if [ $(ROMIO) = 1 -a -d ${ROMIO_DIR} -a ! -f $(libbuild_dir)/libp$(MPIOLIBNAME).a ] ; then \
+		$(LN_S) $(libbuild_dir)/lib$(MPIOLIBNAME).a \
+		$(libbuild_dir)/libp$(MPIOLIBNAME).a ; \
+	fi 
+
+staticlibs_romio: 
+	@echo "  MPI-IO library"
+	@rm -f $(libbuild_dir)/lib$(MPIOLIBNAME).a
+	@cd ${ROMIO_DIR} ; $(MAKE)
+	@rm -rf $(libbuild_dir)/tmp ; \
+	mkdir $(libbuild_dir)/tmp ; \
+	cd $(libbuild_dir)/tmp ; \
+	for devlib in @ROMIO_DEVLIBS@ ;\
+	do \
+		devlib=lib`echo $$devlib | sed s/-l//`.a ; \
+	   	ar x $(libbuild_dir)/$$devlib ;\
+		$(AR) $(libbuild_dir)/libmpio.a *; \
+		rm -f $(libbuild_dir)/tmp/* ; \
+	done ; \
+	cd $(MPIR_HOME) ; rm -rf $(libbuild_dir)/tmp ; \
+	$(RANLIB) $(libbuild_dir)/lib$(MPIOLIBNAME).a
+
+# 
+# This is an experimental target.  We do only the libraries that we know 
+# about.
+# Note that we do *not* include the Fortran MPI_Init and its support 
+# routines in the (C) shared libraries.  This is required for the Solaris
+# shared libraries; if these files are not excluded, then the application
+# will fail to link (even though no code even *references* the routines that 
+# are used)!
+#
+# You will probably need to add @libbuild_dir@/shared to your LD_LIBRARY_PATH
+# variable.  This value will need to be part of your environment, so that
+# all programs will see it (including ones started on remote hosts).
+#
+# The ar at the end puts the Fortran MPI_Init and the routine that
+# it calls to get getarg and iargc into a separate library.  This
+# is needed for shared lib support
+# Note that if there is no Fortran support, then we don't build the farg
+# library
+sharedlibs:  $(libbuild_dir)/shared/lib$(MPILIBNAME).so \
+		 $(libbuild_dir)/shared/libf$(MPILIBNAME).so \
+		 $(DYNAMICLIBNAMES) \
+		 $(libbuild_dir)/shared/libmpidutil.so
+	if [ "$(HAS_WEAK_SYMBOLS)" = 0 ] ; then \
+		$(MAKE) sharedlibs_profiling ; \
+	else \
+		cd $(libbuild_dir)/shared; \
+		rm -f libp$(MPILIBNAME).so; \
+		$(LN_S) lib$(MPILIBNAME).so libp$(MPILIBNAME).so; \
+		if test $(ROMIO) = 1 && test -d ${MPIR_HOME}/${ROMIO_DIR}; then \
+			rm -f libp$(MPIOLIBNAME).so; \
+			$(LN_S) lib$(MPIOLIBNAME).so libp$(MPIOLIBNAME).so; \
+		fi \
+	fi
+	if [ $(NOMPE) = 0 ] ; then \
+		$(MAKE) sharedlibs_mpe ; \
+	fi
+	if [ $(ROMIO) = 1 -a -d ${ROMIO_DIR} ] ; then \
+		$(MAKE) sharedlibs_romio ; \
+	fi
+	if [ -r lib/libmpichf90.a ] ; then \
+	    $(MAKE) sharedlibs_f90 ; \
+	fi
+
+sharedlibs_profiling: $(libbuild_dir)/shared/libp$(MPILIBNAME).so \
+			$(libbuild_dir)/shared/libp$(MPIOLIBNAME).so 
+
+sharedlibs_f90: $(libbuild_dir)/shared/lib$(MPILIBNAME)f90.so \
+		$(libbuild_dir)/shared/lib$(MPILIBNAME)f90nc.so
+
+sharedlibs_mpe: $(libbuild_dir)/shared/libampi.so \
+		 $(libbuild_dir)/shared/liblmpi.so \
+		 $(libbuild_dir)/shared/libmpe.so \
+		 $(libbuild_dir)/shared/libmpe_nompi.so \
+		 $(libbuild_dir)/shared/libtmpi.so \
+		 $(libbuild_dir)/shared/libpapimpi.so \
+		 $(libbuild_dir)/shared/libstatmpi.so 
+
+sharedlibs_romio: $(libbuild_dir)/shared/lib$(MPIOLIBNAME).so
+	@-for devlib in @ROMIO_DEVLIBS@ @ROMIO_DEVPLIBS@ ;\
+	do \
+	devlib=`echo $$devlib | sed s/-l//` ; \
+	cd $(libbuild_dir) ; \
+	CC="$(CC)" ; export CC ; CLINKER="$(CLINKER)" ; export CLINKER ; \
+	    if [ ! -s  $(libbuild_dir)/shared/lib$${devlib}.so  \
+                 -o $(libbuild_dir)/lib$${devlib}.a -nt $(libbuild_dir)/shared/lib$${devlib}.so ] ; then \
+	      ${top_srcdir}/util/makesharedlib -exceptobjs="farg.o farg90.o initf.o" -lib=lib$${devlib}.a -kind=@SHAREDKIND@ @SHAREDKEEPOBJS@ ; \
+            fi ; \
+	done
+
+sharedlibs_cpp: $(libbuild_dir)/shared/libmpich++.so
+
+$(libbuild_dir)/shared/libmpich++.so: $(libbuild_dir)/libmpich++.a
+	cd $(libbuild_dir); \
+	CC="$(CXX)"; export CC; CLINKER="$(CCLINKER)"; export CLINKER; \
+	      ${top_srcdir}/util/makesharedlib -exceptobjs="farg.o farg90.o initf.o" -lib=libmpich++.a -kind=@SHAREDKIND@ @SHAREDKEEPOBJS@
+
+$(libbuild_dir)/shared/%.so: $(libbuild_dir)/%.a
+	cd $(libbuild_dir); \
+	CC="$(CC)" ; export CC ; CLINKER="$(CLINKER)" ; export CLINKER ; \
+	    if [ -s $*.a ] ; then \
+	      ${top_srcdir}/util/makesharedlib -exceptobjs="farg.o farg90.o initf.o" -lib=$*.a -kind=@SHAREDKIND@ @SHAREDKEEPOBJS@ ; \
+	    fi
+
+# separated "make clean" from "make linktest" to avoid problems with 
+# concurrent compiling (e.g. "gmake -j 6"
+#
+
+# Remove the - in the linktest because the linktest should abort the build
+# when it fails.
+linktest:
+	@if [ $(use_shared_libs) = 1 ] ; then \
+	   echo "" ; \
+	   echo "Testing static linking" ; \
+	   ( cd examples/test/pt2pt ; $(MAKE) linktest_c_static ) ; \
+	   if [ "x$(F77)" != "x" ] ; then \
+	      ( cd examples/test/pt2pt ; $(MAKE) linktest_f_static  ) ; \
+	   fi; \
+	   echo "" ; \
+	   echo "Testing default linking (dynamic)" ; \
+	else \
+	   echo "" ; \
+	   echo "Testing default linking (static)" ; \
+	fi
+	@cd examples/test/pt2pt ; $(MAKE) linktest_c
+	@if [ "x$(F77)" != "x" ] ; then \
+	   cd examples/test/pt2pt ; $(MAKE) linktest_f ; \
+	fi
+
+testing:
+	cd examples/test ; $(MAKE) testing
+
+#
+# Rebuild all libraries, potentially from existing object files
+#
+libs: rmlib mpilib mpiflib mpidevs mpelib $(LIBS_TARGET_SHARED)
+
+#
+# Make sure that a failure during the make causes the make to stop at 
+# that point.
+mpilib: ${top_srcdir}/Makefile.in
+	@for dir in $(LIBDIRS) ;\
+	  do \
+	  echo " " ;\
+	  echo making mpir in directory $$dir ;\
+	  (cd $$dir ; \
+	  $(MAKE) -j 4 default_all ; st=$$? ; if [ $$st != 0 ] ; then \
+		echo "Exit status from make was $$st" ; fi ; exit $$st ) ;\
+	  if [ $$? != 0 ] ; then exit 1 ; fi ; \
+	  done
+	$(RANLIB) $(libbuild_dir)/lib$(MPILIBNAME).a
+	@if test -w $(libbuild_dir)/lib$(MPILIBNAME)++.a ; then \
+		$(RANLIB) $(libbuild_dir)/lib$(MPILIBNAME)++.a ; fi
+
+#
+# This is a special target for just the device part of the transport
+# (used to speed builds for multiple Chameleon transport layers)
+#
+# WARNING: THIS DEPENDS ON THE ROUTINES IN MPIDIRS CALLING ROUTINES, NOT
+# MACROS, FROM THE ADI.  THIS IS CURRENTLY THE CASE BUT MAY CHANGE
+# 
+# This uses the "default" entry instead of "default_all" because it is
+# usually executed alone, and the RANLIB is needed at the end of this
+# target anyway.
+#
+mpidevs: ${top_srcdir}/Makefile.in
+	@for dir in $(DEVDIRS) ;\
+	  do \
+	  echo " " ;\
+	  echo making device in directory $$dir ;\
+	  (cd $$dir ; \
+	  $(MAKE) setlinks; $(MAKE) -j 4 default ; st=$$? ; if [ $$st != 0 ] ; then \
+		echo "Exit status from make was $$st" ; fi ; exit $$st ) ;\
+	  if [ $$? != 0 ] ; then exit 1 ; fi ; \
+	done
+	@-(cd mpid/util; $(MAKE) default )
+
+mpiflib: ${top_srcdir}/Makefile.in
+	@for dir in $(MPIDIRS) $(MPI2DIRS) ;\
+	  do \
+	  echo " " ;\
+	  echo making mpir in directory $$dir ;\
+	  (cd $$dir ; \
+	  $(MAKE) wrapperlib ) ;\
+	  done
+	$(RANLIB) $(libbuild_dir)/libf$(MPILIBNAME).a
+	@-( if [ "x$(F77)" != "x" ] ; then \
+	    cd $(libbuild_dir) ; \
+	    ar x lib$(MPILIBNAME).a farg.o initf.o ; \
+	    $(AR) lib$(MPILIBNAME)farg.a farg.o initf.o ; \
+	fi ; \
+	)
+
+#
+# This target is used to remove the libraries for this configuration; this
+# can lead to better performance when rebuilding.
+rmlib:
+	@echo ""
+	@echo "*# removing libraries"
+	@/bin/rm -f $(libbuild_dir)/lib*.a 
+	@/bin/rm -f $(libbuild_dir)/shared/lib*.so*
+	@/bin/rm -rf $(libbuild_dir)/*.obj
+
+
+mpelib:
+	@-if [ $(NOMPE) = 0 ] ; then \
+            echo "making MPE graphics and profiling libraries" ; \
+	    if [ ! -d mpe ] ; then mkdir mpe ; fi ; \
+	    (cd mpe ; MAKE="$(MAKE)" ; export MAKE ; \
+	     libbuild_dir="${libbuild_dir}"; export libbuild_dir ; \
+             if ${top_srcdir}/mpe/configure --with-mpich=$(MPIR_HOME) \
+			--with-mpichdev=$(libbuild_dir)  \
+			--with-mpichbin=$(MPIR_HOME)/bin \
+			$(ENABLE_MPEDBG) \
+			--prefix=$(prefix) \
+			--libdir=$(libdir) \
+			--bindir=$(bindir) \
+			"$(JUMPSHOT_OPTS)" \
+			$(MPE_OPTS) ; then $(MAKE) ; \
+	    else echo "Error configuring mpe" ; \
+	      if [ -s config.log ] ; then cat config.log ; fi ; \
+	  fi ) \
+	fi
+	@if test -w $(libbuild_dir)/libmpe.a ; then \
+		$(RANLIB) $(libbuild_dir)/libmpe.a ; fi
+	@if test -w $(libbuild_dir)/libmpe_nompi.a ; then \
+		$(RANLIB) $(libbuild_dir)/libmpe_nompi.a ; fi
+
+mpetest:
+	@-if [ $(NOMPE) = 0 ] ; then \
+            echo "testing MPE linking" ; \
+	    (cd mpe ; $(MAKE) testing;) ;\
+	fi
+
+# Grumble.  The mpichdev is supposed to be the subdirectory of the mpich
+# home.
+# Note that mpi.h expects to find an mpi++.h.  Create an empty one if 
+# necessary, in both the final includedir and the topsrc/include directory
+# (the C++ configure doesn't use the correct compiler test for mpi.h)
+# The rm of mpi++.h when the -s test fails deletes mpi++.h ONLY when we've
+# created a dummy with touch
+
+# We also added a dummy mpi++.h.  However, the C++ build step both builds
+# and tests, so it needs the *real* includes.  This is done by setting the
+# CPPFLAGS to point to the MPI-2-C++/src build directory. During installation,
+# these flags are (should be) reset.
+#	@if [ ! -s $(includebuild_dir)/mpi++.h ] ; then \
+#		touch $(includebuild_dir)/mpi++.h ; fi
+#	@if [ ! -s include/mpi++.h ] ; then \
+#		touch include/mpi++.h ; fi
+#		if [ ! -s $(includedir)/mpi++.h ] ; then \
+#		    rm -f $(includedir)/mpi++.h ; fi ; \
+#	        if [ ! -s ../include/mpi++.h ] ; then \
+#		    rm -f ../include/mpi++.h ; fi ; 
+cpplib:
+	@if [ -d ${includebuild_dir}/mpi2c++ ] ; then \
+	    if [ -f ${includebuild_dir}/mpi2c++/mpi2c++_config.h ] ; then \
+	        rm -f ${includebuild_dir}/mpi2c++/mpi2c++_config.h ; \
+            fi ; \
+	fi
+	@(cd MPI-2-C++ ; MAKE="$(MAKE)" ; export MAKE ; \
+	/bin/rm -f config.cache ; \
+	CXXFLAGS="" ; export CXXFLAGS ; \
+	CXX="g++" ; export CXX ; \
+	ldir=`echo $(libdir) | sed -e 's%$(MPIR_HOME)/%%g'` ; \
+	echo "configure options:  --with-mpich=.. --with-libopt=" " --with-profiling "; \
+	echo "                    --with-mpichbin=${binbuild_dir}"; \
+	echo "                    --with-mpichlib=${libbuild_dir}";\
+	echo "                    --with-mpichsrc=${MPIR_HOME}" ;\
+	echo "                    --with-mpichdev=$(libbuild_dir)" ; \
+	echo "                    @CONFIGURE_ARGS_CPP@" ; \
+	if ${top_srcdir}/MPI-2-C++/configure --with-mpich=.. \
+			--with-libopt=" " \
+			 --with-profiling \
+			 --with-mpichbin=${binbuild_dir} \
+			 --with-mpichlib=${libbuild_dir} \
+			 --with-mpichsrc=${MPIR_HOME} \
+	                 --with-mpichdev=$(libbuild_dir) \
+			 @CONFIGURE_ARGS_CPP@ ; then \
+		$(MAKE) ; \
+	fi ) 
+	@if [ -f "MPI-2-C++/src/libmpi++.a" ] ; then \
+		cp -p MPI-2-C++/src/libmpi++.a $(libbuild_dir)/lib${MPILIBNAME}++.a ; \
+	elif [ -f "MPI-2-C++/src/libpmpi++.a" ] ; then \
+		cp -p MPI-2-C++/src/libpmpi++.a $(libbuild_dir)/lib${MPILIBNAME}++.a ; fi 
+	@if [ ! -d ${includebuild_dir}/mpi2c++ ] ; then \
+		mkdir ${includebuild_dir}/mpi2c++ ; fi
+	@if [ -d ${srcdir}/MPI-2-C++/src/mpi2c++ ] ; then \
+	    for file in ${srcdir}/MPI-2-C++/src/mpi2c++/*.h ; do \
+	        cp $$file ${includebuild_dir}/mpi2c++ ; done ; \
+	    cp MPI-2-C++/src/mpi2c++/mpi2c++_config.h \
+		${includebuild_dir}/mpi2c++ ; \
+	else \
+	    echo "Need install target for alternate cxx interface" ;\
+	    for file in ${srcdir}/MPI-2-C++/mpi*.h ; do \
+		cp $$file ${includebuild_dir}/mpi2c++ ; done ; \
+	    cp MPI-2-C++/mpicxxconf.h ${includebuild_dir}/mpi2c++ ;\
+	fi
+
+
+#
+# This is mpilib, but with memory leak/usage debugging turned on.
+# The command line switch -chmemdebug will enable leak reporting
+# when MPI_Finalize is called.
+mpilibdebug:
+	@for dir in $(LIBDIRS) ;\
+	  do \
+	  echo " " ;\
+	  echo making mpir in directory $$dir ;\
+	  (cd $$dir ; \
+	  $(MAKE) default_all MPIPROFILE="-DMPIR_DEBUG_MEM" ) ;\
+	  (cd $$dir ; $(MAKE) clean ; \
+	  $(MAKE) profile_all MPIPROFILE="-DMPIR_DEBUG_MEM -DMPI_BUILD_PROFILING");\
+	  done 
+	$(RANLIB) $(libbuild_dir)/lib$(MPILIBNAME).a
+	$(RANLIB) $(libbuild_dir)/libp$(MPILIBNAME).a
+	@if test -w $(libbuild_dir)/lib$(MPILIBNAME)++.a ; then \
+		$(RANLIB) $(libbuild_dir)/lib$(MPILIBNAME)++.a ; fi
+
+# 
+# We need to include the device here, so that the MPID symbols will be 
+# defined in libpmpich.a (the best order of libs is -lmpich -lpmpich).
+# Since we allow -lmpich *only*, we need the device files in both 
+# libraries.  The directory list is the same as LIBDIRS
+profile:
+	@if [ "$(HAS_WEAK_SYMBOLS)" = 0 ] ; then \
+	  echo "";\
+	  echo "*#  no weak symbols available - building profiling library";\
+	  echo "*#  cleaning to build profiling library"; \
+	  $(MAKE) clean; \
+	  for dir in mpid/${DEVICE} $(MPIDIRS) $(MPI2DIRS) ; do \
+	    echo " " ;\
+	    echo making mpir in directory $$dir ;\
+	    (cd $$dir ; \
+	    $(MAKE) profile_all MPIPROFILE="-DMPI_BUILD_PROFILING" ) ;\
+	  done ; \
+	  $(RANLIB) $(libbuild_dir)/libp$(MPILIBNAME).a ; \
+	else \
+	  echo "" ; \
+	  echo "*#  weak symbols available - profiling via main MPICH library" ; \
+	fi
+
+#
+# In some cases, we may not need to build a profiling library (if we can
+# use weak symbols).  This ensures that users can always link with it, even
+# if they don't need to.  Also, ROMIO may generate explicit profiling library
+# routines, in that case the library will exist (but be small)
+profileliblink:
+	@if [ ! -s $(libbuild_dir)/libp$(MPILIBNAME).a ] ; then\
+	  (cd $(libbuild_dir); $(LN_S) lib$(MPILIBNAME).a \
+		libp$(MPILIBNAME).a ) ; \
+	fi
+	@if [ ! -s $(libbuild_dir)/libp$(MPIOLIBNAME).a ] ; then\
+	  (cd $(libbuild_dir); $(LN_S) lib$(MPIOLIBNAME).a \
+		libp$(MPIOLIBNAME).a ) ; \
+	fi
+
+#
+# This is a temporary hack.  The code to build the rest of the mpirun
+# infrastructure should be part of the device setup code, not part of
+# the master Makefile (this also applies to the server targets).
+# Note that we copy rather than link to the programs
+mpirun_chp4mpd:
+	/bin/rm -f ${binbuild_dir}/startdaemons
+	if [ -d mpid/mpd ] ; then \
+	    if [ ! -f mpid/mpd/mpdcon ] ; then \
+	        ( cd mpid/mpd ; $(MAKE) mpdcon ) ; \
+	    fi ; \
+	    cp mpid/mpd/mpdcon ${binbuild_dir}/mpirun ; \
+	    cp mpid/mpd/startdaemons ${binbuild_dir}/startdaemons ; \
+	fi
+
+#
+# Changed clean to not remove the library, only the object files
+#
+# Also, it should not remove the "executables"
+# We also do NOT clean util, since it has files (like mpicc) that are built
+# by configure.  Builds with a new architecture
+# should use make cleanslate
+# We also remove the Makefile in nupshot after using it as it is created
+# by the nupshot configure itself.
+# We pass MAKE to the MPE Makefile to make sure that it has a valid
+# version of make.  Since MPE is configured separately, it might have
+# a make choice from a previous configuration.
+clean: 
+	@-for dir in tsuite bugs mpid/server mpid/mpd installtest \
+		f90modules ; do \
+	    if [ -d $$dir -a -s $$dir/Makefile ] ; then \
+		(cd $$dir ; $(MAKE) clean ) ; fi ; done
+	@-if [ -d ${ROMIO_DIR} -a -s ${ROMIO_DIR}/Makefile -a "$(ROMIO)" = 1 ] ; then \
+	    (cd ${ROMIO_DIR} ; echo "" ; echo "*# cleaning ROMIO"; $(MAKE) clean ) ; fi
+	@-if [ -d MPI-2-C++ -a -s MPI-2-C++/Makefile -a "$(CXX)" ] ; then \
+	    (cd MPI-2-C++ ; echo "" ; echo "*# cleaning C++ bindings" ; $(MAKE) clean ) ; fi
+	@-if [ -d mpe -a -s mpe/Makefile -a "$(NOMPE)" = 0 ] ; then \
+	    (cd mpe ; echo "" ; echo "*# cleaning MPE" ; $(MAKE) MAKE="$(MAKE)" clean ) ; fi
+	@echo "" ;
+	@echo "*# cleaning MPI sources" ;
+	@-for dir in $(DIRS) ;\
+	  do \
+	  if [ -s $$dir/Makefile ] ; then \
+	  echo "directory $$dir" ;\
+	  (cd $$dir ; $(MAKE) clean ; ) ; fi ;\
+	  done
+	-@if [ -s mpid/ch_shmem/p2ptest/Makefile ] ; then \
+	    echo "cleaning mpid/ch_shmem/p2ptest" ; \
+	    (cd mpid/ch_shmem/p2ptest ; $(MAKE) clean ) ; fi
+	-@if [ -s mpid/tests/Makefile ] ; then \
+	    (cd mpid/tests ; $(MAKE) clean ) ; fi
+	@echo "Cleaning Tunnelfs IO Server"; 
+	-@if [ -s src/tunnelfs_io_server/Makefile ] ; then \
+	    (cd src/tunnelfs_io_server ; $(MAKE) clean ) ; fi
+	-rm -f bin/metarouter
+
+cleanslate: clean
+	@cd util ; if [ -s Makefile ] ; then $(MAKE) clean ; fi
+#
+# distclean removes mpirun etc as well as the libraries.
+distclean: cleanslate rmlib
+	@if [ -d jumpshot ] ; then \
+	     rm -f jumpshot/confdefs.h jumpshot/config.log \
+	        jumpshot/config.cache jumpshot/config.status ; fi
+	@for dir in mpid/server mpe util f90modules $(AVAILDEVICES) mpid/ch2 \
+			mpid/ch_shmem mpid/tests ${ROMIO_DIR} MPI-2-C++ $(DIRS); \
+		do if [ -d $$dir ] && [ -s $$dir/Makefile ]; then \
+			(cd $$dir && $(MAKE) distclean ); \
+		fi; done
+	-rm -f *~ *.ln bin/mpi* ID bin/upshot bin/jumpshot \
+		bin/tkrun_smi bin/startdaemons \
+		installtest/Makefile installtest/Makefile.proto \
+		include/mpidefs.h include/mpif.h include/mpio.h \
+		include/mpichconf.h Makefile config.log config.status \
+		bin/config.status doc/port doc/portbuild doc/portperf \
+		doc/porttest lib/*.[oa] lib/*.so.* lib/*.so bin/tstmachines \
+		mpe/slog_api/config.log \
+		mpe/slog_api/confdefs.h \
+		romio/test/pfcoll_test.f \
+		MPI-2-C++/config.log \
+		MPI-2-C++/confdefs.h \
+		examples/test/third.out \
+		examples/test/summary.xml \
+		examples/meta/Makefile \
+		examples/meta/metabench/Makefile \
+		examples/test/io \
+		bin/chkserv bin/chkmachine 
+	-rm -rf include/mpi2c++ lib/obj lib/shared romio/lib
+
+install: lib/lib$(MPILIBNAME).a
+	$(INSTALL) -d $(bindir) $(libdir) $(datadir)/doc $(sharedlib_dir) \
+		$(includedir) $(sbindir) $(datadir)/examples
+	$(INSTALL_SCRIPT) bin/mpicc bin/mpicompile.args bin/mpif77 bin/mpif90 \
+		bin/tarch util/execer \
+		bin/mpirun.args bin/mpiman bin/mpirun $(bindir)
+	for file in $(MPIRUNLIST); do \
+		$(INSTALL_SCRIPT) bin/`basename $$file .in` $(bindir); done
+	cd $(bindir); rm -f mpiexec; $(LN_S) mpirun mpiexec
+	$(INSTALL_DATA) doc/install.ps.gz doc/guide.ps.gz \
+		doc/mp-mpich_manual.pdf $(datadir)/doc
+	$(INSTALL_DATA) util/machines/machines* $(datadir)
+	$(INSTALL_DATA) include/mpi.h include/mpi_errno.h  include/mpichconf.h \
+		include/mpidefs.h include/mpif.h $(includedir)
+	for file in lib/*.a libtvmpich.so*; do \
+		if test -f $$file && ! test -h $$file; then \
+			$(INSTALL_DATA) $$file $(libdir); \
+		fi; \
+	done
+	if test "$(HAS_WEAK_SYMBOLS)" = "1"; then \
+		cd $(libdir); rm -f libp$(MPILIBNAME).a; $(LN_S) lib$(MPILIBNAME).a libp$(MPILIBNAME).a; fi
+	for file in lib/shared/*.so*; do \
+		if test -f $$file && ! test -h $$file; then \
+			$(INSTALL_DATA) $$file $(sharedlib_dir); \
+		elif test -h $$file && ! test -h "$${file}.1.0"; then \
+			( cd $(sharedlib_dir); rm -f `basename "$$file"`; \
+			$(LN_S) `basename "$$file"`.1.0 `basename "$$file"`); \
+		fi; \
+	done
+	if test "$(HAS_WEAK_SYMBOLS)" = "1" && test -e $(sharedlib_dir)/lib$(MPILIBNAME).so; then \
+		cd $(sharedlib_dir); rm -f libp$(MPILIBNAME).so; \
+		$(LN_S) lib$(MPILIBNAME).so libp$(MPILIBNAME).so; fi
+	$(INSTALL_SCRIPT) util/cleanipcs $(sbindir)
+	# Message catalogs
+	for file in lib/mpich.*; do \
+		if test -s $$file && ! test $$file = mpich.cat; then \
+			$(INSTALL_DATA) $$file $(messagecat_dir); \
+		elif test $$file = mpich.cat; then \
+			(cd $(messagecat_dir); $(LN_S) mpich.En_US.cat mpich.cat); \
+		fi; \
+	done
+	# Documentation
+	$(INSTALL) -d $(mandir)/man1 $(mandir)/man3 $(mandir)/man4
+	$(INSTALL_DATA) man/man1/* $(mandir)/man1
+	$(INSTALL_DATA) man/man3/* $(mandir)/man3
+	$(INSTALL_DATA) man/man4/* $(mandir)/man4
+	# examples
+	$(INSTALL_DATA) installtest/cpi.c \
+		installtest/pi3.f installtest/cpip.c installtest/pi3p.f \
+		installtest/cpilog.c installtest/hello++.cc \
+		installtest/pi3f90.f90 $(datadir)/examples
+	$(INSTALL_DATA) installtest/Makefile.proto $(datadir)/examples/Makefile
+	# ROMIO
+	if test "$(ROMIO)" = 1; then \
+		$(INSTALL_DATA) $(ROMIO_DIR)/include/mpio.h $(ROMIO_DIR)/include/mpiof.h \
+			$(includedir); \
+		$(INSTALL_DATA) $(ROMIO_DIR)/test/simple.c $(datadir)/examples/simpleio.c; \
+	fi
+	# VIOLA-IO
+	if test "$(ROMIO_DIR)" = "viola-io"; then \
+        $(INSTALL_DATA) include/violaio.h $(includedir); \
+        $(INSTALL_SCRIPT) src/tunnelfs_io_server/tunnelfs_io_server $(bindir); \
+	fi
+	# ch_p4
+	if expr match "$(DEVICES)" ".*ch_p4.*"; then \
+		$(INSTALL_SCRIPT) bin/tstmachines $(sbindir); fi
+	# CPP
+	if test "x$(CXX)" != x ; then \
+		$(INSTALL) -d $(includedir)/mpi2c++; \
+		$(INSTALL_DATA) MPI-2-C++/src/mpi2c++/*.h \
+		$(includedir)/mpi2c++; \
+		cd $(bindir); rm -f mpiCC; $(LN_S) mpicc mpiCC; fi
+	# MPE
+	if test "$(NOMPE)" = 0 && test -e mpe/mpeinstall; then \
+		cd mpe; ./mpeinstall -prefix="$(prefix)"; fi
+	# The MPE examples still use strange pathes after install and are almost the same as the mpich examples
+	if test -d "$(prefix)/mpe_examples"; then rm -R $(prefix)/mpe_examples; fi
+	# Meta
+	if test "$(META)" = yes; then \
+		$(INSTALL_SCRIPT) bin/wgetMetaConfig bin/mpirun.meta \
+			bin/checkmetacfg bin/metapars $(bindir); \
+	fi
+
+# Install adds ALL of the examples to the installation area
+# This is an initial version.
+install-all: install
+	-rm -f $(prefix)/examples/*
+	-$(CPRP) -r examples $(prefix)
+	cd $(prefix)/examples ; \
+		for dir in `find . -type d -print` ; do \
+			(cd $$dir ; \
+			if [ -s Makefile.in ] ; then \
+				$(bindir)/mpireconfig Makefile ; \
+			fi ) ; \
+		done
+
+etags:
+	etags include/*.h mpid/$(DEFAULT_DEVICE)/*.h $(LIBDIRS)
+

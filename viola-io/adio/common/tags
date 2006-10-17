@@ -1,0 +1,140 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/darren@hiebert.com/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://darren.hiebert.com/ctags/	/official site/
+!_TAG_PROGRAM_VERSION	3.3.1	/with C, C++, Eiffel, Fortran, and Java  support/
+ADIOI_Add_req_to_list	async_list.c	/^void ADIOI_Add_req_to_list(ADIO_Request *request)$/;"	f
+ADIOI_Async_avail_head	ad_init.c	/^ADIOI_Async_node *ADIOI_Async_avail_head = NULL,$/;"	v
+ADIOI_Async_avail_tail	ad_init.c	/^    *ADIOI_Async_avail_tail = NULL;$/;"	v
+ADIOI_Async_list_head	ad_init.c	/^ADIOI_Async_node *ADIOI_Async_list_head = NULL, *ADIOI_Async_list_tail = NULL;$/;"	v
+ADIOI_Async_list_tail	ad_init.c	/^ADIOI_Async_node *ADIOI_Async_list_head = NULL, *ADIOI_Async_list_tail = NULL;$/;"	v
+ADIOI_BUFFERED_READ	ad_read_str.c	12;"	d	file:
+ADIOI_BUFFERED_WRITE	ad_write_str.c	12;"	d	file:
+ADIOI_BUFFERED_WRITE_WITHOUT_READ	ad_write_str.c	57;"	d	file:
+ADIOI_BUF_COPY	ad_read_coll.c	890;"	d	file:
+ADIOI_BUF_COPY	ad_write_coll.c	745;"	d	file:
+ADIOI_BUF_INCR	ad_read_coll.c	869;"	d	file:
+ADIOI_BUF_INCR	ad_write_coll.c	724;"	d	file:
+ADIOI_Calc_aggregator	ad_aggregate.c	/^int ADIOI_Calc_aggregator(ADIO_File fd,$/;"	f
+ADIOI_Calc_file_domains	ad_aggregate.c	/^void ADIOI_Calc_file_domains(ADIO_Offset *st_offsets, ADIO_Offset$/;"	f
+ADIOI_Calc_my_off_len	ad_read_coll.c	/^void ADIOI_Calc_my_off_len(ADIO_File fd, int bufcount, MPI_Datatype$/;"	f
+ADIOI_Calc_my_req	ad_aggregate.c	/^void ADIOI_Calc_my_req(ADIO_File fd, ADIO_Offset *offset_list, int *len_list, $/;"	f
+ADIOI_Calc_others_req	ad_aggregate.c	/^void ADIOI_Calc_others_req(ADIO_File fd, int count_my_req_procs, $/;"	f
+ADIOI_Calloc_fn	malloc.c	/^void *ADIOI_Calloc_fn(size_t nelem, size_t elsize, int lineno, char *fname)$/;"	f
+ADIOI_Complete_async	async_list.c	/^void ADIOI_Complete_async(int *error_code)$/;"	f
+ADIOI_Count_contiguous_blocks	flatten.c	/^int ADIOI_Count_contiguous_blocks(MPI_Datatype datatype, int *curr_index)$/;"	f
+ADIOI_DFLT_ERR_HANDLER	ad_init.c	/^MPI_Errhandler ADIOI_DFLT_ERR_HANDLER = MPI_ERRORS_RETURN;$/;"	v
+ADIOI_Datatype_iscontig	iscontig.c	/^void ADIOI_Datatype_iscontig(MPI_Datatype datatype, int *flag)$/;"	f
+ADIOI_Del_req_from_list	async_list.c	/^void ADIOI_Del_req_from_list(ADIO_Request *request)$/;"	f
+ADIOI_Delete_flattened	flatten.c	/^void ADIOI_Delete_flattened(MPI_Datatype datatype)$/;"	f
+ADIOI_Direct_read	ad_init.c	/^int ADIOI_Direct_read = 0, ADIOI_Direct_write = 0;$/;"	v
+ADIOI_Direct_write	ad_init.c	/^int ADIOI_Direct_read = 0, ADIOI_Direct_write = 0;$/;"	v
+ADIOI_End_call	ad_end.c	/^int ADIOI_End_call(MPI_Comm comm, int keyval, void *attribute_val, void$/;"	f
+ADIOI_Error	error.c	/^int ADIOI_Error(ADIO_File fd, int error_code, char *string)$/;"	f
+ADIOI_Exch_and_write	ad_write_coll.c	/^static void ADIOI_Exch_and_write(ADIO_File fd, void *buf, MPI_Datatype$/;"	f	file:
+ADIOI_Fill_send_buffer	ad_write_coll.c	/^static void ADIOI_Fill_send_buffer(ADIO_File fd, void *buf, ADIOI_Flatlist_node$/;"	f	file:
+ADIOI_Fill_user_buffer	ad_read_coll.c	/^static void ADIOI_Fill_user_buffer(ADIO_File fd, void *buf, ADIOI_Flatlist_node$/;"	f	file:
+ADIOI_Flatlist	ad_init.c	/^ADIOI_Flatlist_node *ADIOI_Flatlist = NULL;$/;"	v
+ADIOI_Flatten	flatten.c	/^void ADIOI_Flatten(MPI_Datatype datatype, ADIOI_Flatlist_node *flat, $/;"	f
+ADIOI_Flatten_copy_type	flatten.c	/^void ADIOI_Flatten_copy_type(ADIOI_Flatlist_node *flat,$/;"	f
+ADIOI_Flatten_darray	flatten.c	/^void ADIOI_Flatten_darray(int size,$/;"	f
+ADIOI_Flatten_datatype	flatten.c	/^void ADIOI_Flatten_datatype(MPI_Datatype datatype)$/;"	f
+ADIOI_Flatten_subarray	flatten.c	/^void ADIOI_Flatten_subarray(int ndims,$/;"	f
+ADIOI_Free_async_node	async_list.c	/^void ADIOI_Free_async_node(ADIOI_Async_node *node)$/;"	f
+ADIOI_Free_fn	malloc.c	/^void ADIOI_Free_fn(void *ptr, int lineno, char *fname)$/;"	f
+ADIOI_Free_request	req_malloc.c	/^void ADIOI_Free_request(ADIOI_Req_node *node)$/;"	f
+ADIOI_Ftable	ad_init.c	/^ADIO_File *ADIOI_Ftable = NULL;$/;"	v
+ADIOI_Ftable_max	ad_init.c	/^int ADIOI_Ftable_ptr = 0, ADIOI_Ftable_max = 0;$/;"	v
+ADIOI_Ftable_ptr	ad_init.c	/^int ADIOI_Ftable_ptr = 0, ADIOI_Ftable_max = 0;$/;"	v
+ADIOI_GEN_Delete	ad_delete.c	/^void ADIOI_GEN_Delete(char *filename, int *error_code)$/;"	f
+ADIOI_GEN_Flush	ad_flush.c	/^void ADIOI_GEN_Flush(ADIO_File fd, int *error_code)$/;"	f
+ADIOI_GEN_ReadStrided	ad_read_str.c	/^void ADIOI_GEN_ReadStrided(ADIO_File fd, void *buf, int count,$/;"	f
+ADIOI_GEN_ReadStridedColl	ad_read_coll.c	/^void ADIOI_GEN_ReadStridedColl(ADIO_File fd, void *buf, int count,$/;"	f
+ADIOI_GEN_ReadStrided_naive	ad_read_str_naive.c	/^void ADIOI_GEN_ReadStrided_naive(ADIO_File fd, void *buf, int count,$/;"	f
+ADIOI_GEN_SeekIndividual	ad_seek.c	/^ADIO_Offset ADIOI_GEN_SeekIndividual(ADIO_File fd, ADIO_Offset offset, $/;"	f
+ADIOI_GEN_SetInfo	ad_hints.c	/^void ADIOI_GEN_SetInfo(ADIO_File fd, MPI_Info users_info, int *error_code)$/;"	f
+ADIOI_GEN_WriteStrided	ad_write_str.c	/^void ADIOI_GEN_WriteStrided(ADIO_File fd, void *buf, int count,$/;"	f
+ADIOI_GEN_WriteStridedColl	ad_write_coll.c	/^void ADIOI_GEN_WriteStridedColl(ADIO_File fd, void *buf, int count,$/;"	f
+ADIOI_GEN_WriteStrided_naive	ad_write_str_naive.c	/^void ADIOI_GEN_WriteStrided_naive(ADIO_File fd, void *buf, int count,$/;"	f
+ADIOI_Get_byte_offset	byte_offset.c	/^void ADIOI_Get_byte_offset(ADIO_File fd, ADIO_Offset offset, ADIO_Offset *disp)$/;"	f
+ADIOI_Get_eof_offset	eof_offset.c	/^void ADIOI_Get_eof_offset(ADIO_File fd, ADIO_Offset *eof_offset)$/;"	f
+ADIOI_Get_position	get_fp_posn.c	/^void ADIOI_Get_position(ADIO_File fd, ADIO_Offset *offset)$/;"	f
+ADIOI_Heap_merge	ad_write_coll.c	/^static void ADIOI_Heap_merge(ADIOI_Access *others_req, int *count, $/;"	f	file:
+ADIOI_Malloc_async_head	ad_init.c	/^ADIOI_Malloc_async *ADIOI_Malloc_async_head = NULL,$/;"	v
+ADIOI_Malloc_async_node	async_list.c	/^ADIOI_Async_node *ADIOI_Malloc_async_node(void)$/;"	f
+ADIOI_Malloc_async_tail	ad_init.c	/^    *ADIOI_Malloc_async_tail = NULL;$/;"	v
+ADIOI_Malloc_fn	malloc.c	/^void *ADIOI_Malloc_fn(size_t size, int lineno, char *fname)$/;"	f
+ADIOI_Malloc_req_head	ad_init.c	/^ADIOI_Malloc_req *ADIOI_Malloc_req_head = NULL, *ADIOI_Malloc_req_tail = NULL;$/;"	v
+ADIOI_Malloc_req_tail	ad_init.c	/^ADIOI_Malloc_req *ADIOI_Malloc_req_head = NULL, *ADIOI_Malloc_req_tail = NULL;$/;"	v
+ADIOI_Malloc_request	req_malloc.c	/^struct ADIOI_RequestD *ADIOI_Malloc_request(void)$/;"	f
+ADIOI_Optimize_flattened	flatten.c	/^void ADIOI_Optimize_flattened(ADIOI_Flatlist_node *flat_type)$/;"	f
+ADIOI_R_Exchange_data	ad_read_coll.c	/^static void ADIOI_R_Exchange_data(ADIO_File fd, void *buf, ADIOI_Flatlist_node$/;"	f	file:
+ADIOI_Read_and_exch	ad_read_coll.c	/^static void ADIOI_Read_and_exch(ADIO_File fd, void *buf, MPI_Datatype$/;"	f	file:
+ADIOI_Realloc_fn	malloc.c	/^void *ADIOI_Realloc_fn(void *ptr, size_t size, int lineno, char *fname)$/;"	f
+ADIOI_Req_avail_head	ad_init.c	/^ADIOI_Req_node *ADIOI_Req_avail_head = NULL, *ADIOI_Req_avail_tail = NULL;$/;"	v
+ADIOI_Req_avail_tail	ad_init.c	/^ADIOI_Req_node *ADIOI_Req_avail_head = NULL, *ADIOI_Req_avail_tail = NULL;$/;"	v
+ADIOI_Reqtable	ad_init.c	/^ADIO_Request *ADIOI_Reqtable = NULL;$/;"	v
+ADIOI_Reqtable_max	ad_init.c	/^int ADIOI_Reqtable_ptr = 0, ADIOI_Reqtable_max = 0;$/;"	v
+ADIOI_Reqtable_ptr	ad_init.c	/^int ADIOI_Reqtable_ptr = 0, ADIOI_Reqtable_max = 0;$/;"	v
+ADIOI_SetFunctions	setfn.c	/^void ADIOI_SetFunctions(ADIO_File fd)$/;"	f
+ADIOI_Set_lock	lock.c	/^int ADIOI_Set_lock(FDTYPE fd, int cmd, int type, ADIO_Offset offset, int whence,$/;"	f
+ADIOI_Set_lock64	lock.c	/^int ADIOI_Set_lock64(FDTYPE fd, int cmd, int type, ADIO_Offset offset, int whence,$/;"	f
+ADIOI_Shfp_fname	shfp_fname.c	/^void ADIOI_Shfp_fname(ADIO_File fd, int rank)$/;"	f
+ADIOI_Uses_generic_read	gencheck.c	/^int ADIOI_Uses_generic_read(ADIO_File fd)$/;"	f
+ADIOI_Uses_generic_write	gencheck.c	/^int ADIOI_Uses_generic_write(ADIO_File fd)$/;"	f
+ADIOI_W_Exchange_data	ad_write_coll.c	/^static void ADIOI_W_Exchange_data(ADIO_File fd, void *buf, char *write_buf,$/;"	f	file:
+ADIOI_cb_bcast_rank_map	cb_config_list.c	/^int ADIOI_cb_bcast_rank_map(ADIO_File fd)$/;"	f
+ADIOI_cb_config_list_parse	cb_config_list.c	/^int ADIOI_cb_config_list_parse(char *config_list, $/;"	f
+ADIOI_cb_copy_name_array	cb_config_list.c	/^int ADIOI_cb_copy_name_array(MPI_Comm comm, $/;"	f
+ADIOI_cb_delete_name_array	cb_config_list.c	/^int ADIOI_cb_delete_name_array(MPI_Comm comm, $/;"	f
+ADIOI_cb_gather_name_array	cb_config_list.c	/^int ADIOI_cb_gather_name_array(MPI_Comm comm,$/;"	f
+ADIO_Close	ad_close.c	/^void ADIO_Close(ADIO_File fd, int *error_code)$/;"	f
+ADIO_End	ad_end.c	/^void ADIO_End(int *error_code)$/;"	f
+ADIO_FileSysType_fncall	ad_fstype.c	/^static void ADIO_FileSysType_fncall(char *filename, int *fstype, int *error_code)$/;"	f	file:
+ADIO_FileSysType_parentdir	ad_fstype.c	/^static void ADIO_FileSysType_parentdir(char *filename, char **dirnamep)$/;"	f	file:
+ADIO_FileSysType_prefix	ad_fstype.c	/^static void ADIO_FileSysType_prefix(char *filename, int *fstype, int *error_code)$/;"	f	file:
+ADIO_Get_shared_fp	ad_get_sh_fp.c	/^void ADIO_Get_shared_fp(ADIO_File fd, int incr, ADIO_Offset *shared_fp, $/;"	f
+ADIO_ImmediateOpen	ad_iopen.c	/^void ADIO_ImmediateOpen(ADIO_File fd, int *error_code)$/;"	f
+ADIO_Init	ad_init.c	/^void ADIO_Init(int *argc, char ***argv, int *error_code)$/;"	f
+ADIO_Init_keyval	ad_init.c	/^int ADIO_Init_keyval=MPI_KEYVAL_INVALID;$/;"	v
+ADIO_Open	ad_open.c	/^ADIO_File ADIO_Open(MPI_Comm orig_comm,$/;"	f
+ADIO_ResolveFileType	ad_fstype.c	/^void ADIO_ResolveFileType(MPI_Comm comm, char *filename, int *fstype, $/;"	f
+ADIO_Set_shared_fp	ad_set_sh_fp.c	/^void ADIO_Set_shared_fp(ADIO_File fd, ADIO_Offset offset, int *error_code)$/;"	f
+ADIO_Set_view	ad_set_view.c	/^void ADIO_Set_view(ADIO_File fd, ADIO_Offset disp, MPI_Datatype etype, $/;"	f
+AGG_COLON	cb_config_list.c	32;"	d	file:
+AGG_COMMA	cb_config_list.c	31;"	d	file:
+AGG_DEBUG	ad_aggregate.c	15;"	d	file:
+AGG_EOS	cb_config_list.c	34;"	d	file:
+AGG_ERROR	cb_config_list.c	33;"	d	file:
+AGG_STRING	cb_config_list.c	30;"	d	file:
+AGG_WILDCARD	cb_config_list.c	29;"	d	file:
+CB_CONFIG_LIST_DEBUG	cb_config_list.c	36;"	d	file:
+FPRINTF	malloc.c	27;"	d	file:
+MPIR_Infotable	ad_init.c	/^MPI_Info *MPIR_Infotable = NULL;$/;"	v
+MPIR_Infotable_max	ad_init.c	/^int MPIR_Infotable_ptr = 0, MPIR_Infotable_max = 0;$/;"	v
+MPIR_Infotable_ptr	ad_init.c	/^int MPIR_Infotable_ptr = 0, MPIR_Infotable_max = 0;$/;"	v
+MPIR_Status_set_bytes	status_setb.c	/^int MPIR_Status_set_bytes(MPI_Status *status, MPI_Datatype datatype, $/;"	f
+MPIR_Status_set_bytes	status_setb.c	/^int MPIR_Status_set_bytes(MPI_Status *status, MPI_Datatype datatype,$/;"	f
+NFS_SUPER_MAGIC	ad_fstype.c	20;"	d	file:
+NUM	async_list.c	20;"	d	file:
+NUM	req_malloc.c	20;"	d	file:
+PATH_MAX	ad_fstype.c	72;"	d	file:
+PVFS2_SUPER_MAGIC	ad_fstype.c	22;"	d	file:
+S_ISLNK	ad_fstype.c	82;"	d	file:
+S_ISLNK	ad_fstype.c	85;"	d	file:
+cb_config_list_keyval	cb_config_list.c	/^static int cb_config_list_keyval = MPI_KEYVAL_INVALID;$/;"	v	file:
+cb_config_list_lex	cb_config_list.c	/^static int cb_config_list_lex(void)$/;"	f	file:
+find_name	cb_config_list.c	/^static int find_name(char *name, $/;"	f	file:
+get_cyclic_k	flatten.c	/^static int get_cyclic_k(int dim_size,$/;"	f	file:
+get_darray_position	flatten.c	/^static void get_darray_position(int rank,$/;"	f	file:
+get_max_procs	cb_config_list.c	/^static int get_max_procs(int cb_nodes)$/;"	f	file:
+index_of_type	flatten.c	/^static int index_of_type(int type_nr,$/;"	f	file:
+is_aggregator	ad_open.c	/^int is_aggregator(int rank, ADIO_File fd ) {$/;"	f
+local_types_in_dim	flatten.c	/^static int local_types_in_dim(int dim_size,$/;"	f	file:
+lseek	ad_seek.c	16;"	d	file:
+lseek	ad_seek.c	20;"	d	file:
+match_procs	cb_config_list.c	/^static int match_procs(char *name, $/;"	f	file:
+match_this_proc	cb_config_list.c	/^static int match_this_proc(char *name,$/;"	f	file:
+token_ptr	cb_config_list.c	/^static char *token_ptr;$/;"	v	file:
+yylval	cb_config_list.c	/^static char *yylval;$/;"	v	file:

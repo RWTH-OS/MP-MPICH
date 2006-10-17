@@ -1,0 +1,19 @@
+#! /bin/bash
+# $Id: resource_test.sh.in,v 1.1 2000/04/12 16:22:04 joachim Exp $
+#
+# shell script to let the segv programm loop (test of resource management)
+
+mpirun="@MPIRUN@"
+
+loops=1000
+prog=segv
+
+i=0
+while [ $i -lt $loops ] ; do
+    echo resourcetest with $prog [loop $i]
+    $mpirun -np 2 $prog
+    
+    i=`expr $i + 1`
+done
+
+    

@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+
+<head>
+<title></title>
+</head>
+
+<body>
+
+<p><a href="index.html">main</a></p>
+
+<p><big><big><big>MPICHSH.exe</big></big></big></p>
+
+<p>Usage: 
+
+<ul>
+  <li><font face="Courier">MPICHSH&nbsp;[port]</font></li>
+</ul>
+
+<p>MPICHSH.exe is a simple process launcher.&nbsp; It starts up and listens on a&nbsp;port
+for socket connections.&nbsp; If you don't provide a port number the default is
+2020.&nbsp; You must start this program manually on all the machines.&nbsp; It is not a
+service; it does not start automatically, it does not require any privileges and it does
+not impersonate the client user.&nbsp; It simply waits for connections and launches the
+command line that comes over the socket.</p>
+
+<p>The data that comes over a connection is in the following format:</p>
+
+<table border="1" cellPadding="1" cellSpacing="1" width="75%"
+style="HEIGHT: 27px; WIDTH: 472px">
+  <tr>
+    <td noWrap>int length</td>
+    <td noWrap><font face="Courier">[-dir&quot;somepath\sub\dir&quot;][-env&quot;var1=val1|var2=val2...&quot;]command
+    line arg1 ...</font></td>
+  </tr>
+</table>
+
+<p>The length field specifies the number of bytes to follow.&nbsp; The bracketted sections
+are optional (actual brackets are not transmitted over the socket).&nbsp; The
+-dir&quot;...&quot; section defines in what directory to&nbsp;launch the executable.&nbsp;
+The -env&quot;...&quot; section defines environment variables which are set before
+launching the process.&nbsp; An example might be:</p>
+
+<table border="1" cellPadding="1" cellSpacing="1" width="75%"
+style="HEIGHT: 21px; WIDTH: 1020px">
+  <tr>
+    <td>122</td>
+    <td noWrap><font face="Courier">-dir&quot;c:\temp&quot;-env&quot;MPICH_JOBID=fry.1|MPICH_NPROC=2|MPICH_IPROC=1|MPICH_ROOTHOST=fry|MPICH_ROOTPORT=1234&quot;netpipe.exe
+    -reps 3</font></td>
+  </tr>
+</table>
+
+<p>Standard out and error from the launched process are redirected back through the
+socket.&nbsp; The socket is closed when the process terminates.&nbsp; If a connection is
+dropped before the process finishes, the process is killed.</p>
+
+<p>Each connection appears in the dialog list box.&nbsp; The time and command line are
+printed out when a process is launched and when it terminates.&nbsp; The number in
+brackets matches the start and finish lines and shows how many processes have been
+launched.&nbsp; The clear button clears the list window.&nbsp; The OK button closes the
+listening socket and exits the program.</p>
+
+<p><img src="mpichsh.gif" width="315" height="322" alt="mpichsh.gif (3974 bytes)"></p>
+
+<p><a href="index.html">main<br>
+</a><a href="MPIRun.html">MPIRun </a><br>
+MPICHSH</p>
+
+<p>&nbsp;</p>
+</body>
+</html>

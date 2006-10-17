@@ -1,0 +1,37 @@
+#! /bin/sh
+#
+#
+# /sbin/init.d/mtrr
+#
+# Adjusts MTRR settings - this is highly dependable on the system settings!
+# Usually, region 0 is set for the main memory to write-back. All other
+# regions are usually set up for special PCI device which get a better
+# performance with write-combining or which need uncachable memory for
+# some reason. 
+#
+# Modifiy this script to match your needs. Many systems do not need this
+# script at all as the drivers/BIOS do correctly set up the MTRR.
+#
+# Joachim Worringen, joachim@lfbs.rwth-aachen.de
+
+. /etc/rc.status
+. /etc/rc.config
+
+mtrr=/proc/mtrr
+
+rc_reset
+case "$1" in
+    start)
+        echo -n "Adjusting MTRR settings"
+	rc_status
+
+	# the SuperMicro 370DLE BIOS creates a silly uncachable region which
+	# overlaps with the PCI-SCI write-combining region
+	echo "disable=0x01" >$mtrr	
+	rc_status -v
+	;;
+    *)
+	echo "Usage: $0 {start}"
+	exit 1
+esac
+rc_exit

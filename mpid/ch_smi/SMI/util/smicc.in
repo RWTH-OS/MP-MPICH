@@ -1,0 +1,50 @@
+#!/bin/bash
+
+CC="@CC@"
+
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+bindir="@bindir@"
+libdir="@libdir@"
+includedir="@includedir@"
+
+LDFLAGS="@LDFLAGS@"
+LIBS="@LIBS@ -l@LIBNAME@"
+
+CPPFLAGS="@CPPFLAGS@"
+CFLAGS="@CFLAGS@"
+
+myself=`basename $0`
+# first find ourselfs
+scriptdir="`dirname $0`"
+scriptdir="`cd "$scriptdir"; pwd`"
+if [ ! -x "$scriptdir/$myself" ]
+then
+	echo "Cannot find myself. How did you manage to call this script?"
+	exit 1
+fi
+
+bindir="`cd "$bindir"; pwd`"
+if [ "$scriptdir" = "$bindir" ]
+then
+	installed="yes"
+else
+	installed="no"
+	SMI_HOME="`dirname $scriptdir`"
+	includedir="$SMI_HOME/include"
+	libdir="$SMI_HOME/lib"
+	# Yay, libtool!
+	ltmode=link
+	for arg
+	do
+		case $arg in
+			-c)
+			ltmode=compile
+			break
+			;;
+		esac
+	done
+	CC="$SMI_HOME/libtool --mode=$ltmode $CC"
+fi
+
+$CC $CPPFLAGS $CFLAGS -I"$includedir" -L"$libdir" $LDFLAGS $LIBS "$@"

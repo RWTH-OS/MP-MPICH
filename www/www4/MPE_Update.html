@@ -1,0 +1,26 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML3.2 EN">
+<HTML>
+<HEAD>
+<META NAME="GENERATOR" CONTENT="DOCTEXT">
+<TITLE>MPE_Update</TITLE>
+</HEAD>
+<BODY BGCOLOR="FFFFFF">
+<A NAME="MPE_Update"><H1>MPE_Update</H1></A>
+Updates an X11 display 
+<H2>Synopsis</H2>
+<PRE>
+#include &lt;stdio.h&gt;
+#include "mpe.h"
+int MPE_Update( handle )
+MPE_XGraph handle;
+</PRE>
+<H2>Input Parameter</H2>
+<DL><DT><B>handle </B> <DD> MPE graphics handle.
+</DL>
+<P>
+<H2>Note</H2>
+Only after an <TT>MPE_Update</TT> can you count on seeing the results of MPE
+drawing routines.  This is caused by the buffering of graphics requests
+for improved performance.
+<P><B>Location:</B>mpe_graphics.c<P>
+</BODY></HTML>

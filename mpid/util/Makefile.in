@@ -1,0 +1,66 @@
+#
+#  $Id$
+#
+#  (C) 1993,1995 by Argonne National Laboratory and Mississipi State University.
+#      All rights reserved.  See COPYRIGHT in top-level directory.
+#
+##### User configurable options #####
+META        = @META@
+ARCH        = @ARCH@
+DEVICE      = @DEVICE@
+MPIR_HOME   = @MPIR_HOME@
+INCLUDE_DIR = @INCLUDE_PATH@ 
+CC          = @CC@
+AR          = @AR@
+RANLIB      = @RANLIB@
+OPTFLAGS    = @OPTFLAGS@
+SHELL       = /bin/sh
+ASMFILES_O  = @ASMFILES_O@
+libbuild_dir = @libbuild_dir@
+top_srcdir  = @top_srcdir@
+UseSharedLibs = @UseSharedLibs@
+### End User configurable options ###
+
+ALL: default
+
+LIBNAME  = ${libbuild_dir}/libmpidutil.a
+
+CFLAGS   = @DEVCFLAGS@ @CFLAGS@ @OPTFLAGSC@ $(OPTFLAGS) -I${top_srcdir}/include -I. -I../ch2 
+
+SOURCE   = hash.c stack.c queue.c tree.c cmnargs.c tr2.c sbcnst2.c fifo.c dataqueue.c
+OBJECTS  = hash.o stack.o queue.o tree.o cmnargs.o tr2.o sbcnst2.o fifo.o dataqueue.o
+ifeq ($(META),yes)
+SOURCE   += pidsync.c
+OBJECTS  += pidsync.o
+endif
+
+default: $(LIBNAME)
+
+# default_all is the same as default, but without the RANLIB.  This
+# can speed up the build (ranlibs can take a LONG time).  
+default_all: $(OBJECTS)
+	$(AR) $(LIBNAME) $?
+sharedlib: default_all
+	@(cd ${MPIR_HOME}; make sharedlibs; cd ${MPIR_HOME}/mpid/util;)
+
+$(LIBNAME): $(OBJECTS) 
+	$(AR) $@ $?
+	$(RANLIB) $@
+
+queue.o: queue.h
+cmnargs.o: cmnargs.h
+sbcnst2.o: sbcnst2.h
+
+# dummy target to avoid error msg on build
+wrapperlib:
+
+clean:
+	@/bin/rm -f *~ $(OBJECTS) 
+
+distclean: clean
+	rm Makefile
+
+.c.o:
+	$(CC) $(CFLAGS) $(BASEOPT) -c $*.c $(MPI_PROFILE)
+
+

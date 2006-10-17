@@ -1,0 +1,20 @@
+
+NOTES:
+
+This Project creates the file rcluma.cpl
+
+*.clp files are dynamic librarys for the Control Panel 
+
+With this ControlApplett you can start and stop the cluster manager service.
+
+To show the ControlApplet-Icon in the Control Panel the file rcluma.cpl has to be copied 
+to the Windows\ System folder.
+
+If you want to debug this CPL-file you have to specify rundll32.exe as the executable.
+neccessary program parameters: shell32.dll,Control_RunDLL rcluma.cpl
+
+
+
+further information about cpl-files:
+http://msdn.microsoft.com/library/default.asp?url=/library/en-us/shellcc/platform/Shell/Shell_Adv/ConPanel.asp
+http://support.microsoft.com/support/kb/articles/Q166/1/68.ASP

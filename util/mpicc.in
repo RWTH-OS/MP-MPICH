@@ -1,0 +1,99 @@
+#! /bin/sh
+# $Id$
+
+COMPSKRIPT=`basename $0`
+# first find ourselfs
+rundir=`pwd`
+cd "`dirname $0`"
+scriptdir=`pwd`
+cd "$rundir"
+if [ ! -x "$scriptdir/$COMPSKRIPT" ]
+then
+	echo "Cannot find myself. How did you manage to call this script?"
+	exit 1
+fi
+
+. $scriptdir/mpicompile.args
+
+status=0
+if [ $DoCompile = 1 -o $show_compile = 1 ] ; then
+    if [ $HasDashC != 1 ] ; then
+        compileargs="-c $compileargs"
+    fi
+    # note the use of HAVE_MPI_CPP to cause the mpi++.h file to be 
+    # included from mpi.h for C++
+    if [ $COMPSKRIPT = "mpiCC" ] ; then
+    $Show $CXX $CCFLAGS $ROMIO_TCPPFLAGS -I$includedir/mpi2c++ -I$includedir -DHAVE_MPI_CPP $CXXFLAGS $compileargs
+    else
+    $Show $CC $USER_CFLAGS $ROMIO_TCFLAGS -I$includedir $compileargs
+    fi
+
+    status=$?
+    if [ $status != 0 ] ; then
+	exit $status
+    fi
+fi
+#
+# Here's a tricky issue:  If there is no mpi library yet, we can't link,
+# but if we are building other tools that need mpicc, they may need to 
+# build and run non-mpi programs.  This is currently handled in the configure
+# by making a dummy library.
+# 
+if [ $DoLink = 1 -o $show_link = 1 ] ; then
+    # If the profiling library doesn't exist, or MPICH_NO_PROF environment
+    # variable is set, skip the profiling library.
+    if [ -n "$MPICH_NO_PROF" -o ! -s "$proflibfullname" ] ; then
+        proflib=""
+    fi
+    # IRIX complains if we include a library twice.  In the case of a
+    # library using weak symbols, we don't need the proflib.  Just
+    # in case we do, there is an enviroment variable that
+    # can be used to override this test.
+    if [ "$HAS_WEAK_SYMBOLS" = "1" -a "$MPICH_INCLUDE_PROFLIB" != yes ] ; then
+        proflib=""
+    fi
+    # If the C++ library doesn't exist, skip it
+    # This may be needed because the C++ build wants to build executables
+    # before the libraries are built.
+    if [ ! -s "$cpplibfullname" ] ; then
+        cpplib=""
+    fi
+
+    # set up paths for shared libraries
+    # Only use the shared libraries if explicitly requested.  This is
+    # necessary because some (all?) systems are quite happy to link with
+    # a shared library *and then forget where it is*!  You often need to
+    # set an environment variable like LD_LIBRARY_PATH to include the
+    # path where the shared libraries are (is this broken or what?).
+    # Since that enviroment variable would then need to be set for all
+    # hosts where the program might run (since rsh doesn't propagate 
+    # the environment), we don't make this the default.
+    MPI_LIBS="$DEVICELFLAGS -l$MPILIBNAME -lmpidutil"
+    if [ "$SHAREDKIND" != "ignore" -a $UseSharedLib = "1" ] ; then
+        # -L path is already set in $LIB_PATH - instead, add the dir for the shared libs in front
+        LIB_PATH="-L$sharedlib_dir $LIB_PATH"
+        if [ "$UseLibPath" = "1" -a -n "$SHARED_LIB_SEARCH_PATH_LEADER" ] ; then
+	    clibpath="$clibpath $SHARED_LIB_SEARCH_PATH_LEADER$sharedlib_dir"
+  	fi
+	CLINKER="$CLINKER @CLINKERDYNAMICOPTS@"
+    else
+
+      # if we link statically, we need additional flags to force the linker
+      # to link against the device libs, because there are no unresolved symbols
+      # which could be resolved with the device libs
+      # plus, we need the static device libs here
+      MPI_LIBS="$MPI_LIBS -ldl"
+
+    fi
+
+    CCLINKER="$CCLINKER @CLINKERSTATICOPTS@"
+    CLINKER="$CLINKER @CLINKERSTATICOPTS@"
+    # finally call the compiler; linkargs needs to be after linkobjs for things like "-lm"
+    if [ $COMPSKRIPT = "mpiCC" ] ; then
+	$Show $CCLINKER $CCFLAGS $ROMIO_LFLAGS $LIB_PATH $linkobjs $linkargs $CXXLDFLAGS $cpplib $MPILOG $mpiolib $proflib $MPI_LIBS $BASE_LIB_LIST $ROMIO_DEVLIBS
+    else
+	$Show $CLINKER $USER_CFLAGS $ROMIO_LFLAGS $clibpath $LIB_PATH $linkobjs $MPILOG $linkargs $LDFLAGS $mpiolib $proflib $MPI_LIBS $BASE_LIB_LIST $ROMIO_DEVLIBS
+    fi
+    status=$?
+fi
+exit $status

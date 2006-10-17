@@ -1,0 +1,9 @@
+NUMHOSTS 2
+magrathea 1
+laforge 1
+magrathea laforge 1 -
+134.130.62.94 134.130.62.44
+laforge magrathea 1 -
+134.130.62.44 134.130.62.94
+HETERO
+

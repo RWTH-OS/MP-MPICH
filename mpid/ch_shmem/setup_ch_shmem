@@ -1,0 +1,35 @@
+#! /bin/sh
+#
+# ch_shmem and ch_lfshmem setup
+#
+if test -n "$DEVICE_ARGS_ch_shmem" ; then
+    echo "ch_shmem: running device specific setup with args: $DEVICE_ARGS_ch_shmem"
+else
+    test -n "$verbose" && echo "ch_shmem: running device specific setup with args: NONE"
+fi
+
+#indicate presence of device
+CFLAGS="$CFLAGS -DCH_SHMEM_PRESENT"
+FFLAGS="$FFLAGS -DCH_SHMEM_PRESENT"
+
+# force linking of device lib in static case
+CLINKERSTATICOPTS="${CLINKERSTATICOPTS} -u MPID_CH_SHMEM_InitMsgPass"
+F77LINKERSTATICOPTS="${F77LINKERSTATICOPTS} -uMPID_CH_SHMEM_InitMsgPass"
+
+DEFAULT_MACHINE="smp"
+
+# Run configure in the device directory
+rm -f mpid/ch_shmem/shmem-mpid.h
+( cd $srcdir/mpid/ch_shmem ; export CC ; \
+    ./configure $DEVICE_ARGS_ch_shmem )
+
+# Variable assignments from configure are in localdefs
+. mpid/ch_shmem/localdefs
+LIB_LIST="$LIB_LIST $CHSHMEM_LIBS"
+
+# Solaris needs these, they are already in C lib on Linux
+if [ $ARCH = "solaris" -o $ARCH = "solaris86" ] ; then
+   LIB_LIST="${LIB_LIST} -lrt"
+fi
+
+echo "ch_shmem: end of device specific setup."

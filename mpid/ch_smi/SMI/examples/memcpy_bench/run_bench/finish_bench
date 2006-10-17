@@ -1,0 +1,19 @@
+BLIST=`ls $1`
+
+for i in $BLIST
+do
+  BLA=`ls $1/$i/membench.out*`
+  if test -z "$BLA"
+  then
+    echo "making set '$i' of benchmark '$1'"
+    cp $1/$i/arg.conf .
+    cp $1/$i/machines .
+    ./smirun memcpy_bench -debug
+    echo hit enter when benchmark is done
+    read
+    rm $1/$i/membench.out*
+    mv ~/membench.out* $1/$i
+    cp arg.conf $1/$i
+    cp machines $1/$i
+  fi
+done

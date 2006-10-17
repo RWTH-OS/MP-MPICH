@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chkresult", "chkresult\chkresult.vcproj", "{22B97988-25FD-41AF-BB95-7DEB78793411}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "runtests", "runtests\runtests.vcproj", "{4FF17816-8FBB-48AD-A9AA-495C6F4F6BDB}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{22B97988-25FD-41AF-BB95-7DEB78793411}.Debug.ActiveCfg = Debug|Win32
+		{22B97988-25FD-41AF-BB95-7DEB78793411}.Debug.Build.0 = Debug|Win32
+		{22B97988-25FD-41AF-BB95-7DEB78793411}.Release.ActiveCfg = Release|Win32
+		{22B97988-25FD-41AF-BB95-7DEB78793411}.Release.Build.0 = Release|Win32
+		{4FF17816-8FBB-48AD-A9AA-495C6F4F6BDB}.Debug.ActiveCfg = Debug|Win32
+		{4FF17816-8FBB-48AD-A9AA-495C6F4F6BDB}.Debug.Build.0 = Debug|Win32
+		{4FF17816-8FBB-48AD-A9AA-495C6F4F6BDB}.Release.ActiveCfg = Release|Win32
+		{4FF17816-8FBB-48AD-A9AA-495C6F4F6BDB}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

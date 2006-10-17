@@ -1,0 +1,75 @@
+<html>
+
+<head>
+<title></title>
+</head>
+
+<body>
+<a href="../index.html">
+
+<p>main</a></p>
+
+<p>::MPICH JOB LAUNCHER</p>
+
+<p>DCOM servers are installed on each machine that will provide CPUs for parallel
+applications.&nbsp; </p>
+
+<p>MPIRun.exe must be used to launch the processes.&nbsp; </p>
+
+<p>MPIRun first looks in the registry to see if the current user has saved their account
+and password.&nbsp;&nbsp; If the account information exists, it uses it to launch the
+processes, else it prompts the user for an account and password.&nbsp; MPIRegister.exe is
+used to encrypt the account information into the registry on a per user basis.&nbsp; It is
+stored in the CURRENT_USER section of the registry.&nbsp; Batch servers would need to run
+MPIRegister once for the user which the batch server is logged in as or send the account
+and password to MPIRun each time it is executed. </p>
+
+<p>MPIRun creates a job object on all the machines which will launch processes.&nbsp; The
+user either provides a configuration file which specifies which machines to launch on or
+MPIRun generates a list based on installation information stored in the registry. &nbsp;
+MPIRun connects to the MPIJob COM object on the first host in the list and asks it to
+create a job, specifying the rest of the machines.&nbsp; The MPIJob object then connects
+to all the other machines in the list.&nbsp; MPIRun can push an executable out to all the
+remote hosts if it hasn't been copied to their local file systems.&nbsp; The COM object
+which actually creates the process on each machine runs as a service.&nbsp; This means for
+NT4, the executable must live on the local host.&nbsp; The SYSTEM account does not have
+access to network resources and cannot resolve shared network file names. &nbsp; That is
+why I provided the push capability into the launcher.&nbsp; The executable only needs to
+exist on the host where MPIRun is executed.&nbsp; The MPIJob object will create a
+temporary file on each host, copy the executable, execute it, and then delete the
+temporary file after each executable terminates.&nbsp; This means that argv[0] will not be
+the same on each host and if the current path doesn't exist on each machine then the
+processes will not run in the current directory.&nbsp; </p>
+
+<p>When the MPIJob object launches the processes, it passes the account and password to
+each host.&nbsp; Each executable is launched by calling LogonUser() and
+CreateProcessAsUser().&nbsp; Security is determined by MPIRun.&nbsp; DCOM provides various
+levels of security from none to validate and encrypt every packet.&nbsp;&nbsp; MPIRun sets
+this security level each time it is run.&nbsp; Currently I picked a middle value as the
+default but MPIRun will have a flag to allow the user to choose what level they want.</p>
+
+<p>The launcher is tied to this implementation of MPICH because it communicates with the
+first launched process in a particular way.&nbsp;&nbsp; The first process launched creates
+a listening socket, acquires a port, and communicates this port back to the launcher.
+&nbsp; Then the launcher starts all the rest of the processes, informing them of the first
+process's listening port through an environment variable.&nbsp; This allows MPICH jobs to
+be launched without any communication service or reserved port.&nbsp; The draw back is
+that it prohibits the use of launchers that can't communicate with the root process in
+this manner.</p>
+
+<p>Output from each process is merged into MPIRun's standard out.&nbsp; Both stderr and
+stdout are merged into a single stream.&nbsp; The user can hit Ctrl-C to break MPIRun and
+an Abort call will be sent to the MPIJob obect, killing all the remote processes.&nbsp; A
+batch server could send a break event to MPIRun if the process has exceeded its allotted
+time.</p>
+
+<p><a href="../index.html">main</a><br>
+<a href="install.html">Installation</a><br>
+<a href="compiling.html">Compiling an MPI application</a><br>
+<a href="MPIRun.html">MPIRun </a><br>
+<a href="compilingMPICH.html">Re-Building MPICH.NT</a><br>
+Launcher<br>
+<a href="noLauncher.html">Running applications without using the launcher</a><br>
+<a href="subtle.html">Subtle configuration options</a> </p>
+</body>
+</html>

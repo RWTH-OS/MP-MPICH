@@ -1,0 +1,143 @@
+#
+#  $Id: Makefile.in 4397 2006-01-30 10:41:47Z carsten $
+#
+#
+##### User configurable options #####
+
+DEVICE       := ch_mpx
+ARCH         := @ARCH@
+COMM         := @COMM@
+MPIR_HOME    := @MPIR_HOME@
+CC           := @CC@
+CXX          := @CXX@
+AR           := @AR@
+RANLIB       := @RANLIB@
+OPTFLAGS     := @OPTFLAGS@
+SHELL        := /bin/sh
+ASMFILES_O   :=
+prefix       := @prefix@
+top_srcdir   := @top_srcdir@
+srcdir       := @srcdir@
+libbuild_dir := @libbuild_dir@
+MPX_HOME     := @MPX_HOME@
+MPX_IMPL     := @MPX_IMPL@
+MPX_INST     := @MPX_INST@
+STL2C_HOME    := ${top_srcdir}/mpid/stl2c
+INCLUDE_DIR  := -I${top_srcdir}/include -I${top_srcdir}/src/coll \
+		-I${top_srcdir}/mpid/util -I${top_srcdir}/mpid/lfbs_common \
+		-I${top_srcdir}/mpid -I${top_srcdir}/mpid/$(DEVICE) \
+		-I${MPX_INST}/include -I$(STL2C_HOME)
+UseSharedLibs := @UseSharedLibs@
+### End User configurable options ###
+
+@VPATH@
+
+ALL: default
+
+LIBNAME  := ${libbuild_dir}/lib$(DEVICE).a
+
+CFLAGS   := @CFLAGS@ $(OPTFLAGS) $(INCLUDE_DIR) @OPTFLAGSC@ \
+	    -DMPI_@ARCH@ -DMPID_DEVICE_CODE @GETNAME_DEFS@ @DEVCFLAGS@ @DEFS@  @DEV_DEFS@
+
+CCFLAGS  := @CCFLAGS@  @CXXFLAGS@ $(INCLUDE_DIR)
+
+CFLAGSNOOPT   := @CFLAGS@ $(INCLUDE_DIR) -DMPI_@ARCH@ \
+		-DMPID_DEVICE_CODE @GETNAME_DEFS@ @DEVCFLAGS@ @DEV_DEFS@ @DEFS@
+
+DEVSOURCE  := mpxdebug.c mpxbeager.c mpxcancel.c mpxinit.c mpxpriv.cpp \
+              mpxchkdev.c mpxneager.c mpxshort.c mpxgetopt.c
+
+DEVOBJECTS := mpxdebug.o mpxbeager.o mpxcancel.o mpxinit.o mpxpriv.o \
+              mpxchkdev.o mpxneager.o mpxshort.o mpxgetopt.o \
+	       $(ASMFILES_O) @DEVOFILES@ 
+
+DEVHEADERS := mpxdev.h mpxpriv.h  mpxpackets.h mpxdebug.h mpxgetopt.h \
+	      channel.h mpid.h mpid_threads.h cookie.h reqalloc.h mpid_bind.h req.h sbcnst2.h \
+	      adi2config.h chhetero.h comm.h datatype.h attach.h objtrace.h req.h reqrndv.h calltrace.h mpimem.h \
+              tr2.h dev.h sside_protocol.h adi3types.h flow.h mpid_debug.h mpid_common.h
+
+stl2c:
+	@cd $(STL2C_HOME); $(MAKE)
+	$(AR) $(LIBNAME) $(STL2C_HOME)/*.o
+
+$(MPX_INST)/lib: $(MPX_HOME)/config.log
+	(cd $(MPX_HOME); $(MAKE); $(MAKE) install)
+
+$(MPX_HOME)/config.log:
+	@echo
+	@echo "ERROR: $(MPX_HOME) is not configured!"
+	@echo
+	@exit 1
+
+default:
+	$(MAKE) $(MPX_INST)/lib
+	$(MAKE) $(LIBNAME)
+	$(MAKE) stl2c
+	@echo "building ${MPX_IMPL} in directory ${MPX_INST}"
+	./mpx_absorb $(MPX_IMPL) $(MPX_INST) $(LIBNAME)
+	$(AR) $(LIBNAME)
+	$(RANLIB) $(LIBNAME)
+
+$(LIBNAME): $(DEVOBJECTS) 
+	$(AR) $@ $?
+	$(RANLIB) $@
+
+$(DEVOBJECTS): $(DEVHEADERS)
+
+#mpxpriv.o: mpxpriv.cpp
+#	c++ $(CFLAGS) $(BASEOPT) -c $*.cpp $(MPI_PROFILE)
+
+# default_all is the same as default, but without the RANLIB.  This
+# can speed up the build (ranlibs can take a LONG time).  profile_all 
+# is the same, but for the profile library
+
+default_all: setlinks default_files
+default_files: default
+profile_all: 
+sharedlib: default
+	@(cd ${MPIR_HOME}; $(MAKE) sharedlibs; cd ${MPIR_HOME}/mpid/${DEVICE};)
+
+distclean: clean
+	rm -rf $(MPX_HOME)/*
+	if [ -d $(MPX_HOME) ] ; then rmdir $(MPX_HOME); fi
+	@for file in `cat mpx.linklist` ; do  \
+	  rm -rf $$file ; \
+	done
+	@rm -rf mpx.linklist
+	@rm -rf ${top_srcdir}/bin/mpirun.save
+	@for file in ${DEVHEADERS} ${DEVSOURCE} ; do  \
+	    if [ -h $$file ] ; then \
+	        /bin/rm -f $$file ; fi \
+	done
+	@if [ -d p2ptest -a -s p2ptest/Makefile ] ; then \
+	    /bin/rm -f p2ptest/Makefile ; fi
+	/bin/rm -f Makefile
+
+clean:	
+	@rm -rf $(MPX_INST)/*
+	@cd ${STL2C_HOME}; $(MAKE) clean
+	/bin/rm -f *~ $(DEVOBJECTS)
+
+setlinks:
+	@for file in $(DEVHEADERS) $(DEVSOURCE) ; do  \
+	    if [ ! -s $$file -a -s ../lfbs_common/$$file ] ; then \
+	 	ln -s ../lfbs_common/$$file $$file ; fi ; \
+	    if [ ! -s $$file -a -s ../ch2/$$file ] ; then \
+	 	ln -s ../ch2/$$file $$file ; fi ; \
+	    if [ ! -s $$file -a -s ../util/$$file ] ; then \
+		ln -s ../util/$$file $$file ; fi ; \
+	done
+
+.c.o:
+	$(CC) $(CFLAGS) $(BASEOPT) -c $*.c $(MPI_PROFILE)
+
+.cpp.o:
+	$(CXX) $(CCFLAGS) $(BASEOPT) -c $*.cpp $(MPI_PROFILE)
+
+.s.o:
+	as $*.s -o $*.o
+
+lint:
+	lint -chvuz -I../.. -I../../include -I../ch2 \
+		-I./ \
+	-DMPID_DEVICE_CODE $(SOURCE) $(LIBDEVSOURCE) ../util/queue.c ../util/cmnargs.c

@@ -1,0 +1,192 @@
+$Id: cvs_tags.txt,v 1.12 2001/12/20 18:51:42 joachim Exp $
+
+These tags are "historical" tags from the ch_smi repository. The new tags
+for mp-mpich/mpid/ch_smi start below.
+
+tag		description
+-------------------------------------------------------------------------------
+release-1	first naive version, close to the original ch_shmem, only
+		that it uses SCI shared memory
+
+release-1-nosmi	branch from release one which does not use SMI but uses
+		SISCI directly. Incomplete and nonfunctional, since 
+		release-2 was developed.
+
+release-2	the shared-memory data structures were completely redesigned
+		and optimized for SCI shared memory (lockfree, no remote
+		reads). Runs fine, peak bandwith 10 time higher than
+		release-1 (15 MB/sec), but needs some optimizing in the area
+		of fast remote writes to achieve a higher percentage of the
+		maxmium bandwith.
+
+release-2a	introduced FPU memcpy
+
+release-2_91	optimized data structures and protocols for SCI transfer - no
+		resemblance with ch_shmem in this area any longer.
+		In Version 2.91 is pre-pre alpha of version 3.0, basically
+		only the short protocol / control packets work.
+		Many bugfixes and code cleanup is needed!
+
+release-2_99	all protocols seem to be working fine now, but possibly some bugs will 
+		be found.
+
+release-2_99a   last version for mpich-1.1.1 (the configure/makefiles/mpirun scripts of
+		the forthcoming versions will be adjusted for mpich-1.1.2 which has a
+		different binary file structure)
+
+release-2_99b   introduced "transporters" to the rendezvous-protocoll to speed up
+		transfer of long messages
+		This release is for mpich-1.1.2
+
+release-3	This is the release on which the extended abstract SCI-Europe is based.
+		All function names have been adopted to MPID_SMI_...(), the filenames
+		as well (smi...). A lot of unneeded files have been removed from the 
+		repository. 
+		Run-Time statistics can be created by compiling witd -DSTATISTICS 
+		(see stat.c/stat.h) using a high-precsion/low-latency timer (see getus.h/
+		getticks.s)
+
+release-3a	Wow, this is the real one! Bitfield-writes are deadly for SCI-performance,
+		removed them everywhere and latency is now <9us (from 25us).
+		The run-time-statistics helped a lot in this, further instrumented the
+		library.
+
+release-3b	This might be the release version:
+		- SCI-Sequence-Checking is done for every message
+		  (turn it of by compiling with -DMPID_NOVERIFY)
+		- MPI_Wtime does now use GETTICKS() from getus.h, therefor
+		  MHz calibrating is done on every start
+
+release-3_1	- fixed a bug in the rendezvous-protocol
+		- cleaned up code for compilatoin under NT
+		I really think this will be the release version...
+
+release-3_1a	- fixed some installation problems for the distribution
+		- this is the first public beta release 1.0 from 01/06/99
+
+fast_rndv	- branch for experiments with a different (faster) rendevous-
+		  protocol which uses remote Imalloc()s
+
+release-3_2	- compilable under NT
+
+dynamic		- branch for the dynamic configuration
+
+release-3_2a	- rendez-vous FAAASST now!
+		- removed potential deadlock in eager protocol
+
+release-3_3	This is the public release 1.1 from 23/07/99
+		- merged in dynamic branch for memory configuration at
+		  startup
+		- modified startup parameters to be less clumsy
+		
+release-3_3a	This is the *real* public release 1.1 from 23/07/99
+		- corrected alignment for dynamic configuration
+
+release-3_3b	Bugfix release:
+		- rendez-vous protocol contained a serious bug for
+		  *very* long messages
+		- the mpirun.ch_smi script now works better if
+		  default config files are used
+
+release-3_3c	Before merging with async-eager2 branch. Uses the new features
+		of the SMI library like SMI_Abort() and SMI_Debug()
+
+async		Branch for asynchronous implementation of MPI_ISend() using 
+		threads
+
+async-eager	The eager protocoll is now able to do real asynchronous ISends().
+
+async-eager2	Just like async-eager, but also includes the configuration via
+		the devconf-file
+		This tag was merged with the main branch.
+
+snapshot-3_3c	This is a development snapshot:
+		- Isend with threads/memcpy works
+		- Isend with DMA does not yet work
+		- fix configuration for 64-byte streambuffers
+		(before the change for flexible streambuffer sizes)
+		- still the old SMI startup parameters
+
+snapshot-3_3d	This is a development snapshot:
+		- some more bugfixes, now seems to work fine in all
+		  modes on the D310/pci1 SCI boards
+		- Problems on D321/psb64:
+		  - ready sends (Irsend test)
+		  - nblock with 4 or more nodes
+
+snapshot-3_4	This is a development snapshot:
+		- no known problems on D310
+		- Problems on D321:
+		  - ready sends (irsend & irsendinit give error in data)
+		All other pt2pt tests work fine for blocking transfer.
+		
+		- prepared for NONFIXED (use define MPID_SMI_NONFIXED in
+		  shdef.h to select)
+
+		NOTE: the snapshot releases between ch_smi and SMI are 
+		now synced.
+
+release-3_4a	SCI-MPICH release 1.99
+
+release-3_4b	SCI-MPICH release 1.99a
+		- fixed Eager- and Rndv-problems under Linux
+		- now passes all pt2pt-Tests except Ready-Sends
+
+release-3_4c	SCI-MPICH release 1.99b
+		- fixed statistics
+
+release-3_4d	SCI-MPICH release 1.99c
+		- improved the handling of low-memory situations in the 
+		  setup of eager and rendez-vous protocoll
+
+snapshot-3_4e	This is a development snapshot:
+		- before the introduction of DMA-rendez-vous
+
+snapshot-3_5	This is a development snapshot:
+		- SMP via SYSV shared memory is integrated & tested
+		- DELAYED segment type will be introduced now
+
+CVS revision tags of mp-mpich/mpid/ch_smi 
+-----------------------------------------
+
+snapshot-3_6	This is a development snapshot:
+		- DELAYED segments work fine
+		- new EAGER buffer structure works
+		- memcpy() locking and real multi-adapter-support
+		  will be introduced now
+
+snapshot-3_6a	This is a development snapshot:
+		- memcpy() locking works
+		- multi-adapter support introduced, needs to be tested
+		- matching SMI: snapshot-4_0
+
+snapshot-3_6b	This is a development snapshot:
+		- before merging in dynamic eager protocol variant
+
+snapshot-3_6c	This is a development snapshot:
+		- after merging in dynamic eager protocol variant
+		- before the variant of the short protocol which use SENDCTRL_PAD etc.
+
+snapshot-3_6d	This is a development snapshot:
+		- made code 64bit-safe (needs to be tested more thoroughly)
+		- matching SMI version: snapshot-4.1
+
+snapshot-3_6e	(15.Dec 00) This is a development snapshot of mp-mpich/mpid: 
+		- before changes for thread-safety were applied (mainly in ch2 & util)
+
+snapshot-3_7	(22. Feb 01) This is a development snapshot of mp-mpich/mpid/ch_smi: 
+		- before CRC32 / new packet structure was introduced
+
+snapshot-3_90	(08.Aug 01) This is a development snapshot of mp-mpich/mpid/ch_smi:
+		- basic zero-copy modes work fine
+		- before the introduction of
+		  - new short protocol by Hendrik Meyer
+		  - MPI_Alloc_mem by Frank Reker
+
+snapshot-3_91	(09.Nov 01) This is a development snapshot of mp-mpich/mpid/ch_smi:
+                - before the introduction of new short protocol by Hendrik Meyer
+	
+snapshot-3_92	(20.Dec 01) This is a development snapshot of mp-mpich/mpid/ch_smi:
+                - before the introduction of dynamic resource management
+
+	

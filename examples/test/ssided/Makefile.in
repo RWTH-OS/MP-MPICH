@@ -1,0 +1,108 @@
+ALL: default
+##### User configurable options #####
+
+MPIR_HOME    := @MPIR_HOME@
+CC           := @MPICC@
+CLINKER      := @MPICC@
+CCC          := @MPICPLUSPLUS@
+CCLINKER     := $(CCC)
+F77          := @MPIF77@
+FLINKER      := @MPIF77@
+OPTFLAGS     := @OPTFLAGS@
+MPIFDEP      := @MPIFDEP@
+F77_OPTFLAGS := @F77_EXTRA_FLAG@
+MPIRUN       := @MPIRUN@
+### End User configurable options ###
+
+SHELL := /bin/sh
+prefix     := @prefix@
+top_srcdir := @top_srcdir@
+srcdir     := @srcdir@
+@VPATH@
+
+PROFLIB :=
+CFLAGS  := @CFLAGS@ @DEFS@ $(OPTFLAGS)
+CCFLAGS := $(CFLAGS)
+FFLAGS := $(OPTFLAGS)
+# Use LIBS to add any special libraries for C programs
+LIBS := @LIB_PATH@ @LIB_LIST@
+# Use FLIBS to add any special libraries for Fortran programs
+FLIBS := @FLIB_PATH@ @LIB_LIST@
+
+MPI2EXECS := accu_test allocmem get_contig_test1 get_contig_test2 \
+	get_difftype_test get_sametype_test1 get_sametype_test2 progress \
+	put_contig_test1 put_contig_test2 put_contig_test3 put_difftype_test \
+	put_sametype_test1 put_sametype_test2 sparse sparse_check \
+	sside_interactive
+
+default: $(MPI2EXECS)
+
+testing: default
+	-./runtests $(MPIRUN)
+
+linktest: default clean
+
+all: testing
+
+accu_test: accu_test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+allocmem: allocmem.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+get_contig_test1: get_contig_test1.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+get_contig_test2: get_contig_test2.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+get_difftype_test: get_difftype_test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+get_sametype_test1: get_sametype_test1.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+get_sametype_test2: get_sametype_test2.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+progress: progress.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ -lm $(LIBS)
+
+put_contig_test1: put_contig_test1.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+put_contig_test2: put_contig_test2.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+put_contig_test3: put_contig_test3.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+put_difftype_test: put_difftype_test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+put_sametype_test1: put_sametype_test1.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+put_sametype_test2: put_sametype_test2.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+sparse: sparse.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+sparse_check: sparse_check.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+sside_interactive: sside_interactive.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+clean:
+	@-rm -f *.o *~ PI* $(MPI2EXECS) \
+		core *.out *.diff *.trace mpif.h
+
+distclean: clean
+	@-rm -f Makefile
+
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+.f.o:
+	$(F77) $(FFLAGS) $(F77_OPTFLAGS) -c $<

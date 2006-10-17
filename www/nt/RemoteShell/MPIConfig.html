@@ -1,0 +1,61 @@
+<html>
+
+<head>
+<title></title>
+</head>
+
+<body>
+
+<p><a href="index.html">main</a></p>
+
+<p><big><big><big>MPIConfig.exe</big></big></big></p>
+
+<p>In order to run an application on various hosts without specifying the hosts in a
+configuration file, the launcher needs to know which hosts it has been installed on.
+&nbsp; MPIConfig.exe is a simple program which finds the hosts where the launcher has been
+installed and writes this list of hosts to the registry.&nbsp; With this information
+MPIRun can pick hosts from the list in the registry when determining where to launch
+processes.</p>
+
+<p><img src="mpiconfig.gif" width="486" height="350" alt="mpiconfig.gif (9049 bytes)"></p>
+
+<p><strong>Refresh:</strong></p>
+
+<p>Refresh queries the network for the host names.</p>
+
+<p><strong>Find:</strong></p>
+
+<p>Find connects to the registry on each host in the list and determines whether the
+launcher has been successfully installed.&nbsp; When it is finished, the selected hosts
+are the ones where the launcher is installed.</p>
+
+<p><strong>Verify:</strong></p>
+
+<p>When verify is clicked, mpiconfig connects to each of the selected hosts and confirms
+that the DCOM server is reachable.&nbsp; This feature has not been implemented yet.</p>
+
+<p><strong>Set:</strong></p>
+
+<p>When set is clicked the following dialog pops up:</p>
+
+<p><img border="0" src="settings.gif" width="285" height="179"></p>
+
+<p>If you select &quot;set HOSTS&quot; mpiconfig makes a group out of all the selected hosts
+and writes
+this list of host names to the registry on each host.&nbsp; When MPIRun is executed from
+any of the hosts in a group with the -np option, hosts will be selected from this list.</p>
+
+<p>If you select &quot;set TEMP&quot; mpiconfig will write this directory to the
+registry on each host.&nbsp; The remote shell server needs to make a temporary
+file for communication with the first launched process and the file needs to be
+in a location that is read/write-able by both the remote shell service and the
+user launching the mpich application.&nbsp; The remote shell server uses this
+entry to determine where to write this file.&nbsp; The default is C:\</p>
+
+<p><a href="index.html">main</a><br>
+<a href="MPIRun.html">MPIRun</a> <br>
+<a href="MPIRegister.html">MPIRegister</a><br>
+MPIConfig<br>
+</p>
+</body>
+</html>

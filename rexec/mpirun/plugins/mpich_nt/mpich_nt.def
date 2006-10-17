@@ -1,0 +1,10 @@
+; mpich_nt.def : Declares the module parameters for the DLL.
+
+LIBRARY      "mpich_nt"
+
+
+EXPORTS
+    ; Explicit exports can go here
+
+_PlgDescription @1
+

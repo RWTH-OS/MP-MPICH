@@ -1,0 +1,32 @@
+ |
+-+-------------------------------------------------------------------------------------------
+ |							         
+ | |  _        :  Lehrstuhl fuer Betriebssysteme (LfBS)	(C) 2005
+ | |_|_`__     :  RWTH Aachen,                         ___
+ |   | |__)__  :  Kopernikusstr. 16,          |_|\    / | |_|
+ |     |__|__` :  D-52056 Aachen              | \ \/\/  | | |
+ |         __| :  www.lfbs.rwth-aachen.de
+-+-------------------------------------------------------------------------------------------
+ | 
+ |
+ |  *********************************
+-+--** The STL2C library           **--------------------------------------------------------
+ |  *********************************
+ |
+ |   The stl2c library provides some simple emulation features of the well-known
+ |   C++ Standard Template Library (STL) to be used in the language C.
+ |
+ |   Currently only stl2c_vector, stl2c_list (alias stl2c_deque) and stl2_map
+ |   are implemented to emulate their counterparts in C++.
+ |
+ |   The template feature is achieved by using pre-processor macros, which are
+ |   defined in the respective header files.
+ |
+-+-------------------------------------------------------------------------------------------
+ |
+ |   author(s): Carsten Clauss
+ |   contact  : carsten@lfbs.rwth-aachen.de
+ |   date     : March 2005
+ |
+-+-------------------------------------------------------------------------------------------
+ |

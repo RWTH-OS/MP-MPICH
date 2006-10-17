@@ -1,0 +1,2 @@
+GMPI_MALLOC_OBJ=gmpi_malloc.o gmpi_mallocaux.o
+GMPI_MALLOC_DIR=ptmalloc2

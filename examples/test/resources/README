@@ -1,0 +1,6 @@
+This directory is intended to contain tests that check
+for resource usage of a running application. Typically,
+this means to check for memory leak, but there are other 
+resources that might be critical (i.e. with SCI).
+
+

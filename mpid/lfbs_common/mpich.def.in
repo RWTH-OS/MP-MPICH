@@ -1,0 +1,1065 @@
+; $Id$
+; last Ordinal used: 1102
+ 
+LIBRARY     LIBNAME
+VERSION		1.1
+ 
+EXPORTS
+
+
+#ifdef MAGPIE
+    ; Functions for the magpie library.
+	; Maybe someone wants to try it with
+	; NT-MPICH
+	MAGPIE_cluster_of_process       @1
+	MAGPIE_reset_cluster_info       @2
+#endif
+
+	;*********************************
+	; MPIO functions not compatible with 
+	; the MPI funcs
+	;*********************************
+	MPIO_Request_c2f				@4   
+    MPIO_Request_f2c				@5   
+    MPIO_Test						@7   
+    MPIO_Wait						@9  
+
+
+	;**********************************
+	;Used with attributes
+	;**********************************
+    MPIR_dup_fn						@15  
+    MPIR_null_copy_fn				@16  
+    MPIR_null_delete_fn				@17 
+	 
+
+    ;**********************************
+	;These are used by MPE
+	;**********************************
+	MPIR_PrintDatatypePack			@1017
+	MPIR_PrintDatatypeUnpack		@1018
+
+	;**************************************
+	;Functions used by the Fortran bindings
+	;**************************************
+
+    MPIR_COMM_WORLD					@1019 DATA
+    MPIR_F_MPI_BOTTOM				@1020 DATA
+
+    mpir_init_bottom_win32			@1021
+	ADIOI_Malloc=ADIOI_Malloc_fn	@1096
+	ADIOI_Free=ADIOI_Free_fn		@1097
+	MPIR_strncpy=strncpy			@1098
+	MPIR_Alloc=malloc				@1099
+	MPIR_CAlloc=calloc				@1100
+	MPIR_Free=free					@1101
+    
+	MPIR_Error						@1026
+    MPIR_Err_setmsg					@1027
+	MPIR_Keyval_create				@1088
+	MPI_Request_c2f					@1028
+	MPI_Status_c2f					@1031
+	MPI_Status_f2c					@1086
+	PMPI_Status_f2c = LIBNAME.MPI_Status_f2c @1087
+	PMPI_Request_c2f = LIBNAME.MPI_Request_c2f		@1029
+	PMPI_Status_c2f  = LIBNAME.MPI_Status_c2f		@1030
+	MPIR_ToPointer					@1032
+
+	; This one is used by the VF bindings
+	; To check which of two possible buffers
+	; contains a string. We just forward it to kernel32.dll
+
+	MPIR_VirtualQuery=kernel32.VirtualQuery @1102
+
+
+	;**************************************
+	; The normal bindings...              
+	;**************************************
+	MPI_Abort                      @28  
+    MPI_Address                    @29  
+    MPI_Allgather                  @30  
+    MPI_Allgatherv                 @31  
+    MPI_Allreduce                  @32  
+    MPI_Alltoall                   @33  
+    MPI_Alltoallv                  @34  
+    MPI_Attr_delete                @35  
+    MPI_Attr_get                   @36  
+    MPI_Attr_put                   @37  
+	MPI_Alloc_mem				   @38
+	MPI_Accumulate			       @39
+    MPI_Barrier                    @44  
+    MPI_Bcast                      @45  
+    MPI_Bsend                      @46  
+    MPI_Bsend_init                 @47  
+    MPI_Buffer_attach              @48  
+    MPI_Buffer_detach              @49  
+    MPI_Cancel                     @71  
+    MPI_Cart_coords                @72  
+    MPI_Cart_create                @73  
+    MPI_Cart_get                   @74  
+    MPI_Cart_map                   @75  
+    MPI_Cart_rank                  @76  
+    MPI_Cart_shift                 @77  
+    MPI_Cart_sub                   @78  
+    MPI_Cartdim_get                @79  
+    MPI_Comm_compare               @80  
+    MPI_Comm_create                @81  
+    MPI_Comm_dup                   @82  
+    MPI_Comm_free                  @83  
+    MPI_Comm_get_name              @84  
+    MPI_Comm_group                 @85  
+    MPI_Comm_rank                  @86  
+    MPI_Comm_remote_group          @87  
+    MPI_Comm_remote_size           @88  
+    MPI_Comm_set_name              @89  
+    MPI_Comm_size                  @90  
+    MPI_Comm_split                 @91  
+    MPI_Comm_test_inter            @92  
+    MPI_Dims_create                @95  
+    MPI_Errhandler_create          @102 
+	MPI_Comm_create_errhandler = LIBNAME.MPI_Errhandler_create @1090
+    MPI_Errhandler_free            @103 
+    MPI_Errhandler_get             @104 
+	MPI_Comm_get_errhandler = LIBNAME.MPI_Errhandler_get @1091
+    MPI_Errhandler_set             @105
+	MPI_Comm_set_errhandler = LIBNAME.MPI_Errhandler_set @1092
+    MPI_Error_class                @106 
+    MPI_Error_string               @107 
+	
+
+	MPI_File_c2f					@138 
+    MPI_File_close					@139 
+    MPI_File_delete					@140 
+    MPI_File_f2c					@141 
+    MPI_File_get_amode				@142 
+    MPI_File_get_atomicity			@143 
+    MPI_File_get_byte_offset		@144 
+	MPI_File_get_errhandler			@922
+    MPI_File_get_group				@145 
+	MPI_File_get_info  				@929
+    MPI_File_get_position			@146 
+    MPI_File_get_position_shared	@931
+	MPI_File_get_size				@147 
+    MPI_File_get_type_extent		@148 
+    MPI_File_get_view				@149 
+    MPI_File_iread					@150 
+	MPI_File_iread_at				@151 
+	MPI_File_iread_shared			@932
+    MPI_File_iwrite					@152 
+    MPI_File_iwrite_at				@153 
+    MPI_File_iwrite_shared			@933
+	MPI_File_open					@154 
+    MPI_File_preallocate			@155 
+    MPI_File_read					@156 
+    MPI_File_read_all				@157 
+    MPI_File_read_at				@158 
+    MPI_File_read_at_all			@159 
+    MPI_File_read_at_all_begin		@936
+	MPI_File_read_at_all_end		@937
+	MPI_File_read_ordered			@938
+	MPI_File_read_ordered_begin		@939
+	MPI_File_read_ordered_end		@940
+	MPI_File_read_shared			@941
+	MPI_File_seek					@160 
+    MPI_File_seek_shared			@942
+	MPI_File_set_atomicity			@161 
+    MPI_File_set_errhandler			@921	
+	MPI_File_set_info				@930
+	MPI_File_set_size				@162 
+    MPI_File_set_view				@163 
+    MPI_File_sync					@164 
+    MPI_File_write					@165 
+    MPI_File_write_all				@166 
+    MPI_File_read_all_begin			@934
+	MPI_File_read_all_end			@935
+	MPI_File_write_at				@167 
+    MPI_File_write_all_begin		@943
+	MPI_File_write_all_end			@944
+	MPI_File_write_at_all			@168 
+	MPI_File_write_at_all_begin		@945
+	MPI_File_write_at_all_end		@946
+	MPI_File_write_ordered			@947
+	MPI_File_write_ordered_begin	@948
+	MPI_File_write_ordered_end		@949
+	MPI_File_write_shared			@950
+
+	MPI_Finalize					@169 
+	MPI_Finalized					@542
+	MPI_Free_mem                   @170
+
+    MPI_Gather						@192 
+    MPI_Gatherv						@193 
+    MPI_Get_count					@194 
+    MPI_Get_elements				@195
+	MPI_Get_version					@544 
+    MPI_Get_processor_name			@196 
+    MPI_Graph_create				@197 
+    MPI_Graph_get					@198 
+    MPI_Graph_map					@199 
+    MPI_Graph_neighbors				@200 
+    MPI_Graph_neighbors_count		@201 
+    MPI_Graphdims_get				@202 
+    MPI_Group_compare				@203 
+    MPI_Group_difference			@204 
+    MPI_Group_excl					@205 
+    MPI_Group_free					@206 
+    MPI_Group_incl					@207 
+    MPI_Group_intersection			@208 
+    MPI_Group_range_excl			@209 
+    MPI_Group_range_incl			@210 
+    MPI_Group_rank					@211 
+    MPI_Group_size					@212 
+    MPI_Group_translate_ranks		@213 
+    MPI_Group_union					@214 
+	MPI_Get							@215
+
+    MPI_Ibsend						@224 
+	MPI_Info_c2f					@469 
+    MPI_Info_create					@470 
+    MPI_Info_delete					@471 
+    MPI_Info_dup					@472 
+    MPI_Info_f2c					@473 
+    MPI_Info_free					@474 
+    MPI_Info_get					@475 
+    MPI_Info_get_nkeys				@476 
+    MPI_Info_get_nthkey				@477 
+    MPI_Info_get_valuelen			@478 
+    MPI_Info_set					@479 
+
+    MPI_Init						@225
+	MPI_Init_thread					@546 
+    MPI_Initialized					@226 
+    MPI_Intercomm_create			@227 
+    MPI_Intercomm_merge				@228 
+    MPI_Iprobe						@229 
+    MPI_Irecv						@230 
+    MPI_Irsend						@231 
+    MPI_Isend						@232 
+    MPI_Issend						@233 
+    MPI_Keyval_create				@236 
+    MPI_Keyval_free					@237 
+    MPI_Op_create					@242 
+    MPI_Op_free						@243 
+    MPI_Pack						@248 
+    MPI_Pack_size					@249 
+    MPI_Pcontrol					@250 
+    MPI_Probe						@251 
+	MPI_Put							@252
+
+    MPI_Recv						@259 
+    MPI_Recv_init					@260 
+    MPI_Reduce						@261 
+    MPI_Reduce_scatter				@262 
+    MPI_Request_free				@263 
+    MPI_Rsend						@264 
+    MPI_Rsend_init					@265 
+    MPI_Scan						@277 
+    MPI_Scatter						@278 
+    MPI_Scatterv					@279 
+    MPI_Send						@280 
+    MPI_Send_init					@281 
+    MPI_Sendrecv					@282 
+    MPI_Sendrecv_replace			@283 
+    MPI_Ssend						@284 
+    MPI_Ssend_init					@285 
+    MPI_Start						@286 
+    MPI_Startall					@287
+	MPI_Status_set_cancelled		@547 
+	MPI_Status_set_elements			@549
+    MPI_Test						@308 
+    MPI_Test_cancelled				@309 
+    MPI_Testall						@310 
+    MPI_Testany						@311 
+    MPI_Testsome					@312 
+    MPI_Topo_test					@313 
+    MPI_Type_commit					@314 
+    MPI_Type_contiguous				@315 
+    MPI_Type_create_darray			@316
+	MPI_Type_create_indexed_block	@551
+    MPI_Type_create_subarray		@317 
+    MPI_Type_extent					@318 
+    MPI_Type_free					@319 
+    MPI_Type_get_contents			@532 
+    MPI_Type_get_envelope			@533 
+    MPI_Type_hindexed				@320 
+    MPI_Type_hvector				@321 
+    MPI_Type_indexed				@322 
+    MPI_Type_lb						@323 
+    MPI_Type_size					@324 
+    MPI_Type_struct					@325 
+    MPI_Type_ub						@326 
+    MPI_Type_vector					@327 
+    MPI_Unpack						@329 
+    MPI_Wait						@336 
+    MPI_Waitall						@337 
+    MPI_Waitany						@338 
+    MPI_Waitsome					@339 
+    MPI_Wtick						@340 
+    MPI_Wtime						@341
+	MPI_Win_create_errhandler		@342
+	MPI_Win_set_errhandler			@343
+	MPI_Win_get_errhandler			@344
+	MPI_Win_fence					@345
+	MPI_Win_start					@346
+	MPI_Win_complete				@347
+	MPI_Win_post					@348
+	MPI_Win_wait					@349
+	MPI_Win_test					@350
+	MPI_Win_lock					@351
+	MPI_Win_unlock					@352
+	MPI_Win_create 					@353
+	MPI_Win_free 					@354
+	MPI_Win_get_attr 				@355
+	MPI_Win_get_group				@356
+
+#ifdef META 
+	MPI_COMM_LOCAL					@370
+	MPI_COMM_HOST					@371
+#endif
+
+    ;**************************************************
+	; The profiling stuff	
+	; These are just forwards to the normal functions 
+	; in the dll
+	;**************************************************
+
+	PMPIO_Request_c2f = LIBNAME.MPIO_Request_c2f		@553
+	PMPIO_Request_f2c = LIBNAME.MPIO_Request_f2c		@554
+	PMPIO_Test		  = LIBNAME.MPIO_Test				@555
+	PMPIO_Wait		  = LIBNAME.MPIO_Wait				@556
+	PMPI_Abort		  = LIBNAME.MPI_Abort				@557
+	PMPI_Address	  = LIBNAME.MPI_Address				@558
+	PMPI_Allgather	  = LIBNAME.MPI_Allgather			@559
+	PMPI_Allgatherv = LIBNAME.MPI_Allgatherv			@560
+	PMPI_Allreduce = LIBNAME.MPI_Allreduce				@561
+	PMPI_Alltoall = LIBNAME.MPI_Alltoall				@562
+	PMPI_Alltoallv = LIBNAME.MPI_Alltoallv				@563
+	PMPI_Attr_delete = LIBNAME.MPI_Attr_delete			@564
+	PMPI_Attr_get = LIBNAME.MPI_Attr_get				@565
+	PMPI_Attr_put = LIBNAME.MPI_Attr_put				@566
+	PMPI_Barrier = LIBNAME.MPI_Barrier					@567
+	PMPI_Bcast = LIBNAME.MPI_Bcast						@568
+	PMPI_Bsend = LIBNAME.MPI_Bsend						@569
+	PMPI_Bsend_init = LIBNAME.MPI_Bsend_init			@570
+	PMPI_Buffer_attach = LIBNAME.MPI_Buffer_attach		@571
+	PMPI_Buffer_detach = LIBNAME.MPI_Buffer_detach		@572
+	PMPI_Cancel = LIBNAME.MPI_Cancel					@573
+	PMPI_Cart_coords = LIBNAME.MPI_Cart_coords			@574
+	PMPI_Cart_create = LIBNAME.MPI_Cart_create			@575
+	PMPI_Cart_get = LIBNAME.MPI_Cart_get				@576
+	PMPI_Cart_map = LIBNAME.MPI_Cart_map				@577
+	PMPI_Cart_rank = LIBNAME.MPI_Cart_rank				@578
+	PMPI_Cart_shift = LIBNAME.MPI_Cart_shift			@579
+	PMPI_Cart_sub = LIBNAME.MPI_Cart_sub				@580
+	PMPI_Cartdim_get = LIBNAME.MPI_Cartdim_get			@581
+	PMPI_Comm_compare = LIBNAME.MPI_Comm_compare		@582
+	PMPI_Comm_create = LIBNAME.MPI_Comm_create			@583
+	PMPI_Comm_dup = LIBNAME.MPI_Comm_dup				@584
+	PMPI_Comm_free = LIBNAME.MPI_Comm_free				@585
+	PMPI_Comm_get_name = LIBNAME.MPI_Comm_get_name		@586
+	PMPI_Comm_group = LIBNAME.MPI_Comm_group			@587
+	PMPI_Comm_rank = LIBNAME.MPI_Comm_rank				@588
+	PMPI_Comm_remote_group = LIBNAME.MPI_Comm_remote_group @589
+	PMPI_Comm_remote_size = LIBNAME.MPI_Comm_remote_size   @590
+	PMPI_Comm_set_name = LIBNAME.MPI_Comm_set_name		@591
+	PMPI_Comm_size = LIBNAME.MPI_Comm_size				@592
+	PMPI_Comm_split = LIBNAME.MPI_Comm_split			@593
+	PMPI_Comm_test_inter = LIBNAME.MPI_Comm_test_inter	@594
+	PMPI_Dims_create = LIBNAME.MPI_Dims_create			@595
+	PMPI_Errhandler_create = LIBNAME.MPI_Errhandler_create @596
+	PMPI_Errhandler_free = LIBNAME.MPI_Errhandler_free  @597
+	PMPI_Errhandler_get = LIBNAME.MPI_Errhandler_get	@598
+	PMPI_Errhandler_set = LIBNAME.MPI_Errhandler_set	@599
+	PMPI_Error_class = LIBNAME.MPI_Error_class			@600
+	PMPI_Error_string = LIBNAME.MPI_Error_string		@601
+
+	PMPI_Comm_create_errhandler = LIBNAME.MPI_Errhandler_create @1093
+	PMPI_Comm_get_errhandler = LIBNAME.MPI_Errhandler_get @1094    
+	PMPI_Comm_set_errhandler = LIBNAME.MPI_Errhandler_set @1095
+
+	PMPI_File_c2f = LIBNAME.MPI_File_c2f				@602
+	PMPI_File_close = LIBNAME.MPI_File_close			@603
+	PMPI_File_delete = LIBNAME.MPI_File_delete			@604
+	PMPI_File_f2c = LIBNAME.MPI_File_f2c				@605
+	PMPI_File_get_amode = LIBNAME.MPI_File_get_amode	@606
+	PMPI_File_get_atomicity = LIBNAME.MPI_File_get_atomicity @607
+	PMPI_File_get_byte_offset = LIBNAME.MPI_File_get_byte_offset @608
+	PMPI_File_get_errhandler = LIBNAME.MPI_File_get_errhandler	@925
+	PMPI_File_get_group = LIBNAME.MPI_File_get_group    @609
+	PMPI_File_get_info = LIBNAME.MPI_File_get_info		@951
+	PMPI_File_get_position = LIBNAME.MPI_File_get_position @610
+	PMPI_File_get_position_shared = LIBNAME.MPI_File_get_position_shared	@953
+	PMPI_File_get_size = LIBNAME.MPI_File_get_size		@611
+	PMPI_File_get_type_extent = LIBNAME.MPI_File_get_type_extent @612
+	PMPI_File_get_view = LIBNAME.MPI_File_get_view		@613
+	PMPI_File_iread = LIBNAME.MPI_File_iread			@614
+	PMPI_File_iread_at = LIBNAME.MPI_File_iread_at		@615
+	PMPI_File_iread_shared = LIBNAME.MPI_File_iread_shared	@954
+	PMPI_File_iwrite = LIBNAME.MPI_File_iwrite			@616
+	PMPI_File_iwrite_at = LIBNAME.MPI_File_iwrite_at	@617
+	PMPI_File_iwrite_shared = LIBNAME.MPI_File_iwrite_shared	@955
+	PMPI_File_open = LIBNAME.MPI_File_open				@618
+	PMPI_File_preallocate = LIBNAME.MPI_File_preallocate @619
+	PMPI_File_read = LIBNAME.MPI_File_read				@620
+	PMPI_File_read_all = LIBNAME.MPI_File_read_all		@621
+	PMPI_File_read_all_begin = LIBNAME.MPI_File_read_all_begin	@956
+	PMPI_File_read_all_end = LIBNAME.MPI_File_read_all_end		@957
+	PMPI_File_read_at = LIBNAME.MPI_File_read_at		@622
+	PMPI_File_read_at_all = LIBNAME.MPI_File_read_at_all @623
+	PMPI_File_read_at_all_begin = LIBNAME.MPI_File_read_at_all_begin	@958
+	PMPI_File_read_at_all_end = LIBNAME.MPI_File_read_at_all_end		@959
+	PMPI_File_read_ordered = LIBNAME.MPI_File_read_ordered				@960
+	PMPI_File_read_ordered_begin = LIBNAME.MPI_File_read_ordered_begin	@961
+	PMPI_File_read_ordered_end = LIBNAME.MPI_File_read_ordered_end		@962
+	PMPI_File_read_shared = LIBNAME.MPI_File_read_shared				@963
+	PMPI_File_seek = LIBNAME.MPI_File_seek				@624
+	PMPI_File_seek_shared = LIBNAME.MPI_File_seek_shared				@964
+	PMPI_File_set_atomicity = LIBNAME.MPI_File_set_atomicity @625
+	PMPI_File_set_errhandler = LIBNAME.MPI_File_set_errhandler	@926
+	PMPI_File_set_info = LIBNAME.MPI_File_set_info		@952
+	PMPI_File_set_size = LIBNAME.MPI_File_set_size		@626
+	PMPI_File_set_view = LIBNAME.MPI_File_set_view		@627
+	PMPI_File_sync = LIBNAME.MPI_File_sync				@628
+	PMPI_File_write = LIBNAME.MPI_File_write			@629
+	PMPI_File_write_all = LIBNAME.MPI_File_write_all	@630
+	PMPI_File_write_all_begin = LIBNAME.MPI_File_write_all_begin		@965
+	PMPI_File_write_all_end = LIBNAME.MPI_File_write_all_end			@966
+	PMPI_File_write_at = LIBNAME.MPI_File_write_at		@631
+	PMPI_File_write_at_all = LIBNAME.MPI_File_write_at_all	@632
+	PMPI_File_write_at_all_begin = LIBNAME.MPI_File_write_at_all_begin	@967
+	PMPI_File_write_at_all_end = LIBNAME.MPI_File_write_at_all_end		@968
+	PMPI_File_write_ordered = LIBNAME.MPI_File_write_ordered			@969
+	PMPI_File_write_ordered_begin = LIBNAME.MPI_File_write_ordered_begin	@970
+	PMPI_File_write_ordered_end = LIBNAME.MPI_File_write_ordered_end	@971
+	PMPI_File_write_shared = LIBNAME.MPI_File_write_shared				@972
+
+	PMPI_Finalize = LIBNAME.MPI_Finalize				@633
+	PMPI_Finalized = LIBNAME.MPI_Finalized				@634
+	PMPI_Gather = LIBNAME.MPI_Gather					@635
+	PMPI_Gatherv = LIBNAME.MPI_Gatherv					@636
+	PMPI_Get_count = LIBNAME.MPI_Get_count				@637
+	PMPI_Get_elements = LIBNAME.MPI_Get_elements		@638
+	PMPI_Get_version = LIBNAME.MPI_Get_version			@639
+	PMPI_Get_processor_name = LIBNAME.MPI_Get_processor_name @640
+	PMPI_Graph_create = LIBNAME.MPI_Graph_create		@641
+	PMPI_Graph_get = LIBNAME.MPI_Graph_get				@642
+	PMPI_Graph_map = LIBNAME.MPI_Graph_map				@643
+	PMPI_Graph_neighbors = LIBNAME.MPI_Graph_neighbors  @644
+	PMPI_Graph_neighbors_count = LIBNAME.MPI_Graph_neighbors_count @645
+	PMPI_Graphdims_get = LIBNAME.MPI_Graphdims_get		@646
+	PMPI_Group_compare = LIBNAME.MPI_Group_compare		@647
+	PMPI_Group_difference = LIBNAME.MPI_Group_difference @648
+	PMPI_Group_excl = LIBNAME.MPI_Group_excl			@649
+	PMPI_Group_free = LIBNAME.MPI_Group_free			@650
+	PMPI_Group_incl = LIBNAME.MPI_Group_incl			@651
+	PMPI_Group_intersection = LIBNAME.MPI_Group_intersection @652
+	PMPI_Group_range_excl = LIBNAME.MPI_Group_range_excl @653
+	PMPI_Group_range_incl = LIBNAME.MPI_Group_range_incl @654
+	PMPI_Group_rank = LIBNAME.MPI_Group_rank			@655
+	PMPI_Group_size = LIBNAME.MPI_Group_size			@656
+	PMPI_Group_translate_ranks = LIBNAME.MPI_Group_translate_ranks	@657
+	PMPI_Group_union = LIBNAME.MPI_Group_union			@658
+	
+	PMPI_Ibsend = LIBNAME.MPI_Ibsend					@659
+	PMPI_Info_c2f = LIBNAME.MPI_Info_c2f				@660
+	PMPI_Info_create = LIBNAME.MPI_Info_create			@661
+	PMPI_Info_delete = LIBNAME.MPI_Info_delete			@662
+	PMPI_Info_dup = LIBNAME.MPI_Info_dup				@663
+	PMPI_Info_f2c = LIBNAME.MPI_Info_f2c				@664
+	PMPI_Info_free = LIBNAME.MPI_Info_free				@665
+	PMPI_Info_get = LIBNAME.MPI_Info_get				@666
+	PMPI_Info_get_nkeys = LIBNAME.MPI_Info_get_nkeys	@667
+	PMPI_Info_get_nthkey = LIBNAME.MPI_Info_get_nthkey	@668
+	PMPI_Info_get_valuelen = LIBNAME.MPI_Info_get_valuelen @669
+	PMPI_Info_set = LIBNAME.MPI_Info_set				@670
+	PMPI_Init = LIBNAME.MPI_Init						@671
+	PMPI_Init_thread = LIBNAME.MPI_Init_thread			@672
+	PMPI_Initialized = LIBNAME.MPI_Initialized			@673
+	PMPI_Intercomm_create = LIBNAME.MPI_Intercomm_create @674
+	PMPI_Intercomm_merge = LIBNAME.MPI_Intercomm_merge	@675
+	PMPI_Iprobe = LIBNAME.MPI_Iprobe					@676
+	PMPI_Irecv = LIBNAME.MPI_Irecv						@677
+	PMPI_Irsend = LIBNAME.MPI_Irsend					@678
+	PMPI_Isend = LIBNAME.MPI_Isend						@679
+	PMPI_Issend = LIBNAME.MPI_Issend					@680
+	PMPI_Keyval_create = LIBNAME.MPI_Keyval_create		@681
+	PMPI_Keyval_free = LIBNAME.MPI_Keyval_free			@682
+	PMPI_Op_create = LIBNAME.MPI_Op_create				@683
+	PMPI_Op_free = LIBNAME.MPI_Op_free					@684
+	PMPI_Pack = LIBNAME.MPI_Pack						@685
+	PMPI_Pack_size = LIBNAME.MPI_Pack_size				@686
+	PMPI_Pcontrol = LIBNAME.MPI_Pcontrol				@687
+	PMPI_Probe = LIBNAME.MPI_Probe						@688
+	PMPI_Recv = LIBNAME.MPI_Recv						@689
+	PMPI_Recv_init = LIBNAME.MPI_Recv_init				@690
+	PMPI_Reduce = LIBNAME.MPI_Reduce					@691
+	PMPI_Reduce_scatter = LIBNAME.MPI_Reduce_scatter	@692
+	PMPI_Request_free = LIBNAME.MPI_Request_free		@693
+	PMPI_Rsend = LIBNAME.MPI_Rsend						@694
+	PMPI_Rsend_init = LIBNAME.MPI_Rsend_init			@695
+	PMPI_Scan = LIBNAME.MPI_Scan						@696
+	PMPI_Scatter = LIBNAME.MPI_Scatter					@697
+	PMPI_Scatterv = LIBNAME.MPI_Scatterv				@698
+	PMPI_Send = LIBNAME.MPI_Send						@699
+	PMPI_Send_init = LIBNAME.MPI_Send_init				@700
+	PMPI_Sendrecv = LIBNAME.MPI_Sendrecv				@701
+	PMPI_Sendrecv_replace = LIBNAME.MPI_Sendrecv_replace @702
+	PMPI_Ssend = LIBNAME.MPI_Ssend						@703
+	PMPI_Ssend_init = LIBNAME.MPI_Ssend_init			@704
+	PMPI_Start = LIBNAME.MPI_Start						@705
+	PMPI_Startall = LIBNAME.MPI_Startall				@706
+	PMPI_Status_set_cancelled = LIBNAME.MPI_Status_set_cancelled	@707
+	PMPI_Status_set_elements = LIBNAME.MPI_Status_set_elements		@708
+	PMPI_Test = LIBNAME.MPI_Test						@709
+	PMPI_Test_cancelled = LIBNAME.MPI_Test_cancelled	@710
+	PMPI_Testall = LIBNAME.MPI_Testall					@711
+	PMPI_Testany = LIBNAME.MPI_Testany					@712
+	PMPI_Testsome = LIBNAME.MPI_Testsome				@713
+	PMPI_Topo_test = LIBNAME.MPI_Topo_test				@714
+	PMPI_Type_commit = LIBNAME.MPI_Type_commit			@715
+	PMPI_Type_contiguous = LIBNAME.MPI_Type_contiguous	@716
+	PMPI_Type_create_darray = LIBNAME.MPI_Type_create_darray @717
+	PMPI_Type_create_indexed_block = LIBNAME.MPI_Type_create_indexed_block	@718
+	PMPI_Type_create_subarray = LIBNAME.MPI_Type_create_subarray	@719
+	PMPI_Type_extent = LIBNAME.MPI_Type_extent			@720
+	PMPI_Type_free = LIBNAME.MPI_Type_free				@721
+	PMPI_Type_get_contents = LIBNAME.MPI_Type_get_contents	@722
+	PMPI_Type_get_envelope = LIBNAME.MPI_Type_get_envelope	@723
+	PMPI_Type_hindexed = LIBNAME.MPI_Type_hindexed		@724
+	PMPI_Type_hvector = LIBNAME.MPI_Type_hvector		@725
+	PMPI_Type_indexed = LIBNAME.MPI_Type_indexed		@726
+	PMPI_Type_lb = LIBNAME.MPI_Type_lb					@727
+	PMPI_Type_size = LIBNAME.MPI_Type_size				@728
+	PMPI_Type_struct = LIBNAME.MPI_Type_struct			@729
+	PMPI_Type_ub = LIBNAME.MPI_Type_ub					@730
+	PMPI_Type_vector = LIBNAME.MPI_Type_vector			@731
+	PMPI_Unpack = LIBNAME.MPI_Unpack					@732
+	PMPI_Wait = LIBNAME.MPI_Wait						@733
+	PMPI_Waitall = LIBNAME.MPI_Waitall					@734
+	PMPI_Waitany = LIBNAME.MPI_Waitany					@735
+	PMPI_Waitsome = LIBNAME.MPI_Waitsome				@736
+	PMPI_Wtick = LIBNAME.MPI_Wtick						@737
+	PMPI_Wtime = LIBNAME.MPI_Wtime						@738
+
+	PMPI_Get = LIBNAME.MPI_Get							@739
+	PMPI_Put = LIBNAME.MPI_Put							@740
+	PMPI_Alloc_mem = LIBNAME.MPI_Alloc_mem				@741
+	PMPI_Free_mem = LIBNAME.MPI_Free_mem				@742
+
+	PMPI_Win_create_errhandler = LIBNAME.MPI_Win_create_errhandler		@743
+	PMPI_Win_set_errhandler = LIBNAME.MPI_Win_set_errhandler			@744
+	PMPI_Win_get_errhandler = LIBNAME.MPI_Win_get_errhandler			@745
+	PMPI_Win_fence = LIBNAME.MPI_Win_fence					@746
+	PMPI_Win_start = LIBNAME.MPI_Win_start					@747
+	PMPI_Win_complete = LIBNAME.MPI_Win_complete			@748
+	PMPI_Win_post = LIBNAME.MPI_Win_post					@749
+	PMPI_Win_wait = LIBNAME.MPI_Win_wait					@750
+	PMPI_Win_test = LIBNAME.MPI_Win_test					@751
+	PMPI_Win_lock = LIBNAME.MPI_Win_lock					@752
+	PMPI_Win_unlock	 = LIBNAME.MPI_Win_unlock				@753
+	PMPI_Win_create = LIBNAME.MPI_Win_create 				@754
+	PMPI_Win_free = LIBNAME.MPI_Win_free 					@755
+	PMPI_Win_get_attr = LIBNAME.MPI_Win_get_attr 			@756
+	PMPI_Win_get_group = LIBNAME.MPI_Win_get_group			@757
+
+
+	;****************************************************
+	; The MPE bindings
+	;****************************************************
+
+	; Logging...
+	MPE_Init_log								@1033
+	MPE_Initialized_logging						@1034
+	MPE_Describe_state							@1035
+	MPE_Describe_event							@1036
+	MPE_DelTag									@1070
+	MPE_GetTags									@1071
+	MPE_ReturnTags								@1072
+
+	MPE_Log_get_event_number					@1037
+	MPE_Start_log								@1038
+    MPE_Log_event								@1039
+    MPE_Log_send								@1040
+    MPE_Log_receive								@1041
+    MPE_Stop_log								@1042
+    MPE_Finish_log								@1043
+
+	; Graphics...
+	MPE_Open_graphics							@1044
+	MPE_Draw_point								@1045
+	MPE_Draw_line								@1046
+	MPE_Draw_circle								@1047
+	MPE_Draw_string								@1048
+	MPE_Fill_rectangle							@1049
+	MPE_Draw_rectangle							@1050
+	MPE_Update									@1051
+	MPE_Num_colors								@1052
+	MPE_Make_color_array						@1053
+	MPE_Close_graphics							@1054
+	MPE_CaptureFile								@1055
+	MPE_Draw_points								@1056
+	MPE_Fill_circle								@1057
+	MPE_Draw_logic								@1058
+	MPE_Line_thickness							@1059
+	MPE_Draw_dashes								@1060
+	MPE_Dash_offset								@1061
+	MPE_Add_RGB_color							@1062
+	MPE_Xerror									@1063
+	MPE_Get_mouse_press							@1064
+	MPE_Iget_mouse_press						@1065
+	MPE_Get_drag_region							@1066
+	MPE_Get_drag_region_fixratio				@1067
+
+	
+	; Misc...
+	
+	MPE_Seq_begin								@1068
+	MPE_Seq_end									@1069
+	MPE_TagsEnd									@1073
+	MPE_IO_Stdout_to_file						@1074
+	MPE_GetHostName								@1075
+	MPE_Start_debugger							@1076
+	MPE_Errors_to_dbx							@1077
+	MPE_Errors_call_debugger					@1078
+	MPE_Errors_call_xdbx						@1079
+	MPE_Errors_call_dbx_in_xterm				@1080
+	MPE_Signals_call_debugger					@1081
+	MPE_Decomp1d								@1082
+	MPE_Comm_global_rank						@1083
+	MPE_Print_datatype_unpack_action			@1084
+	MPE_Print_datatype_pack_action				@1085
+
+
+
+#ifdef FOO
+	;Now the Fortran bindings
+	MPIPRIV					   @1019 DATA
+	_MPIO_TEST@16                  @6   
+    _MPIO_WAIT@12                  @8   
+;	_MPIR_INIT_BOTTOM@4			   @11
+;   _MPIR_INIT_FSIZE@16			   @13  
+    _MPI_ABORT@12				   @18  
+    _MPI_ADDRESS@12                @19  
+    _MPI_ALLGATHER@32              @20  
+    _MPI_ALLGATHERV@36             @21  
+    _MPI_ALLREDUCE@28              @22  
+    _MPI_ALLTOALL@32               @23  
+    _MPI_ALLTOALLV@40              @24  
+    _MPI_ATTR_DELETE@12            @25  
+    _MPI_ATTR_GET@20               @26  
+    _MPI_ATTR_PUT@16               @27  
+    _MPI_BARRIER@8                 @38  
+    _MPI_BCAST@24                  @39  
+    _MPI_BSEND@28                  @40  
+    _MPI_BSEND_INIT@32             @41  
+    _MPI_BUFFER_ATTACH@12          @42  
+    _MPI_BUFFER_DETACH@12          @43  
+    _MPI_CANCEL@8                  @50  
+    _MPI_CARTDIM_GET@12            @51  
+    _MPI_CART_COORDS@20            @52  
+    _MPI_CART_CREATE@28            @53  
+    _MPI_CART_GET@24               @54  
+    _MPI_CART_MAP@24               @55  
+    _MPI_CART_RANK@16              @56  
+    _MPI_CART_SHIFT@24             @57  
+    _MPI_CART_SUB@16               @58  
+    _MPI_COMM_COMPARE@16           @59  
+    _MPI_COMM_CREATE@16            @60  
+    _MPI_COMM_DUP@12               @61  
+    _MPI_COMM_FREE@8               @62  
+    _MPI_COMM_GET_NAME@16          @63  
+    _MPI_COMM_GROUP@12             @64  
+    _MPI_COMM_RANK@12              @65  
+    _MPI_COMM_REMOTE_GROUP@12      @66  
+    _MPI_COMM_REMOTE_SIZE@12       @67  
+    _MPI_COMM_SET_NAME@16          @68  
+    _MPI_COMM_SIZE@12              @69  
+    _MPI_COMM_SPLIT@20             @70  
+    _MPI_DIMS_CREATE@16            @93  
+    _MPI_DUP_FN@24                 @94  
+    _MPI_ERRHANDLER_CREATE@12      @96  
+    _MPI_ERRHANDLER_FREE@8         @97  
+    _MPI_ERRHANDLER_GET@12         @98  
+	_MPI_ERRHANDLER_SET@12         @99  
+    _MPI_ERROR_CLASS@12            @100 
+    _MPI_ERROR_STRING@20           @101 
+
+	_MPI_FILE_CLOSE@8			   @108 
+    _MPI_FILE_DELETE@16            @109 
+    _MPI_FILE_GET_AMODE@12         @110 
+    _MPI_FILE_GET_ATOMICITY@12     @111 
+    _MPI_FILE_GET_BYTE_OFFSET@16   @112 
+	_MPI_FILE_GET_ERRHANDLER@12	   @923
+    _MPI_FILE_GET_GROUP@12         @113 
+    _MPI_FILE_GET_INFO@12		   @973
+	_MPI_FILE_GET_POSITION@12      @114 
+    _MPI_FILE_GET_POSITION_SHARED@12	@974
+	_MPI_FILE_GET_SIZE@12          @115 
+    _MPI_FILE_GET_TYPE_EXTENT@16   @116 
+    _MPI_FILE_GET_VIEW@28          @117 
+    _MPI_FILE_IREAD@24             @118 
+    _MPI_FILE_IREAD_AT@28          @119 
+	_MPI_FILE_IREAD_SHARED@24	   @975
+    _MPI_FILE_IWRITE@24            @120 
+    _MPI_FILE_IWRITE_AT@28         @121 
+	_MPI_FILE_IWRITE_SHARED@24     @976
+    _MPI_FILE_OPEN@28              @122 
+    _MPI_FILE_PREALLOCATE@12       @123 
+    _MPI_FILE_READ@24              @124 
+    _MPI_FILE_READ_ALL@24          @125 
+	_MPI_FILE_READ_ALL_BEGIN@20	   @977
+	_MPI_FILE_READ_ALL_END@16	   @978
+    _MPI_FILE_READ_AT@28           @126 
+    _MPI_FILE_READ_AT_ALL@28       @127 
+	_MPI_FILE_READ_AT_ALL_BEGIN@24 @979
+	_MPI_FILE_READ_AT_ALL_END@16   @980
+	_MPI_FILE_READ_ORDERED@24	   @981
+	_MPI_FILE_READ_ORDERED_BEGIN@20	@982
+	_MPI_FILE_READ_ORDERED_END@16  @983
+	_MPI_FILE_READ_SHARED@24	   @984
+	_MPI_FILE_SEEK_SHARED@16	   @985
+    _MPI_FILE_SEEK@16              @128 
+    _MPI_FILE_SET_ATOMICITY@12     @129 
+	_MPI_FILE_SET_ERRHANDLER@12	   @924
+    _MPI_FILE_SET_INFO@12		   @986
+	_MPI_FILE_SET_SIZE@12          @130 
+    _MPI_FILE_SET_VIEW@32          @131 
+    _MPI_FILE_SYNC@8               @132 
+    _MPI_FILE_WRITE@24             @133 
+    _MPI_FILE_WRITE_ALL@24         @134 
+	_MPI_FILE_WRITE_ALL_BEGIN@20   @987
+	_MPI_FILE_WRITE_ALL_END@16	   @1015
+    _MPI_FILE_WRITE_AT@28          @135 
+    _MPI_FILE_WRITE_AT_ALL@28      @136 
+	_MPI_FILE_WRITE_AT_ALL_BEGIN@24		@988
+	_MPI_FILE_WRITE_AT_ALL_END@16  @989
+	_MPI_FILE_WRITE_ORDERED@24	   @990
+	_MPI_FILE_WRITE_ORDERED_BEGIN@20	@991
+	_MPI_FILE_WRITE_ORDERED_END@16 @992
+	_MPI_FILE_WRITE_SHARED@24	   @993
+
+    _MPI_FINALIZE@4				   @137
+	_MPI_FINALIZED@8			   @543
+    _MPI_GATHER@36                 @170 
+    _MPI_GATHERV@40                @171 
+    _MPI_GET_COUNT@16              @172 
+    _MPI_GET_ELEMENTS@16           @173 
+    _MPI_GET_PROCESSOR_NAME@16     @174
+	_MPI_GET_VERSION@12			   @545 
+    _MPI_GRAPHDIMS_GET@16          @175 
+    _MPI_GRAPH_CREATE@28           @176 
+    _MPI_GRAPH_GET@24              @177 
+    _MPI_GRAPH_MAP@24              @178 
+    _MPI_GRAPH_NEIGHBORS@20        @179 
+    _MPI_GRAPH_NEIGHBORS_COUNT@16  @180 
+    _MPI_GROUP_COMPARE@16          @181 
+    _MPI_GROUP_DIFFERENCE@16       @182 
+    _MPI_GROUP_EXCL@20             @183 
+    _MPI_GROUP_FREE@8              @184 
+    _MPI_GROUP_INCL@20             @185 
+    _MPI_GROUP_INTERSECTION@16     @186 
+    _MPI_GROUP_RANGE_EXCL@20       @187 
+    _MPI_GROUP_RANGE_INCL@20       @188
+	_MPI_GROUP_RANK@12             @541
+    _MPI_GROUP_SIZE@12             @189 
+    _MPI_GROUP_TRANSLATE_RANKS@24  @190 
+    _MPI_GROUP_UNION@16            @191 
+    _MPI_INIT@4					   @460
+	_MPI_IBSEND@32                 @215 
+
+	_MPI_INFO_CREATE@8			   @442
+	_MPI_INFO_DELETE@16            @444
+	_MPI_INFO_DUP@12               @446
+	_MPI_INFO_FREE@8			   @448
+	_MPI_INFO_GET@32               @450
+	_MPI_INFO_GET_NKEYS@12         @452
+	_MPI_INFO_GET_NTHKEY@20		   @454
+	_MPI_INFO_GET_VALUELEN@24      @456
+	_MPI_INFO_SET@24               @458 
+
+    _MPI_INITIALIZED@8             @216 
+    _MPI_INTERCOMM_CREATE@28       @217 
+    _MPI_INTERCOMM_MERGE@16        @218 
+    _MPI_IPROBE@24                 @219 
+    _MPI_IRECV@32                  @220 
+    _MPI_IRSEND@32                 @221 
+    _MPI_ISEND@32                  @222 
+    _MPI_ISSEND@32                 @223 
+    _MPI_KEYVAL_CREATE@20          @234 
+    _MPI_KEYVAL_FREE@8             @235 
+    _MPI_NULL_COPY_FN@24           @238 
+    _MPI_NULL_DELETE_FN@16         @239 
+    _MPI_OP_CREATE@16              @240 
+    _MPI_OP_FREE@8                 @241 
+    _MPI_PACK@32                   @244 
+    _MPI_PACK_SIZE@20              @245 
+    _MPI_PCONTROL@8                @246 
+    _MPI_PROBE@20                  @247 
+    _MPI_RECV@32                   @252 
+    _MPI_RECV_INIT@32              @253 
+    _MPI_REDUCE@32                 @254 
+    _MPI_REDUCE_SCATTER@28         @255 
+    _MPI_REQUEST_FREE@8            @256 
+    _MPI_RSEND@28                  @257 
+    _MPI_RSEND_INIT@32             @258 
+    _MPI_SCAN@28                   @266 
+    _MPI_SCATTER@36                @267 
+    _MPI_SCATTERV@40               @268 
+    _MPI_SEND@28                   @269 
+    _MPI_SENDRECV@52               @270 
+    _MPI_SENDRECV_REPLACE@40       @271 
+    _MPI_SEND_INIT@32              @272 
+    _MPI_SSEND@28                  @273 
+    _MPI_SSEND_INIT@32             @274 
+    _MPI_START@8                   @275 
+    _MPI_STARTALL@12               @276 
+	_MPI_STATUS_SET_CANCELLED@12   @548
+	_MPI_STATUS_SET_ELEMENTS@16	   @550
+    _MPI_TEST@16                   @288 
+    _MPI_TESTALL@20                @289 
+    _MPI_TESTANY@24                @290 
+    _MPI_TESTSOME@24               @291 
+    _MPI_TEST_CANCELLED@12         @292 
+    _MPI_TOPO_TEST@12              @293 
+    _MPI_TYPE_COMMIT@8             @294 
+    _MPI_TYPE_CONTIGUOUS@16        @295 
+    _MPI_TYPE_CREATE_DARRAY@44     @296 
+	_MPI_TYPE_CREATE_INDEXED_BLOCK@24 @552
+    _MPI_TYPE_CREATE_SUBARRAY@32   @297 
+    _MPI_TYPE_EXTENT@12            @298 
+    _MPI_TYPE_FREE@8               @299 
+	_MPI_TYPE_GET_ENVELOPE@24      @523
+	_MPI_TYPE_GET_CONTENTS@32      @521
+    _MPI_TYPE_HINDEXED@24          @300 
+    _MPI_TYPE_HVECTOR@24           @301 
+    _MPI_TYPE_INDEXED@24           @302 
+    _MPI_TYPE_LB@12                @303 
+    _MPI_TYPE_SIZE@12              @304 
+    _MPI_TYPE_STRUCT@24            @305 
+    _MPI_TYPE_UB@12                @306 
+    _MPI_TYPE_VECTOR@24            @307 
+    _MPI_UNPACK@32                 @328 
+    _MPI_WAIT@12                   @330 
+    _MPI_WAITALL@16                @331 
+    _MPI_WAITANY@20                @332 
+    _MPI_WAITSOME@24               @333 
+    _MPI_WTICK@0                   @334 
+    _MPI_WTIME@0                   @335 
+
+
+	_PMPIO_TEST@16 = LIBNAME._MPIO_TEST@16				@739
+	_PMPIO_WAIT@12 = LIBNAME._MPIO_WAIT@12				@740
+	_PMPI_ABORT@12 = LIBNAME._MPI_ABORT@12				@741
+	_PMPI_ADDRESS@12 = LIBNAME._MPI_ADDRESS@12			@743
+	_PMPI_ALLGATHER@32 = LIBNAME._MPI_ALLGATHER@32		@744
+	_PMPI_ALLGATHERV@36 = LIBNAME._MPI_ALLGATHERV@36	@745
+	_PMPI_ALLREDUCE@28 = LIBNAME._MPI_ALLREDUCE@28		@746
+	_PMPI_ALLTOALL@32 = LIBNAME._MPI_ALLTOALL@32		@747
+	_PMPI_ALLTOALLV@40 = LIBNAME._MPI_ALLTOALLV@40		@748
+	_PMPI_ATTR_DELETE@12 = LIBNAME._MPI_ATTR_DELETE@12	@749
+	_PMPI_ATTR_GET@20 = LIBNAME._MPI_ATTR_GET@20		@750
+	_PMPI_ATTR_PUT@16 = LIBNAME._MPI_ATTR_PUT@16		@751
+	_PMPI_BARRIER@8 = LIBNAME._MPI_BARRIER@8			@752
+	_PMPI_BCAST@24 = LIBNAME._MPI_BCAST@24				@753
+	_PMPI_BSEND@28 = LIBNAME._MPI_BSEND@28				@754
+	_PMPI_BSEND_INIT@32 = LIBNAME._MPI_BSEND_INIT@32	@755
+	_PMPI_BUFFER_ATTACH@12 = LIBNAME._MPI_BUFFER_ATTACH@12	@756
+	_PMPI_BUFFER_DETACH@12 = LIBNAME._MPI_BUFFER_DETACH@12	@757
+	_PMPI_CANCEL@8 = LIBNAME._MPI_CANCEL@8				@758
+	_PMPI_CARTDIM_GET@12 = LIBNAME._MPI_CARTDIM_GET@12	@759
+	_PMPI_CART_COORDS@20 = LIBNAME._MPI_CART_COORDS@20	@760
+	_PMPI_CART_CREATE@28 = LIBNAME._MPI_CART_CREATE@28	@761
+	_PMPI_CART_GET@24 = LIBNAME._MPI_CART_GET@24		@762
+	_PMPI_CART_MAP@24 = LIBNAME._MPI_CART_MAP@24		@763
+	_PMPI_CART_RANK@16 = LIBNAME._MPI_CART_RANK@16		@764
+	_PMPI_CART_SHIFT@24 = LIBNAME._MPI_CART_SHIFT@24	@765
+	_PMPI_CART_SUB@16 = LIBNAME._MPI_CART_SUB@16		@766
+	_PMPI_COMM_COMPARE@16 = LIBNAME._MPI_COMM_COMPARE@16	@767
+	_PMPI_COMM_CREATE@16 = LIBNAME._MPI_COMM_CREATE@16	@768
+	_PMPI_COMM_DUP@12 = LIBNAME._MPI_COMM_DUP@12		@769
+	_PMPI_COMM_FREE@8 = LIBNAME._MPI_COMM_FREE@8		@770
+	_PMPI_COMM_GET_NAME@16 = LIBNAME._MPI_COMM_GET_NAME@16	@771
+	_PMPI_COMM_GROUP@12 = LIBNAME._MPI_COMM_GROUP@12	@772
+	_PMPI_COMM_RANK@12 = LIBNAME._MPI_COMM_RANK@12		@773
+	_PMPI_COMM_REMOTE_GROUP@12 = LIBNAME._MPI_COMM_REMOTE_GROUP@12	@774
+	_PMPI_COMM_REMOTE_SIZE@12 = LIBNAME._MPI_COMM_REMOTE_SIZE@12	@775
+	_PMPI_COMM_SET_NAME@16 = LIBNAME._MPI_COMM_SET_NAME@16	@776
+	_PMPI_COMM_SIZE@12 = LIBNAME._MPI_COMM_SIZE@12		@777
+	_PMPI_COMM_SPLIT@20 = LIBNAME._MPI_COMM_SPLIT@20	@778
+	_PMPI_DIMS_CREATE@16 = LIBNAME._MPI_DIMS_CREATE@16	@780
+	_PMPI_DUP_FN@24 = LIBNAME._MPI_DUP_FN@24			@781
+	_PMPI_ERRHANDLER_CREATE@12 = LIBNAME._MPI_ERRHANDLER_CREATE@12	@782
+	_PMPI_ERRHANDLER_FREE@8 = LIBNAME._MPI_ERRHANDLER_FREE@8	@783
+	_PMPI_ERRHANDLER_GET@12 = LIBNAME._MPI_ERRHANDLER_GET@12	@784
+	_PMPI_ERRHANDLER_SET@12 = LIBNAME._MPI_ERRHANDLER_SET@12	@785
+	_PMPI_ERROR_CLASS@12 = LIBNAME._MPI_ERROR_CLASS@12	@786
+	_PMPI_ERROR_STRING@20 = LIBNAME._MPI_ERROR_STRING@20	@787
+
+
+	_PMPI_FILE_GET_INFO@12 = LIBNAME._MPI_FILE_GET_INFO@12	@994
+
+	
+	
+	_PMPI_FILE_SET_INFO@12 = LIBNAME._MPI_FILE_SET_INFO@12						@1007
+	
+	
+	
+	_PMPI_FILE_CLOSE@8 = LIBNAME._MPI_FILE_CLOSE@8		@788
+	_PMPI_FILE_DELETE@16 = LIBNAME._MPI_FILE_DELETE@16	@789
+	_PMPI_FILE_GET_AMODE@12 = LIBNAME._MPI_FILE_GET_AMODE@12	@790
+	_PMPI_FILE_GET_ATOMICITY@12 = LIBNAME._MPI_FILE_GET_ATOMICITY@12	@791
+	_PMPI_FILE_GET_BYTE_OFFSET@16 = LIBNAME._MPI_FILE_GET_BYTE_OFFSET@16	@792
+	_PMPI_FILE_GET_ERRHANDLER@12 = LIBNAME._MPI_FILE_GET_ERRHANDLER@12	@927
+	_PMPI_FILE_GET_GROUP@12 = LIBNAME._MPI_FILE_GET_GROUP@12	@793
+	_PMPI_FILE_GET_POSITION@12 = LIBNAME._MPI_FILE_GET_POSITION@12	@794
+	_PMPI_FILE_GET_POSITION_SHARED@12 = LIBNAME._MPI_FILE_GET_POSITION_SHARED@12	@995
+	_PMPI_FILE_GET_SIZE@12 = LIBNAME._MPI_FILE_GET_SIZE@12	@795
+	_PMPI_FILE_GET_TYPE_EXTENT@16 = LIBNAME._MPI_FILE_GET_TYPE_EXTENT@16	@796
+	_PMPI_FILE_GET_VIEW@28 = LIBNAME._MPI_FILE_GET_VIEW@28	@797
+	_PMPI_FILE_IREAD@24 = LIBNAME._MPI_FILE_IREAD@24	@798
+	_PMPI_FILE_IREAD_AT@28 = LIBNAME._MPI_FILE_IREAD_AT@28	@799
+	_PMPI_FILE_IREAD_SHARED@24 = LIBNAME._MPI_FILE_IREAD_SHARED@24		@996
+	_PMPI_FILE_IWRITE@24 = LIBNAME._MPI_FILE_IWRITE@24	@800
+	_PMPI_FILE_IWRITE_AT@28 = LIBNAME._MPI_FILE_IWRITE_AT@28	@801
+	_PMPI_FILE_IWRITE_SHARED@24 = LIBNAME._MPI_FILE_IWRITE_SHARED@24	@997
+	_PMPI_FILE_OPEN@28 = LIBNAME._MPI_FILE_OPEN@28		@802
+	_PMPI_FILE_PREALLOCATE@12 = LIBNAME._MPI_FILE_PREALLOCATE@12	@803
+	_PMPI_FILE_READ@24 = LIBNAME._MPI_FILE_READ@24		@804
+	_PMPI_FILE_READ_ALL@24 = LIBNAME._MPI_FILE_READ_ALL@24	@805
+	_PMPI_FILE_READ_ALL_BEGIN@20 = LIBNAME._MPI_FILE_READ_ALL_BEGIN@20	@998
+	_PMPI_FILE_READ_ALL_END@16 = LIBNAME._MPI_FILE_READ_ALL_END@16		@999
+	_PMPI_FILE_READ_AT@28 = LIBNAME._MPI_FILE_READ_AT@28	@806
+	_PMPI_FILE_READ_AT_ALL@28 = LIBNAME._MPI_FILE_READ_AT_ALL@28	@807
+	_PMPI_FILE_READ_AT_ALL_BEGIN@24 = LIBNAME._MPI_FILE_READ_AT_ALL_BEGIN@24	@1000
+	_PMPI_FILE_READ_AT_ALL_END@16 = LIBNAME._MPI_FILE_READ_AT_ALL_END@16		@1001
+	_PMPI_FILE_READ_ORDERED@24 = LIBNAME._MPI_FILE_READ_ORDERED@24				@1002
+	_PMPI_FILE_READ_ORDERED_BEGIN@20 = LIBNAME._MPI_FILE_READ_ORDERED_BEGIN@20	@1003
+	_PMPI_FILE_READ_ORDERED_END@16 = LIBNAME._MPI_FILE_READ_ORDERED_END@16		@1004
+	_PMPI_FILE_READ_SHARED@24 = LIBNAME._MPI_FILE_READ_SHARED@24				@1005
+	_PMPI_FILE_SEEK_SHARED@16 = LIBNAME._MPI_FILE_SEEK_SHARED@16				@1006
+	_PMPI_FILE_SEEK@16 = LIBNAME._MPI_FILE_SEEK@16		@808
+	_PMPI_FILE_SET_ATOMICITY@12 = LIBNAME._MPI_FILE_SET_ATOMICITY@12	@809
+	_PMPI_FILE_SET_ERRHANDLER@12 = LIBNAME._MPI_FILE_SET_ERRHANDLER@12	@928
+	_PMPI_FILE_SET_SIZE@12 = LIBNAME._MPI_FILE_SET_SIZE@12	@810
+	_PMPI_FILE_SET_VIEW@32 = LIBNAME._MPI_FILE_SET_VIEW@32	@811
+	_PMPI_FILE_SYNC@8 = LIBNAME._MPI_FILE_SYNC@8		@812
+	_PMPI_FILE_WRITE@24 = LIBNAME._MPI_FILE_WRITE@24	@813
+	_PMPI_FILE_WRITE_ALL@24 = LIBNAME._MPI_FILE_WRITE_ALL@24	@814
+	_PMPI_FILE_WRITE_ALL_BEGIN@20 = LIBNAME._MPI_FILE_WRITE_ALL_BEGIN@20		@1008
+	_PMPI_FILE_WRITE_ALL_END@16 = LIBNAME._MPI_FILE_WRITE_ALL_END@16			@1016
+	_PMPI_FILE_WRITE_AT@28 = LIBNAME._MPI_FILE_WRITE_AT@28		@815
+	_PMPI_FILE_WRITE_AT_ALL@28 = LIBNAME._MPI_FILE_WRITE_AT_ALL@28	@816
+	_PMPI_FILE_WRITE_AT_ALL_BEGIN@24 = LIBNAME._MPI_FILE_WRITE_AT_ALL_BEGIN@24	@1009
+	_PMPI_FILE_WRITE_AT_ALL_END@16 = LIBNAME._MPI_FILE_WRITE_AT_ALL_END@16		@1010
+	_PMPI_FILE_WRITE_ORDERED@24 = LIBNAME._MPI_FILE_WRITE_ORDERED@24			@1011
+	_PMPI_FILE_WRITE_ORDERED_BEGIN@20 = LIBNAME._MPI_FILE_WRITE_ORDERED_BEGIN@20	@1012
+	_PMPI_FILE_WRITE_ORDERED_END@16 = LIBNAME._MPI_FILE_WRITE_ORDERED_END@16	@1013
+	_PMPI_FILE_WRITE_SHARED@24 = LIBNAME._MPI_FILE_WRITE_SHARED@24				@1014
+	
+	_PMPI_FINALIZE@4 = LIBNAME._MPI_FINALIZE@4			@817
+	_PMPI_FINALIZED@8 = LIBNAME._MPI_FINALIZED@8		@818
+	_PMPI_GATHER@36 = LIBNAME._MPI_GATHER@36			@819
+	_PMPI_GATHERV@40 = LIBNAME._MPI_GATHERV@40			@820
+	_PMPI_GET_COUNT@16 = LIBNAME._MPI_GET_COUNT@16		@742
+	_PMPI_GET_ELEMENTS@16 = LIBNAME._MPI_GET_ELEMENTS@16	@821
+	_PMPI_GET_PROCESSOR_NAME@16 = LIBNAME._MPI_GET_PROCESSOR_NAME@16	@822
+	_PMPI_GET_VERSION@12 = LIBNAME._MPI_GET_VERSION@12	@823
+	_PMPI_GRAPHDIMS_GET@16 = LIBNAME._MPI_GRAPHDIMS_GET@16	@824
+	_PMPI_GRAPH_CREATE@28 = LIBNAME._MPI_GRAPH_CREATE@28	@825
+	_PMPI_GRAPH_GET@24 = LIBNAME._MPI_GRAPH_GET@24		@826
+	_PMPI_GRAPH_MAP@24 = LIBNAME._MPI_GRAPH_MAP@24		@827
+	_PMPI_GRAPH_NEIGHBORS@20 = LIBNAME._MPI_GRAPH_NEIGHBORS@20	@828
+	_PMPI_GRAPH_NEIGHBORS_COUNT@16 = LIBNAME._MPI_GRAPH_NEIGHBORS_COUNT@16	@829
+	_PMPI_GROUP_COMPARE@16 = LIBNAME._MPI_GROUP_COMPARE@16	@830
+	_PMPI_GROUP_DIFFERENCE@16 = LIBNAME._MPI_GROUP_DIFFERENCE@16	@831
+	_PMPI_GROUP_EXCL@20 = LIBNAME._MPI_GROUP_EXCL@20	@832
+	_PMPI_GROUP_FREE@8 = LIBNAME._MPI_GROUP_FREE@8		@833
+	_PMPI_GROUP_INCL@20 = LIBNAME._MPI_GROUP_INCL@20	@834
+	_PMPI_GROUP_INTERSECTION@16 = LIBNAME._MPI_GROUP_INTERSECTION@16	@835
+	_PMPI_GROUP_RANGE_EXCL@20 = LIBNAME._MPI_GROUP_RANGE_EXCL@20	@836
+	_PMPI_GROUP_RANGE_INCL@20 = LIBNAME._MPI_GROUP_RANGE_INCL@20	@837
+	_PMPI_GROUP_RANK@12 = LIBNAME._MPI_GROUP_RANK@12	@838
+	_PMPI_GROUP_SIZE@12 = LIBNAME._MPI_GROUP_SIZE@12	@839
+	_PMPI_GROUP_TRANSLATE_RANKS@24 = LIBNAME._MPI_GROUP_TRANSLATE_RANKS@24	@840
+	_PMPI_GROUP_UNION@16 = LIBNAME._MPI_GROUP_UNION@16	@841
+	_PMPI_INIT@4 = LIBNAME._MPI_INIT@4					@842
+	_PMPI_IBSEND@32 = LIBNAME._MPI_IBSEND@32			@843
+	_PMPI_INFO_CREATE@8 = LIBNAME._MPI_INFO_CREATE@8	@844
+	_PMPI_INFO_DELETE@16 = LIBNAME._MPI_INFO_DELETE@16	@845
+	_PMPI_INFO_DUP@12 = LIBNAME._MPI_INFO_DUP@12		@846
+	_PMPI_INFO_FREE@8 = LIBNAME._MPI_INFO_FREE@8		@847
+	_PMPI_INFO_GET@32 = LIBNAME._MPI_INFO_GET@32		@848
+	_PMPI_INFO_GET_NKEYS@12 = LIBNAME._MPI_INFO_GET_NKEYS@12	@849
+	_PMPI_INFO_GET_NTHKEY@20 = LIBNAME._MPI_INFO_GET_NTHKEY@20	@850
+	_PMPI_INFO_GET_VALUELEN@24 = LIBNAME._MPI_INFO_GET_VALUELEN@24	@851
+	_PMPI_INFO_SET@24 = LIBNAME._MPI_INFO_SET@24		@852
+	_PMPI_INITIALIZED@8 = LIBNAME._MPI_INITIALIZED@8	@853
+	_PMPI_INTERCOMM_CREATE@28 = LIBNAME._MPI_INTERCOMM_CREATE@28	@854
+	_PMPI_INTERCOMM_MERGE@16 = LIBNAME._MPI_INTERCOMM_MERGE@16	@855
+	_PMPI_IPROBE@24 = LIBNAME._MPI_IPROBE@24			@856
+	_PMPI_IRECV@32 = LIBNAME._MPI_IRECV@32				@857
+	_PMPI_IRSEND@32 = LIBNAME._MPI_IRSEND@32			@858
+	_PMPI_ISEND@32 = LIBNAME._MPI_ISEND@32				@859
+	_PMPI_ISSEND@32 = LIBNAME._MPI_ISSEND@32			@860
+	_PMPI_KEYVAL_CREATE@20 = LIBNAME._MPI_KEYVAL_CREATE@20	@861
+	_PMPI_KEYVAL_FREE@8 = LIBNAME._MPI_KEYVAL_FREE@8	@862
+	_PMPI_NULL_COPY_FN@24 = LIBNAME._MPI_NULL_COPY_FN@24	@863
+	_PMPI_NULL_DELETE_FN@16 = LIBNAME._MPI_NULL_DELETE_FN@16	@864
+	_PMPI_OP_CREATE@16 = LIBNAME._MPI_OP_CREATE@16		@865
+	_PMPI_OP_FREE@8 = LIBNAME._MPI_OP_FREE@8			@866
+	_PMPI_PACK@32 = LIBNAME._MPI_PACK@32				@867
+	_PMPI_PACK_SIZE@20 = LIBNAME._MPI_PACK_SIZE@20		@868
+	_PMPI_PCONTROL@8 = LIBNAME._MPI_PCONTROL@8			@869
+	_PMPI_PROBE@20 = LIBNAME._MPI_PROBE@20				@870
+	_PMPI_RECV@32 = LIBNAME._MPI_RECV@32				@871
+	_PMPI_RECV_INIT@32 = LIBNAME._MPI_RECV_INIT@32		@872
+	_PMPI_REDUCE@32 = LIBNAME._MPI_REDUCE@32			@873
+	_PMPI_REDUCE_SCATTER@28 = LIBNAME._MPI_REDUCE_SCATTER@28	@874
+	_PMPI_REQUEST_FREE@8 = LIBNAME._MPI_REQUEST_FREE@8	@875
+	_PMPI_RSEND@28 = LIBNAME._MPI_RSEND@28				@876
+	_PMPI_RSEND_INIT@32 = LIBNAME._MPI_RSEND_INIT@32	@877
+	_PMPI_SCAN@28 = LIBNAME._MPI_SCAN@28				@878
+	_PMPI_SCATTER@36 = LIBNAME._MPI_SCATTER@36			@879
+	_PMPI_SCATTERV@40 = LIBNAME._MPI_SCATTERV@40		@880
+	_PMPI_SEND@28 = LIBNAME._MPI_SEND@28				@881
+	_PMPI_SENDRECV@52 = LIBNAME._MPI_SENDRECV@52		@882
+	_PMPI_SENDRECV_REPLACE@40 = LIBNAME._MPI_SENDRECV_REPLACE@40	@883
+	_PMPI_SEND_INIT@32 = LIBNAME._MPI_SEND_INIT@32		@884
+	_PMPI_SSEND@28 = LIBNAME._MPI_SSEND@28				@885
+	_PMPI_SSEND_INIT@32 = LIBNAME._MPI_SSEND_INIT@32	@886
+	_PMPI_START@8 = LIBNAME._MPI_START@8				@887
+	_PMPI_STARTALL@12 = LIBNAME._MPI_STARTALL@12		@888
+	_PMPI_STATUS_SET_CANCELLED@12 = LIBNAME._MPI_STATUS_SET_CANCELLED@12	@889
+	_PMPI_STATUS_SET_ELEMENTS@16 = LIBNAME._MPI_STATUS_SET_ELEMENTS@16		@890
+	_PMPI_TEST@16 = LIBNAME._MPI_TEST@16				@891
+	_PMPI_TESTALL@20 = LIBNAME._MPI_TESTALL@20			@892
+	_PMPI_TESTANY@24 = LIBNAME._MPI_TESTANY@24			@893
+	_PMPI_TESTSOME@24 = LIBNAME._MPI_TESTSOME@24		@894
+	_PMPI_TEST_CANCELLED@12 = LIBNAME._MPI_TEST_CANCELLED@12	@895
+	_PMPI_TOPO_TEST@12 = LIBNAME._MPI_TOPO_TEST@12		@896
+	_PMPI_TYPE_COMMIT@8 = LIBNAME._MPI_TYPE_COMMIT@8	@897
+	_PMPI_TYPE_CONTIGUOUS@16 = LIBNAME._MPI_TYPE_CONTIGUOUS@16	@898
+	_PMPI_TYPE_CREATE_DARRAY@44 = LIBNAME._MPI_TYPE_CREATE_DARRAY@44	@899
+	_PMPI_TYPE_CREATE_INDEXED_BLOCK@24 = LIBNAME._MPI_TYPE_CREATE_INDEXED_BLOCK@24	@900
+	_PMPI_TYPE_CREATE_SUBARRAY@32 = LIBNAME._MPI_TYPE_CREATE_SUBARRAY@32	@901
+	_PMPI_TYPE_EXTENT@12 = LIBNAME._MPI_TYPE_EXTENT@12	@920
+	_PMPI_TYPE_FREE@8 = LIBNAME._MPI_TYPE_FREE@8		@902
+	_PMPI_TYPE_GET_ENVELOPE@24 = LIBNAME._MPI_TYPE_GET_ENVELOPE@24	@903
+	_PMPI_TYPE_GET_CONTENTS@32 = LIBNAME._MPI_TYPE_GET_CONTENTS@32	@904
+	_PMPI_TYPE_HINDEXED@24 = LIBNAME._MPI_TYPE_HINDEXED@24	@905
+	_PMPI_TYPE_HVECTOR@24 = LIBNAME._MPI_TYPE_HVECTOR@24	@906
+	_PMPI_TYPE_INDEXED@24 = LIBNAME._MPI_TYPE_INDEXED@24	@907
+	_PMPI_TYPE_LB@12 = LIBNAME._MPI_TYPE_LB@12			@908
+	_PMPI_TYPE_SIZE@12 = LIBNAME._MPI_TYPE_SIZE@12		@909
+	_PMPI_TYPE_STRUCT@24 = LIBNAME._MPI_TYPE_STRUCT@24	@910
+	_PMPI_TYPE_UB@12 = LIBNAME._MPI_TYPE_UB@12			@911
+	_PMPI_TYPE_VECTOR@24 = LIBNAME._MPI_TYPE_VECTOR@24	@912
+	_PMPI_UNPACK@32 = LIBNAME._MPI_UNPACK@32			@913
+	_PMPI_WAIT@12 = LIBNAME._MPI_WAIT@12				@914
+	_PMPI_WAITALL@16 = LIBNAME._MPI_WAITALL@16			@915
+	_PMPI_WAITANY@20 = LIBNAME._MPI_WAITANY@20			@916
+	_PMPI_WAITSOME@24 = LIBNAME._MPI_WAITSOME@24		@917
+	_PMPI_WTICK@0 = LIBNAME._MPI_WTICK@0				@918
+	_PMPI_WTIME@0 = LIBNAME._MPI_WTIME@0				@919
+
+#endif

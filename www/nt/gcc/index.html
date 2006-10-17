@@ -1,0 +1,57 @@
+<html>
+
+<head>
+<title></title>
+</head>
+
+<body>
+
+<p><font size="6">MPICH.NT.1.2.0</font></p>
+
+<p>This release supports tcp/ip and shared memory connections. Interprocess communication
+on a single machine is done through shared memory queues and communication between
+processes on separate machines is done through sockets. This is not considered an optimal
+implementation.&nbsp; It is a correct implementation which passes all but one function in
+our test suite and IBM's test suite .</p>
+
+<p>Installation</p>
+
+<p>1) Install the mpich dlls. 
+
+<ul>
+  <li>The runtime dlls come in the MPICH Runtime Dlls package or the MPICH SDK package.</li>
+</ul>
+
+<p>2) Install a launcher. 
+
+<ul>
+  <li>MPICH Launcher: This is the preferred launcher.&nbsp; It requires administrator
+    privileges to install.</li>
+  <li>MPICH Simple Launcher: This launcher is provided for users who wish to evaluate MPICH
+    without requiring any privileges to install.&nbsp; It is limited in its capabilities.</li>
+</ul>
+
+<p>3) Compile an MPI application 
+
+<ul>
+  <li><a href="nt/gcccompiling.html">Compiling an MPI application</a></li>
+</ul>
+
+<p>4) Run an application. 
+
+<ul>
+  <li>Each launcher provides an application launcher called MPIRun.exe.&nbsp; Instructions can
+    be found on the web pages provided with the launcher.</li>
+</ul>
+
+<p>Additional Information:</p>
+
+<p><a href="nt/noLauncher.html">Running applications without using the launcher</a></p>
+
+<p><a href="nt/subtle.html">Subtle configuration options</a></p>
+
+<p>Reference</p>
+
+<p><a href="www3/index.html">MPI Routines</a></p>
+</body>
+</html>

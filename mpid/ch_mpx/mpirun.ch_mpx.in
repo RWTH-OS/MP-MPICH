@@ -1,0 +1,204 @@
+#!/bin/sh
+#
+# mpirun.ch_mpx for starting MPI applications via the ch_mpx device
+# based on mpirun.ch_smi for the ch_smi device in many respects
+
+#
+# some important variables
+#
+
+MPX_IMPL=@MPX_IMPL@
+MPX_INST=@MPX_INST@
+
+scriptdir=`dirname $0`
+
+common_options="" # command line options for all started processes
+master_options="" # command line options only for the master process
+client_options="" # command line options only for the client processes
+
+#
+# function definitions
+#
+nbr() { echo $#;}
+
+# tell the world who I am
+if [ $mpirun_verbose -gt 1 ] ; then
+    echo "*** This is mpirun.ch_mpx running on `hostname`"
+fi
+
+# where are we, and where should the programm run?
+BASENAME=`basename $progname`
+DIRNAME=`dirname $progname`
+if [ -z "$workingdir" ] ; then
+    EXENAME=./$BASENAME
+    WDNAME=$DIRNAME
+else
+    EXENAME=$progname
+    WDNAME=$workingdir
+fi
+
+#
+# get the names of the hosts to run the processes on
+# the names supplied via '-nodes' have precedence over those in the machine file
+# we look for the machine file in some defined places if none is given on the command line
+# if no host names are given, we run everything on the local host
+# if the number of processes was not given, we start exactly 1 process
+#
+if [ -n "$nodes" ] ; then
+# if the user supplied a list of nodes on the command line, use these nodes
+    HOSTS=$nodes
+else
+# try to find a machine file and use the nodes contained therein
+    if [ -z "$machineFile" ] ; then
+	if [ -f ./machines ] ; then
+	    machineFile=$DIRNAME"/machines"
+	elif [ -f $HOME/.machines ] ; then
+	    machineFile="$HOME/.machines"
+	elif [ -f $datadir/machines ] ; then
+	    machineFile="$datadir/machines"
+	fi
+    fi
+
+    if [ -n "$machineFile" ] ; then
+	# we have a machine file, get the nodes from it
+	if [ ${mpirun_verbose} != 0 ] ; then
+	    echo "*** mpirun.ch_mpx: using "$machineFile" to specify the hosts"
+	fi
+	HOSTS=`cat $machineFile | awk -F\  'NF==0 {exit} NF==1 { print $1 } NF==2 { for (i = $2; i > 0; i--) print $1 }  NF==3 { for (i=$2; i>0; i--) print $1" "$3}'` 
+	# increment the first process if it is a prcogroup file
+	# aditionally allow otional login and flags parameter
+	if test -n "$givenPGFile"  ; then
+		HOSTS=`cat $machineFile | awk -F\  'NF==0 {exit} \
+						    NF==1 { print $1 } \
+						    NF==3 { if (FNR==1) $2++;for (i=$2; i>0; i--) print $1":"$3} \
+						    NF==4 { if (FNR==1) $2++;for (i=$2; i>0; i--) print $1":"$3":"$4} \
+						    NF>=5 { if (FNR==1) $2++;for (i=$2; i>0; i--) print $1":"$3":"$4":"$5"§"$6"§"$7"§"$8"§"$9"§"$10"§"$11"§"$12}'` 
+	fi
+    else
+	HOSTS=`hostname`
+	if [ ${mpirun_verbose} != 0 ] ; then
+	    echo "*** mpirun.ch_mpx: no machines file found, running all processes on $HOSTS"
+	fi
+    fi
+fi
+
+NBR_HOSTS=`nbr ${HOSTS}`
+
+if [ ${np} -eq 0 ] ; then
+    # number of processes not given on command line -> we start one process per node
+    np=`nbr ${HOSTS}`
+    if [ ${mpirun_verbose} != 0 ] ; then
+	echo "*** mpirun.ch_mpx: number of processes not explicitly stated -> starting ${np} processes (one per node)"
+    fi
+fi
+
+# if we now have more hosts than number of processes, we eliminate some hosts from our list
+# -> the np processes run on the first np hosts
+if [ ${np} -lt ${NBR_HOSTS} ] ; then
+    NEWHOSTS=""
+    i=0
+    for h in $HOSTS ; do
+	if [ $i -lt ${np} ] ; then
+	    NEWHOSTS="${NEWHOSTS} $h"
+	    i=`expr $i + 1`;
+	fi
+    done
+    HOSTS=${NEWHOSTS}
+fi
+
+# if more processes are requested than nodes are given in the command line, 
+# schedule the processes in round-robin manner
+if [ ${np} -gt ${NBR_HOSTS} ] ; then
+    NEWHOSTS=$HOSTS
+    while [ $NBR_HOSTS -lt $np ] ; do
+	for h in $HOSTS ; do
+	    NEWHOSTS="$NEWHOSTS $h"
+	    NBR_HOSTS=`expr $NBR_HOSTS + 1`
+	    if [ $NBR_HOSTS = $np ] ; then
+		break;
+	    fi
+	done
+    done
+    HOSTS=$NEWHOSTS
+fi
+
+case "$MPX_IMPL" in
+"mpich"|"lam/mpi")
+ # for MPICH and LAM: the first host gets the master process
+ for h in ${HOSTS} ; do
+     MASTER_HOST=`echo ${h} | cut -d ":" -f 1`
+     break;
+ done
+ if [ ${mpirun_verbose} != 0 ] ; then
+     echo "*** mpirun.ch_mpx: master process running on ${MASTER_HOST}"
+ fi
+;;
+esac
+
+device_nbr=`cat $includedir/mpichconf.h | grep DEVICE_ch_mpx_nbr | awk  '{ print $3 }'`
+
+# Clash with LAM/MPI: an '0' argument indicates the end of the argument list in LAM/MPI
+# Thus, a '-usedevice 0' would cause problems
+if [ ${device_nbr} != 0 ] ; then
+   common_options="${common_options} -usedevice ${device_nbr}"
+fi
+
+# if cmdLineArgs already contain --, we get rid of it first, to not have it twice
+# this happens when using the meta device
+tmpLineArgs=""
+for c in $cmdLineArgs
+  do
+  if [ "$c" != '"--"' ] ; then
+      tmpLineArgs="$tmpLineArgs $c"
+  fi
+done
+cmdLineArgs=$tmpLineArgs
+
+
+###
+
+# (re-)create machine file:
+mID=`date +%H%M%S`
+mID=$mID.$$
+machineFile="${PWD}/machines.tmp.${mID}"
+
+for n in ${HOSTS} ; do
+    echo "$n" >> ${machineFile}
+done
+
+# create mpirun launch command for the MPX library:
+case "$MPX_IMPL" in
+
+"mpich")
+     launch_cmd="$Show $rshcmd ${MASTER_HOST}"
+     launch_cmd="$launch_cmd '( ${MPX_INST}/bin/mpirun"
+     launch_cmd="$launch_cmd -np ${np} -machinefile ${machineFile}"
+     launch_cmd="$launch_cmd ${WDNAME}/${EXENAME}" 
+     launch_cmd="$launch_cmd ${common_options} -- ${cmdLineArgs} )'"
+     ${launch_cmd}
+;;
+
+"lam/mpi")
+     mv "$scriptdir/mpirun" "$scriptdir/mpirun.save"
+     ln -fs "$MPX_INST/bin/mpirun" "$scriptdir/mpirun"
+     launch_cmd="$Show $rshcmd ${MASTER_HOST}"
+     launch_cmd="$launch_cmd '( ${MPX_INST}/bin/mpiexec"
+     launch_cmd="$launch_cmd -machinefile ${machineFile}"
+     launch_cmd="$launch_cmd ${WDNAME}/${EXENAME}" 
+     launch_cmd="$launch_cmd ${common_options} -- ${cmdLineArgs} )'"
+     ${launch_cmd}
+     mv "$scriptdir/mpirun.save" "$scriptdir/mpirun"    
+;;
+
+"mvapich")
+     launch_cmd="$Show "
+     launch_cmd="$launch_cmd ${MPX_INST}/bin/mpirun"
+     launch_cmd="$launch_cmd -np ${np} -hostfile ${machineFile}"
+     launch_cmd="$launch_cmd ${WDNAME}/${EXENAME}" 
+     launch_cmd="$launch_cmd ${common_options} ${cmdLineArgs}"
+     ${launch_cmd}
+;;
+
+esac
+
+rm -rf $machineFile

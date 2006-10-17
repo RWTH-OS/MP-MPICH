@@ -1,0 +1,5 @@
+* Each source file contains a file header with very short
+  description (blank header in FILE_HEADER)
+
+* Source code is formated with:   
+    indent -nbad -bap -nbbb -npsl -bl -bli0 -di4 -ncdb -i4 -lp -npcs -nprs -nut

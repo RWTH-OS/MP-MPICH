@@ -1,0 +1,9 @@
+NUMHOSTS 2
+frogstar 1
+magrathea 1
+frogstar magrathea 1 -
+134.130.62.98:0,134.130.62.98:1 134.130.62.94:0,134.130.62.94:1
+magrathea frogstar 1 -
+134.130.62.94:0,134.130.62.94:1 134.130.62.98:0,134.130.62.98:1
+PORTBASE 2300
+SPLITSIZE 300

@@ -1,0 +1,4 @@
+
+To use MPICH with SCI, refer to mpid/ch_smi/README for further installation 
+and usage instructions or use the complete manual (PDF format) which is 
+available from http://www.lfbs.rwth-aachen.de/~joachim/SCI-MPICH.

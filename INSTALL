@@ -1,0 +1,38 @@
+This file describes how to configure and compile mp-mpich for your system.
+
+You can configure this package using the supplied 'configure'-script. The
+standard-procedure to install mp-mpich would be:
+        ./configure [options]
+        make
+        make test
+        make install
+
+If you used the configure of some older mp-mpich releases (up till 1.3.0a),
+there were many changed options, please check the following list:
+
+    OLD              NEW
+  -ar_nolocal      --disable-ar-local
+  -noranlib        --disable-ranlib
+  -mpilibname      --with-mpilibname=
+  -meta            --enable-meta
+  -hetero          --enable-hetero
+  -no_short_longs  --disable-short-longs
+  -memdebug        --enable-memdebug
+  -ptrdebug        --enable-ptrdebug
+  -tracing         --enable-tracing
+  -pkt_size=       --enable-pkt-size=
+  -limited_buffers --enable-limited-bufffers
+  -tiny_buffers    --enable-tiny-buffers
+  -adi_collective  --enable-adi-collective
+  -f77idx          --enable-f77idx
+  -enable-c++      --enable-cxx
+
+Removed options:
+  -socksize=     Nowhere to be found in the source tree
+  --with-c++=    Use environment variable CXX
+  --with-cc=     Use environment variable CC
+  --with-fc=     Use environment variable F77
+  --with-make=   Use environment variable MAKE
+  --enable-jumpshot Go to the jumpshot directory and build it yourself...
+  -cross           was removed, use --build=, --host= and --target=
+

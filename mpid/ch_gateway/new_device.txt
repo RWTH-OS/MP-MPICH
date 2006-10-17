@@ -1,0 +1,20 @@
+~/mpich/mpid $ NewDevice gateway
+Building new device gateway
+You should modify ch_gateway/Makefile.in to use the correct ch files (for
+example, choosing blocking eager (chbeager) over nonblocking eager
+(chneager)).  Modify ch_gateway/mpid_time.h to use the correct time routines
+for this device.  Modify ch_gateway/chconfig.h and chdef.h for the correct
+Channel device definitions.
+ 
+If you are NOT using the channel device, you can delete chdef.h and you
+MUST replace mpiddev.h (which is a link to mpid/ch2/mpiddevbase.h).
+ 
+You will probably need a gatewaypriv.c file.
+ 
+You can add your new device to mpirun by creating an mpirun.gateway.in file
+in mpich/util .
+ 
+You may find that some routines are missing.  Look for them in mpid/ch2;
+it may be that you need to establish links to them.  NewDevice simply
+creates a copy of ch_nx; each device has a different set of requirements.
+Shared memory versions should consider ch_shmem or ch_lfshmem.

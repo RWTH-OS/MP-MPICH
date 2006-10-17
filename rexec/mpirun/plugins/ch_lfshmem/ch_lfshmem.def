@@ -1,0 +1,9 @@
+; ch_lfshmem.def : Declares the module parameters for the DLL.
+
+LIBRARY      "ch_shmem"
+
+
+EXPORTS
+    ; Explicit exports can go here
+
+_PlgDescription @1

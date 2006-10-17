@@ -1,0 +1,200 @@
+# $Id$
+#  (C) 2002 by Lehrstuhl fuer Betriebssysteme, RWTH Aachen, Germany
+#      All rights reserved.  
+
+##### User configurable options #####
+
+META        := @META@
+META_ATM    := @META_ATM@
+ARCH        := @ARCH@
+COMM        := @COMM@
+BOPT        := @BOPT@
+MPIR_HOME   := @MPIR_HOME@
+CC          := @CC@
+CLINKER     := @CLINKER@
+MPICC       := @MPICC@
+F77         := @F77@
+AR          := @AR@
+RANLIB      := @RANLIB@
+INCLUDE_DIR := -I../../include -I../../mpid/ch2 -I../../mpid/util -I../../mpid/ch_gateway 
+DEVICE      := @DEVICE@
+OPTFLAGS    := @OPTFLAGS@ -DYYDEBUG=1
+LDFLAGS     := @LDFLAGS@
+
+### End User configurable options ###
+LDFLAGS:=-lnsl
+SHELL := /bin/sh
+
+
+ifeq ($(META_ATM),yes) 
+	META_ATM_INCLUDE = atm_connection.h
+	META_ATM_DEFINES = -DMETA_ATM
+	META_ATM_LIBS = -latm
+	META_ATM_OBJECTS = atm_connection.o
+	META_ATM_CSOURCES = atm_connection.c
+else
+	META_ATM_INCLUDE =
+	META_ATM_DEFINES =
+	META_ATM_LIBS =
+	META_ATM_OBJECTS =
+	META_ATM_CSOURCES =
+endif
+
+MPI_INCLUDE    := ../../include/mpi.h ./intqueue.h ./pbarrier.h ./rhlist.h \
+	         ./tcp_connection.h $(META_ATM_INCLUDE) connection.h ./mpi_router.h ./perfserver.h ./rdebug.h ../../include/metampi.h
+DEVICE_LIB := 
+ifeq ($(META),yes) 
+	CFLAGS =-DMPIR_LIB_CODE @CFLAGS@ $(OPTFLAGS) @OPTFLAGSC@ $(INCLUDE_DIR) -I. \
+		-DMPI_$(ARCH) $(MPIPROFILE) -DMETA $(META_ATM_DEFINES)
+else
+	CFLAGS =-DMPIR_LIB_CODE @CFLAGS@ $(OPTFLAGS) @OPTFLAGSC@ $(INCLUDE_DIR) \
+		-DMPI_$(ARCH) $(MPIPROFILE)
+endif
+LIBS := ../../lib/lib@MPILIBNAME@.a $(DEVICE_LIB)
+TEST_LIBS := $(META_ATM_LIBS)  -lnsl -lpthread
+ifeq ($(ARCH),solaris) 
+	TEST_LIBS= $(META_ATM_LIBS)  $(LIB_LIST)
+endif
+FFLAGS :=
+MPI_FOBJECTS := 
+
+ifeq ($(META),yes) 
+	MPI_COBJECTS = tcp_connection.o $(META_ATM_OBJECTS) connection.o mpi_router.o perfserver.o rhlist.o intqueue.o pbarrier.o router_config.o rconf_parser.tab.o prof_timer.o rdebug.o auto_router.o  newstrings.o rconf_scanner.o
+else 
+	MPI_COBJECTS =
+endif
+
+MPI_FSOURCES := farg.f initfcmn.f initfdte.f
+
+ifeq ($(META),yes) 
+	MPI_CSOURCES = tcp_connection.c $(META_ATM_CSOURCES) connection.c mpi_router.c perfserver.c rhlist.c intqueue.c pbarrier.c router_config.c rconf_parser.tab.c prof_timer.c rdebug.c auto_router.c newstrings.c rconf_scanner.c
+else
+	MPI_CSOURCES =
+endif
+
+MPI_TSOURCES := errclass.c 
+MPI_WSOURCES :=
+MPI_WOBJECTS :=
+
+MPI_SOURCES := $(MPI_CSOURCES) $(MPI_WSOURCES)
+MPI_OBJECTS := $(MPI_COBJECTS) $(MPI_WOBJECTS)
+
+TEST_OBJECTS := tcp_connection.o $(META_ATM_OBJECTS) connection.o  pbarrier.o \
+	      speed_send.o speed_recv.o optsplit_send.o optsplit_recv.o conn_pingpong.o
+
+default: ../../lib/lib@MPILIBNAME@.a mpirunparser
+
+profile: ../../lib/libp@MPILIBNAME@.a
+
+# some test programms, also for evaluating performance
+test:	speed_send speed_recv optsplit_send optsplit_recv conn_pingpong
+
+wrapperlib: $(MPI_WOBJECTS)
+	$(AR) ../../lib/libf@MPILIBNAME@.a $?
+
+# default_all is the same as default, but without the RANLIB.  This
+# can speed up the build (ranlibs can take a LONG time).  profile_all 
+# is the same, but for the profile library
+default_all: $(MPI_OBJECTS) @MPI_FOBJECTS@ mpirunparser
+	$(AR) ../../lib/lib@MPILIBNAME@.a $(MPI_OBJECTS) @MPI_FOBJECTS@
+profile_all: $(MPI_OBJECTS) @MPI_FOBJECTS@
+	$(AR) ../../lib/libp@MPILIBNAME@.a $?
+
+# the standalone routing process has to be built manually because it requires the metalib
+#router: tcp_connection.o $(META_ATM_OBJECTS) connection.o mpi_router.o rhlist.o router.o intqueue.o pbarrier.o
+#	$(CC) -L../../lib/$(ARCH)/$(COMM) -o router tcp_connection.o $(META_ATM_OBJECTS) connection.o mpi_router.o \
+#	rhlist.o router.o $(META_ATM_LIBS) -lnsl -lsocket -lmetampi
+metarouter: router.o
+	$(MPICC) -o $@ $^
+#	cp $@ ../../bin
+
+$(MPI_OBJECTS) :  $(MPI_INCLUDE)
+$(MPI_FOBJECTS) :  $(MPI_INCLUDE)
+
+wrappers:
+	-rm -f $(MPI_WSOURCES)
+	../../util/bfort -ferr -mpi -mnative -mapptr -ptrprefix MPIR_ \
+		-anyname -I pubinc $(MPI_TSOURCES)
+
+conn_pingpong: conn_pingpong.o connection.o tcp_connection.o pbarrier.o  $(META_ATM_CSOURCES)
+	$(CC)  -o conn_pingpong conn_pingpong.o connection.o tcp_connection.o pbarrier.o $(META_ATM_OBJECTS)  $(TEST_LIBS) $(META_ATM_LIBS) 
+speed_send: $(TEST_OBJECTS) client_server.h
+	$(CC) $(CFLAGS) -c speed_send.c
+	$(CC) $(CFLAGS) -o speed_send tcp_connection.o $(META_ATM_OBJECTS) connection.o speed_send.o pbarrier.o $(TEST_LIBS)
+
+speed_recv: $(TEST_OBJECTS) client_server.h
+	$(CC) $(CFLAGS) -c speed_recv.c
+	$(CC) $(CFLAGS) -o speed_recv tcp_connection.o $(META_ATM_OBJECTS) connection.o speed_recv.o pbarrier.o $(TEST_LIBS)
+
+optsplit_send: $(TEST_OBJECTS) client_server.h
+	$(CC) $(CFLAGS) -c optsplit_send.c
+	$(CC) $(CFLAGS) -o optsplit_send tcp_connection.o $(META_ATM_OBJECTS) connection.o optsplit_send.o pbarrier.o $(TEST_LIBS)
+
+optsplit_recv: $(TEST_OBJECTS) client_server.h
+	$(CC) $(CFLAGS) -c optsplit_recv.c
+	$(CC) $(CFLAGS) -o optsplit_recv tcp_connection.o $(META_ATM_OBJECTS) connection.o optsplit_recv.o pbarrier.o $(TEST_LIBS)
+
+source_names:
+	@echo $(MPI_CSOURCES)
+
+.c.o:
+	$(CC) $(CFLAGS) -c $*.c
+.f.o:
+	$(F77) $(FFLAGS) -c $*.f
+
+# Always compile this with -g
+# Warning: some systems might not support -g.  We'll deal with that when
+# we have to.  We use the part of CFLAGS that does not include the
+# optimization switches.
+debugutil.o: debugutil.c
+	$(CC) -g @CFLAGS@ $(INCLUDE_DIR) -DMPI_$(ARCH) $(MPIPROFILE) -c \
+		debugutil.c
+
+# errmsg needs to know about NLS definitions.
+errmsg.o: errmsg.c
+	$(CC) $(CFLAGS) @NLS_DEFS@ -c errmsg.c
+
+../../lib/lib@MPILIBNAME@.a: \
+		$(MPI_OBJECTS) @MPI_FOBJECTS@
+	$(AR) $@ $?
+	$(RANLIB) $@
+
+../../lib/libp@MPILIBNAME@.a: $(MPI_OBJECTS) @MPI_FOBJECTS@
+	$(AR) $@ $?
+	$(RANLIB) $@
+tstmsg:
+	$(CC) $(CFLAGS) -DTEST_MSGS @NSL_DEFS@ -c errmsg.c
+	$(CLINKER) -o errmsg errmsg.o \
+		../../lib/lib@MPILIBNAME@.a
+	rm -f errmsg.o
+
+clean:
+	rm -f *.o *~ errmsg speed_send speed_recv optsplit_send optsplit_recv \
+		metapars checkmetacfg rconf_parser.tab.c rconf_scanner.c rconf_parser.tab.h \
+		../../bin/metapars ../../bin/checkmetacfg metarouter
+
+rconf_test: rconf_parser.tab.c
+	$(CC) $< -o $@
+
+rconf_parser.tab.c: rconf_parser.y 
+	bison -d $<
+
+rconf_scanner.c: rconf_scanner.l rconf_parser.tab.c
+	flex -t $< > $@
+
+checkmetacfg: checkmetacfg.o rconf_parser.tab.o rhlist.o router_config.o auto_router.o rconf_scanner.o newstrings.o
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
+mpirunparser: ../../bin/metapars ../../bin/checkmetacfg
+
+../../bin/metapars: metapars
+	cp $^ $@
+
+../../bin/checkmetacfg: checkmetacfg
+	cp $^ $@
+
+metapars: metapars.o rconf_parser.tab.o rhlist.o router_config.o auto_router.o  rconf_scanner.o newstrings.o
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
+distclean:
+	-rm -f Makefile

@@ -1,0 +1,94 @@
+ALL: default
+##### User configurable options #####
+
+SHELL := /bin/sh
+ARCH         := @ARCH@
+DEVICE       := @DEVICE@
+MPIR_HOME    := @MPIR_HOME@
+CC           := @MPICC@
+CLINKER      := $(CC)
+F77          := @MPIF77@
+FLINKER      := $(F77)
+OPTFLAGS     := @OPTFLAGS@
+F77_OPTFLAGS := @F77_EXTRA_FLAG@
+### End User configurable options ###
+
+@VPATH@
+srcdir     := @srcdir@
+
+
+CFLAGS  := @CFLAGS@ @DEFS@ $(OPTFLAGS)
+ifeq ($(ARCH),LINUX_ALPHA)
+# for gcc on Alpha - mpptest/stress dump core without.
+CFLAGS  += -mieee
+endif
+
+CCFLAGS := $(CFLAGS)
+FFLAGS := $(OPTFLAGS)
+LIBS := -lm
+EXECS := commspeedclassfinder mpptest goptest vectest stress buflimit ctest cluster busy_sndrcv noncontig
+
+default: $(EXECS)
+
+OBJS := gopf.o grph.o ovlap.o pair.o pattern.o util.o getopts.o \
+	rate.o mpe_seq.o copy.o verify.o mem.o
+
+commspeedclassfinder: commspeedclassfinder.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o ./commspeedclassfinder commspeedclassfinder.o $(LIBS)
+
+mpptest: mpptest.o $(OBJS)
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o ./mpptest mpptest.o $(OBJS) $(LIBS)
+
+goptest: goptest.o $(OBJS)
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o ./goptest goptest.o $(OBJS) $(LIBS)
+
+copytest: copytest.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o ./copytest copytest.o $(LIBS)
+
+stress: stress.o daytime.o getopts.o mem.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o ./stress stress.o daytime.o getopts.o mem.o $(LIBS)
+
+buflimit: buflimit.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o ./buflimit buflimit.o $(LIBS)
+
+tunepkt: tunepkt.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o ./tunepkt tunepkt.o $(LIBS)
+
+pktuse: pktuse.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o ./pktuse pktuse.o $(LIBS)
+
+ctest: ctest.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o ./ctest ctest.o $(LIBS)
+
+cluster: cluster.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o ./cluster cluster.o $(LIBS)
+
+vectest: vectest.o
+	$(FLINKER) $(OPTFLAGS) -o ./vectest vectest.o  $(LIBS)
+
+busy_sndrcv: busy_sndrcv.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o ./busy_sndrcv busy_sndrcv.o  $(LIBS) -lpthread
+
+noncontig: noncontig.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o ./noncontig noncontig.o  $(LIBS)
+
+clean:
+	@-rm -f *.o *~ $(EXECS) tunepkt pktuse core TAGS .foo *.gpl \
+	           *.log gop.ps *.gpl *.gcm makeplot info.txt basetest.tar \
+	           copytest gmon.*
+
+distclean: clean
+	-rm -f Makefile config.status
+#
+# We'd like to eliminate aclocal.m4 from the directory, but the old autoconf
+# can't handle this. Sigh
+configure: configure.in
+	/home/MPI/maint/makeconfigs 
+
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+.f.o:
+	$(F77) $(FFLAGS) $(F77_OPTFLAGS) -c $<
+
+
+

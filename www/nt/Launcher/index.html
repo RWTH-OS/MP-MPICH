@@ -1,0 +1,31 @@
+<html>
+
+<head>
+<title></title>
+</head>
+
+<body>
+
+<p><big><big><big>MPICH Launcher</big></big></big></p>
+
+<p>The launcher is a DCOM server which resides on each host which will provide CPU's for
+mpich applications.&nbsp; The DCOM server runs as a service under the SYSTEM account.
+&nbsp; When MPIRun connects to the launcher, the launcher impersonates the user who
+executed MPIRun and launches processes in the context of that user.&nbsp; The launcher
+does not map the network drives that the current user has mapped.&nbsp; The launcher does
+not load the registry hive of the current user.</p>
+
+<p>With the launcher installed on all the machines in a cluster, you can use MPIRun to
+launch an mpich application:</p>
+
+<p>You must install the MPICH runtime dlls before attempting to launch an application with
+MPIRun.</p>
+
+<p><a href="MPIRun.html">MPIRun</a></p>
+
+<p>MPIRun has an option, -np, which runs an application on the first n available machines.
+&nbsp; To set up the -np option for MPIRun, run MPIConfig:</p>
+
+<p><a href="MPIConfig.html">MPIConfig</a></p>
+</body>
+</html>

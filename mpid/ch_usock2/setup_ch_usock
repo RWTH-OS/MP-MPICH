@@ -1,0 +1,35 @@
+#! /bin/sh
+# $Id: setup_ch_usock 3436 2005-04-21 11:45:24Z nicolas $
+# ch_usock
+#
+if test -n "$DEVICE_ARGS_ch_usock" ; then
+    echo "ch_usock: running device specific setup with args: $DEVICE_ARGS_ch_usock"
+else
+    test -n "$verbose" && echo "ch_usock: running device specific setup with args: NONE"
+fi
+
+#indicate presence of device
+CFLAGS="$CFLAGS -DCH_USOCK_PRESENT"
+FFLAGS="$FFLAGS -DCH_USOCK_PRESENT"
+
+
+# force linking of device lib in static case
+CLINKERSTATICOPTS="${CLINKERSTATICOPTS} -u MPID_CH_USOCK_InitMsgPass"
+F77LINKERSTATICOPTS="${F77LINKERSTATICOPTS} -uMPID_CH_USOCK_InitMsgPass"
+
+CHUSOCK_LIBS="-lstdc++ -lpthread -ldl"
+DEFAULT_MACHINE="usock"
+
+NT2UNIX_DIR="$srcdir/mpid/nt2unix"
+
+if ! test -d $NT2UNIX_DIR ; then
+  echo "nt2unix library not found!"
+  exit 1
+fi
+
+echo "*** configuring internal nt2unix library"
+(cd $NT2UNIX_DIR; ./configure)
+
+LIB_LIST="$LIB_LIST $CHUSOCK_LIBS"
+
+echo "ch_usock: end of device specific setup."

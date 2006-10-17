@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+
+<head>
+<title></title>
+</head>
+
+<body>
+
+<p><a href="index.html">main</a></p>
+
+<p><big><big><big>MPIRun.exe</big></big></big></p>
+
+<p>Use MPIRun.exe to launch an mpich application. It is in the [MPICH Simple Launcher
+Home]\bin directory. You will probably want to add this directory to your path environment
+variable.</p>
+
+<p>Usage: 
+
+<ul>
+  <li><font face="Courier">MPIRun [flags] -port LaunchPortNumber configfile [args ...] </li>
+  <li>MPIRun [flags] [-tcp] -localonly #processes&nbsp;executable [args ...] </li>
+</ul>
+
+<p>flags<br>
+-env &quot;var1=val1|var2=val2|var3=val3...&quot; <br>
+-mpichport number (port number for the root process to listen on)</font></p>
+
+<p><big>Configuration files</big>.</p>
+
+<p>The config file format is as follows: </p>
+
+<blockquote style="MARGIN-RIGHT: 0px">
+  <font face="Courier"><pre>[port RootPortNumber]
+exe c:\somepath\myapp.exe
+ OR \\host\share\somepath\myapp.exe
+[args arg1 arg2 arg3 ...]
+[env VAR1=VAL1|VAR2=VAL2|...|VARn=VALn]
+hosts
+hostA #procs
+hostB #procs
+hostC #procs
+...
+</pre>
+  </font>
+</blockquote>
+
+<p>Bracketed lines are optional. The # character will comment out a line</p>
+
+<p>Here is a sample configuration file:</p>
+
+<blockquote style="MARGIN-RIGHT: 0px">
+  <font face="Courier"><pre>port 5500
+exe c:\temp\mandel.exe
+env MINX=0|MAXX=2|MINY=0|MAXY=2
+args -i c:\temp\cool.points
+hosts
+fry 2
+#light 2
+jazz 1
+</pre>
+  </font>
+</blockquote>
+
+<p><big>Command line options for MPIRun</big></p>
+
+<p><strong>-localonly #procs</strong></p>
+
+<p>This runs the application on the local machine using the shared memory device.</p>
+
+<p><strong>-localonly #procs -tcp</strong></p>
+
+<p>Add the -tcp switch to force the use of sockets instead of shared memory</p>
+
+<p><strong>-env&nbsp;&quot;var1=val1|var2=val2|var3=val3|...varn=valn&quot;</strong></p>
+
+<p>This will set the environment variables specified in the string before each process is
+launched.&nbsp; Remember to quote the string so the command prompt doesn't interpret the
+vertical bar as a pipe command.</p>
+
+<p><strong>-mpichport number</strong></p>
+
+<p>For every mpich application, the root process waits on a specific port for the rest of
+the processes to connect.&nbsp; In order for two or more mpich applications to run at the
+same time from the same root host they must have unique ports to wait on.&nbsp; If you
+don't supply a number, the default is 12345.&nbsp; To run more than one application
+simultaneously, the user must supply unique port numbers.&nbsp; This number can be
+specified in the configuration file on the line: port number</p>
+
+<p><big>How MPIRun launches processes</big></p>
+
+<p>MPIRun makes socket connections to MPICHSH.exe running on each of the hosts specified
+in the configuration file (MPICHSH.exe must be manually started on each of the nodes
+before MPIRun.exe is called). MPICHSH.exe launches the processes and the output from each
+process is redirected over the socket.&nbsp; When the sockets close, the remote processes
+have terminated.&nbsp; MPIRun waits for all the sockets to close and then exits.</p>
+
+<p>If you hit &lt;Ctrl C&gt; while MPIRun is running, it will exit - closing all the
+sockets.&nbsp; MPICHSH.exe terminates all processes running after the socket connection is
+lost.</p>
+
+<p>This launcher is not secure.&nbsp; While the MPICHSH.exe processes are running, anyone
+can connect and launch a process.&nbsp; There is a slight bit of obscurity because the
+user can specify whatever port they want.&nbsp; The port supplied on the command line to
+MPIRun must be the same port that all the MPICHSH.exe processes are waiting on.&nbsp; If
+you don't provide a port number to either MPIRun or MPICHSH they default to port 2020 (a
+completely arbitrary port chosen after watching 20/20 Wednesday on TV).</p>
+
+<p><a href="index.html">main</a><br>
+MPIRun <br>
+<a href="mpichsh.html">MPICHSH</a></p>
+
+<p>&nbsp;</p>
+</body>
+</html>

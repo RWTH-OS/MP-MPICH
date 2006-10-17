@@ -1,0 +1,121 @@
+#
+#  (C) 1993 by Argonne National Laboratory and Mississipi State University.
+#      All rights reserved.  See COPYRIGHT in top-level directory.
+#
+
+CC          = @CC@
+F77         = @F77@
+AR          = @AR@
+RANLIB      = @RANLIB@
+OPTFLAGS    = @OPTFLAGS@
+OPTFLAGSC   = @OPTFLAGSC@
+prefix      = @prefix@
+top_srcdir  = @top_srcdir@
+srcdir      = @srcdir@
+libbuild_dir = @libbuild_dir@
+ARCH        = @ARCH@
+
+DEFS        = -DMPI_@ARCH@ -DMPIR_LIB_CODE @DEFS@ ${MPIPROFILE} -I. -I${srcdir} @mpich_includes@
+CFLAGS      = @CFLAGS@ 
+
+SHELL       = /bin/sh
+
+@VPATH@
+
+.SUFFIXES:
+.SUFFIXES: .o .c .f
+
+LIBS = ${libbuild_dir}/lib@MPILIBNAME@.a
+
+MPI_CSOURCES = keyval_free.c keyvalcreate.c attr_getval.c \
+		attr_delval.c attr_util.c attr_putval.c \
+		group_excl.c group_diff.c group_free.c group_incl.c \
+		group_inter.c group_rexcl.c group_rincl.c groupcompare.c \
+		group_rank.c group_size.c group_union.c group_util.c \
+		comm_dup.c comm_free.c comm_group.c comm_create.c \
+	        comm_name_get.c comm_name_put.c \
+		comm_size.c comm_util.c comm_split.c context_util.c \
+		group_tranks.c comm_testic.c comm_rank.c commcompare.c \
+		comm_rsize.c comm_rgroup.c ic_create.c ic_merge.c \
+		null_copyfn.c null_del_fn.c dup_fn.c
+
+MPI_WSOURCES = keyval_freef.c \
+		attr_delvalf.c \
+		group_exclf.c group_difff.c group_freef.c group_inclf.c \
+		group_interf.c \
+		group_rankf.c group_sizef.c group_unionf.c groupcomparf.c \
+		comm_dupf.c comm_freef.c comm_groupf.c comm_createf.c \
+		comm_sizef.c comm_splitf.c \
+		grouptranksf.c \
+		comm_testicf.c comm_rankf.c commcomparef.c \
+		comm_rsizef.c comm_rgroupf.c ic_createf.c ic_mergef.c
+
+# still making comm_sizef.c and comm_rankf.c by hand
+# MUST make attr_putvalf.c and attr_getvalf.c by hand
+# MUST make group_rinclf.c and group_rexclf.c by hand
+# MUST make comm_nameputf.c and comm_namegetf.c by hand
+MPI_TSOURCES = 
+
+MPI_COBJECTS = keyval_free.o keyvalcreate.o attr_getval.o \
+		attr_delval.o attr_util.o attr_putval.o \
+		group_excl.o group_diff.o group_free.o group_incl.o \
+		group_inter.o group_rexcl.o group_rincl.o groupcompare.o \
+		group_rank.o group_size.o group_union.o group_util.o \
+		comm_dup.o comm_free.o comm_group.o comm_create.o comm_rank.o \
+		comm_name_get.o comm_name_put.o \
+		comm_size.o comm_util.o comm_split.o context_util.o \
+		group_tranks.o comm_testic.o commcompare.o \
+		comm_rsize.o comm_rgroup.o ic_create.o ic_merge.o \
+		group_rinclf.o group_rexclf.o \
+		null_copyfn.o null_del_fn.o dup_fn.o
+
+MPI_WOBJECTS = keyval_freef.o keyvalcreatf.o attr_getvalf.o \
+		attr_delvalf.o  attr_putvalf.o \
+		group_exclf.o group_difff.o group_freef.o group_inclf.o \
+		group_interf.o \
+		group_rankf.o group_sizef.o group_unionf.o groupcomparf.o \
+		comm_dupf.o comm_freef.o comm_groupf.o comm_createf.o \
+	        comm_nameputf.o comm_namegetf.o \
+		comm_sizef.o comm_splitf.o grouptranksf.o \
+		comm_testicf.o comm_rankf.o commcomparef.o \
+		comm_rsizef.o comm_rgroupf.o ic_createf.o ic_mergef.o \
+		null_copyfnf.o null_del_fnf.o dup_fnf.o
+
+default: ${libbuild_dir}/lib@MPILIBNAME@.a
+
+MPI_SOURCES = ${MPI_CSOURCES} ${MPI_WSOURCES}
+MPI_OBJECTS = ${MPI_COBJECTS} ${MPI_WOBJECTS}
+
+profile: ${libbuild_dir}/libp@MPILIBNAME@.a
+
+# default_all is the same as default, but without the RANLIB.  This
+# can speed up the build (ranlibs can take a LONG time).  profile_all 
+# is the same, but for the profile library
+default_all: ${MPI_OBJECTS}
+	${AR} ${libbuild_dir}/lib@MPILIBNAME@.a $?
+profile_all: ${MPI_OBJECTS}
+	${AR} ${libbuild_dir}/libp@MPILIBNAME@.a $?
+wrapperlib: ${MPI_WOBJECTS}
+	${AR} ${libbuild_dir}/libf@MPILIBNAME@.a $?	
+
+source_names:
+	@echo ${MPI_CSOURCES}
+
+.c.o:
+	${CC} ${DEFS} ${INCLUDES} ${CFLAGS} ${OPTFLAGSC} ${OPTFLAGS} -c $<
+
+${libbuild_dir}/lib@MPILIBNAME@.a: ${MPI_OBJECTS} 
+	${AR} $@ $?
+	${RANLIB} $@
+
+${libbuild_dir}/libp@MPILIBNAME@.a: ${MPI_OBJECTS} 
+	${AR} $@ $?
+	${RANLIB} $@
+
+# We need to clean the srcdir of any .o files because they can confuse the
+# VPATH build process
+clean:
+	@/bin/rm -f *.o *~ ${srcdir}/*.o
+
+distclean:
+	-rm -f Makefile

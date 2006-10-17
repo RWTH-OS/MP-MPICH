@@ -1,0 +1,14 @@
+#results from running asyncperf on ch_smi-tag async-eager2
+#date 10/11/99, all results in Microseconds, msg_size in bytes
+#msg_size	Isend(non)	whole(non)	Isend(bl)	whole(bl)
+64		213		404		103		155
+128		207		417		105		158
+256		208		401		109		163
+512		218		401		112		164
+1024		195		381		118		171
+2048		209		412		130		182
+4096		209		456		157		211
+8192		218		596		213		265
+16384		206		747		421		474
+32768		210		1290		846		899
+

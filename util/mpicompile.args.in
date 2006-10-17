@@ -1,0 +1,444 @@
+#! /bin/sh
+# $Id$
+
+# Script to evaluate arguments for the mpicompile skripts
+
+DoLink=1
+DoCompile=0
+show_compile=0
+show_link=0
+MPILOG=
+Show=eval
+allargs=
+compileargs=
+linkargs=
+linkobjs=
+gettinglinkarg=0
+HasDashC=0
+UsesPmpi=0
+verbose=0
+
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+bindir="@bindir@"
+includedir="@includedir@"
+libdir="@libdir@"
+sharedlib_dir="@sharedlib_dir@"
+# $scriptdir is clean if it comes from one of the other mpi* scripts, $bindir may not,
+# so we try to sanitize it:
+rundir="`pwd`"
+cd "$bindir"
+bindir="`pwd`"
+cd "$rundir"
+if [ "$scriptdir" = "$bindir" ]
+then
+	installed="yes"
+else
+	installed="no"
+	MPIR_HOME="`dirname $scriptdir`"
+	bindir="$MPIR_HOME/bin"
+	includedir="$MPIR_HOME/include"
+	libdir="$MPIR_HOME/lib"
+	sharedlib_dir="$MPIR_HOME/lib/shared"
+fi
+
+USER_CFLAGS="@USER_CFLAGS@"
+MPILIBNAME="@MPILIBNAME@"
+MPIOLIBNAME="@MPIOLIBNAME@"
+NOMPE="@NOMPE@"
+DEVICELFLAGS="@DEVICELFLAGS@"
+
+ROMIO_LFLAGS="@ROMIO_LFLAGS@"
+ROMIO_DEVLIBS="@ROMIO_DEVLIBS@"
+ROMIO_TCPPFLAGS="@ROMIO_TCPPFLAGS@"
+ROMIO_RCFLAGS="@ROMIO_TCFLAGS@"
+ROMIO_TFFLAGS="@ROMIO_TFFLAGS@"
+
+CC="${MPICH_CC-@CC@}"
+CLINKER="${MPICH_CLINKER-@CLINKER@}"
+
+CXX="${MPICH_CXX-@CXX@}"
+CCLINKER="${MPICH_CCLINKER-@CCLINKER@}"
+
+F77="${MPICH_F77-@F77@}"
+F77LINKER="${MPICH_F77LINKER-@FLINKER@}"
+FINC="@FINCARG@${includedir}"
+FFLAGS="@FFLAGS@"
+FLIB_PATH_LEADER="@FLIB_PATH_LEADER@"
+FLIB_LIST="@FLIB_LIST@"
+F77LINKERDYNAMICOPTS="@F77LINKERDYNAMICOPTS@"
+F77LINKERSTATICOPTS="@F77LINKERSTATICOPTS@"
+
+F90="${MPICH_F90-@F90@}"
+F90LINKER="${MPICH_F90LINKER-@F90LINKER@}"
+F90INC="@F90INC@"
+F90MODINC="@F90MODINC@"
+F90FLAGS="@F90FLAGS@"
+F90LIB_PATH="@FLIB_PATH_LEADER@$libdir"
+
+UseSharedLib="@UseSharedLibs@"
+SHAREDKIND="@SHAREDKIND@"
+HAS_WEAK_SYMBOLS="@HAS_WEAK_SYMBOLS@"
+SHARED_LIB_SEARCH_PATH_LEADER="@SHARED_LIB_SEARCH_PATH_LEADER@"
+
+UseLibPath=0
+LIB_PATH="@LIB_PATH_LEADER@$libdir @LIB_PATH@"
+XLIB_PATH="@XLIB_PATH@"
+PAPILIB_PATH="@PAPI_PATH@/lib"
+BASE_LIB_LIST="@BASE_LIB_LIST@"
+
+cpplib="-l${MPILIBNAME}++"
+cpplibfullname="$libdir/lib${MPILIBNAME}++.a"
+CXXFLAGS="@CXXFLAGS@"
+CXXLDFLAGS="@CXXLDFLAGS@"
+LDFLAGS="@LDFLAGS@"
+CXX="${MPICH_CXX-@CXX@}"
+CCLINKER="${MPICH_CCLINKER-@CCLINKER@}"
+CCFLAGS="@CCFLAGS@"
+
+proflib="-lp${MPILIBNAME} $ROMIO_DEVPLIBS"
+proflibfullname="$libdir/libp${MPILIBNAME}.a"
+
+if [ -n "$MPIOLIBNAME" ] ; then
+    mpiolib="-l${MPIOLIBNAME}"
+fi
+
+compilemeta="@META@"
+
+if [ -n "$XLIB_PATH" ] ; then
+    LIB_PATH="$LIB_PATH -L$XLIB_PATH"
+fi
+
+if [ "$compilemeta" = "yes" ] ; then
+    compileargs="$compileargs -DMETA"
+#    linkargs="$linkargs -lpthread"
+fi
+
+if [ -z "$1" ] ; then
+    echo "No arguments specified - nothing to be done. Exiting."
+    exit 0
+fi
+
+for arg in "$@" ; do
+#    echo procssing arg $arg
+    # Special processing for -o name
+    if [ $gettinglinkarg = 1 ] ; then
+	linkargs="$linkargs $arg"
+	outputfilename="$arg"
+	gettinglinkarg=0
+	continue
+    fi
+    case "$arg" in 
+	-c)
+	# If -c is NOT specified, then we need to perform a link step.
+	allargs="$allargs $arg"
+	compileargs="$compileargs $arg"
+        # If -o was set, then we need to move the output file option
+        # to the compile line (note that this is non-standard, and should
+        # not be used in portable codes)
+        if [ $DoLink = 1 -a -n "$outputfilename" ] ; then
+	    compileargs="$compileargs -o $outputfilename"
+        fi
+	DoLink=0
+	HasDashC=1
+	;;
+        -o)
+	# Need to link
+	allargs="$allargs $arg"
+        if [ $HasDashC = 1 ] ; then
+            # Some BUT NOT ALL compilers support -o with -c.  Allow
+            # the user to make use of the feature, IF IT EXISTS.
+            compileargs="$compileargs $arg"
+        else
+	    linkargs="$linkargs $arg"
+	    
+	    if [ x"$COMPSKRIPT" = x"mpif77" ] ; then
+		compileargs="$compileargs -c"
+	    fi
+	    # Still need to add the target of the -o
+	    gettinglinkarg=1
+	    DoLink=1
+        fi
+	;;
+	-E|-M)
+	# For compilers that support -E as a way to get at the C preprocessor
+	# Also, for compilers that support -M for creating dependencies
+	allargs="$allargs $arg"
+	compileargs="$compileargs $arg"
+	DoLink=0
+	;;
+
+	-mpilog)
+	if [ $UsesPmpi = 1 ] ; then
+	    echo "Only one of -mpilog, -mpitrace, -mpianim, -mpipapi or -vampir may be used."
+	    exit 1
+	else
+	    UsesPmpi=1
+        fi
+	if [ "$NOMPE" = 0 ] ; then
+		MPILOG="-llmpi -lmpe -lX11 -lm"
+		MPICH_NO_PROF=""
+	else
+	    echo "-mpilog requires the MPE libraries"
+	fi
+	;;
+	-vampir)
+	if [ $UsesPmpi = 1 ] ; then
+	    echo "Only one of -mpilog, -mpitrace, -mpianim, -mpipapi or -vampir may be used."
+	    exit 1
+	else
+	    UsesPmpi=1
+        fi
+	if [ -z "$VAMPIR_LIB" ] ; then
+	    echo "Environment variable VAMPIR_LIB not set - can not link with VAMPIR trace library."
+	    exit 1
+	fi
+	if [ ! -r $VAMPIR_LIB/libVT.a -a ! -r $VAMPIR_LIB/libVT.so ] ; then
+	    echo "VAMPIR trace library libVT not found in $VAMPIR_LIB. Check VAMPIR_LIB env. variable."
+	    exit 1
+	fi
+	MPILOG="-L$VAMPIR_LIB -lVT"
+	MPICH_NO_PROF=""
+	;;
+	-mpitrace)
+	if [ $UsesPmpi = 1 ] ; then
+	    echo "Only one of -mpilog, -mpitrace, -mpianim, -mpipapi or -vampir may be used."
+	    exit 1
+	else
+	    UsesPmpi=1
+        fi
+	if [ "$NOMPE" = 0 ] ; then
+   	    MPILOG="-ltmpi -lm"
+	    MPICH_NO_PROF=""
+	else
+	    echo "-mpitrace requires the MPE libraries"
+	fi
+	;;
+	-mpipapi)
+	if [ -z "$PAPILIB_PATH" ] ; then
+	    echo "You need to configure with the --with-papi option to use -mpipapi"
+            exit 1
+	fi
+	if [ $UsesPmpi = 1 ] ; then
+            echo "Only one of -mpilog, -mpitrace, -mpianim, -mpipapi or -vampir may be used."
+            exit 1
+        else
+            UsesPmpi=1
+	fi
+	if [ "$NOMPE" = 0 ] ; then
+            MPILOG="-L$PAPILIB_PATH -lpapimpi -lperfometer -lpapi -lm"
+	    MPICH_NO_PROF=""
+        else
+            echo "You need to configure with the --enable-mpe option to use -mpipapi"
+        fi
+	;;	
+	-mpistat)
+	if [ $UsesPmpi = 1 ] ; then
+            echo "Only one of -mpilog, -mpitrace, -mpianim, -mpipapi or -vampir may be used."
+            exit 1
+        else
+            UsesPmpi=1
+        fi
+        if [ "$NOMPE" = 0 ] ; then
+            MPILOG="-L$PAPILIB_PATH -lstatmpi -lm"
+	    MPICH_NO_PROF=""
+        else
+            echo "You need to configure with the --enable-mpe option to use -mpistat"
+        fi
+	;;
+	-mpianim)
+	if [ $UsesPmpi = 1 ] ; then
+	    echo "Only one of -mpilog, -mpitrace, -mpianim, -mpipapi or -vampir may be used."
+	    exit 1
+	else
+	    UsesPmpi=1
+        fi
+	if [ "$NOMPE" = 0 ] ; then
+	    MPILOG="-lampi -lmpe -lX11 -lm"
+	    MPICH_NO_PROF=""
+	else
+	    echo "-mpianim requires the MPE libraries"
+	fi
+	;;
+	-echo)
+	set -x
+	;;
+	-show)
+	Show=echo
+	;;
+	-cc=*)
+	CC=`echo A$arg | sed -e 's/A-cc=//g'`
+	CLINKER="$CC"
+	;;
+	-CC=*)
+	CXX=`echo A$arg | sed -e 's/A-CC=//g'`
+	CCLINKER="$CXX"
+	;;
+	-fc=*)
+	F77=`echo A$arg | sed -e 's/A-fc=//g'`
+	F77LINKER="$F77"
+	;;
+	-f90=*)
+	F90=`echo A$arg | sed -e 's/A-f90=//g'`
+	F90LINKER="$F90"
+	;;
+	-compile_info)
+	show_compile=1
+	DoLink=0
+	Show=echo
+	;;
+	-link_info)
+	show_link=1
+	Show=echo
+	;;
+	-shlib | -mpidynamic)
+        UseSharedLib=1
+	;;
+	-noshlib | -mpistatic)
+        UseSharedLib=0
+	;;
+	-shlibpath)
+	UseLibPath=1
+	;;
+	-noshlibpath)
+	UseLibPath=0
+	;;
+	-v)
+	verbose=1
+	compileargs="$compileargs -v"
+	linkargs="$linkargs -v"
+	;;
+	-l*)
+	# This SHOULD be the -l<lib> argument.  Only for the linker
+	linkargs="$linkargs $arg"
+	allargs="$allargs $arg"
+	;;
+	-help)
+	echo "This is a program to compile or link C, C++ or Fortran programs for MPI"
+	echo "Generally, this script should be used just like the usual compiler"
+	echo "For example,"
+	echo "   $0 -c foo.c "
+	echo "and"
+	echo "   $0 -o foo foo.o"
+	echo "Combining compilation and linking in a single command"
+	echo "   $0 -o foo foo.c"
+	echo "may not work on some systems, and is not recommended."
+	echo ""
+	echo "In addition, the following special options are supported"
+	echo "    -cc=pgm    - Change the program to use to compile and link"
+        echo "                 MPI programs.  WARNING! The program that you"
+        echo "                 choose MUST be compatible with the MPICH "
+        echo "                 libraries.  If you have trouble, you should"
+        echo "                 reconfigure and rebuild MPICH, selecting"
+        echo "                 this compiler."
+	echo "    -show          - Show the commands that would be used without runnning them"
+	echo "    -compile_info  - Show how to compile a program"
+	echo "    -link_info     - Show how to link a program"
+	echo "    -mpistatic     - force linking with static versions of the MPI libraries"
+	echo "    -mpidynamic    - force linking with dynamic (shared) versions of the MPI libraries"
+	echo "                     (default if shared libs are available)"
+	echo "    -(no)shlibpath - do (not) hard-code the explicit path to the shared libraries"
+	echo "                     into the executable (default: noshlibpath)"
+	echo "    -help      - Give this help"
+	echo "    -echo      - Show exactly what this program is doing."
+	echo "                 This option should normally not be used."
+	echo ""
+	echo "Linking with special MPI wrapper libraries (only with MPE enabled):"
+	echo "    -mpilog    - Build version that generate MPE log files"
+	echo "    -mpitrace  - Build version that generates traces"
+	echo "    -mpianim   - Build version that generates real-time animation"
+	echo "    -mpipapi   - Build version for low-level performance measurement with PAPI"
+	echo "    -mpistat   - Build version that prints statistical information about"
+	echo "                 where each process has spent it's time"
+	exit 1
+	;;
+	
+	# Unrecognized args.  Because we do an eval, we need to
+	# carefully quote any args that contain quotes.
+        *\"*) 
+	qarg="'"$arg"'"
+	allargs="$allargs $qarg"
+	compileargs="$compileargs $qarg"
+	linkargs="$linkargs $qarg"
+	;;
+        *\'*) 
+	qarg='\"'"$arg"'\"'
+	allargs="$allargs $qarg"
+	compileargs="$compileargs $qarg"
+	linkargs="$linkargs $qarg"
+	;;
+        *) allargs="$allargs $arg"
+	if [ -s "$arg" ] ; then
+	    ext=`expr "$arg" : '.*\(\..*\)'`
+	    case "$COMPSKRIPT" in
+	    mpicc)
+		# some applications (i.e. GROMACS) want to use mpicc for assembly files
+		if [ "$ext" = ".c" -o "$ext" = ".s" ] ; then
+	        DoCompile=1
+	        compileargs="$compileargs $arg"
+	        fname=`basename $arg $ext`
+		linkobjs="$linkobjs $fname.o"
+		elif [ "$ext" = ".o" ] ; then
+		    if [ $HasDashC = 1 ] ; then
+			compileargs="$compileargs $arg"
+		    else
+			DoLink=1
+			linkobjs="$linkobjs $arg"
+		    fi
+		else
+		    compileargs="$compileargs $arg"
+		    linkargs="$linkargs $arg"
+		fi
+	    ;;
+	    mpiCC)
+		if [ "$ext" = ".C" -o "$ext" = ".cxx" -o "$ext" = ".cpp" -o \
+		    "$ext" = ".cc" -o "$ext" = ".c" -o "$ext" = ".CC" ] ; then
+	        DoCompile=1
+	        compileargs="$compileargs $arg"
+	        fname=`basename $arg $ext`
+		linkobjs="$linkobjs $fname.o"
+		elif [ "$ext" = ".o" ] ; then
+		    if [ $HasDashC = 1 ] ; then
+			compileargs="$compileargs $arg"
+		    else
+			DoLink=1
+			linkobjs="$linkobjs $arg"
+		    fi
+		else
+		    compileargs="$compileargs $arg"
+		    linkargs="$linkargs $arg"
+		fi
+	    ;;
+	    mpif77 | mpif90)
+		if [ "$ext" = ".f" -o "$ext" = ".F" -o "$ext" = ".f90" -o \
+		    "$ext" = ".for" -o "$ext" = ".FOR" ] ; then
+		    DoCompile=1
+		    compileargs="$compileargs $arg"
+		    fname=`basename $arg $ext`
+	            linkobjs="$linkobjs $fname.o"
+		elif [ "$ext" = ".o" ] ; then
+		    if [ $HasDashC = 1 ] ; then
+			compileargs="$compileargs $arg"
+		    else
+			DoLink=1
+			linkobjs="$linkobjs $arg"
+		    fi
+		else
+		    compileargs="$compileargs $arg"
+		    linkargs="$linkargs $arg"
+		fi
+	    ;;
+	    esac	    
+	else
+            compileargs="$compileargs $arg"
+	    linkargs="$linkargs $arg"
+	fi
+	;;
+    esac
+done
+
+if [ $UsesPmpi = 1 ] ; then
+  if [ x"$COMPSKRIPT" = x"mpif77" ] ; then
+	MPILOG="-lf${MPILIBNAME} $MPILOG"
+   fi
+fi

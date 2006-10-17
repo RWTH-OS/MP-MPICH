@@ -1,0 +1,165 @@
+ALL: default
+##### User configurable options #####
+
+MPIR_HOME    := @MPIR_HOME@
+CC           := @MPICC@
+CLINKER      := @MPICC@
+CCC          := @MPICPLUSPLUS@
+CCLINKER     := $(CCC)
+F77          := @MPIF77@
+FLINKER      := @MPIF77@
+OPTFLAGS     := @OPTFLAGS@
+MPIFDEP      := @MPIFDEP@
+MAKE         := @MAKE@
+### End User configurable options ###
+
+SHELL := /bin/sh
+prefix     := @prefix@
+top_srcdir := @top_srcdir@
+srcdir     := @srcdir@
+@VPATH@
+
+PROFLIB :=
+CFLAGS  := @CFLAGS@ @DEFS@
+CCFLAGS := $(CFLAGS)
+FFLAGS := @FFLAGS@
+# Use LIBS to add any special libraries for C programs
+LIBS := @LIB_PATH@ @LIB_LIST@
+# Use FLIBS to add any special libraries for Fortran programs
+FLIBS := @FLIB_PATH@ @LIB_LIST@
+CEXECS := coll1 coll2 coll3 coll4 coll5 coll6 coll7 coll8 coll9 \
+	coll10 coll11 coll12 coll13 bcastbug bcastbug2 grouptest redtst \
+	barrier bcast allred allred_prod allred2 allgather \
+	scatterv redscat alltoallv  shortint \
+	allredmany longuser scattern bcastvec scantst \
+	reduce scatter alltoall allgatherv  nbcoll
+ifeq (@HAS_FORTRAN@,1)
+	FEXECS := allredf assocf bcastlog allgatherf bcast2
+else
+	FEXECS :=
+endif
+EXECS := $(CEXECS) $(FEXECS)
+
+default: $(EXECS)
+
+#
+# Note that runtests builds the executables as required
+testing: 
+	-./runtests $(TESTARGS)
+
+linktest: default clean
+
+all: testing
+
+coll1: coll1.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o coll1 coll1.o test.o $(LIBS)
+coll2: coll2.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o coll2 coll2.o test.o $(LIBS)
+coll3: coll3.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o coll3 coll3.o test.o $(LIBS)
+coll4: coll4.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o coll4 coll4.o test.o $(LIBS)
+coll5: coll5.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o coll5 coll5.o test.o $(LIBS)
+coll6: coll6.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o coll6 coll6.o test.o $(LIBS)
+coll7: coll7.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o coll7 coll7.o test.o $(LIBS)
+coll8: coll8.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o coll8 coll8.o test.o $(LIBS)
+coll9: coll9.o test.o 
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o coll9 coll9.o test.o $(LIBS)
+coll10: coll10.o test.o 
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o coll10 coll10.o test.o $(LIBS)
+coll11: coll11.o test.o 
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o coll11 coll11.o test.o $(LIBS)
+coll12: coll12.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o coll12 coll12.o test.o $(LIBS)
+coll13: coll13.o 
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o coll13 coll13.o $(LIBS)
+allredmany: allredmany.o 
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o allredmany allredmany.o $(LIBS)
+bcastbug2: bcastbug2.o test.o 
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o bcastbug2 bcastbug2.o test.o $(LIBS)
+bcastbug: bcastbug.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o bcastbug bcastbug.o test.o $(LIBS)
+bcastvec: bcastvec.o test.o 
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o bcastvec bcastvec.o test.o $(LIBS)
+bcastlog: $(MPIFDEP) bcastlog.o
+	$(FLINKER) $(OPTFLAGS) -o ./bcastlog bcastlog.o $(FLIBS)
+grouptest: grouptest.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o grouptest grouptest.o test.o $(LIBS)
+redtst: redtst.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o redtst redtst.o test.o $(LIBS)
+barrier: barrier.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o barrier barrier.o test.o $(LIBS)
+bcast: bcast.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o bcast bcast.o test.o $(LIBS)
+allred: allred.o ../pt2pt/gcomm.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS) -lm
+allred_prod: allred_prod.o ../pt2pt/gcomm.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS) -lm
+scatterv: scatterv.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o scatterv scatterv.o $(LIBS) -lm
+scatter: scatter.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o scatter scatter.o $(LIBS)
+scattern: scattern.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o scattern scattern.o $(LIBS) -lm
+redscat: redscat.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o redscat redscat.o $(LIBS) -lm
+alltoallv: alltoallv.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o alltoallv alltoallv.o test.o $(LIBS)
+alltoall: alltoall.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o alltoall alltoall.o test.o $(LIBS)
+allgather: allgather.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o allgather allgather.o test.o $(LIBS)
+allgatherv: allgatherv.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o allgatherv allgatherv.o test.o $(LIBS)
+scantst: scantst.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o scantst scantst.o test.o $(LIBS)
+shortint: shortint.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o shortint shortint.o test.o $(LIBS)
+
+allredf: $(MPIFDEP) allredf.o
+	$(FLINKER) $(OPTFLAGS) -o allredf allredf.o $(FLIBS)
+
+assocf: $(MPIFDEP) assocf.o 
+	$(FLINKER) $(OPTFLAGS) -o assocf assocf.o $(FLIBS)
+
+allgatherf: $(MPIFDEP) allgatherf.o
+	$(FLINKER) $(OPTFLAGS) -o allgatherf allgatherf.o $(FLIBS)
+
+bcast2: $(MPIFDEP) bcast2.o
+	$(FLINKER) $(OPTFLAGS) -o bcast2 bcast2.o $(FLIBS)
+
+longuser: longuser.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o longuser longuser.o $(LIBS)
+nbcoll: nbcoll.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o nbcoll nbcoll.o test.o $(LIBS)
+
+reduce: reduce.o reduce_defops.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+../pt2pt/gcomm.o:
+	(cd ../pt2pt ; $(MAKE) gcomm.o )
+../pt2pt/dtypes.o:
+	(cd ../pt2pt ; $(MAKE) dtypes.o )
+
+#mpif.h: $(MPIR_HOME)/include/mpif.h
+#	if test \! -f mpif.h ; then \
+#	    /bin/rm -f mpif.h ; \
+#	    ln -s $(MPIR_HOME)/include/mpif.h . ; \
+#	fi
+clean:
+	@-rm -f *.o *~ PI* $(EXECS) core *.out coll.diff *.trace mpif.h \
+		work.pc work.pcl ${srcdir}/*.o *.stdo
+
+distclean: clean
+	@-rm -f Makefile runtests
+
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+.c:
+	$(CC) $(CFLAGS) -o $@ $< $(LIBS)
+.f.o:
+	$(F77) $(FFLAGS) $(OPTFLAGS) -c $<

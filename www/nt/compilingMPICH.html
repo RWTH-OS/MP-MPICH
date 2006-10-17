@@ -1,0 +1,76 @@
+<html>
+
+<head>
+<title></title>
+</head>
+
+<body>
+
+<p><a href="../index.html">main</a></p>
+
+<p>::BUILDING MPICH </p>
+
+<p>You must have MS Visual C++ 6 and Compaq(Digital) Visual Fortran 6 in order to build
+without any modifications.</p>
+
+<p>Load the workspace in Visual C++ IDE and select build=&gt;batch build=&gt;rebuild all.
+You will see an error at link time for the first couple of projects because they require
+&nbsp; mpich_fortran.lib which hasn't been built yet.&nbsp; Either build
+nt_fortran first or
+re-link the first couple of projects after nt_fortran has been built.</p>
+
+<p>There are several workspaces available: 
+
+<ul>
+  <li><strong>mpich.dsw</strong> <ul>
+      <li>Contains projects to compile all the flavors of mpich </li>
+      <ul>
+        <li><strong>nt_fortran</strong> contains a couple Fortran calls and is used by all the other
+          projects if you build the Fortran interface. </li>
+        <li><strong>nt_tcp_shm</strong> is the&nbsp;tcp and shared memory device. </li>
+        <li><strong>pnt_tcp_shm</strong> contains the PMPI_*&nbsp;functions for the nt_tcp_shm
+          device. </li>
+        <li><strong>nt_ipvishm</strong> is the shared memory, via, tcp device. </li>
+        <li><strong>pnt_ipvishm</strong> contains the PMPI_* functions of the nt_ipvishm device.</li>
+        <li><strong>mpichdbs</strong> contains the database server code to be used with custom job
+          launchers (including by hand from a terminal).</li>
+      </ul>
+      <li>If you have a FORTRAN compiler other than Digital Visual Fortran you will have to make
+        some code changes.&nbsp; You will have to change farg.f in the nt_fortran project to use
+        the corresponding &quot;getarg&quot; and &quot;nargs&quot; calls provided by your compiler
+        and set the USE lines to the appropriate modules. You will also have to delete the
+        nt_fortran project and create a new one with the same source files so that the compiler
+        settings are changed to reflect your Fortran compiler.</li>
+      <li>If you do not have a FORTRAN compiler you will have to alter the compiler settings in
+        order to compile mpich. <ul>
+          <li>You need to define MPID_NO_FORTRAN for all the projects.&nbsp; </li>
+          <li>Remove mpich_fortran.lib from the link command. </li>
+          <li>Project=&gt;Settings=&gt;C/C++=&gt;Preprocessor=&gt;Preprocessor Definitions: add
+            MPID_NO_FORTRAN </li>
+          <li>Project=&gt;Settings=&gt;Link=&gt;Object/Library Modules: remove mpich_fortran.lib </li>
+          <li>Don't compile the nt_fortran project if you don't have a FORTRAN compiler.<br>
+            &nbsp; </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>mpid\nt_server\remoteshell\<strong>remoteshell.dsw</strong> <ul>
+      <li>Contains projects to build the DCOM launcher. Only the Debug and ReleaseMinDependency
+        versions have been tested. The UNICODE versions may not work.
+      </li>
+      <li>Compile MPIRun, RemoteShellServer, MPIConfig and MPIRegister.
+      </li>
+    </ul>
+  </li>
+  <li>mpid\nt_server\simplelauncher\<strong>simplelauncher.dsw</strong></li>
+  <ul>
+    <li>Contains the simple tcp insecure socket based launcher.&nbsp; This launcher is provided
+      for trial users or systems that won't work with the DCOM launcher.</li>
+  </ul>
+</ul>
+
+<p><a href="../index.html">main</a><br>
+<a href="compiling.html">Compiling an MPI application</a><br>
+</p>
+</body>
+</html>

@@ -1,0 +1,101 @@
+ALL: default
+##### User configurable options #####
+
+ARCH        := @ARCH@
+META        := @META@
+MPIR_HOME   := @MPIR_HOME@
+CC          := @CC@
+CLINKER     := $(CC)
+CXX         := @CXX@
+CCLINKER    := $(CXX)
+F77         := @F77@
+FLINKER     := $(F77)
+AR          := @AR@
+RANLIB      := @RANLIB@
+PROFILING   := $(PMPILIB)
+OPTFLAGS    := @OPTFLAGS@
+MPE_GRAPH   := @MPE_GRAPHICS@
+DEVICE      := @DEVICE@
+
+### End User configurable options ###
+SHELL := /bin/sh
+
+# We're not ready to do contrib by default yet; 
+SUBDIRS := test perftest basic
+TESTDIRS := test
+EXECS := sendchar
+
+ifeq ($(META),yes)
+SUBDIRS += meta
+endif
+
+default: subdirs
+
+subdirs:
+	@echo "#* Building examples"
+	@for dir in $(SUBDIRS) ;\
+		do \
+			echo " " ;\
+			echo "   directory $$dir" ;\
+			(cd $$dir; $(MAKE)) ;\
+		done
+	@if [ -d io ] ; then \
+		echo " " ;\
+		echo "   directory io";\
+		(cd io; $(MAKE)) ;\
+	fi
+
+testing:
+	@echo "#* Running tests"
+	@for dir in $(TESTDIRS) ;\
+		do \
+			if [ ! -d $$dir -o ! -s $$dir/Makefile ] ; then \
+				continue ; fi ; \
+			echo " " ;\
+			echo "   testing in directory $$dir" ;\
+			(cd $$dir; $(MAKE) testing) ;\
+		done
+	@if [ -d io ] ; then \
+		echo " " ;\
+		echo "   testing in directory io" ;\
+		(cd io; $(MAKE) testing) ;\
+	fi
+
+linktest:
+	@echo "#* Testing linking"
+	@for dir in $(SUBDIRS) ;\
+		do \
+			if [ ! -d $$dir -o ! -s $$dir/Makefile ] ; then \
+				continue ; fi ; \
+			echo " " ;\
+			echo "   testing linking in directory $$dir" ;\
+			(cd $$dir; $(MAKE) linktest) ;\
+		done
+
+all: subdirs testing
+
+clean:
+	@echo "" ;
+	@echo "*# cleaning examples & testsuite" ;
+	@rm -f $(EXECS) *.o
+	@for dir in $(SUBDIRS) ;\
+		do \
+			if [ ! -d $$dir -o ! -s $$dir/Makefile ] ; then \
+				continue ; fi ; \
+			echo "   cleaning directory $$dir" ;\
+			(cd $$dir; $(MAKE) clean) ;\
+		done
+	@if [ -d io/Makefile ] ; then \
+		echo " " ;\
+		echo "   cleaning in directory io" ;\
+		(cd io; $(MAKE) clean) ;\
+	fi
+
+distclean: clean
+	@for dir in $(SUBDIRS) ;\
+		do \
+			if [ ! -d $$dir -o ! -s $$dir/Makefile ] ; then \
+				continue ; fi ; \
+			$(MAKE) -C $$dir distclean ;\
+		done
+	@rm -f io Makefile

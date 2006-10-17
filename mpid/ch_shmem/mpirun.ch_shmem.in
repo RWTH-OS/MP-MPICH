@@ -1,0 +1,152 @@
+#! /bin/sh
+#
+# mpirun.smi for starting MPI applications on a SHARED MEMORY SYSTEM
+#
+
+# function definitions
+nbr() { echo $#;}
+
+firsthost() { echo $1;}
+
+# ch_shmem device
+#
+
+# tell the world who I am
+if [ $mpirun_verbose -gt 1 ] ; then
+    echo "*** This is mpirun.ch_shmem running on `hostname`"
+fi
+
+exitstatus=1
+# Pass to mpirun that this is a shared memory device.  Since there
+# may be several, try using the default value.
+# This may not be what we want....
+MPIRUN_DEVICE=$default_device
+export MPIRUN_DEVICE
+#
+#
+# Handle debuggers
+#
+#startpgm="eval"
+
+if [ -n "$ld_lib_path" ] ; then
+    export LD_LIBRARY_PATH="$ld_lib_path"
+fi
+
+if [ `nbr $nodes` -gt 1 ] ; then
+    echo "*** mpirun.ch_shmem"
+    echo "    WARNING: launching all $np processes on host `firsthost $nodes`"
+fi
+
+# get number of ch_shmem-device as specified in mpichconf.h and add
+# according usedevice-switch to command line
+device_nbr=`cat $includedir/mpichconf.h | grep DEVICE_ch_shmem_nbr | awk  '{ print $3 }'`
+
+# if cmdLineArgs already contain --, we get rid of it first, to not have it twice
+# this happens when using the meta device
+tmpLineArgs=""
+for c in $cmdLineArgs ; do
+  if [ "$c" != '"--"' ] ; then
+     tmpLineArgs="$tmpLineArgs $c"
+  fi
+done
+
+cmdLineArgs=$tmpLineArgs
+
+# save user and meta args
+usermetaArgs=$cmdLineArgs
+
+cmdLineArgs="-usedevice $device_nbr"
+
+# number of processes to start
+cmdLineArgs="$cmdLineArgs -n $np"
+
+# end of device args
+cmdLineArgs="$cmdLineArgs -- $usermetaArgs"
+
+startpgm="$progname $cmdLineArgs"
+
+if [ "$debugger" != "" ] ; then
+    if [ "$debugger" = "totalview" ] ; then
+        if [ "$TOTALVIEW" = "" ] ; then
+	   TOTALVIEW="totalview"
+        fi
+        # We need to put -mpichtv into an environment variable
+        startpgm="$TOTALVIEW $progname -a $cmdLineArgs -mpichtv"
+    else
+	# There should be a way to specify a debugger startup method, for
+        # special vendor-specific debuggers (like SGI's cvd) etc.
+	# gdb or dbx-like debuggers
+        dbgfile=$PWD_TRIAL/PId$$
+        echo "Test" > $dbgfile
+        if [ -s $dbgfile ] ; then
+	    rm -f $dbgfile
+        else
+            dbgfile=$HOME/PId$$
+        fi
+        # If gdb has an equivalent, the documentation is well hidden.
+        #  - .gdbinit - and the documentation IS well hidden.  Fortunately,
+        # the .gbdinit file is read; gdb provides the -nx (instead of -x)
+        # command if you don't want to read the default init file.
+        if [ "$debugger" = "dbx" -a -r $HOME/.dbxinit ] ; then
+	    cat $HOME/.dbxinit > $dbgfile
+        fi
+        # Regretably, xxgdb does NOT provide this argument (even though it
+        # claims to).
+    #    if [ "$debugger" = "xxgdb" -a -r $HOME/.gdbinit ] ; then
+    #	cat $HOME/.gdbini > $dbgfile
+    #    fi
+        # handle USR1 pass for gdb; add an initial break 
+        if [ "$debugger" = "gdb" -o "$debugger" = "xxgdb" -o \
+	     "$debugger" = "ddd" ] ; then
+	    echo "handle SIGUSR1 nostop pass" >> $dbgfile
+	    echo "br MPI_Init" >> $dbgfile
+	    #echo "set args $cmdLineArgs -np $np" >> $dbgfile
+	    echo "set args $cmdLineArgs" >> $dbgfile
+	    echo "run" >> $dbgfile
+        else 
+            echo "ignore USR1" >> $dbgfile
+            # This may not work, depending on when the symbol table is read.
+            # An alternative is to use the startup file to load the 
+            # program with "debug $progname" ,followed with this, followed
+	    # with run command args.
+	    echo "debug $progname" >> $dbgfile
+   	    echo "stop in MPI_Init" >> $dbgfile
+#	    echo "run $cmdLineArgs -np $np" >> $dbgfile
+	    echo "run $cmdLineArgs" >> $dbgfile
+        fi
+    #	cat >> $dbgfile <<.
+    ## Use this command to start your programm:
+    #run  $cmdLineArgs -p4pg $p4pgfile
+    #.
+	    commandfile=`echo $commandfile | sed -e s@%f@$dbgfile@g`
+	    startpgm="$debugger $commandfile $progname"
+    fi
+fi
+
+#
+# Build a suitable command for the whole thing
+#
+if [ $just_testing = 1 ] ; then
+  doitall="echo"
+else
+  doitall="eval"
+fi
+
+# it's either echo or eval and in the latter case we just omit it
+if [ "${Show}" != "echo" ] ; then
+    Show=""
+fi
+
+#
+# Execute the program on another host? (if '-nodes host' is given)
+#
+if [ `nbr $nodes` -gt 0 ] ; then
+    if [ $mpirun_verbose -gt 0 ] ; then
+	echo "*** mpirun.ch_shmem: launching the processes on host `firsthost $nodes`"
+    fi
+    startpgm="$rshcmd `firsthost $nodes` \"$startpgm\" "
+fi
+
+$doitall $startpgm
+exitstatus=$?
+exit $exitstatus

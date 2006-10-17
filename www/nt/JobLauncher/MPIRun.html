@@ -1,0 +1,126 @@
+<html>
+
+<head>
+<title></title>
+</head>
+
+<body>
+
+<p><a href="../index.html">main</a></p>
+
+<p>::RUNNING MPICH APPLICATIONS: </p>
+
+<p>Use MPIRun.exe to launch the application. It is in the [MPICH Home]\bin directory. </p>
+
+<p>Usage: 
+
+<ul>
+  <li><font face="Courier">MPIRun configfile [args ...]</font></li>
+  <li><font face="Courier">MPIRun -np #processes [-push] [-env
+    &quot;var1=val1|var2=val2...&quot;] executable [args ...]</font></li>
+  <li><font face="Courier">MPIRun -localonly #processes&nbsp; [-env
+    &quot;var1=val1|var2=val2...&quot;] executable [args ...]</font> </li>
+</ul>
+
+<p>The&nbsp;preferred format is &quot;MPIRun myapp.cfg&quot; where the config file
+determines the executable and hosts to launch on. </p>
+
+<p><big>Configuration files</big>.</p>
+
+<p>The config file format is as follows: </p>
+
+<blockquote style="MARGIN-RIGHT: 0px">
+  <font face="Courier"><pre>
+[opt push]
+exe c:\somepath\myapp.exe
+ OR \\host\share\somepath\myapp.exe
+[args arg1 arg2 arg3 ...]
+[env VAR1=VAL1|VAR2=VAL2|...|VARn=VALn]
+hosts
+hostA #procs
+hostB #procs
+hostC #procs
+...
+</pre>
+  </font>
+</blockquote>
+
+<p>Bracketed lines are optional. The # character will comment out a line</p>
+
+<p>Here is a sample configuration file:</p>
+
+<blockquote style="MARGIN-RIGHT: 0px">
+  <font face="Courier"><pre>
+opt push
+exe c:\temp\mandel.exe
+env MINX=0|MAXX=2|MINY=0|MAXY=2
+args -i c:\temp\cool.points
+hosts
+fry 2
+#light 2
+jazz 1
+</pre>
+  </font>
+</blockquote>
+
+<p>I provided a sample application and config file for you to try. 
+
+<ul>
+  <li>Unzip mandel.exe, mandel.cfg and cool.points from the distribution. </li>
+  <li>Then modify mandel.cfg to match the machines you want to launch on and the location of
+    mandel.exe. Then you can run it two ways: <ul>
+      <li>MPIRun mandel.cfg </li>
+      <li>MPIRun mandel.cfg -i cool.points </li>
+    </ul>
+  </li>
+</ul>
+
+<p><big>Username and Password</big></p>
+
+<p>When you run an application, MPIRun will prompt you for an account and password to
+launch the processes as. You can avoid this prompt by running MPIRegister. MPIRegister
+will encrypt an account and password to the registry for the current user only. Then when
+you use MPIRun it won't prompt you for a user and password. MPIRegister -remove will
+delete this information from the registry. </p>
+
+<p><big>Command line options for MPIRun</big></p>
+
+<p><strong>-np #procs</strong></p>
+
+<p>Launch #procs, starting on the current machine and then one on each of the rest of the
+machines specified at install time until #procs are launched.&nbsp; This mechanism loops
+if more processes are specified than there are machines available.</p>
+
+<p><strong>-push </strong></p>
+
+<p>The push option copies the executable to a temporary file on each node, executes it,
+and then deletes the file after the process has terminated. If this option is not
+specified then the path to the executable must be the&nbsp;valid on all the nodes.&nbsp;
+Note: The launcher cannot resolve network drives.&nbsp; The executable must reside on the
+local file system of each node or be reachable by a network share
+(\\host\share\mpiapp.exe).</p>
+
+<p><strong>-localonly #procs</strong></p>
+
+<p>This runs the application on the local machine using the shared memory device.</p>
+
+<p><strong>-localonly #procs -tcp</strong></p>
+
+<p>Add the -tcp switch to force the use of sockets instead of shared memory</p>
+
+<p><strong>-env&nbsp;var1=val1|var2=val2|var3=val3|...varn=valn</strong></p>
+
+<p>This will set the environment variables specified in the string before each process is
+launched.&nbsp; Remember to quote the string so the command prompt doesn't interpret the
+vertical bar as a pipe command.</p>
+
+<p><a href="../index.html">main</a><br>
+<a href="install.html">Installation</a><br>
+<a href="compiling.html">Compiling an MPI application</a><br>
+MPIRun <br>
+<a href="compilingMPICH.html">Re-Building MPICH.NT</a><br>
+<a href="MPILauncher.html">Launcher</a><br>
+<a href="noLauncher.html">Running applications without using the launcher</a><br>
+<a href="subtle.html">Subtle configuration options</a> </p>
+</body>
+</html>

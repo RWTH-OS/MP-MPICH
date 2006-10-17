@@ -1,0 +1,66 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cart", "cart.vcproj", "{95F9E068-884D-4D53-955A-38AC792AB4FB}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cart1f", "cart1f.vcproj", "{C6434733-B7FF-4D06-BF9F-CA64AEE1AFA1}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cart2", "cart2.vcproj", "{58DC4E06-D236-428C-93BB-4E0C90DCA4B5}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cart2f", "cart2f.vcproj", "{5D6E423F-EE14-4829-AD91-82AC1FB4679E}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cartf", "cartf.vcproj", "{7997242D-23A4-4571-885C-39BA29147044}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cartmap", "cartmap.vcproj", "{B43FEAE1-BB8D-4E4E-8ABB-0993C1C7DB15}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cartorder", "cartorder.vcproj", "{BFF85CCB-446C-4A84-9940-D432CA511B76}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "graphtest", "graphtest.vcproj", "{41163FFF-B01D-4855-8062-93EED90B1624}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "twod", "twod.vcproj", "{5D245CCA-2DCC-42A0-B18C-E3C1CCA8B064}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{95F9E068-884D-4D53-955A-38AC792AB4FB}.Release.ActiveCfg = Release|Win32
+		{95F9E068-884D-4D53-955A-38AC792AB4FB}.Release.Build.0 = Release|Win32
+		{C6434733-B7FF-4D06-BF9F-CA64AEE1AFA1}.Release.ActiveCfg = Release|Win32
+		{C6434733-B7FF-4D06-BF9F-CA64AEE1AFA1}.Release.Build.0 = Release|Win32
+		{58DC4E06-D236-428C-93BB-4E0C90DCA4B5}.Release.ActiveCfg = Release|Win32
+		{58DC4E06-D236-428C-93BB-4E0C90DCA4B5}.Release.Build.0 = Release|Win32
+		{5D6E423F-EE14-4829-AD91-82AC1FB4679E}.Release.ActiveCfg = Release|Win32
+		{5D6E423F-EE14-4829-AD91-82AC1FB4679E}.Release.Build.0 = Release|Win32
+		{7997242D-23A4-4571-885C-39BA29147044}.Release.ActiveCfg = Release|Win32
+		{7997242D-23A4-4571-885C-39BA29147044}.Release.Build.0 = Release|Win32
+		{B43FEAE1-BB8D-4E4E-8ABB-0993C1C7DB15}.Release.ActiveCfg = Release|Win32
+		{B43FEAE1-BB8D-4E4E-8ABB-0993C1C7DB15}.Release.Build.0 = Release|Win32
+		{BFF85CCB-446C-4A84-9940-D432CA511B76}.Release.ActiveCfg = Release|Win32
+		{BFF85CCB-446C-4A84-9940-D432CA511B76}.Release.Build.0 = Release|Win32
+		{41163FFF-B01D-4855-8062-93EED90B1624}.Release.ActiveCfg = Release|Win32
+		{41163FFF-B01D-4855-8062-93EED90B1624}.Release.Build.0 = Release|Win32
+		{5D245CCA-2DCC-42A0-B18C-E3C1CCA8B064}.Release.ActiveCfg = Release|Win32
+		{5D245CCA-2DCC-42A0-B18C-E3C1CCA8B064}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

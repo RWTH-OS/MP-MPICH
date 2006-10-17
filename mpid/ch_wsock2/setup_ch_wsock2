@@ -1,0 +1,49 @@
+#!/bin/sh
+# $Id$
+#
+# ch_wsock2 setup
+
+echo $ac_n "checking for nt2unix""... $ac_c"
+if [ $ARCH = "LINUX" ] ; then
+    echo "currently no nt2unix library exists for $ARCH"
+    echo "ask mp-mpich@lfbs.rwth-aachen.de if this has changed"
+    echo "Cannot build ch_wsock2 device"
+    exit 1
+fi
+
+# find nt2unix directory
+if test ! -n "$NT2UNIXDIR" ; then
+  # use default directory if no --with-nt2unix option was given
+  if test -d "/usr/local/nt2unix" ; then
+    NT2UNIXDIR="/usr/local/nt2unix"
+  elif test -d ${HOME}/nt2unix ; then
+    NT2UNIXDIR="${HOME}/nt2unix"
+  fi
+fi
+
+if test ! -d "$NT2UNIXDIR" ; then
+  echo "nt2unix directory $NT2UNIXDIR not found"
+  echo "cannot build ch_wsock2 device"
+  exit 1
+elif test ! -f "$NT2UNIXDIR/libnt2unix.a" -a ! -f "$NT2UNIXDIR/libnt2unix.so" ; then
+  echo "nt2unix library libnt2unix[.a|.so] not found in  $NT2UNIXDIR"
+  echo "cannot build ch_wsock2 device"
+  exit 1
+elif ! test -f  "$NT2UNIXDIR/nt2unix.h" ; then
+  echo "nt2unix header nt2unix.h not found in  $NT2UNIXDIR"
+  echo "cannot build ch_wsock2 device"
+  exit 1
+else
+  echo "$ac_t""yes"
+fi
+
+LIB_LIST="${LIB_LIST} -lnt2unix -socket -lnsl"
+LIB_PATH="${LIB_PATH} -L${NT2UNIXDIR}"
+
+DEV_DEFS="${DEV_DEFS} -DWSOCK2"
+CFLAGS="$CFLAGS -D_REENTRANT"
+# is it necessary to include this in mpichconf, too ?
+test -n "$verbose" && \
+echo "	configured wsock2 with nt2unix in ${NT2UNIXDIR}"
+
+DEFAULT_MACHINE="wsock2"

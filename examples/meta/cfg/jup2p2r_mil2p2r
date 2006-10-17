@@ -1,0 +1,9 @@
+NUMHOSTS 2
+jupiter 2
+milliways 2
+jupiter milliways 1 -
+134.130.62.63 134.130.62.95
+milliways jupiter 1 -
+134.130.62.95 134.130.62.63
+
+

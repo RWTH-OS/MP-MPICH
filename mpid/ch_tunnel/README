@@ -1,0 +1,4 @@
+This device is tunnel device which can be used to 
+insert a MPI-message from another host (MPP) into
+the local host. This device should be used only by 
+the routing-process.

@@ -1,0 +1,72 @@
+ALL: default
+##### User configurable options #####
+
+MPIR_HOME   := @MPIR_HOME@
+CC          := @MPICC@
+CLINKER     := @MPICC@
+CCC         := @MPICPLUSPLUS@
+CCLINKER    := $(CCC)
+F77         := @MPIF77@
+FLINKER     := @MPIF77@
+OPTFLAGS    := @OPTFLAGS@
+MPIFDEP     := @MPIFDEP@
+CFLAGS      := @CFLAGS@
+### End User configurable options ###
+
+SHELL := /bin/sh
+
+PROFLIB :=
+#CFLAGS  := $(CFLAGS) 
+CCFLAGS := $(CFLAGS)
+FFLAGS  := $(OPTFLAGS)
+#OPTFLAGS := $(OPTFLAGS) $(CFLAGS)
+# Use LIBS to add any special libraries for C programs
+LIBS := 
+# Use FLIBS to add any special libraries for Fortran programs
+FLIBS := 
+OBJECTS := metabench.o setuptest.o star.o bcast.o allgather.o
+MLB_OBJECTS := MLB_run.o MLB_calc.o MLB_comm.o MLB_topol.o MLB_common.o
+EXECS := metabench setuptest star bcast allgather MLB
+OTHEREXECS :=
+
+default: $(EXECS)
+
+all: $(EXECS)
+
+allgather: allgathermain.o allgather.o
+	$(CLINKER) $(OPTFLAGS) -o allgather allgathermain.o allgather.o $(LIBS)
+
+bcast: bcastmain.o bcast.o
+	$(CLINKER) $(OPTFLAGS) -o bcast bcastmain.o bcast.o $(LIBS)
+
+star: starmain.o star.o
+	$(CLINKER) $(OPTFLAGS) -o star starmain.o star.o $(LIBS)
+
+setuptest: setuptestmain.o setuptest.o
+	$(CLINKER) $(OPTFLAGS) -o setuptest setuptestmain.o setuptest.o $(LIBS)
+
+metabench: $(OBJECTS)
+	$(CLINKER) $(OPTFLAGS) -o metabench metabench.o setuptest.o star.o bcast.o allgather.o $(LIBS)
+
+MLB: $(MLB_OBJECTS)
+	$(CLINKER) $(OPTFLAGS) -o MLB MLB_run.o MLB_calc.o MLB_comm.o MLB_topol.o MLB_common.o $(LIBS)
+#
+# Make sure that we remove executables for specific architectures
+clean:
+	@rm -f *.o *~ PI* $(EXECS) *.out core pt2pt.diff $(OTHEREXECS) \
+		*.trace rdb.* startup.* 
+	@for file in $(EXECS) ; do \
+	   rm -f $$file.sun4 $$file.alpha $$file.IRIX $$file.freebsd ;\
+	done
+
+distclean: clean
+	@rm -f Makefile
+
+.c.o:
+	$(CC) $(CFLAGS) $(OPTFLAGS) -c $*.c
+.f.o:
+	$(F77) $(FFLAGS) -c $*.f
+
+# This is MPICH specific
+#$(MPIR_HOME)/util/mpirun:
+#	(cd $(MPIR_HOME) ; $(MAKE) mpirun )

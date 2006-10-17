@@ -1,0 +1,97 @@
+##### User configurable options #####
+# This is an example Makefile to build the examples inside an _installed_ mpich
+# dir.
+
+prefix      = @prefix@
+exec_prefix = @exec_prefix@
+bindir      = @bindir@
+CC          = $(bindir)/mpicc
+CLINKER     = $(CC)
+CFLAGS      = @CFLAGS@
+
+buildcpp    = @buildcpp@
+CXX         = $(bindir)/mpiCC
+CXXLINKER   = $(CXX)
+
+SYSF77       = @F77@
+F77         = $(bindir)/mpif77
+FLINKER     = $(F77)
+FFLAGS      = @FFLAGS@
+
+F90         = $(bindir)/mpif90
+F90LINKER   = $(F90)
+F90SUFFIX   = @F90SUFFIX@
+F90MODINC   = @F90MODINC@
+
+OPTFLAGS    = @OPTFLAGS@
+MAKE        = @MAKE@
+SHELL       = @SHELL@
+LN_S        = @LN_S@
+
+ROMIO   = @ROMIO@
+NOMPE   = @NOMPE@
+EXECS   = cpi cpip cpilog cpiwithlog pi3 pi3p pi3f90 simpleio hello++
+
+default: cpi pi3 cpip pi3p
+
+# pi3f90 also wants an MPI module.  If modules not supported, don't
+# try to build pi3f90
+all: cpi cpip cpilog cpiwithlog
+	if [ "$(ROMIO)" = 1 -a -s simpleio.c ] ; then $(MAKE) simpleio ; fi
+	if [ "$(buildcpp)" = 1 ] ; then $(MAKE) hello++ ; fi
+	if [ "x$(SYSF77)" != "x" ] ; then \
+		$(MAKE) pi3 ; \
+		$(MAKE) pi3p; \
+	fi
+	if [ "$(NOMPE)" = 0 ] ; then $(MAKE) cpilog ; fi
+	if [ "$(F90)" != "false" -a -n "$(F90)" -a -n "$(F90MODINC)" ] ; then \
+		$(MAKE) pi3f90 ; fi
+
+cpi: cpi.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o cpi cpi.o -lm
+cpip: cpip.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o cpip cpip.o -lm
+
+cpilog: cpilog.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o cpilog cpilog.o -lmpe -lm -lX11
+
+# This uses MPICH's -mpilog option to the mpicc command to add the automatic
+# logging interface.
+cpiwithlog: cpi.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o cpiwithlog cpi.o -mpilog -lm
+
+pi3: pi3.o
+	$(FLINKER) $(FFLAGS) $(OPTFLAGS) -o pi3 pi3.o
+pi3p: pi3p.o
+	$(FLINKER) $(FFLAGS) $(OPTFLAGS) -o pi3p pi3p.o
+
+# Some Fortran 90 compilers do not accept a .f90 suffix (xlf90 for one)
+pi3f90.o: pi3f90.$(F90SUFFIX)
+	$(F90) $(FFLAGS) -c pi3f90.$(F90SUFFIX)
+pi3f90: pi3f90.o
+	$(F90LINKER) $(FFLAGS) $(OPTFLAGS) -o pi3f90 pi3f90.o
+pi3f90.f: pi3f90.f90
+	$(LN_S) $< $@
+
+# Here are the rules for the optional package examples (ROMIO/C++)
+simpleio: simpleio.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o simpleio simpleio.o
+hello++: hello++.o
+	$(CXXLINKER) $(CFLAGS) $(OPTFLAGS) -o hello++ hello++.o
+
+# The Solaris C++ compiler creates a directory containing miscellaneous
+# data.  The action is not documented in the Solaris CC man pages
+# We also remove any copy of pi3f90 that is created (e.g., pi3f90.f; pi3f90.f90
+# is the master file)
+clean:
+	rm -rf *.o *~ PI* $(EXECS) SunWS_cache pi3f90.f pi3p
+
+.c.o:
+	$(CC) $(CFLAGS) $(OPTFLAGS) -c $<
+.cc.o:
+	$(CXX) $(CFLAGS) $(OPTFLAGS) -c $<
+.f.o:
+	$(F77) $(FFLAGS) $(OPTFLAGS) -c $<
+.f90.o:
+	$(F90) $(FFLAGS) $(OPTFLAGS) -c $<
+.SUFFIXES: .f90 .cc

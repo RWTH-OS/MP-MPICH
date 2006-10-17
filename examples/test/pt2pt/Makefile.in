@@ -1,0 +1,422 @@
+ALL: default
+##### User configurable options #####
+
+MPIR_HOME    := @MPIR_HOME@
+CC           := @MPICC@
+CLINKER      := @MPICC@
+CCC          := @MPICPLUSPLUS@
+CCLINKER     := $(CCC)
+F77          := @MPIF77@
+F90BASE	     := @MPIF90BASE@
+F90          := @MPIF90@
+FLINKER      := @MPIF77@
+OPTFLAGS     := @OPTFLAGS@
+MPIFDEP      := @MPIFDEP@
+F77_OPTFLAGS := @F77_EXTRA_FLAG@
+### End User configurable options ###
+
+SHELL := /bin/sh
+prefix     := @prefix@
+top_srcdir := @top_srcdir@
+srcdir     := @srcdir@
+@VPATH@
+
+PROFLIB :=
+CFLAGS  := @CFLAGS@ @DEFS@ $(OPTFLAGS)
+CCFLAGS := $(CFLAGS)
+FFLAGS := $(OPTFLAGS)
+# Use LIBS to add any special libraries for C programs
+LIBS := @LIB_PATH@ @LIB_LIST@
+# Use FLIBS to add any special libraries for Fortran programs
+FLIBS := @FLIB_PATH@ @LIB_LIST@
+EXECS := overtake simplesend sendrecv isndrcv isndrcv2 third fourth fifth sixth \
+	hvectest hvectest2 hvec probe probe1 testtest1 ssendtest ssendtest2 \
+	typetest dtypelife issendtest issend2 issendinit relrank nullproc trunc \
+	truncmult typeub typeub2 typeub3 irecvtest htmsg nullproc2 isendtest \
+	self sendrecv2 sendrecv3 sendrecv4 persistent waitany pack bsendtest \
+	typebase irsend irsendinit longmsgs waitall waitall2 testsome getelm \
+	testall sndrcv nbtest nblock sendmany sendmany2 sendmany4 order \
+	hindexed commit cancel persist typecreate reqcreate sndrcvrep flood \
+	flood2 flood3 persist2 dataalign dtyperecv reqfree sndrcvrpl2 cancel2 \
+	cancel3 cancelmessages cancelibm cancelissend sendorder exittest \
+	selfvsworld waitall3 waitall4 typelb structlb outstanding pingping \
+	pingpingsync pingpong systest1 testtypes waitall_test
+
+OTHEREXECS := secondf allpair systest send1 allpair2 structf typebasef \
+		sendfort isendf pingpongf
+default: $(EXECS)
+
+#
+# Note that runtests builds the executables as required
+testing: 
+	  -./runtests $(TESTARGS)
+
+# We want the link tests to be noisier about problems
+# If we have compiled dynamic libraries, we explicitly test static linking
+linktest_f:
+	@-$(MAKE) secondf
+	@if [ ! -x secondf ] ; then \
+	    echo "Could not link a Fortran program with MPI libraries" ; \
+	    exit 1 ; \
+	else \
+	    echo "Linking Fortran MPI programs works." ; \
+	fi
+	$(MAKE) clean
+
+linktest_f_static:
+	@-$(MAKE) secondf_static
+	@if [ ! -x secondf ] ; then \
+	    echo "Could not link a Fortran program with static MPI libraries" ; \
+	else \
+	    echo "Statically linking Fortran MPI programs works." ; \
+	fi
+	$(MAKE) clean
+
+linktest_c: 
+	@-$(MAKE) overtake
+	@if [ ! -x overtake ] ; then \
+	    echo "Could not link a C program with MPI libraries" ; \
+	    exit 1 ; \
+	else \
+	    echo "Linking C MPI programs works." ; \
+	fi
+	@$(MAKE) clean
+
+linktest_c_static: 
+	@-$(MAKE) overtake_static
+	@if [ ! -x overtake ] ; then \
+	   echo "Could not link a C program with static MPI libraries" ; \
+	else \
+	    echo "Statically linking C MPI programs works." ; \
+	fi
+	@$(MAKE) clean
+
+all: testing
+
+fortran_tests: secondf allpair allpair2 structf typebasef send1 pingpongf \
+	sendfort
+
+#f90_tests: secondf90 allpair90 allpair290 structf90 typebasef90 send190 \
+#	pingpong90
+
+overtake: overtake.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+overtake_static: overtake.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -mpistatic -o $@ $^ $(LIBS)
+
+bsendtest: bsendtest.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+simplesend: simplesend.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+relrank: relrank.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+sendrecv: sendrecv.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+persistent: persistent.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+flood: flood.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+flood2: flood2.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+flood3: flood3.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+persist: persist.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+persist2: persist2.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+sendrecv2: sendrecv2.o dtypes.o gcomm.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+sendrecv3: sendrecv3.o dtypes.o gcomm.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+sendrecv4: sendrecv4.o dtypes.o gcomm.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+irsend: irsend.o dtypes.o gcomm.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+irsendinit: irsendinit.o dtypes.o gcomm.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+longmsgs: longmsgs.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+testsome: testsome.o dtypes.o gcomm.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+testall: testall.o dtypes.o gcomm.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+sndrcv: sndrcv.o dtypes.o gcomm.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+sndrcvrep: sndrcvrep.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+sndrcvrpl2: sndrcvrpl2.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+getelm: getelm.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+self: self.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+typeub: typeub.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+typeub2: typeub2.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+typeub3: typeub3.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+typecreate: typecreate.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+reqcreate: reqcreate.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+reqfree: reqfree.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+isndrcv: isndrcv.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+isndrcv2: isndrcv2.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+nullproc: nullproc.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+nullproc2: nullproc2.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+trunc: trunc.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+truncmult: truncmult.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+typetest: typetest.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+typebase: typebase.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+ssendtest: ssendtest.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+ssendtest2: ssendtest2.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+issendtest: issendtest.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+issend2: issend2.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+issendinit: issendinit.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+testtypes: testtypes.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+dataalign: dataalign.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+dtyperecv: dtyperecv.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+dtypelife: dtypelife.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+htmsg: htmsg.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+isendtest: isendtest.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+third: third.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+fourth: fourth.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+fifth: fifth.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+sixth: sixth.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+probe: probe.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+nblock: nblock.o 
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+sendmany: sendmany.o 
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+sendmany2: sendmany2.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+sendmany4: sendmany4.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+order: order.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+pack: pack.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+probe1: probe1.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+testtest1: testtest1.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+hvectest: hvectest.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+hvectest2: hvectest2.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+hvec: hvec.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+hindexed: hindexed.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+irecvtest: irecvtest.o test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+nbtest: nbtest.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+waitany: waitany.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+waitall: waitall.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+waitall2: waitall2.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+waitall3: waitall3.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+waitall4: waitall4.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+commit: commit.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+cancel: cancel.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+cancel2: cancel2.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+cancel3: cancel3.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+cancelmessages: cancelmessages.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+cancelibm: cancelibm.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+cancelissend: cancelissend.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+sendorder: sendorder.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+exittest: exittest.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+selfvsworld: selfvsworld.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+outstanding: outstanding.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+pingping: pingping.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+pingpingsync: pingpingsync.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+pingpong: pingpong.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+systest1: systest1.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+waitall_test: waitall_test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+# This has a test for HAS_FORTRAN so that the link test target will work
+# even when -nof77 is selected.
+secondf: $(MPIFDEP) secondf.o
+	if test "@HAS_FORTRAN@" = 1 ; then \
+	$(FLINKER) $(OPTFLAGS) -o $@ $^ $(FLIBS) ; fi
+
+secondf_static: $(MPIFDEP) secondf.o
+	if test "@HAS_FORTRAN@" = 1 ; then \
+	$(FLINKER) $(OPTFLAGS) -mpistatic -o $@ $^ $(FLIBS) ; fi
+
+allpair: $(MPIFDEP) allpair.o
+	$(FLINKER) $(OPTFLAGS) -o $@ $^ $(FLIBS)
+
+allpair2: $(MPIFDEP) allpair2.o
+	$(FLINKER) $(OPTFLAGS) -o $@ $^ $(FLIBS)
+
+structf: $(MPIFDEP) structf.o
+	$(FLINKER) $(OPTFLAGS) -o $@ $^ $(FLIBS)
+
+send1: $(MPIFDEP) send1.o
+	$(FLINKER) $(OPTFLAGS) -o $@ $^ $(FLIBS)
+
+isendf: $(MPIFDEP) isendf.o
+	$(FLINKER) $(OPTFLAGS) -o $@ $^ $(FLIBS)
+
+sendfort: $(MPIFDEP) sendfort.o
+	$(FLINKER) $(OPTFLAGS) -o $@ $^ $(FLIBS)
+
+pingpongf: $(MPIFDEP) pingpongf.o
+	$(FLINKER) $(OPTFLAGS) -o $@ $^ $(FLIBS)
+
+typebasef: $(MPIFDEP) typebasef.o
+	$(FLINKER) $(OPTFLAGS) -o $@ $^ $(FLIBS)
+
+#
+# Make sure that we remove executables for specific architectures
+clean:
+	-rm -f *.o *~ PI* $(EXECS) *.out core pt2pt.diff $(OTHEREXECS) \
+		*.trace rdb.* startup.* mpif.h *.stdo \
+		work.pc work.pcl
+	-for file in $(EXECS); do \
+	   rm -f $$file.sun4 $$file.alpha $$file.IRIX $$file.freebsd ;\
+	done
+
+distclean: clean
+	-rm -f Makefile runtests
+
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+.f.o:
+	$(F77) $(FFLAGS) $(F77_OPTFLAGS) -c $<

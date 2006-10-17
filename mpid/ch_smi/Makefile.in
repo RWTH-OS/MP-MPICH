@@ -1,0 +1,184 @@
+#
+#  $Id$
+#
+#
+##### User configurable options #####
+
+DEVICE       := ch_smi
+ARCH         := @ARCH@
+MPIR_HOME    := @MPIR_HOME@
+SMI_HOME     := @MPIR_HOME@/mpid/$(DEVICE)/SMI
+# Dirty hack until we fully switch to libtool
+SMILIB       := ${SMI_HOME}/lib/.libs/libcsmi.a
+CC           := @CC@
+AR           := @AR@
+RANLIB       := @RANLIB@
+OPTFLAGS     := @OPTFLAGS@
+SHELL        := /bin/sh
+ASMFILES_O   := @ASMFILES_O@
+prefix       := @prefix@
+top_srcdir   := @top_srcdir@
+srcdir       := @srcdir@
+libbuild_dir := @libbuild_dir@
+
+INCLUDE_DIR  := -I${top_srcdir}/include -I${top_srcdir}/src/coll \
+		-I${top_srcdir}/mpid/util \
+		-I${top_srcdir}/mpid -I${top_srcdir}/mpid/$(DEVICE) \
+		-I${SMI_HOME}/include
+UseSharedLibs := @UseSharedLibs@
+### End User configurable options ###
+
+@VPATH@
+
+ALL: default
+
+LIBNAME  := ${libbuild_dir}/lib$(DEVICE).a
+
+CFLAGS   := @CFLAGS@ $(INCLUDE_DIR) $(OPTFLAGS) @OPTFLAGSC@ \
+	   -DMPI_@ARCH@ -DMPID_DEVICE_CODE @GETNAME_DEFS@ @DEVCFLAGS@ @DEV_DEFS@ @DEFS@ \
+           -DMPI_SMI
+
+CFLAGSNOOPT   := @CFLAGS@ $(INCLUDE_DIR) \
+		-DMPI_@ARCH@ -DMPID_DEVICE_CODE @GETNAME_DEFS@ @DEVCFLAGS@ @DEV_DEFS@ @DEFS@
+
+DEVSOURCE := smidebug.c smichkdev.c smiregionmngmt.c smidelayedos.c \
+		smiinit.c smishort.c smieager.c smirndv.c smiarndv.c smipriv.c \
+		smiself.c smistat.c smicancel.c smiseager.c smideager.c smireduce.c \
+		smibrndv.c sminbrndv.c smicoll.c smibcast.c smialltoall.c smicheck.c \
+		smipersistent.c smimmu.c smimutex.c \
+		get_contig.c getsametype.c job.c put_contig.c putsametype.c \
+		remote_handler.c smirhcv.c sside_memcpy.c ssidesetup.c uniqta \
+		smiwincreate.c smiwinfree.c winincr.c smiwinlock.c winsync.c \
+		smipackdtype.c sendrecvstubs.c \
+	        direct_ff.c smidelayedos.c smigather.c smiscatter.c
+
+ifeq ($(ARCH), LINUX_ALPHA)
+DEVSOURCE += alpha_memcpy.c
+endif
+
+DEVOBJECTS := smidebug.o smichkdev.o smiregionmngmt.o smidelayedos.o \
+		smiinit.o smishort.o smieager.o smirndv.o smiarndv.o \
+		smipriv.o smiself.o smistat.o smicancel.o smialltoall.o \
+		smiseager.o smideager.o smibrndv.o sminbrndv.o smireduce.o \
+		smicoll.o smibcast.o smicheck.o smipersistent.o smimmu.o smimutex.o\
+		get_contig.o getsametype.o job.o put_contig.o putsametype.o \
+		remote_handler.o smirhcv.o sside_memcpy.o ssidesetup.o uniqtag.o\
+		smiwincreate.o smiwinfree.o winincr.o smiwinlock.o winsync.o \
+		smipackdtype.o sendrecvstubs.o direct_ff.o smigather.o smiscatter.o \
+	        @DEVOFILES@ $(ASMFILES_O) 
+
+ifeq ($(ARCH), LINUX_ALPHA)
+DEVOBJECTS += alpha_memcpy.o
+endif
+
+DEVHEADERS := adi2config.h dev.h mpid.h mpid_threads.h req.h comm.h datatype.h \
+	     chhetero.h attach.h objtrace.h smistat.h \
+	     calltrace.h cookie.h mpid_bind.h reqalloc.h tr2.h smimem.h mpimem.h \
+	     flow.h smidev.h smidef.h smipackets.h smisync.h sbcnst2.h \
+	     queue.h smicoll.h mmu.h mutex.h maprank.h job.h remote_handler.h \
+	     sside_memcpy.h ssidesetup.h uniqtag.h sside_macros.h \
+	     packdtype.h hash.h fifo.h stack.h smipackdtype.h sendrecvstubs.h \
+	     smieager.h smirndv.h smiperf.h smitypes.h \
+	     adi3types.h sside_protocol.h mpid_common.h mpid_debug.h
+
+default: $(LIBNAME)
+	cd ${SMI_HOME}; $(MAKE)
+	@if /usr/bin/test $(SMILIB) -nt $(LIBNAME) ; then \
+		rm -rf smi.obj; mkdir smi.obj ; cd smi.obj ; \
+		ar x ${SMILIB}; $(AR) $(LIBNAME) *.o ; cd ..; rm -rf smi.obj; \
+	fi
+	$(RANLIB) $(LIBNAME)
+
+$(LIBNAME): $(DEVOBJECTS)
+	$(AR) $@ $?
+	$(RANLIB) $@
+
+$(DEVOBJECTS): $(DEVHEADERS)
+
+# smipriv.c is sensitive to memory access ordering.  Despite the use
+# of VOLATILE statements, some compilers may be over-aggressive when
+# compiling this file. 
+# 
+# We tested optimized compilation of smipriv.c with gcc-2.95.2 (-O3)
+# and it worked fine, reducing the lateny about 0,4us. Therefore, 
+# smipriv is compiled *with* optimization by default. If you expirience
+# problems, try to compile smipriv.c without optimization by un-commenting
+# the lines below.
+#
+#smipriv.o: smipriv.c
+#	$(CC) $(CFLAGSNOOPT) -c smipriv.c
+#
+# Eventually, we suspected some compilers to mess up the checksum functions, although
+# this shouldnt really happen. Problems with this would show up as deadlocks,
+# corrupt data or internal aborts - everything you like... But very unlikely, again.
+#smicheck.o: smicheck.c
+#	$(CC) $(CFLAGSNOOPT) -c smicheck.c
+
+# this file can only be compiled with Gnu cc due to inline assembly
+#sci_memcpy.o: sci_memcpy.c
+#	gcc -c $(CFLAGSNOOPT) $(BASEOPT) sci_memcpy.c
+
+# this is a tool that is useful if launching the processes manually using the
+# -f option. It returns the SCI-id of the first SCI-PCI adapter board
+sciid:	sciid.c
+	$(CC) $(CFLAGS) sciid.c -o sciid
+
+# default_all is the same as default, but without the RANLIB.  This
+# can speed up the build (ranlibs can take a LONG time).  profile_all 
+# is the same, but for the profile library
+default_all: setlinks default_files
+default_files: default
+profile_all: $(LIBNAME)
+
+$(SMILIB):
+	@echo "building SMI in directory ${SMI_HOME}"
+	@cd ${SMI_HOME}; $(MAKE)
+
+# these lib-targets are for faster builds during development
+sharedlib: default
+	@cd ${MPIR_HOME}; $(MAKE) ${libbuild_dir}/shared/lib$(DEVICE).so
+
+staticlib: default
+	@cd ${MPIR_HOME}; $(MAKE) staticlibs
+
+libs: staticlib sharedlib
+
+distclean: clean
+	@for file in ${DEVHEADERS} ${DEVSOURCE} ; do  \
+	    if [ -h $$file ] ; then \
+	        rm -f $$file ; fi \
+	done
+	@if [ -d p2ptest -a -s p2ptest/Makefile ] ; then \
+	    rm -f p2ptest/Makefile ; fi
+	@cd ${SMI_HOME}; $(MAKE) distclean
+	@rm -f Makefile smi_conf.h
+
+libclean: clean
+	rm -f $(LIBNAME)
+
+devclean:
+	@rm -f *~ $(DEVOBJECTS) mprerr.o
+
+clean: devclean
+	@cd ${SMI_HOME}; $(MAKE) clean
+
+setlinks:
+	@for file in $(DEVHEADERS) $(DEVSOURCE) ; do  \
+	    if [ ! -s $$file -a -s ../lfbs_common/$$file ] ; then \
+	 	ln -s ${top_srcdir}/mpid/lfbs_common/$$file $$file ; fi ; \
+	    if [ ! -s $$file -a -s ${top_srcdir}/mpid/ch2/$$file ] ; then \
+	 	ln -s ${top_srcdir}/mpid/ch2/$$file $$file ; fi ; \
+	    if [ ! -s $$file -a -s ${top_srcdir}/mpid/util/$$file ] ; then \
+		ln -s ${top_srcdir}/mpid/util/$$file $$file ; fi ; \
+	done
+
+.c.o:
+	$(CC) $(CFLAGS) -c $< -o $@ $(MPI_PROFILE)
+
+.s.o:
+	as $< -o $@
+
+lint:
+	lint -chvuz -I../.. -I../../include -I../ch2 -I./ \
+	-DMPID_DEVICE_CODE $(SOURCE) $(LIBDEVSOURCE) ../util/queue.c ../util/cmnargs.c
+

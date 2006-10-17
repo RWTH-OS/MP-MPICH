@@ -1,0 +1,26 @@
+CC          = @CC@
+AR          = @AR@
+LIBNAME     = @LIBNAME@
+srcdir      = @srcdir@
+
+INCLUDE_DIR = -I@MPI_INCLUDE_DIR@ -I${srcdir}/../include -I../include
+CFLAGS      = @CFLAGS@ $(INCLUDE_DIR)
+
+@VPATH@
+
+AD_PVFS2_OBJECTS = ad_pvfs2_close.o ad_pvfs2_read.o ad_pvfs2_rdcoll.o \
+      ad_pvfs2_wrcoll.o ad_pvfs2_open.o ad_pvfs2_write.o ad_pvfs2_done.o \
+      ad_pvfs2_fcntl.o ad_pvfs2_iread.o ad_pvfs2_iwrite.o ad_pvfs2_wait.o \
+      ad_pvfs2_flush.o ad_pvfs2_resize.o ad_pvfs2_hints.o \
+      ad_pvfs2_delete.o ad_pvfs2.o ad_pvfs2_common.o
+
+default: $(LIBNAME)
+
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+
+$(LIBNAME): $(AD_PVFS2_OBJECTS)
+	$(AR) $(LIBNAME) $(AD_PVFS2_OBJECTS)
+
+clean:
+	@rm -f *.o

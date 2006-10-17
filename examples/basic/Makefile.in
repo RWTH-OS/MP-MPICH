@@ -1,0 +1,118 @@
+ALL: default
+##### User configurable options #####
+
+SHELL       := /bin/sh
+ARCH        := @ARCH@
+MPIR_HOME   := @MPIR_HOME@
+CC          := @MPICC@
+CLINKER     := $(CC)
+F77         := @MPIF77@
+FLINKER     := $(F77)
+F90         := @MPIF90@
+F90LINKER   := $(F90)
+CCC         := @MPICPLUSPLUS@
+CCLINKER    := $(CCC)
+AR          := @AR@
+RANLIB      := @RANLIB@
+LOG_LIB     := -mpilog -lm
+PROF_LIB    := -lmpe -L@XLIB_PATH@ -lX11 -lm
+OPTFLAGS    := @OPTFLAGS@
+MPE_DIR     := @MPE_DIR@
+#
+srcdir := @srcdir@
+
+@VPATH@
+### End User configurable options ###
+.SUFFIXES:	.cc .C .f90
+
+CFLAGS    := @CFLAGS@ $(OPTFLAGS)
+CFLAGSMPE := $(CFLAGS) -I$(MPE_DIR)
+CCFLAGS	  := $(CFLAGS)
+#FFLAGS	  := '-qdpc=e'
+FFLAGS    := @FFLAGS@ $(OPTFLAGS)
+LIBS      := 
+EXECS     := cpi systest srtest
+ALL_EXECS := $(EXECS) fpi cpilog cpi_autolog hello++ iotest piff90 
+
+all: cpi systest srtest fpi cpilog hello++ iotest pi3f90 
+
+#
+# The cp for pi3f90 is needed because different Fortran 90 compilers
+# accept *different* suffixes.
+# pi3f90 also wants an MPI module.  If modules not supported, don't
+# try to build pi3f90
+default: $(EXECS)
+	@if [ "@ROMIO@" = 1 -a -s iotest.c ] ; then $(MAKE) iotest ; fi
+	@if [ "@buildcpp@" = 1 ] ; then $(MAKE) hello++ ; fi
+	@if test "x$(MPIF77)" != "x" ; then $(MAKE) fpi ; fi
+	@if [ "@NOMPE@" = 0 ] ; then $(MAKE) cpilog ; fi
+	@if [ "@NOMPE@" = 0 ] ; then $(MAKE) cpi_autolog ; fi
+	@if [ "@F90@" != "false" -o "@f90nag@" = 1 ] ; then \
+	    if [ ! -s pi3f90.@F90SUFFIX@ ] ; then \
+		cp ${srcdir}/pi3f90.f90 pi3f90.@F90SUFFIX@ ; fi ; \
+	    $(MAKE) pi3f90 ; fi
+
+
+fpi: fpi.o 
+	$(FLINKER) $(OPTFLAGS) -o fpi fpi.o
+
+# Some Fortran 90 compilers do not accept a .f90 suffix (xlf90 for one)
+pi3f90.o: pi3f90.@F90SUFFIX@
+	$(F90) $(FFLAGS) -c $<
+pi3f90: pi3f90.o
+	$(F90LINKER) $(OPTFLAGS) -o pi3f90 pi3f90.o
+
+cpi: cpi.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o cpi cpi.o -lm $(LIBS)
+
+cpi_autolog: cpi.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o cpi_autolog cpi.o -mpilog $(LIBS)
+
+cpilog: cpilog.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o cpilog cpilog.o $(PROF_LIB) $(LIBS)
+
+srtest: srtest.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o srtest srtest.o -lm $(LIBS)
+
+systest: systest.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o systest systest.o -lm $(LIBS)
+
+iotest: iotest.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o iotest iotest.o -lm $(LIBS)
+
+hello++: hello++.o
+	$(CCLINKER) hello++.o -o hello++ $(LIBS)
+
+unsafe: unsafe.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o unsafe unsafe.o $(LIBS)
+# Intel Fortran (ifc) creates work.*; pgCC creates .ti and .ii files
+clean:
+	rm -f work.pc work.pcl *.o *~ PI* $(ALL_EXECS) upshot rdb.* \
+		startup.* core hello++.ti hello++.ii
+
+distclean: clean
+	@rm -f Makefile
+
+cpilog.o: cpilog.c
+	@if test -z "$(MPE_DIR)" ; then \
+	    echo "Can only build cpilog if MPE libraries built" ; \
+	    echo "Use -mpe to configure to have the MPE libraries built" ; \
+	    exit 1 ; \
+	fi
+	$(CC) $(CFLAGSMPE) -c ${srcdir}/cpilog.c
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+.f.o:
+	$(F77) $(FFLAGS) -c $<
+.cc.o:
+	$(CCC) -c $<
+.C.o:
+	$(CCC) -c $<
+.f90.o:
+	$(F90) -c $<
+.f:
+	$(F77) -c $<
+	$(FLINKER) -o $* $*.o
+.c:	
+	$(CC) -c $<
+	$(CLINKER) -o $* $*.o

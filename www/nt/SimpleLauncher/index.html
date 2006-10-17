@@ -1,0 +1,32 @@
+<html>
+
+<head>
+<title></title>
+</head>
+
+<body>
+
+<p><big><big><big>MPICH Simple Launcher</big></big></big></p>
+
+<p>This is a simple socket based launcher used to start mpich applications.&nbsp; It is
+not secure and it does not impersonate the client user when launching processes.&nbsp; It
+does not require special privileges to be installed.&nbsp; The reason this launcher is
+provided is so that users who want to evaluate the software can install an run mpich
+applications easily, without requiring administrator privileges to install.</p>
+
+<p>There are two parts to the launcher:
+
+<ol>
+  <li><a href="mpichsh.html">MPICHSH.exe</a></li>
+  <li><a href="mpirun.html">MPIRun.exe</a></li>
+</ol>
+
+<p>MPICHSH.exe is the server which resides on each host in the cluster.</p>
+
+<p>MPIRun.exe is the application launcher which connects to the servers and launches the
+mpich application.</p>
+
+<p>Note: The MPICH runtime dlls must be installed on each node before an MPICH application
+can be launched.</p>
+</body>
+</html>

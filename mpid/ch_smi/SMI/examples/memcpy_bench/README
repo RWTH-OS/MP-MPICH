@@ -1,0 +1,96 @@
+MemcpyBench for Benchmarking SMI_Memcpy and SMI_Imemcpy
+
+Passed Args:
+
+-t <int>
+-n <int>
+-s <int>
+-i <int>
+-e <int>
+-c <check_type>
+-l
+-b 
+-a 
+-q 
+-w 
+-r 
+-f
+-o
+
+-t <int>
+This option is used to set the Number of threads to the specified int-Value. At
+least one Thread is required. Please note, that each thread requires its own
+SCI-memory-space => more sci-space required
+
+
+-n <int>
+
+This options sets up the number of Retries for the first test-size. It is
+decreased debending on the increase-type of the size. 
+
+
+-s <int>
+
+This options is used to set the size of the first transfer.
+
+
+-i <int>
+
+This option sets the increasement of the size. By default size is doubled each
+time. If -i is specified the increase is addet to size each time. 
+
+
+-e <int>
+
+This option specifies the size of the last transfer.
+
+
+-c <check_type>			This option specifies special check-types:
+
+	nocheck			No check at all (default, recommendet for Performance
+				maximum tests)
+
+	smi_only		Enable the SMI-Transmission errordetect Feature	. But do
+				not verify if mechanism really works
+
+	verify_unchecked	Really verify (by comparing src and dst) if transfer was 
+				correct. The SMI-Transmission errordetect Feature is not 
+				enabled
+
+	verify_checked		Really verify (by comparing src and dst) if transfer was 
+				correct. The SMI-Transmission errordetect Feature is
+				enabled. So you can check if it really works.	
+
+	verify_details		like verify_unchecked but print the differenced between
+				src an dst on screen
+
+	fail_counters		make a real errorcount and an detect errorcount to
+				check the errordetect feature (less or more alarms then
+				really needed)
+
+-l	Perform a local benchmark between private and local SCI-memory
+
+-b	Make benchmarks on 2 Nodes in both directions at the same time. If -l is
+	Specified All nodes perform local benchmarks...
+
+-a	Test asynchronos Transfer (SMI_Imemcpy). If not specified the default
+	SMI_Memcpy will be tested
+ 
+-q	Enqueue DMA-transfer
+
+-w	Write to Remote Node. If -l option is specified, write private to local	
+	SCI-memory. This option is default
+ 
+-r	Transfer goes opposite direction than if -w is specified.
+
+-f	Force DMA-transfer, even if transfer-size is to small to be recognized als
+	efficient by SMI-Imemcpy. This option only works if -a is specified also
+
+-o	Use the original Order of the machines file (MPI_order)
+        SMI will not reorder procoecess. So you can specify which machines to transmit where to 
+	exactly 
+       
+The Benchmark has to be run with an even number of processes. If more then 2
+Processes are used, memcpy_bench makes groups of 2 processes benchmarking transfer to each 
+other. If you realy want to bring your SCI-network to the limit, try using all
+nodes and specify -b option. 

@@ -1,0 +1,2 @@
+/* $Id$ */ 
+void battery( void );

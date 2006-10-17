@@ -1,0 +1,25 @@
+/*
+    $Id: r_mpe.acf,v 1.6 2000/11/14 08:57:31 karsten Exp $
+*/
+[explicit_handle]
+interface R_MPE
+{
+[comm_status, fault_status] Ping();
+[comm_status, fault_status] R_Create_window();
+[comm_status, fault_status] R_Connect_window();
+[comm_status, fault_status] R_Draw();
+[comm_status, fault_status] R_Draw_string();
+[comm_status, fault_status] R_Close_window();
+[comm_status, fault_status] R_Draw_logic();
+[comm_status, fault_status] R_Line_thickness();
+[comm_status, fault_status] R_Draw_dashes();
+[comm_status, fault_status] R_Dash_offset();
+[comm_status, fault_status] R_Set_colortable();
+[comm_status, fault_status] R_Add_color();
+[comm_status, fault_status] R_Get_DIB();
+[comm_status, fault_status] R_Save_bitmap();
+[comm_status, fault_status] R_Get_mouse_press();
+[comm_status, fault_status] R_Iget_mouse_press();
+[comm_status, fault_status] R_Get_drag_region();
+}  
+

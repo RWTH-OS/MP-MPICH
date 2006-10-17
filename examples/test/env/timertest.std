@@ -1,0 +1,3 @@
+Two successive calls to MPI_Wtime gave:
+Five approximations to one second:
+MPI_Wtick gave: 

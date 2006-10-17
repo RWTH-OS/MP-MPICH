@@ -1,0 +1,10 @@
+
+
+LIBRARY      "rcluma.cpl"
+
+
+EXPORTS
+    ; Explicit exports can go here
+
+CPlApplet
+

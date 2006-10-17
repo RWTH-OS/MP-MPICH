@@ -1,0 +1,62 @@
+<html>
+
+<head>
+<title>F:\MPICH\www\nt\via\index.html</title>
+</head>
+
+<body>
+
+<p><a href="../index.html">main</a></p>
+
+<p>::VIA MPICH APPLICATIONS: </p>
+
+<p>Currently, the via device is specific to Giganet hardware.&nbsp; In order to use it you
+must add an environment variable, MPICH_VI_CLICKS, to the job configuration file detailing
+which processes can communicate to which others by VI connections.&nbsp; This is done by
+adding a via click definition to the env line.&nbsp; Everyone in a click can communicate
+directly with everyone else in a click.</p>
+
+<p><font face="Courier">CLICK := ( LIST ) | PREDEFINED</font><br>
+<font face="Courier">PREDEFINED := *</font><br>
+<font face="Courier">LIST := NUMBER | LIST, NUMBER | RANGE | LIST, RANGE</font><br>
+<font face="Courier">RANGE := NUMBER..NUMBER</font><br>
+<font face="Courier">NUMBER := 0 to NPROC-1 where NPROC is the number of processes in the
+job</font></p>
+
+<p>The following are valid clicks:</p>
+
+<p>*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;= everyone can
+reach everyone else<br>
+(0..3,5)<br>
+(1,3,5,7..10)<br>
+(4)<br>
+(0..5,2..8,10)</p>
+
+<p>A typical job configuration file for MPIRun.exe would look like:</p>
+
+<p><font face="Courier">exe c:\temp\slave.exe</font> <br>
+<font face="Courier">env MPICH_VI_CLICKS=*</font> <br>
+<font face="Courier">hosts</font> <br>
+<font face="Courier">hostA c:\temp\master.exe</font> <br>
+<font face="Courier">hostB</font> <br>
+<font face="Courier">hostC 2</font></p>
+
+<p>or</p>
+
+<p><font face="Courier">exe c:\temp\slave.exe</font> <br>
+<font face="Courier">env MPICH_VI_CLICKS=(1..3)</font> <br>
+<font face="Courier">hosts</font> <br>
+<font face="Courier">hostA c:\temp\master.exe</font> <br>
+<font face="Courier">hostB</font> <br>
+<font face="Courier">hostC 2</font></p>
+
+<p>The second example shows a run where the slave processes can communicate with each
+other by VI but must use tcp to reach the master.</p>
+
+<p>From the command line a typical run would look like this:</p>
+
+<p><font face="Courier">mpirun -np 4 -env &quot;MPICH_VI_CLICKS=*&quot; myapp.exe</font></p>
+
+<p><a href="../index.html">main</a></p>
+</body>
+</html>

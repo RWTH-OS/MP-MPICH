@@ -1,0 +1,10 @@
+- BUG: mpirun -v -np 4 -meta stug_2p1r_wikkit_2p1r.cfg flood with ch_smi and SMI configured for SMP only:
+  shutdown doesn't work, processes continue to run and never leave MPI_FInalize(). This doesn't happen always.   It seems that one router proc doesn't get ROUTCMD_FINALIZE.
+- document MPI_Cancel() in Meta-MPICH with better source code comments and a description of how it works in
+  gatewaycancel.c
+- MPI_Ssend() via Meta-MPICH doesn't work correctly because call to MPI_Ssend() returns even if matching
+  receive has not been posted
+- try to improve pingpong performance with implementation of custom rndv protocol
+- metapars is not being built automatically
+- multithreaded router doesn`t work on solaris/sparc/ch_shmem
+  

@@ -1,0 +1,29 @@
+//file: cluma.acf
+[explicit_handle]
+/*[implicit_handle (handle_t cluma_IfHandle)]*/
+interface cluma
+{
+ [comm_status, fault_status] Ping();
+ [comm_status, fault_status] R_GetLockStatus();
+ [comm_status, fault_status] R_LockServer();
+ [comm_status, fault_status] R_UnlockServer();
+ [comm_status, fault_status] R_GetConsoleUser();
+ [comm_status, fault_status] R_GetUserData();
+ [comm_status, fault_status] R_CreateProcess();
+ [comm_status, fault_status] R_TerminateProcess();
+ [comm_status, fault_status] R_GetClientName();
+ [comm_status, fault_status] R_GetSystemInfo();
+ [comm_status, fault_status] R_GetProcs();
+ [comm_status, fault_status] R_ProcEnumCallback();
+ [comm_status, fault_status] R_KillProcess();
+ [comm_status, fault_status] R_ShutDown();
+ [comm_status, fault_status] R_Transfer();
+ /*
+ [comm_status, fault_status] R_AscertainProcessorUtilization();
+ [comm_status, fault_status] R_OpenSystemQuery();
+ [comm_status, fault_status] R_OpenProcessQuery();
+ [comm_status, fault_status] R_GetSpecifiedSystemData();
+ [comm_status, fault_status] R_GetProcesslist();
+ [comm_status, fault_status] R_GetProcessData();
+ */
+}
