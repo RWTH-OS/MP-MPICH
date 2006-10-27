@@ -24,7 +24,7 @@ int main( int argc, char *argv[])
     fprintf(stderr,"Process %d on %s\n",
 	    myid, processor_name);
 
-    n = 0;
+    n = 100;
     while (!done)
     {
         if (myid == 0)
@@ -33,7 +33,7 @@ int main( int argc, char *argv[])
             printf("Enter the number of intervals: (0 quits) ");
             scanf("%d",&n);
 */
-	    if (n==0) n=100; else n=0;
+	    printf("Processing with %d intervals\n",n);
 
 	    startwtime = MPI_Wtime();
         }
