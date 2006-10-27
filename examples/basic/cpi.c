@@ -36,7 +36,7 @@ int main(int argc,char *argv[])
     fprintf(stdout,"Executing %s: Process %d of %d on %s\n",argv[0],
 	    myid, numprocs, processor_name);fflush (stdout);
 
-    n = 10;
+    n = 100;
  /*   while (!done)
     {   */
         if (myid == 0)
@@ -45,11 +45,7 @@ int main(int argc,char *argv[])
     /*     fflush (stdout); */
     /*     scanf("%d",&n); */
 
-#if 0
-    if (n==0) 
-      n=100; 
-    else n=0;
-#endif
+	    printf("Processing with %d intervals\n",n);
 
 		DBG("calling MPI_Wtime");
 	    startwtime = MPI_Wtime();
