@@ -324,7 +324,7 @@ EOF
 
 if [ -f $scriptdir/mpirun.$default_device.args ] ; then
     # Here is the easiest way to set the arg list to -usage
-    set "--usage"
+    arg="--usage"
     . $scriptdir/mpirun.$default_device.args
 fi
 }
@@ -732,6 +732,14 @@ while [ 1 -le $# ] ; do
 
 	;;
     *)
+        # For the very first, see if there is any argument at all!
+        if [ -z $1 ] ; then
+           if [ "$hasprinthelp" = "1" ] ; then
+                PrintHelp
+                exit 0
+           fi
+        fi
+
         # First see if the device knows about this argument:
         if [ -f $scriptdir/mpirun.$default_device.args ] ; then
             device_knows_arg=0
