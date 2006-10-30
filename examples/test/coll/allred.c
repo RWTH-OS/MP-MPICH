@@ -17,7 +17,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "mpi.h"
-#include "test.h"
+#include "../util/test.h"
 #include "../pt2pt/gcomm.h"
 #include "allred.h"
 

@@ -1,4 +1,4 @@
-/* $Id: sside_protocol.h,v 1.3 2002/03/28 16:30:58 joachim Exp $ */
+/* $Id$ */
 
 /* Protocol interface for one-sided (aka single-sided) communication. */
 
@@ -25,7 +25,7 @@ typedef struct _MPID_Sside_protocol {
 	int (*Get_contig) (	void *, int, MPI_Aint, int, MPID_Win *, 
 						volatile int *, MPI_Aint);
     int (*Rhcv) (	int, MPID_Win *, MPID_Handler_id, 
-					const struct iovec *, int, int *);
+					const struct iovec *, int, volatile int *);
 } MPID_Sside_protocol;
 
 

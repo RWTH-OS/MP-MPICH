@@ -32,11 +32,11 @@ typedef void * (*solaris_PTHREAD_START_ROUTINE)(void *);
 
 struct ThreadInfo {
 
-    ThreadInfo::ThreadInfo() {
+    ThreadInfo() {
       ThreadInfo::init(THREAD_RUNNING);
     }
     
-    ThreadInfo::ThreadInfo(DWORD aState) {
+    ThreadInfo(DWORD aState) {
       ThreadInfo::init(aState);
     }
     
@@ -45,7 +45,7 @@ struct ThreadInfo {
     // elements. We have to avoid destruction of the
     // mutex and the condition when struct is copied.
     // And creation of unused synch. objects.
-    ThreadInfo::ThreadInfo(const ThreadInfo& other) {
+    ThreadInfo(const ThreadInfo& other) {
        state=other.state;
        suspendCount=other.suspendCount;
        exitCode=other.exitCode;
@@ -59,7 +59,7 @@ struct ThreadInfo {
     }
     
     
-    ThreadInfo::~ThreadInfo() {
+    ~ThreadInfo() {
        (*counter)--;
        if(*counter) return;
        if(cond) {
@@ -78,10 +78,10 @@ struct ThreadInfo {
     
 private:
    // Hide assignment operator to avoid dangerous copies.
-   void ThreadInfo::operator=(ThreadInfo& other);
+   void operator=(ThreadInfo& other);
 public:
 #endif
-    inline void ThreadInfo::init(DWORD aState) {
+    inline void init(DWORD aState) {
       state = aState;
       suspendCount=0;
       exitCode = 0;

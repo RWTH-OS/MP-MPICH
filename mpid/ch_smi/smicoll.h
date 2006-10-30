@@ -26,8 +26,6 @@
 #include "smipackets.h"
 #include "reqrndv.h"
 #include "smirndv.h"
-
-
 /*
  * relevant parameters of the custom implemenations 
  */
@@ -303,6 +301,13 @@ typedef struct {
 void MPID_SMI_Pcast_coll_init (MPID_SMI_comm_info_t *ci);
 void MPID_SMI_Pcast_coll_destroy (MPID_SMI_comm_info_t *ci);
 int mpid_smi_pipe_do_dma (int, struct MPIR_COMMUNICATOR*, MPID_SMI_comm_info_t*);
+void MPID_SMI_alltoall_init_topology_1D( MPID_SMI_comm_info_t *ci );
+void MPID_SMI_alltoall_init_topology_2D( MPID_SMI_comm_info_t *ci );
+void MPID_SMI_alltoall_init_plain( MPID_SMI_comm_info_t *ci );
+void MPID_SMI_alltoall_init_scampi( MPID_SMI_comm_info_t *ci );
+void MPID_SMI_alltoall_init_straight( MPID_SMI_comm_info_t *ci );
+void MPID_SMI_alltoall_destroy_topology (MPID_SMI_comm_info_t *ci);
+void MPID_SMI_alltoall_destroy_plain (MPID_SMI_comm_info_t *ci);
 
 /* Get the rank of an lnode located at a specified position in the 
    virtual grid (subgrid) of a communicator. < 0 means "no active node

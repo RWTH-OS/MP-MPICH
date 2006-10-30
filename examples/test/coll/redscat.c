@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "mpi.h"
-#include "test.h"
+#include "../util/test.h"
 
 int main(int argc, char **argv)
 {

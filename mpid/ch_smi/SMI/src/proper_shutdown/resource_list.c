@@ -326,7 +326,7 @@ void rs_FreeResource(rs_resource_t Resource, rs_resource_type_t ResourceType, sc
     /* XXX Problem: SetSegmentUnavailable takes the AdapterNo of the adapter which has 
        created the segment while RemoveSegment does not need it. We assume adapter 0 
        as creator because we do not have the information at this point */
-    DNOTICE("Setting Segment unavailable");
+    DNOTICEP("Setting Segment unavailable",Resource.Segment);
     SCISetSegmentUnavailable(Resource.Segment, 0, 0, error);
     DNOTICEP("Removing Segment",Resource.Segment);
     /* only wait for a limited time for the other processes to disconnect*/

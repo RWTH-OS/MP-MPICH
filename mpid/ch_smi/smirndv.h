@@ -245,18 +245,18 @@ typedef struct {
     int (*Setup_rndv_addr) (int *, ulong *, int *, int *, int);
 } MPID_SMI_Rndv_int_t;
 
-extern int MPID_SMI_Rndv_connect_zerocopy (char **, int, int, int, ulong, ulong, int, int *);
-extern int MPID_SMI_Rndv_map_remote_mem(int , MPID_PKT_RNDV_T *, MPIR_SHANDLE *, boolean);
-extern int MPID_SMI_Rndv_unxrecv_start ( MPIR_RHANDLE *, void * );
-extern int MPID_SMI_Rndv_start_recv ( MPIR_RHANDLE *, void * );
-extern int MPID_SMI_Rndv_unxrecv_end ( MPIR_RHANDLE * );
-extern int MPID_SMI_Rndv_unxrecv_test_end ( MPIR_RHANDLE * );
-extern int MPID_SMI_Rndv_cancel_recv ( MPIR_RHANDLE * );
-extern int MPID_SMI_Rndv_cancel_send ( MPIR_SHANDLE * );
-extern int MPID_SMI_Rndv_send_wait ( MPIR_SHANDLE * );
-extern int MPID_SMI_Rndv_send_test_ack ( MPIR_SHANDLE * );
-extern int MPID_SMI_Rndv_send_wait_ack ( MPIR_SHANDLE * );
-extern int MPID_SMI_Rndv_free_rndvinfo(void *h);
+int MPID_SMI_Rndv_connect_zerocopy (char **, int, int, int, ulong, ulong, int, int *);
+int MPID_SMI_Rndv_map_remote_mem(int , MPID_PKT_RNDV_T *, MPIR_SHANDLE *, boolean);
+int MPID_SMI_Rndv_unxrecv_start ( MPIR_RHANDLE *, void * );
+int MPID_SMI_Rndv_start_recv ( MPIR_RHANDLE *, void * );
+int MPID_SMI_Rndv_unxrecv_end ( MPIR_RHANDLE * );
+int MPID_SMI_Rndv_unxrecv_test_end ( MPIR_RHANDLE * );
+int MPID_SMI_Rndv_cancel_recv ( MPIR_RHANDLE * );
+int MPID_SMI_Rndv_cancel_send ( MPIR_SHANDLE * );
+int MPID_SMI_Rndv_send_wait ( MPIR_SHANDLE * );
+int MPID_SMI_Rndv_send_test_ack ( MPIR_SHANDLE * );
+int MPID_SMI_Rndv_send_wait_ack ( MPIR_SHANDLE * );
+int MPID_SMI_Rndv_free_rndvinfo(void *h);
 
 /* implemented in smiarndv.c */
 int MPID_SMI_Arndv_setup (void);
@@ -268,29 +268,36 @@ void MPID_SMI_Arndv_get_config (int *size);
 int MPID_SMI_Arndv_send_ack (void *, int);
 int MPID_SMI_Arndv_send_ack_zc (void *, int);
 int MPID_SMI_Arndv_recv_ack (void *, int);
+int MPID_SMI_Arndv_unxrecv_start (MPIR_RHANDLE *, void *);
 int MPID_SMI_Arndv_unxrecv_end (MPIR_RHANDLE *);
 int MPID_SMI_Arndv_unxrecv_test_end (MPIR_RHANDLE *);
 int MPID_SMI_Arndv_cancel_recv (MPIR_RHANDLE *);
+int MPID_SMI_Arndv_send_wait (MPIR_SHANDLE *);
+int MPID_SMI_Arndv_send_test_ack (MPIR_SHANDLE *);
+int MPID_SMI_Arndv_send_wait_ack (MPIR_SHANDLE *);
+
+int MPID_SMI_Arndv_cancel_send (MPIR_SHANDLE *shandle);
+int MPID_SMI_Arndv_cancel_recv (MPIR_RHANDLE *runex);
 
 /* implemented in smibrndv.c */
-extern int MPID_SMI_Brndv_send_ack( void *, int );
-extern int MPID_SMI_Brndv_recv_ack( void *, int );
-extern int MPID_SMI_Brndv_get_recvbuf( int *, ulong *, int *, int *, int);
+int MPID_SMI_Brndv_send_ack( void *, int );
+int MPID_SMI_Brndv_recv_ack( void *, int );
+int MPID_SMI_Brndv_get_recvbuf( int *, ulong *, int *, int *, int);
 
 /* implmented in sminbrndv.c */
-extern int MPID_SMI_Nbrndv_send_ack ( void *, int );
-extern int MPID_SMI_Nbrndv_recv_ack ( void *, int );
-extern int MPID_SMI_Nbrndv_get_recvbuf( int *, ulong *, int *, int *, int);
-extern void MPID_SMI_Brndv_memdelete( void );
-extern int MPID_SMI_Brndv_ack( void *in_pkt, int from_grank );
-extern int MPID_SMI_Brndv_send(void *buf, int, int, int, int, int, MPID_Msgrep_t, struct MPIR_DATATYPE *);
-extern int MPID_SMI_Brndv_resume_send ( MPIR_SHANDLE *sh );
-extern int MPID_SMI_Brndv_isend( void *buf, int, int, int, int, int, MPID_Msgrep_t, MPIR_SHANDLE *,
+int MPID_SMI_Nbrndv_send_ack ( void *, int );
+int MPID_SMI_Nbrndv_recv_ack ( void *, int );
+int MPID_SMI_Nbrndv_get_recvbuf( int *, ulong *, int *, int *, int);
+void MPID_SMI_Brndv_memdelete( void );
+int MPID_SMI_Brndv_ack( void *in_pkt, int from_grank );
+int MPID_SMI_Brndv_send(void *buf, int, int, int, int, int, MPID_Msgrep_t, struct MPIR_DATATYPE *);
+int MPID_SMI_Brndv_resume_send ( MPIR_SHANDLE *sh );
+int MPID_SMI_Brndv_isend( void *buf, int, int, int, int, int, MPID_Msgrep_t, MPIR_SHANDLE *,
 				struct MPIR_DATATYPE *);
-extern int MPID_SMI_Brndv_irecv( MPIR_RHANDLE *, int, void *);
-extern int MPID_SMI_Brndv_save( MPIR_RHANDLE *, int, void *);
-extern int MPID_SMI_Brndv_resume_recv (MPIR_RHANDLE *, void *);
-extern int MPID_SMI_Brndv_unxrecv_start (MPIR_RHANDLE *, void *);
+int MPID_SMI_Brndv_irecv( MPIR_RHANDLE *, int, void *);
+int MPID_SMI_Brndv_save( MPIR_RHANDLE *, int, void *);
+int MPID_SMI_Brndv_resume_recv (MPIR_RHANDLE *, void *);
+int MPID_SMI_Brndv_unxrecv_start (MPIR_RHANDLE *, void *);
 
 /* Prototype definitions */
 MPID_Protocol *MPID_SMI_Rndv_setup(void);

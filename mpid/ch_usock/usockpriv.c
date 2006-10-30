@@ -356,6 +356,12 @@ void MPID_USOCK_Finalize( void )
 
     free(local_data);
 
+    if( (getenv("USOCK_VERBOSE")!=NULL) ) {
+      printf("USOCK device finalized.\n");
+      fflush(stdout);
+    }
+
+
     DSECTLEAVE
       return;
 }

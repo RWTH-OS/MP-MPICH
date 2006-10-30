@@ -13,7 +13,7 @@
 #include <time.h>
 
 #include "mpi.h"
-#include "test.h"
+#include "../util/test.h"
 
 #define MAXSIZE 4096
 

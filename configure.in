@@ -80,7 +80,6 @@ if test "${NBR_DEVICES}" = "0" ; then
    AC_MSG_ERROR([You must define a list of devices with --with-device=DEVICE{,DEVICE}])
 fi
 
-
 AC_ARG_WITH([lpgc],AS_HELP_STRING(--with-lpgc=LIBPATH,
 	    [when using pgf77 and gcc alltogether set this to the location of libpcg.a (by
 	    default, libpgc is not used)]),
@@ -350,6 +349,25 @@ AC_ARG_ENABLE([meta-atm],AS_HELP_STRING(--enable-meta-atm,
 		 enable_meta="no"
 	       fi],
 	      [enable_meta="no"])
+
+AC_ARG_WITH([sec-device],AS_HELP_STRING(--with-sec-device=SEC_DEVICE,
+	    [Allows you to select the default secondary device for meta configurations.
+	    The default is 'ch_usock' or the second device device defined with "--with-device=".]),
+	    [DEFAULT_SEC_DEVICE=$withval],
+	    [
+		if test "$META" = "yes" ; then
+		    	if test -n "$DEVICE_ch_usock" ; then
+				DEFAULT_SEC_DEVICE=ch_usock
+			else
+				if test $NBR_DEVICES -gt 1 ; then
+					DEFAULT_SEC_DEVICE=$DEVICE1
+				else
+					DEFAULT_SEC_DEVICE=$DEVICE0
+				fi
+				AC_MSG_WARN([Device ch_usock not found, using $DEFAULT_SEC_DEVICE as default secondary device.])
+			fi
+		fi
+	    ])
 
 # Set the name of the MPI lib, use env var or command line argument... Ugly.
 AC_ARG_WITH([mpilibname],AS_HELP_STRING(--with-mpilibname=NAME,
@@ -2914,20 +2932,12 @@ else
     MPE_OPTS="$MPE_OPTS --with-f77_extra_flag='$F77_EXTRA_FLAG' --with-flib_path_leader='$FLIB_PATH_LEADER'"
 fi
 
-if test "$GCC" = "yes" ; then
-   CLINKERDYNAMICOPTS="${CLINKERDYNAMICOPTS} -rdynamic"
-   CLINKERSTATICOPTS="${CLINKERSTATICOPTS} -rdynamic"
-fi
+CLINKERDYNAMICOPTS="${CLINKERDYNAMICOPTS} -Wl,-export-dynamic"
+CLINKERSTATICOPTS="${CLINKERSTATICOPTS} -Wl,-export-dynamic"
 
-if test "$F77" = "g77" ; then
-   F77LINKERDYNAMICOPTS="${F77LINKERDYNAMICOPTS} -rdynamic"
-   F77LINKERSTATICOPTS="${F77LINKERSTATICOPTS} -rdynamic"
-fi
+F77LINKERDYNAMICOPTS="${F77LINKERDYNAMICOPTS} -Wl,-export-dynamic"
+F77LINKERSTATICOPTS="${F77LINKERSTATICOPTS} -Wl,-export-dynamic"
 
-if test "$F77" = "pgf77" ; then
-   F77LINKERDYNAMICOPTS="${F77LINKERDYNAMICOPTS} -Wl -export-dynamic"
-   F77LINKERSTATICOPTS="${F77LINKERSTATICOPTS} -Wl -export-dynamic"
-fi
 
 
 #
@@ -2966,6 +2976,7 @@ AC_SUBST(META) dnl
 AC_SUBST(META_ATM) dnl
 AC_SUBST(DEFAULT_MACHINE)dnl
 AC_SUBST(DEFAULT_DEVICE)dnl
+AC_SUBST(DEFAULT_SEC_DEVICE)dnl
 AC_SUBST(DEVCFLAGS)dnl
 AC_SUBST(DEVCFILES)dnl
 AC_SUBST(DEVOFILES)dnl
@@ -3111,6 +3122,7 @@ AC_CONFIG_FILES([bin/mpicc:util/mpicc.in
 		 bin/tstmachines:util/tstmachines.in
 		 bin/mpirun:util/mpirun.in bin/mpirun.args:util/mpirun.args.in
 		 bin/mpirun.meta:util/mpirun.meta.in
+		 bin/mpirun.meta.create:util/mpirun.meta.create.in
 		],[chmod +x "$ac_file"])
 
 AC_CONFIG_LINKS([bin/mpiCC:bin/mpicc])
@@ -3265,9 +3277,9 @@ AC_MSG_NOTICE([configuring the performance tests...])
 
 if test ! -f .mpich -a -z "$nobanner" ; then
   AC_MSG_NOTICE([---------------------------------------------------------------
-	   You should register your copy of MP-MPICH with us by
-	   subscribing to the MP-MPICH Announcement mailing list. You can
-	   do so by sending mail to mp-mpich-request@lists.rwth-aachen.de
+	   You should register your copy of MP-MPICH by subscribing to
+	   the MP-MPICH Announcement mailing list. You can do so by 
+	   sending a mail to mp-mpich-request@lists.rwth-aachen.de
 	   with the subject "subscribe". You can also do this
 	   via WWW by going to
 

@@ -104,9 +104,9 @@ RunTest() {
 	    if [ ${filelines} -ne 1 ] ; then
 		err=1
 	    else
-		# check if sole line reads exactly " No Errors"
-		firstline=$(head -n 1 ${filename})
-		if [ x"${firstline}" != x" No Errors" ] ; then
+		# check if sole line contains "No Errors"
+		firstline=$(head -n 1 ${filename} | grep 'No Errors')
+		if [ x"${firstline}" = x ] ; then
 		    err=1
 		fi
 	    fi
@@ -240,5 +240,14 @@ RunTest redtst 1 ${NPMAX} ${NBRRUNS} ""
 RunTest reduce 1 ${NPMAX} ${NBRRUNS} ""
 
 RunTest scatter 2 ${NPMAX} ${NBRRUNS} "run with at least 2 processes"
+
+# the allgatherf test program doesn't work
+# with more than 1024 processes
+if [ ${NPMAX} -gt 1024 ] ; then
+    RunTest allgatherf 1 1024 ${NBRRUNS} "run with at most 1024 processes"
+else    
+    RunTest allgatherf 1 ${NPMAX} ${NBRRUNS} "run with at most 1024 processes"
+fi
+
 
 ############################### End of Main Part ###################################################################

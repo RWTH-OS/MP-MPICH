@@ -33,8 +33,15 @@ if [ -n "$ld_lib_path" ] ; then
 fi
 
 if [ `nbr $nodes` -gt 1 ] ; then
-    echo "*** mpirun.ch_shmem"
-    echo "    WARNING: launching all $np processes on host `firsthost $nodes`"
+    for node in ${nodes} ; do
+	if [ "$node" != `firsthost $nodes` ] ; then
+	    warn_flag=1
+	fi
+    done
+    if [ -n "$warn_flag" ] ; then
+	echo "*** mpirun.ch_shmem"
+	echo "    WARNING: launching all $np processes on host `firsthost $nodes`"
+    fi
 fi
 
 # get number of ch_shmem-device as specified in mpichconf.h and add

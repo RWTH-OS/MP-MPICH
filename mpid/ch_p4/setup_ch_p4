@@ -57,7 +57,7 @@ fi
 CFLAGS="$CFLAGS -DCH_P4_PRESENT"
 
 # force linking of device lib in static case
-CLINKERSTATICOPTS="${CLINKERSTATICOPTS} -u MPID_CH_P4_InitMsgPass"
+CLINKERSTATICOPTS="${CLINKERSTATICOPTS} -Wl,-u,MPID_CH_P4_InitMsgPass"
 
 echo "About to do p4$P4EXT device"
 DEVICE_KIND=network

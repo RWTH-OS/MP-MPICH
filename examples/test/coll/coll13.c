@@ -10,7 +10,7 @@
 #include <errno.h>
 
 #include "mpi.h"
-#include "test.h"
+#include "../util/test.h"
 
 #ifndef EXIT_SUCCESS
 #define EXIT_SUCCESS 0

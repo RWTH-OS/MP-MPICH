@@ -385,8 +385,8 @@ static int pcast_send_pio (int *to_granks, int ndims)
 		pcast_base_addr[dim] += (misalign_size == 0) ? 0 : (MPID_SMI_STREAMSIZE - misalign_size);
 
 		ptrmem_size = 2*MPID_SMI_STREAMSIZE;
-		woffset_ptr[dim] = (long * volatile)(pcast_base_addr[dim] + MPID_SMI_STREAMSIZE - sizeof(long *));
-		roffset_ptr[dim] = (long * volatile)(woffset_ptr[dim] + MPID_SMI_STREAMSIZE/sizeof(long));
+		woffset_ptr[dim] = (long *)(pcast_base_addr[dim] + MPID_SMI_STREAMSIZE - sizeof(long *));
+		roffset_ptr[dim] = (long *)(woffset_ptr[dim] + MPID_SMI_STREAMSIZE/sizeof(long));
 		woffset[dim] = 0;
 		roffset[dim] = 0;
 
@@ -528,8 +528,8 @@ static int pcast_recv_pio (int from_grank)
 
     /* initalize addresses & sizes */
     ptrmem_size = 2 * MPID_SMI_STREAMSIZE;
-    woffset_ptr = (long * volatile)(rndv_base_addr + MPID_SMI_STREAMSIZE - sizeof(long *));
-    roffset_ptr = (long * volatile)(woffset_ptr + MPID_SMI_STREAMSIZE/sizeof(long));
+    woffset_ptr = (long *)(rndv_base_addr + MPID_SMI_STREAMSIZE - sizeof(long *));
+    roffset_ptr = (long *)(woffset_ptr + MPID_SMI_STREAMSIZE/sizeof(long));
     woffset = 0;
     roffset = 0;
 	
@@ -630,8 +630,8 @@ static int pcast_sendrecv_pio (int from_grank, int to_grank)
     recv_rndv_base_addr += (misalign_size == 0) ? 0 : (MPID_SMI_STREAMSIZE - misalign_size);
 
     ptrmem_size = 2 * MPID_SMI_STREAMSIZE;
-    recv_woffset_ptr = (long * volatile)(recv_rndv_base_addr + MPID_SMI_STREAMSIZE - sizeof(long *));
-    recv_roffset_ptr = (long * volatile)(recv_woffset_ptr + MPID_SMI_STREAMSIZE/sizeof(long));
+    recv_woffset_ptr = (long *)(recv_rndv_base_addr + MPID_SMI_STREAMSIZE - sizeof(long *));
+    recv_roffset_ptr = (long *)(recv_woffset_ptr + MPID_SMI_STREAMSIZE/sizeof(long));
     recv_roffset = *recv_roffset_ptr;
 
     recv_rndv_data_addr = recv_rndv_base_addr + ptrmem_size;
@@ -647,8 +647,8 @@ static int pcast_sendrecv_pio (int from_grank, int to_grank)
     send_rndv_base_addr += (misalign_size == 0) ? 0 : (MPID_SMI_STREAMSIZE - misalign_size);
 
     ptrmem_size = 2*MPID_SMI_STREAMSIZE;
-    send_woffset_ptr = (long * volatile)(send_rndv_base_addr + MPID_SMI_STREAMSIZE - sizeof(long *));
-    send_roffset_ptr = (long * volatile)(send_woffset_ptr + MPID_SMI_STREAMSIZE/sizeof(long));
+    send_woffset_ptr = (long *)(send_rndv_base_addr + MPID_SMI_STREAMSIZE - sizeof(long *));
+    send_roffset_ptr = (long *)(send_woffset_ptr + MPID_SMI_STREAMSIZE/sizeof(long));
     send_woffset  = 0;
     send_roffset  = 0;
     /* remote SCI writes */
@@ -857,7 +857,7 @@ static int pcast_recv_dma(int from_grank)
     misalign_size = (size_t)recv_base_addr % MPID_SMI_STREAMSIZE;
     recv_base_addr += (misalign_size == 0) ? 0 : (MPID_SMI_STREAMSIZE - misalign_size);
 
-    recv_woffset_ptr = (long * volatile )(recv_base_addr + MPID_SMI_STREAMSIZE - sizeof(long *));
+    recv_woffset_ptr = (long *)(recv_base_addr + MPID_SMI_STREAMSIZE - sizeof(long *));
     recv_roffset_ptr = recv_woffset_ptr + MPID_SMI_STREAMSIZE/sizeof(long);
 	recv_woffset = 0;
     recv_roffset = 0;
@@ -965,7 +965,7 @@ static int pcast_send_dma(int *to_granks, int ndims)
 		misalign_size = (size_t)send_base_addr[dim] % MPID_SMI_STREAMSIZE;
 		send_base_addr[dim] += (misalign_size == 0) ? 0 : (MPID_SMI_STREAMSIZE - misalign_size);
 
-		send_woffset_ptr[dim] = (long * volatile)(send_base_addr[dim] 
+		send_woffset_ptr[dim] = (long *)(send_base_addr[dim] 
 												  + MPID_SMI_STREAMSIZE - sizeof(long *));
 		send_roffset_ptr[dim] = send_woffset_ptr[dim] + MPID_SMI_STREAMSIZE/sizeof(long);
 		send_woffset[dim] = 0;

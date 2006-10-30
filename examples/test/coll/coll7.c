@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include "mpi.h"
-#include "test.h"
+#include "../util/test.h"
 
 #define MAX_PROCESSES 20
 

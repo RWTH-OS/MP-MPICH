@@ -4,16 +4,16 @@
 // A comfortable critical section object. 
 class CriticalSection {
   public:
-    CriticalSection::CriticalSection() {
+    CriticalSection() {
       InitializeCriticalSection(&cs);
     }
-    CriticalSection::~CriticalSection() {
+    ~CriticalSection() {
       DeleteCriticalSection(&cs);
     }    
-    inline void CriticalSection::enter() {
+    inline void enter() {
       EnterCriticalSection(&cs);       
     }  
-    inline void CriticalSection::leave() {
+    inline void leave() {
       LeaveCriticalSection(&cs);
     }
   protected: 

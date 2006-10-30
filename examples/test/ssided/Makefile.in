@@ -33,7 +33,9 @@ MPI2EXECS := accu_test allocmem get_contig_test1 get_contig_test2 \
 	get_difftype_test get_sametype_test1 get_sametype_test2 progress \
 	put_contig_test1 put_contig_test2 put_contig_test3 put_difftype_test \
 	put_sametype_test1 put_sametype_test2 sparse sparse_check \
-	sside_interactive
+	sside_interactive mpich2_wintest mpich2_test1 mpich2_test1_am \
+	mpich2_test2 mpich2_test2_am mpich2_test3 mpich2_test3_am mpich2_test4 \
+	mpich2_test4_am mpich2_test5 mpich2_test5_am \
 
 default: $(MPI2EXECS)
 
@@ -94,6 +96,42 @@ sparse_check: sparse_check.o
 
 sside_interactive: sside_interactive.o
 	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+mpich2_wintest: mpich2_wintest.o ../util/test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+mpich2_test1: mpich2_test1.o ../util/test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+mpich2_test1_am: mpich2_test1_am.o ../util/test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+mpich2_test2: mpich2_test2.o ../util/test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+mpich2_test2_am: mpich2_test2_am.o ../util/test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+mpich2_test3: mpich2_test3.o ../util/test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+mpich2_test3_am: mpich2_test3_am.o ../util/test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+mpich2_test4: mpich2_test4.o ../util/test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+mpich2_test4_am: mpich2_test4_am.o ../util/test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+mpich2_test5: mpich2_test5.o ../util/test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+mpich2_test5_am: mpich2_test5_am.o ../util/test.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
+../util/test.o:
+	cd ../util; $(MAKE) test.o
 
 clean:
 	@-rm -f *.o *~ PI* $(MPI2EXECS) \

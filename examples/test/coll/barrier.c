@@ -11,7 +11,7 @@
  */
 
 #include "mpi.h"
-#include "test.h"
+#include "../util/test.h"
 
 #define WAIT_TIMES 500
 

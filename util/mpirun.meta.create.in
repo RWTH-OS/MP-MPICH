@@ -1,0 +1,176 @@
+#!/bin/bash
+
+# This file generates a temporary meta-configuration-file from the mpirun-commandline,
+# execute mpirun with "-meta"-option and afterwards deletes the temporary file again.
+
+
+i=1
+
+while [ 1 -le $# ] ; do
+  arg=$1
+#echo $arg
+#echo $#
+  shift
+  case $arg in
+     -machine)
+	machine[$i]=$1
+	shift
+	;;
+    -nodes | -node | -hosts | -host)
+    nodestr[$i]=$1
+	shift
+	if [ -z ${np[$i]} ]; then
+	# no -np or -n option is given OR has not yet been parsed
+		np[$i]=0
+	    nodelist=`eval echo ${nodestr[$i]} | sed "s/,/ /g"`
+	    for node in ${nodelist} ; do
+			np[$i]=`expr ${np[$i]} + 1`
+	    done
+	fi
+	;;
+    -np | -n)
+	np[$i]="$1"
+	nodigits=`echo ${np[$i]} | sed 's/^[0-9]*$//'`
+	if [ "$nodigits" != "" -o ! -n ${np[$i]} ] ; then
+		echo "np: ${np[$i]} is an invalid number of processes. Exiting."
+		exit 1
+	fi
+	shift
+	;;
+	-t|-testing|-show)
+	just_testing=1
+	#no shift required here
+	;;
+    ':')
+	i=`expr ${i} + 1`
+	#no shift required here
+	;;
+      *)
+	metampirun_arg=`echo ${arg} | grep '-'`
+	if [ -n	"$metampirun_arg" ] ; then
+	    # This unrecognized switch is assumed to belong to mpirun args...
+	    metampirun_args="$metampirun_args $metampirun_arg"
+	else
+	    # The first unrecognized argument is assumed to be the name of
+	    # the program with the arguments coming right along
+	    execname[$i]=`basename $arg`
+	    execpath[$i]=`dirname $arg`
+	    currdir=${PWD}
+	    cd ${execpath[$i]}
+	    execpath[$i]=${PWD}
+	    cd $currdir
+	    if [ "${execpath[$i]}" = "." ] ; then
+		execpath[$i]=${PWD}/
+	    fi
+	    #echo $i
+	    #echo ${execname[$i]}
+	    #echo ${execpath[$i]}
+	    # any following unrecognized arguments are assumed to be program arguments
+	    while [ "$1" != ":" -a -n "$1" ] ; do
+	        arg="$1"
+		execargs[$i]="${execargs[$i]} $arg"
+		shift
+	    done
+	fi
+	;;
+	esac
+done
+
+not_empty=0;
+#find first non-empty execname
+for (( i=1 ; i <= ${nummetahosts} ; i++ ))
+do
+	if [ -n "${execname[$i]}" ] ; then
+		not_empty=$i;
+	fi
+done
+
+#error handling
+if [ $not_empty = 0 ] ; then
+	echo "No executable found. Exiting."
+	exit 1
+fi
+
+if [ ${#nodestr[@]} -ne $nummetahosts ] ; then
+	echo "Not all metahosts have a node-definition. Exiting."
+	exit 1
+fi
+
+
+#set default values to variables that have not been initialised
+for (( i=1 ; i <= ${nummetahosts} ; i++ ))
+do
+	#if machine[i] is empty -> machine[i]=default_device
+	machine[$i]=${machine[$i]:=${default_device}}
+	#if no further execname -> use the first one
+	execname[$i]=${execname[$i]:=${execname[${not_empty}]}}
+	execpath[$i]=${execpath[$i]:=${execpath[${not_empty}]}}
+	execargs[$i]=${execargs[$i]:=${execargs[${not_empty}]}}
+done
+
+
+mID=`date +%H%M%S`
+mID=$mID.$$
+configFile="${PWD}/metaconf.tmp.${mID}"
+
+cat  <<EOF >$configFile
+
+NUMHOSTS ${nummetahosts}
+
+EOF
+
+i=1
+#while [ $i -le $nummetahosts ]
+for (( i=1 ; i <= ${nummetahosts} ; i++ ))
+do
+	echo "mh${i} ${np[$i]}" >> $configFile
+done
+
+cat  <<EOF >> $configFile
+
+OPTIONS
+SECONDARY_DEVICE ${default_sec_device}
+EOF
+
+i=1
+for (( i=1 ; i <= ${nummetahosts} ; i++ ))
+do
+cat <<EOF >>$configFile
+
+METAHOST mh${i} {
+	TYPE=${machine[$i]};
+	EXECPATH=${execpath[$i]};
+	EXECNAME=${execname[$i]};
+	EXECARGS='${execargs[$i]/#' '/}';
+	NODES=${nodestr[$i]};
+}
+EOF
+done
+
+cat <<EOF >>$configFile
+
+CONNECTIONS
+AUTO_ROUTER
+
+EOF
+
+
+if [ $just_testing -gt 0 ] ; then
+	#show configFile
+	cat ${configFile}
+	echo ""
+	echo "now checkmetacfg is being executed:"
+	echo ""
+	checkmetacfg ${configFile}
+	echo ""
+	echo $scriptdir/mpirun ${metampirun_args} -meta ${configFile} ${execpath[1]}/${execname[1]};
+else
+	# finally call mpirun with -meta option to let it do the parsing of the
+	# previously generated meta-config-file
+	$scriptdir/mpirun ${metampirun_args} -meta ${configFile} ${execpath[1]}/${execname[1]};
+fi
+
+sleep 2
+
+#remove configFile
+rm -f ${configFile}

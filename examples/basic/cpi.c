@@ -47,6 +47,7 @@ int main(int argc,char *argv[])
 
 	    printf("Processing with %d intervals\n",n);
 
+
 		DBG("calling MPI_Wtime");
 	    startwtime = MPI_Wtime();
         }

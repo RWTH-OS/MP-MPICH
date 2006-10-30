@@ -331,7 +331,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="test.c">
+				RelativePath="..\util\test.c">
 				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
@@ -375,7 +375,7 @@
 				RelativePath="..\pt2pt\gcomm.h">
 			</File>
 			<File
-				RelativePath="test.h">
+				RelativePath="..\util\test.h">
 			</File>
 		</Filter>
 		<Filter

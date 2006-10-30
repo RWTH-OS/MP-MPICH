@@ -62,8 +62,8 @@ int MPID_buildSecondaryDeviceArgs_smi( char *** );
  */ 
 char* getFirstIPAddress(const char* hostname)
 {
-    struct hostent *host;		/* host information */
-    struct in_addr in;    		/* internet address */
+	struct hostent *host;		/* host information */
+	struct in_addr in;    		/* internet address */
 	if ((host = gethostbyname(hostname)) == NULL) {
 		return NULL;
 	}
@@ -458,7 +458,7 @@ int MPID_buildSecondaryDeviceArgs_usock( char ***realargv )
     address.sin_family = AF_INET;
     /* address.sin_port = htons( portbase + MPID_MyHostRank ); */
     /* --> Let the OS chose a free port: */
-    address.sin_port = 0;   
+    address.sin_port = 0;
 
     my_node = metahostlist[MPIR_meta_cfg.my_metahost_rank].nodeList;
     found = 0;
@@ -472,8 +472,6 @@ int MPID_buildSecondaryDeviceArgs_usock( char ***realargv )
     	ip = getFirstIPAddress(my_node->nodeName);
 		if (ip)
 			memcpy(&my_node->nicList->nicAddress, ip, strlen(ip));
-
-		PDEBUG("Multidevice.c: nodeName:%s IP:%s\n", my_node->nodeName, my_node->nicList->nicAddress);
 
 		if (my_node->nicList->nicAddress == NULL) { 
 			fprintf( stderr, "MultiDevice-Error: Could not resolve hostname %s\n", my_node->nodeName);
@@ -497,6 +495,9 @@ int MPID_buildSecondaryDeviceArgs_usock( char ***realargv )
 		}
 	    }
 	}
+	
+	PDEBUG("Multidevice.c: nodeName:%s IP:%s\n", my_node->nodeName, my_node->nicList->nicAddress);
+	
 	if( found )
 	    break;
 	my_node = my_node->next;
@@ -517,12 +518,12 @@ int MPID_buildSecondaryDeviceArgs_usock( char ***realargv )
     MPID_SecondaryDevice_type = DEVICE_USOCK;
     sprintf( MPID_SecondaryDevice_cmdline, "%s %s %s %s %s %s %s %s %s",
 	     MPID_SecondaryDevice_argv[0], MPID_SecondaryDevice_argv[1],
-	     MPID_SecondaryDevice_argv[2],MPID_SecondaryDevice_argv[3],
+	     MPID_SecondaryDevice_argv[2], MPID_SecondaryDevice_argv[3],
 	     MPID_SecondaryDevice_argv[4], MPID_SecondaryDevice_argv[5],
 	     MPID_SecondaryDevice_argv[6], MPID_SecondaryDevice_argv[7],
 	     MPID_SecondaryDevice_argv[8] );
 	     
-    PDEBUG("Ending MPID_buildSecondaryDeviceArgs_smi() with cmdLine:\n%s\n", MPID_SecondaryDevice_cmdline );
+    PDEBUG("Ending MPID_buildSecondaryDeviceArgs_usock() with cmdLine:\n%s\n", MPID_SecondaryDevice_cmdline );
 	return MPI_SUCCESS;
 }
 

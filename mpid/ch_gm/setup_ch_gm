@@ -10,7 +10,7 @@ CFLAGS="$CFLAGS -DCH_GM_PRESENT"
 FFLAGS="$FFLAGS -DCH_GM_PRESENT"
 
 # force linking of device lib in static case
-CLINKERSTATICOPTS="${CLINKERSTATICOPTS} -u MPID_CH_GM_InitMsgPass"
+CLINKERSTATICOPTS="${CLINKERSTATICOPTS} -Wl,-u,MPID_CH_GM_InitMsgPass"
 
 for arg in $device_args $@; do
     case $arg in 

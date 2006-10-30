@@ -77,7 +77,7 @@ SOURCE=..\pt2pt\gcomm.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\test.h
+SOURCE=..\util\test.h
 # End Source File
 # End Group
 # End Target

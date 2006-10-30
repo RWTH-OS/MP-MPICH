@@ -351,7 +351,7 @@ device_nbr=`cat $includedir/mpichconf.h | grep DEVICE_ch_smi_nbr | awk  '{ print
 options="$options -usedevice $device_nbr"
 
 # depending on the login-shell of the user, we need to use "setenv" or "export" to
-# set environment variablesA
+# set environment variables
 ENV_HOST=`echo $HOSTS | cut -f 1 -d " "`
 # first, test if rsh towards master node works
 $rshcmd $ENV_HOST 'echo rcmd_works' | grep rcmd_works >/dev/null
@@ -362,7 +362,7 @@ if [ $? != "0" ] ; then
     $ECHO "           that the host names are correct. Aborting."
     exit 1
 fi
-# This test is quiet costly (1 or 2 rsh calls), but is the only reliable way to test
+# This test is quite costly (1 or 2 rsh calls), but is the only reliable way to test
 # for the user's login shell on (one of the) actual compute node.
 ENV_RETCODE=`$rshcmd $ENV_HOST 'export T=t >& /dev/null; echo $?' | tail -1`
 if [ "$ENV_RETCODE" = "0" ] ; then

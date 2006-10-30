@@ -2,6 +2,14 @@
  *  $Id$
  *
  */
+
+/*
+ |  The rndv protocol is obsolete in ch_usock!
+ |  (see usockinit.c and usockneager.c)
+ |  Thus, do not compile:
+ */
+#if 0
+
 #include "mpid.h"
 #include "usockdev.h"
 #include "mpimem.h"
@@ -725,3 +733,4 @@ MPID_Protocol *MPID_USOCK_Rndvb_setup()
     DSECTLEAVE
 	return p;
 }
+#endif

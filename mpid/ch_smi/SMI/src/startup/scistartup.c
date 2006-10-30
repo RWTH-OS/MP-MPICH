@@ -445,9 +445,9 @@ smi_error_t _smi_sci_startup(smi_args_t *sArgs)
 	EXIT_IF_FAIL("SCIPrepareSegment for base segment failed", SCIerror, 2);    
 	
 	DNOTICEI("mapping local base segment, ID =",basesgmt_id);
-	basesgmt_addr = (int*)SCIMapLocalSegment(local_basesgmt, &basesgmt_map, basesgmt_offset, 
-						 basesgmt_size, (void *)basesgmt_addr, 
-						 basesgmt_flags, &SCIerror);
+	basesgmt_addr = (int*)rs_SCIMapLocalSegment(local_basesgmt, &basesgmt_map, basesgmt_offset, 
+                                                    basesgmt_size, (void *)basesgmt_addr, 
+                                                    basesgmt_flags, &SCIerror);
 	EXIT_IF_FAIL("SCIMapLocalSegment for base segment failed", SCIerror, 3);
 	DNOTICEP("address for local base segment =", basesgmt_addr);
 
@@ -483,9 +483,9 @@ smi_error_t _smi_sci_startup(smi_args_t *sArgs)
 	}
 	
 	DNOTICEI("mapping local base segment, ID =",basesgmt_id);
-	basesgmt_addr = (int*)SCIMapLocalSegment(local_basesgmt, &basesgmt_map, basesgmt_offset, 
-						 basesgmt_size, (void *)basesgmt_addr, 
-						 basesgmt_flags, &SCIerror);
+	basesgmt_addr = (int*)rs_SCIMapLocalSegment(local_basesgmt, &basesgmt_map, basesgmt_offset, 
+                                                    basesgmt_size, (void *)basesgmt_addr, 
+                                                    basesgmt_flags, &SCIerror);
 	EXIT_IF_FAIL("SCIMapLocalSegment for base segment failed", SCIerror, 3);
 	DNOTICEP("address for local base segment =", basesgmt_addr);      
 #endif
@@ -579,9 +579,9 @@ smi_error_t _smi_sci_startup(smi_args_t *sArgs)
 	DNOTICE("connection established!");
 	
 	DNOTICE("mapping base segment ...");
-	basesgmt_addr = (int*)SCIMapRemoteSegment(remote_basesgmt, &basesgmt_map, basesgmt_offset, 
-						  basesgmt_size, (void *)basesgmt_addr, 
-						  basesgmt_flags, &SCIerror);
+	basesgmt_addr = (int*)rs_SCIMapRemoteSegment(remote_basesgmt, &basesgmt_map, basesgmt_offset, 
+                                                     basesgmt_size, (void *)basesgmt_addr, 
+                                                     basesgmt_flags, &SCIerror);
 	EXIT_IF_FAIL("SCIMapRemoteSegment for base segment failed", SCIerror, 6);
 	DNOTICEP("address of base segment =", basesgmt_addr);
 	
@@ -648,10 +648,10 @@ smi_error_t _smi_sci_shutdown(void)
     
     DSECTION("_smi_sci_shutdown");
     DSECTENTRYPOINT;    
-    
+
     if (basesgmt_is_remote == FALSE) {
 	DNOTICE("unmapping base segment");
-	SCIUnmapSegment(basesgmt_map, 0, &SCIerror);
+	rs_SCIUnmapSegment(basesgmt_map, 0, &SCIerror);
 	EXIT_IF_FAIL("SCIUnmapSegment for base segment failed", SCIerror, 7);
 	DNOTICE("removing base segment");
 	/* only wait for a limited time for the other processes to discnnect*/
@@ -665,7 +665,7 @@ smi_error_t _smi_sci_shutdown(void)
     } 
     else {
 	DNOTICE("unmapping base segment");
-	SCIUnmapSegment(basesgmt_map, 0, &SCIerror);
+	rs_SCIUnmapSegment(basesgmt_map, 0, &SCIerror);
 	EXIT_IF_FAIL("SCIUnmapSegment for base segment failed", SCIerror, 7);
 	DNOTICE("disconnecting base segment");
 	rs_SCIDisconnectSegment(remote_basesgmt, 0, &SCIerror);
@@ -675,12 +675,7 @@ smi_error_t _smi_sci_shutdown(void)
     DNOTICE("Closing base SCI device descriptor");
     rs_SCIClose(SCIfd,0,&SCIerror);
     EXIT_IF_FAIL("SCIClose for base segment failed", SCIerror, 10);
-    
-#ifdef HAVE_SCIINITIALIZE
-    /* this will be required in future SISCI versions */
-    SCITerminate ();
-#endif
-    
+   
     DNOTICE ("SCI finalization complete!");
     
     DSECTLEAVE;

@@ -254,14 +254,14 @@
 				RelativePath=".\coll7.c">
 			</File>
 			<File
-				RelativePath=".\test.c">
+				RelativePath="..\util\test.c">
 			</File>
 		</Filter>
 		<Filter
 			Name="Headerdateien"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd">
 			<File
-				RelativePath=".\test.h">
+				RelativePath="..\util\test.h">
 			</File>
 		</Filter>
 		<Filter

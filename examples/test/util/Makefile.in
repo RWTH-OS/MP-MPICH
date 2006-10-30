@@ -2,13 +2,9 @@ ALL: default
 ##### User configurable options #####
 
 MPIR_HOME    := @MPIR_HOME@
-CC           := @CC@
-CLINKER      := @CC@
-CCC          := @MPICPLUSPLUS@
-CCLINKER     := $(CCC)
+CC           := @MPICC@
+CLINKER      := $(CC)
 F77          := @MPIF77@
-FLINKER      := @MPIF77@
-OPTFLAGS     := @OPTFLAGS@
 ### End User configurable options ###
 
 SHELL := /bin/sh
@@ -19,7 +15,6 @@ srcdir     := @srcdir@
 
 PROFLIB :=
 CFLAGS  := @CFLAGS@ @DEFS@
-CCFLAGS := $(CFLAGS)
 FFLAGS := @FFLAGS@
 # Use LIBS to add any special libraries for C programs
 LIBS := @LIB_PATH@ @LIB_LIST@
@@ -47,10 +42,10 @@ distclean: clean
 checktestresult.c:
 	ln -s chkresult/checktestresult.c .
 
-.c:
-	$(CC) $(CFLAGS) -c $<
-	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $* $*.o $(LIBS)
+checktestresult: checktestresult.o
+	$(CLINKER) $(CFLAGS) -o $@ $^ $(LIBS)
+
 .c.o:
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) -c $< -o $@
 .f.o:
 	$(F77) $(FFLAGS) -c $<

@@ -495,7 +495,7 @@ static int rpipe_recv (int from_grank, char *sendbuf, struct MPIR_OP *op_ptr,
     misalign_size = (size_t)recv_base_addr % MPID_SMI_STREAMSIZE;
     recv_base_addr += (misalign_size == 0) ? 0 : (MPID_SMI_STREAMSIZE - misalign_size);
 
-    recv_woffset_ptr = (long * volatile )(recv_base_addr + MPID_SMI_STREAMSIZE - sizeof(long *));
+    recv_woffset_ptr = (long *)(recv_base_addr + MPID_SMI_STREAMSIZE - sizeof(long *));
     recv_roffset_ptr = recv_woffset_ptr + MPID_SMI_STREAMSIZE/sizeof(long);
 	recv_woffset = 0;
     recv_roffset = 0;
@@ -618,7 +618,7 @@ static int rpipe_send (int to_grank, char *sendbuf, struct MPIR_OP *op_ptr,
 	send_base_addr = (char *)mpid_smi_pipe_shandle[0].recv_handle->dest_addr;
 	misalign_size = (size_t)send_base_addr % MPID_SMI_STREAMSIZE;
 	send_base_addr += (misalign_size == 0) ? 0 : (MPID_SMI_STREAMSIZE - misalign_size);
-	send_woffset_ptr = (long * volatile)(send_base_addr + MPID_SMI_STREAMSIZE - sizeof(long *));
+	send_woffset_ptr = (long *)(send_base_addr + MPID_SMI_STREAMSIZE - sizeof(long *));
 	send_roffset_ptr = send_woffset_ptr + MPID_SMI_STREAMSIZE/sizeof(long);
 	send_woffset = 0;
 	send_roffset = 0;

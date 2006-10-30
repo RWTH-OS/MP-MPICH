@@ -18,7 +18,25 @@ nbr() { echo $#;}
 # tell the world who I am
 if [ $mpirun_verbose -gt 1 ] ; then
     echo "*** This is mpirun.ch_usock running on `hostname`"
+# set the usock-verbose-flag:
+    USOCK_VERBOSE="export USOCK_VERBOSE=${mpirun_verbose} ;"
 fi
+
+
+# remember if there are special sizes for short and long messages:
+if [ -n "$USOCK_SHORT_SIZE" -o -n "$USOCK_LONG_SIZE" ] ; then
+    USOCK_SIZES="export "
+fi
+if [ -n "$USOCK_SHORT_SIZE" ] ; then
+    USOCK_SIZES="$USOCK_SIZES USOCK_SHORT_SIZE=$USOCK_SHORT_SIZE"
+fi
+if [ -n "$USOCK_LONG_SIZE" ] ; then
+    USOCK_SIZES="$USOCK_SIZES USOCK_LONG_SIZE=$USOCK_LONG_SIZE"
+fi
+if [ -n "$USOCK_SIZES" ] ; then
+    USOCK_SIZES="$USOCK_SIZES ;"
+fi
+
 
 # where are we, and where should the programm run?
 BASENAME=`basename $progname`
@@ -122,7 +140,54 @@ for h in ${HOSTS} ; do
     break;
 done
 if [ ${mpirun_verbose} != 0 ] ; then
+    echo "*** mpirun.ch_usock: launching $np processes on hosts:"
+    echo "                    ${HOSTS}"
+fi
+if [ ${mpirun_verbose} -gt 1 ] ; then
     echo "*** mpirun.ch_usock: master process running on ${MASTER_HOST}"
+fi
+
+
+# depending on the login-shell of the user, we need to use "setenv" or "export" to
+# set environment variables
+# first, test if rsh towards master node works
+$rshcmd $MASTER_HOST 'echo rcmd_works' | grep rcmd_works >/dev/null
+if [ $? != "0" ] ; then
+    $ECHO "*** mpirun.ch_smi:"
+    $ECHO "    ERROR: can not launch process on node $MASTER_HOST"
+    $ECHO "           Make sure that $rshcmd works without password and"
+    $ECHO "           that the host names are correct. Aborting."
+    exit 1
+fi
+
+# This test is quite costly (1 or 2 rsh calls), but is the only reliable way to test
+# for the user's login shell on (one of the) actual compute node.
+ENV_RETCODE=`$rshcmd $MASTER_HOST 'export T=t >& /dev/null; echo $?' | tail -1`
+if [ "$ENV_RETCODE" = "0" ] ; then
+    SET_ENV=export
+    ENV_EQU="="
+else
+    ENV_RETCODE=`$rshcmd $MASTER_HOST 'setenv T t >& /dev/null; echo $?' | tail -1`
+    if [ "$ENV_RETCODE" = "0" ] ; then
+	SET_ENV=setenv
+	ENV_EQU=" "
+    else
+#	$ECHO "*** mpirun.ch_smi:"
+#	$ECHO "    WARNING: can not set environment variables (neither export nor setenv are usable)"
+	SET_ENV=""
+    fi
+fi
+
+# set required environment variables for the processes that will be launched
+EXP_ENV=""
+if [ -n "$SET_ENV" ] ; then
+    if [ -n "$ld_lib_path" ] ; then
+	MPIJOBENV="$MPIJOBENV LD_LIBRARY_PATH=$ld_lib_path"
+    fi
+    for item in $MPIJOBENV ; do
+	env_item=`echo "$item" | sed "s/=/$ENV_EQU/"`
+	EXP_ENV="$SET_ENV $env_item; $EXP_ENV"
+    done
 fi
 
 # if the user supplied no port range, set it to default:
@@ -149,7 +214,7 @@ fi
 
 common_options="${common_options} -p ${port_nbr}"
 
-if [ ${mpirun_verbose} != 0 ] ; then
+if [ ${mpirun_verbose} -gt 1 ] ; then
     echo "*** mpirun.ch_usock: listening port is ${port_nbr}"
 fi
 
@@ -206,11 +271,11 @@ for h in ${HOSTS} ; do
     fi
     if [ ${is_master} -eq 1 ] ; then
 	# the first process is the master process
-	master_launch_cmd="$Show $rshcmd $h ( cd ${WDNAME} ; ${THIS_EXENAME} ${common_options} ${master_options} -r 0 -- ${cmdLineArgs} )"
+	master_launch_cmd="$Show $rshcmd $h ( cd ${WDNAME} ; ${EXP_ENV} ${USOCK_VERBOSE} ${USOCK_SIZES} ${THIS_EXENAME} ${common_options} ${master_options} -r 0 -- ${cmdLineArgs} )"
 	is_master=0
     else
 	# this is a client process
-	client_launch_cmd="$Show $rshcmd $h ' ( cd ${WDNAME} ; sleep 2; ${THIS_EXENAME} ${common_options} ${client_options} -r ${rank_count} -- ${cmdLineArgs} ) ' &"
+	client_launch_cmd="$Show $rshcmd $h ' ( cd ${WDNAME} ; sleep 2 ; ${EXP_ENV} ${USOCK_SIZES} ${THIS_EXENAME} ${common_options} ${client_options} -r ${rank_count} -- ${cmdLineArgs} ) ' &"
 	eval $client_launch_cmd
 	rank_count=$[$rank_count+1]
     fi

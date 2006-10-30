@@ -37,6 +37,7 @@
 #include "mmu.h"
 #include "sside_macros.h"
 #include "smistat.h"
+#include "dev_smi.h"
 
 #ifdef MPID_USE_DEVTHREADS
 #include <pthread.h>

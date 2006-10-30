@@ -63,7 +63,7 @@ SOURCE=.\coll12.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\test.c
+SOURCE=..\util\test.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -71,7 +71,7 @@ SOURCE=.\test.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl;fi;fd"
 # Begin Source File
 
-SOURCE=.\test.h
+SOURCE=..\util\test.h
 # End Source File
 # End Group
 # End Target

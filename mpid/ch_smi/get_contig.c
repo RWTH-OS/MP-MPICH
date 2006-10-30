@@ -31,6 +31,7 @@
 #include "sside_memcpy.h"
 #include "mmu.h"
 #include "smistat.h"
+#include "dev_smi.h"
 
 #ifdef DMALLOC
 #include <dmalloc.h>

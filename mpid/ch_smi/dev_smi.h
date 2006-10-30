@@ -1,4 +1,4 @@
-/* $Id: dev_smi.h,v 1.4 2002/04/29 15:43:25 joachim Exp $ */
+/* $Id$ */
 
 #ifndef MPID_DEV_SMI_H
 #define MPID_DEV_SMI_H
@@ -41,7 +41,7 @@ int MPID_SMI_Get_contig (	void * origin_buf, int n, MPI_Aint target_offset,
 							volatile int * local_flag, MPI_Aint target_flag);
 
 int MPID_SMI_Rhcv (	int rank, MPID_Win * win, MPID_Handler_id id,
-					const struct iovec vector[], int count, int * local_flag);
+					const struct iovec vector[], int count, volatile int * local_flag);
 
 
 

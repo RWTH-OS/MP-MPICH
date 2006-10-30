@@ -36,6 +36,7 @@
 #include "mmu.h"
 #include "sside_macros.h"
 #include "smistat.h"
+#include "dev_smi.h"
 
 #ifdef DMALLOC
 #include <dmalloc.h>

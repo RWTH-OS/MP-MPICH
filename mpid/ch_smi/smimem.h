@@ -45,7 +45,7 @@
 	\
 	if (alignment==0)  { \
         fprintf(stderr,"[%d] ch_smi ERROR (%s:%d) : alignment to 0-byte boundary is impossible\n",\
-                MPID_SMI_myid,__FILE__,__LINE__, size); \
+                MPID_SMI_myid,__FILE__,__LINE__ ); \
         fflush(stderr); \
     	MPID_ABORT("Can't continue because of illegal use of ALIGNEDALLOCATE."); \
     } \

@@ -457,7 +457,7 @@ typedef struct {
 	int		target_offset:32;
 	int		numofdata:32;
 	int		target_winid:31;
-	int		inline_data:1;
+	unsigned int		inline_data:1;
 	int		kind_dtype:32;
 	int		size_dtype:32;
 } MPID_PKT_PUT_T;
@@ -467,7 +467,7 @@ typedef struct {
 	int	target_offset:32;
 	int	numofdata:32;
 	int	target_winid:31;
-	int	do_remote_put:1;
+	unsigned int	do_remote_put:1;
 	int	kind_dtype:32;
 	int	size_dtype:32;
 	int flag_id:32;
@@ -483,7 +483,7 @@ typedef struct {
 	int		kind_dtype:32;
 	int		size_dtype:32;
 	int		target_winid:31;
-	int		inline_data:1;
+	unsigned int		inline_data:1;
 	int		datasize:32;
 } MPID_PKT_ACCU_T;
 

@@ -72,6 +72,13 @@ smi_error_t SMI_Finalize() {
     DNOTICE("destroying lock for mis-structure");
     SMI_DESTROY_LOCK(&_smi_mis_lock);
     
+#ifndef NO_SISCI
+#ifdef HAVE_SCIINITIALIZE
+    /* this will be required in future SISCI versions */
+    SCITerminate ();
+#endif
+#endif
+    
     DSECTLEAVE;
     return(SMI_SUCCESS);
 }

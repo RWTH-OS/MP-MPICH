@@ -17,7 +17,7 @@ EXPORT_MPI_API double mpi_wtime__ ( void );
 EXPORT_MPI_API double mpi_wtime ( void );
 #else
 #pragma weak mpi_wtime_ = pmpi_wtime_
-EXPORT_MPI_API double mpi_time_ ( void );
+EXPORT_MPI_API double mpi_wtime_ ( void );
 #endif
 
 #elif defined(HAVE_ATTRIBUTE_WEAK)

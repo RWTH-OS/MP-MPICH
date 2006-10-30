@@ -14,6 +14,7 @@ default_arch='@DEFAULT_ARCH@'
 # machine='@DEFAULT_MACHINE@'
 default_device='@DEFAULT_DEVICE@'
 machine='@DEFAULT_DEVICE@'
+default_sec_device='@DEFAULT_SEC_DEVICE@'
 execer_machine=1
 cmdLineArgs=
 cmdLineArgsExecer=
@@ -60,11 +61,11 @@ master_ip_addr=""
 unicore=0
 # MetaMPICH options
 # Name of the MetaMPICH configuration file
+meta_enabled="@META@"
 metacfg=""
 metaparam=0
 usemeta=0
-META_MULTI_DEVICE="@META_MULTI_DEVICE@"
-Machines="meta paragon p4 sp1 ibmspx anlspx sgi_mp ipsc860 inteldelta cray_t3d execer smp symm_ptx"
+Machines="ch_smi ch_usock ch_shmem ch_p4"
 # options for ch_smi
 xterm=0
 console=0
@@ -200,7 +201,7 @@ cat <<EOF
             in a way which is visible to the debugger).
     -ld_lib_path <path>
             Adds <path> at the beginning of LD_LIBRARY_PATH before executing
-            the executable (implemented for ch_smi and ch_shmem).
+            the executable (implemented for ch_smi, ch_usock, and ch_shmem).
 
 Special options for the ch_usock device
     -port <nbr>
@@ -286,6 +287,10 @@ Special options or different meaning of existing options for SCI-conected cluste
            the name of the configuration file. With this option, mpirun
            launches mpirun on each machines participating in the configuration.
 
+    Alternatively, for meta-configurations you can use a syntax similar the following:
+
+    mpirun [-show] [-machine <primary_device_a>] -nodes <NODES> [-np <num>] : [-machine <primary_device_b>] -nodes <OTHER_NODES> [-np <num>] <progname> <arguments for progname>
+
 
 On exit, mpirun returns a status of zero unless mpirun detected a problem, in
 which case it returns a non-zero status (currently, all are one, but this 
@@ -323,6 +328,27 @@ if [ -f $scriptdir/mpirun.$default_device.args ] ; then
     . $scriptdir/mpirun.$default_device.args
 fi
 }
+
+#check for ":" in arguments to find out wether to use meta from commandline arguments
+nummetahosts=1
+
+for arg in $*
+do
+	if [ "${arg}" = ":" ]
+	then
+		nummetahosts=`expr ${nummetahosts} + 1`
+	fi
+done
+
+if [ ${nummetahosts} -gt 1 ]; then
+	if [ "$meta_enabled" = "yes" ] ; then
+		. $scriptdir/mpirun.meta.create
+		exit 0
+	else
+		echo "mp-mpich is not configured with --enable-meta. Hence you cannot use the ':' to define a meta-configuration."
+		exit 1
+	fi
+fi
 
 #    -xdbx   Start the first process under xdbx where possible
 while [ 1 -le $# ] ; do
@@ -1003,7 +1029,7 @@ if test -n "$PAPI_NOGUI" -a -z "$PAPI_FILE" ; then
   echo "    WARNING: you are using papi-performance monitoring whithout output destination!"
 fi
 
-#variablie for environment passings to the remote processes
+#variable for environment passings to the remote processes
 MPIJOBENV="$MPIJOBENV MPIRUNWD=$PWD_TRIAL"
 MPIJOBENV=`echo $MPIJOBENV | sed s/,/" "/g`
 

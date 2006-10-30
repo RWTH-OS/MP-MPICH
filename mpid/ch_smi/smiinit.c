@@ -569,10 +569,6 @@ int MPID_SMI_End( dev )
 	   the SCI resources. */
 	SMIcall (SMI_Barrier());
 
-    if (MPID_GetMsgDebugFlag()) {
-		MPID_PrintMsgDebug();
-    }
-    
     /* do not go further if there are still working DMA threads */
     while(MPID_SMI_Eager_DMA_working);
     
@@ -1897,7 +1893,7 @@ void MPID_SMI_Read_settings( void ) {
 								 value, keyword, SCHED_DUMMY);
 						fprintf (stdout, "   -> running with default setting\n");
 					} else
-						MPID_SMI_cfg.RESOURCE_SCHED = value;
+						MPID_SMI_cfg.RESOURCE_SCHED = (MPID_SMI_rsrc_sched_strategy_t)value;
 				}
 				/* GAP_LATENCY */
 				else if (strcasecmp(keyword, NAME_GAP_LTNCY) == 0) {

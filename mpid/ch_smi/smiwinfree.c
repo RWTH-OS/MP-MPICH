@@ -28,6 +28,8 @@
 #include "uniqtag.h"
 #include "smimem.h"
 #include "smistat.h"
+#include "sendrecvstubs.h"
+#include "mmu.h"
 
 
 

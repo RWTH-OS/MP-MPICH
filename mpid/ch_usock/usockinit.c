@@ -99,21 +99,37 @@ int  short_len, long_len;
 
     DNOTICE("device tested");
 
-    /* The short protocol MUST be for messages no longer than 
-       MPID_PKT_MAX_DATA_SIZE since the data must fit within the packet */
-    if (short_len < 0) short_len = MPID_PKT_MAX_DATA_SIZE; /* <- defined in usockpackets.h */
-    if (long_len < 0)  long_len  = 128000;
+    if (short_len < 0) {
+      short_len = MPID_PKT_MAX_DATA_SIZE; /* <- defined in usockpackets.h */
+      if(getenv("USOCK_SHORT_SIZE")!=NULL) {
+      	short_len = atoi(getenv("USOCK_SHORT_SIZE"));
+      }
+    }
+    
+    if (long_len < 0) {
+      long_len = short_len;
+      if(getenv("USOCK_LONG_SIZE")!=NULL) {
+      	long_len = atoi(getenv("USOCK_LONG_SIZE"));
+      }
+    } 
+
     global_data->long_len_value = short_len;
     dev->long_len     = &MPID_CH_USOCK_long_len;
     global_data->vlong_len_value = long_len;
     dev->vlong_len    = &MPID_CH_USOCK_long_len;
 
-    dev->short_msg    = MPID_USOCK_Short_setup();
-    dev->long_msg     = MPID_USOCK_Eagern_setup();   
+ /* dev->short_msg    = MPID_USOCK_Short_setup();  */
+    dev->short_msg    = MPID_USOCK_Eagern_setup(); /* <- We do not realy need to differ between protocols at all when
+						    |    just using socket communication --> always Eager mode!
+						    |    (See also MPID_USOCK_Eagern_isend() in usockneager.c)
+						    */
+
+    dev->long_msg     = MPID_USOCK_Eagern_setup();
     
  /* dev->vlong_msg    = MPID_USOCK_Rndvb_setup();  */
     dev->vlong_msg    = MPID_USOCK_Eagern_setup(); /* <- Since the Rendezvous-Protocol leads no good performance and
-						    |    shows a trend to deadlocks, it is temporarily disabled.
+						    |    shows a trend to deadlocks, it is disabled...
+						    |    Thus, USOCK always useses Eager mode! (s.a.)
 						    */
     dev->eager        = dev->long_msg;
     dev->rndv         = dev->vlong_msg;
@@ -136,28 +152,22 @@ int  short_len, long_len;
     /* mixed = 0; */
 #endif
   
-#if 0
-/* -TRUNK:-------- */
-    MPID_USOCK_Init( argc, argv );
-
-    dev->lrank = MPID_USOCK_Data_global.MyWorldRank;
-    dev->lsize = MPID_USOCK_Data_global.MyWorldSize;
-/* --------------- */
-
-/* -MULTIDEVICE:-- */
-    MPID_USOCK_Init( argc, argv, &lrank, &size );
-    dev->lrank = lrank;
-    dev->size  = size;
-    dev->next  = 0;
-/* --------------- */
-#else
-
     MPID_USOCK_Init( argc, argv );
 
     dev->lrank = global_data->MyWorldRank;
     dev->lsize = global_data->MyWorldSize;
-	dev->next  = 0;
-#endif
+    dev->next  = 0;
+
+    if( (getenv("USOCK_VERBOSE")!=NULL) )
+    {
+      if(atoi(getenv("USOCK_VERBOSE"))>1)
+      {
+	 printf("USOCK SHORT SIZE: %d\n", short_len);
+	 printf("USOCK LONG SIZE: %d\n", long_len);
+      }
+      printf("USOCK device initialized.\n");
+      fflush(stdout);
+    }
 
     SetThreadAffinityMask(GetCurrentThread(),1);
 

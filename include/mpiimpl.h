@@ -217,8 +217,8 @@ extern struct MPIR_DATATYPE *MPIR_PACKED_PTR;
 #define MPIR_GET_OP_PTR(op) \
     (struct MPIR_OP *)MPIR_ToPointer( op )
 #define MPIR_TEST_MPI_OP(op,ptr,comm,routine_name) \
-   if ((!(ptr) && (mpi_errno = (MPI_ERR_OP))) || \
-    (((ptr)->cookie != MPIR_OP_COOKIE) && (mpi_errno = MPI_ERR_OP)) ){\
+  if ((!(ptr)) || (((ptr)->cookie != MPIR_OP_COOKIE))) { \
+     mpi_errno = MPI_ERR_OP; \
      return MPIR_ERROR(comm,mpi_errno,routine_name);}
 
 /* coll */

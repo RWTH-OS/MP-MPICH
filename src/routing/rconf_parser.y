@@ -488,8 +488,10 @@ metahostdef     : metahostdefhead optreturn '{' optreturn mhoptionlist '}' {
 		      
 		      if ( strcmp(metaHostDefType, "ch_shmem") == 0) {
 			  metahostlist[metaHostDefH_id].deviceType=DEVICE_SHMEM;
-			  if ( metahostlist[metaHostDefH_id].numNodes != 1) 
+#if 0
+			  if ( metahostlist[metaHostDefH_id].numNodes != 1)  /* ch_shmem just uses the first node for all procs! Thus, this is no error! */
 			      CONF_ERROR("Metahost with type ch_shmem must have exactly one node");
+#endif
 		      }
 		      
 		      if ( strcmp(metaHostDefType, "ch_smi") == 0) {

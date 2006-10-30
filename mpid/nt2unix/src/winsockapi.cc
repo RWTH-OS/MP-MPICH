@@ -94,7 +94,7 @@ typedef std::deque<MessageSocket_t*> MessageQueue_t;
 // cover all global variables of this module in a struct:
 struct _Message_Struct
 {
-  _Message_Struct::_Message_Struct()
+  _Message_Struct()
   {
     LastError     = 0;
     LastOverlapped = FALSE;

@@ -253,7 +253,7 @@
 				RelativePath=".\grouptest.c">
 			</File>
 			<File
-				RelativePath=".\test.c">
+				RelativePath="..\util\test.c">
 			</File>
 		</Filter>
 		<Filter
@@ -261,7 +261,7 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath=".\test.h">
+				RelativePath="..\util\test.h">
 			</File>
 		</Filter>
 	</Files>

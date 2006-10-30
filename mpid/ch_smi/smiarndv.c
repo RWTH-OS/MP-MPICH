@@ -19,28 +19,6 @@
                                            SMI_Signal_send((dest)|SMI_SIGNAL_ANY);
 
 
-/* Prototype definitions */
-int MPID_SMI_Arndv_setup (void);
-void MPID_SMI_Arndv_delete (void);
-
-int MPID_SMI_Arndv_isend (void *, int, int, int, int, int, 
-									MPID_Msgrep_t, MPIR_SHANDLE *, struct MPIR_DATATYPE * );
-int MPID_SMI_Arndv_irecv (MPIR_RHANDLE *, int, void *);
-
-int MPID_SMI_Arndv_send_ack (void *, int);
-int MPID_SMI_Arndv_recv_ack (void *, int);
-
-int MPID_SMI_Arndv_unxrecv_start (MPIR_RHANDLE *, void *);
-int MPID_SMI_Arndv_unxrecv_end (MPIR_RHANDLE *);
-int MPID_SMI_Arndv_unxrecv_test_end (MPIR_RHANDLE *);
-int MPID_SMI_Arndv_send_wait (MPIR_SHANDLE *);
-int MPID_SMI_Arndv_send_test_ack (MPIR_SHANDLE *);
-int MPID_SMI_Arndv_send_wait_ack (MPIR_SHANDLE *);
-
-int MPID_SMI_Arndv_cancel_send (MPIR_SHANDLE *shandle);
-int MPID_SMI_Arndv_cancel_recv (MPIR_RHANDLE *runex);
-
-
 /* imports */
 extern MPID_SMI_Rndv_int_t MPID_SMI_Rndv_int;
 

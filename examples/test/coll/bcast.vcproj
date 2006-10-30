@@ -318,7 +318,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="test.c">
+				RelativePath="..\util\test.c">
 				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
@@ -357,7 +357,7 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;fi;fd">
 			<File
-				RelativePath="test.h">
+				RelativePath="..\util\test.h">
 			</File>
 		</Filter>
 	</Files>

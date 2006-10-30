@@ -36,6 +36,10 @@ typedef struct {
 
 static int MPID_SMI_Lamport_read_unlock (mutex_id *);
 static int MPID_SMI_Lamport_unlock(mutex_id *);
+static int MPID_SMI_Lamport_init (mutex_id *ID);
+static int MPID_SMI_Lamport_destroy(mutex_id *ID);
+static int MPID_SMI_Lamport_lock(mutex_id *ID);
+static int MPID_SMI_Lamport_readlock(mutex_id *ID);
 
 /* The variable all_mutex allotes a number to a mutex-identifier. 
 	A mutex-identifier contains all necessary informations to use a mutex- 
@@ -294,8 +298,7 @@ int MPID_SMI_Mutex_unlock (ID)
 /* When the system has no contention, a process enters the critical section  */
 /* by O(1) statements. In worst case the process has to visit N variables.   */
 /*****************************************************************************/ 
-int MPID_SMI_Lamport_init (ID)
-	mutex_id	*ID;
+static int MPID_SMI_Lamport_init (mutex_id *ID)
 {
 	int 	error;
 	int 	i;
@@ -338,8 +341,7 @@ int MPID_SMI_Lamport_init (ID)
 }
 
 
-int MPID_SMI_Lamport_destroy(ID)
-	mutex_id	*ID;
+static int MPID_SMI_Lamport_destroy(mutex_id *ID)
 {
 	if (ID->shmaddr == NULL)
 		return 0;
@@ -353,8 +355,7 @@ int MPID_SMI_Lamport_destroy(ID)
 }
 
 
-int MPID_SMI_Lamport_lock(ID)
-	mutex_id	*ID;
+static int MPID_SMI_Lamport_lock(mutex_id *ID)
 {
 	volatile int *x, *y;
 	volatile int *request;
@@ -421,8 +422,7 @@ int MPID_SMI_Lamport_lock(ID)
 }
 
 
-int MPID_SMI_Lamport_readlock(ID)
-	mutex_id	*ID;
+static int MPID_SMI_Lamport_readlock(mutex_id *ID)
 {
 	volatile int *x, *y;
 	volatile int *request;

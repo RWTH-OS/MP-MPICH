@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "mpi.h"
-#include "test.h"
+#include "../util/test.h"
 
 /* nbr of MPI_INTs send to each process */
 #define DATASIZE 4

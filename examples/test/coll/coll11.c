@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include "mpi.h"
-#include "test.h"
+#include "../util/test.h"
 
 void addem(int *invec, int *inoutvec, int *len, MPI_Datatype *dtype)
 {

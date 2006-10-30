@@ -61,7 +61,7 @@ SOURCE=.\scantst.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\test.c
+SOURCE=..\util\test.c
 # End Source File
 # End Group
 # Begin Group "Header-Dateien"
@@ -69,7 +69,7 @@ SOURCE=.\test.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=.\test.h
+SOURCE=..\util\test.h
 # End Source File
 # End Group
 # End Target

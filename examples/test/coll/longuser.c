@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "mpi.h"
-#include "test.h"
+#include "../util/test.h"
 
 /*
  * User-defined operation on a long value (tests proper handling of

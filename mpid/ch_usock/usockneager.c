@@ -60,22 +60,27 @@ struct MPIR_DATATYPE *dtype;
     int res;
     MPID_PKT_LONG_T  *pkt;
     MPID_PKT_LONG_T  pkt_cont;
-    WSABUF SBuf[1];   
+    WSABUF SBuf[2];   
 
     DSECTENTRYPOINT;
 
     MPID_USOCK_Test_device(MPID_devset->active_dev, "Eagern_isend");
 
-    /*   WORKAROUND:
+    /*
      |   To avoid validity problems with the pkt-buffer and since its shipping
-     |   is always a blocking WSASend() (also a workaround), we placed it on
-     |   stack (see above) instead of calling this omitted malloc():
+     |   is always a blocking WSASend(), we placed it on stack (see above)
+     |   instead of calling this omitted malloc():
      |
      |   pkt = MALLOC(sizeof(MPID_PKT_LONG_T));
      */
 
-    pkt=&pkt_cont;
-
+    /* Is this a short message? */
+    if( len <  MPID_CH_USOCK_long_len() )
+    {
+      pkt=(MPID_PKT_LONG_T*)alloca(sizeof(MPID_PKT_LONG_T)+len);
+    }
+    else pkt=&pkt_cont;
+    
     shandle->start=pkt;  
     pkt->mode	        = MPID_PKT_LONG;
     pkt_len	        = sizeof(MPID_PKT_LONG_T); 
@@ -94,29 +99,58 @@ struct MPIR_DATATYPE *dtype;
     /* Send as packet only */
     MPID_DRAIN_INCOMING_FOR_TINY(1);
 
-    /*   WORKAROUND:
+    /*
      |   To avoid synchronisation faults when using the overlapped mode of WASSend()
      |   we send all control messages via the blocking mode, while the user parts of
      |   the messages mut be sent in an overlapped manner to avoid deadlocks:
      */
 
-    /* firstly send the control message NOT_OVERLAPPD: */
-    SBuf[0].len=pkt_len;
-    SBuf[0].buf=(char*)pkt;
+    if(  len < MPID_CH_USOCK_long_len() )
+    {
+      /*
+       |  This is a short message, nevertheless, we handle it in eager mode!
+       |  Hence, the short protocol is disabled, but we can provide the same
+       |  small latencies of the former short protocol by just copying the 
+       |  (short) message buffer after this long-type packet:
+       */
 
-    res=MPID_USOCK_SendChannel(SBuf, pkt_len, 1, dest_dev_lrank, shandle->sid, WSA_NOT_OVERLAPPED);
+      MEMCPY( pkt+1, buf, len );
 
-    /* after this send the user message OVERLAPPED in a separated WSASend: */
-    SBuf[0].len=len;
-    SBuf[0].buf=(char*)buf;
+      SBuf[0].len=pkt_len+len;
+      SBuf[0].buf=(char*)pkt;
+      
+      res=MPID_USOCK_SendChannel(SBuf, pkt_len+len, 1, dest_dev_lrank, shandle->sid, WSA_NOT_OVERLAPPED);
+    }
+    else
+    {
+      if( len < MPID_CH_USOCK_vlong_len() )
+      {
+	SBuf[0].len=pkt_len;
+	SBuf[0].buf=(char*)pkt;
 
-    res=MPID_USOCK_SendChannel(SBuf, len, 1, dest_dev_lrank, shandle->sid, WSA_OVERLAPPED);
-
-    /*   This is old call with two buffers to send:
-     |   res=MPID_USOCK_Send(SBuf, pkt_len+len, 1, dest_dev_lrank, shandle->sid, WSA_OVERLAPPED);
-     |
-     |   (One day we'll may return to this ...)
-     */
+	SBuf[1].len=len;
+	SBuf[1].buf=(char*)buf;
+      
+	res=MPID_USOCK_SendChannel(SBuf, pkt_len+len, 2, dest_dev_lrank, shandle->sid, WSA_NOT_OVERLAPPED);
+      }
+      else
+      {
+	/* firstly send the control message NOT_OVERLAPPD: */
+	SBuf[0].len=pkt_len;
+	SBuf[0].buf=(char*)pkt;
+      
+	res=MPID_USOCK_SendChannel(SBuf, pkt_len, 1, dest_dev_lrank, shandle->sid, WSA_NOT_OVERLAPPED);
+      
+	/* after this send the user message OVERLAPPED in a separated WSASend: */
+	SBuf[0].len=len;
+	SBuf[0].buf=(char*)buf;
+          
+	if(len!=0)
+	  res=MPID_USOCK_SendChannel(SBuf, len, 1, dest_dev_lrank, shandle->sid, WSA_OVERLAPPED);
+	else
+	  res=0;
+      }
+    }
 
     if(!res)  /* The send operation completed already */ 
     {
@@ -139,7 +173,7 @@ struct MPIR_DATATYPE *dtype;
     }
     shandle->cancel  = 0;
     shandle->partner = dest_dev_lrank;
-    
+
     DSECTLEAVE
       return MPI_SUCCESS;
 }

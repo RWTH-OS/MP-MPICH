@@ -187,6 +187,25 @@ MPID_Init(argc, argv, config, error_code)
       int global_rank, metahost_rank;
       MPID_Device *primary_dev;
       
+      /* 
+       * check for verbose startup
+       * this is necessary to be able to have verbose output before MPIR_Init has been called
+       */
+      for (i=1; i<*argc; i++) {
+      	if ((*argv)[i]) {
+			if (strcmp((*argv)[i],"-metaverbose" ) == 0) {
+			    RDEBUG_verbose = 1;
+			}
+      	}
+      }
+      if (RDEBUG_verbose){
+	  	strcpy(RDEBUG_dbgprefix, "[");
+	  	strcat(RDEBUG_dbgprefix, MPIR_meta_cfg.my_metahostname);
+	  	strcat(RDEBUG_dbgprefix, "|" );
+	  	strcat(RDEBUG_dbgprefix, MPIR_meta_cfg.nodeName);
+	  	strcat(RDEBUG_dbgprefix, "]" );
+      }	
+      
       if( use_ch_gm ) {
 #ifdef CH_GM_PRESENT
 	  /* ch_gm is a very special case */
@@ -277,13 +296,13 @@ MPID_Init(argc, argv, config, error_code)
 	     ************** */ 
 	  
 	  /* initialize device */
-
+	  PRVERBOSE("Initializing primary device...\n");
 	  dev = (p->device_init) (argc, argv, MPID_Short_len, -1);
 	  if (!dev) {
 	      *error_code = MPI_ERR_INTERN;
 	      RETURN;
 	  }
-	  
+	  PRVERBOSE("Primary device initialized.\n");
 	  /* needed for the initialization of ch_tunnel below */
 	  primary_dev = dev;
 	  
@@ -403,9 +422,21 @@ MPID_Init(argc, argv, config, error_code)
 	      *error_code = MPI_ERR_INTERN;
 	      RETURN;
 	  }
-	  
+      
+      
+	  if (RDEBUG_verbose){
+	  	fprintf(stderr, "%sStarting secondary device initialization with cmdLine:", RDEBUG_dbgprefix);
+	  	for (i = 0; i < MPID_SecondaryDevice_argc; i++ ) {
+	  		fprintf(stderr, " %s", MPID_SecondaryDevice_argv[i]);
+	  	}
+	  	fprintf(stderr, "\n");
+	  	fflush(stderr);
+	  }
+  	
 	  /* call device initialization function for secondary device with fake command line arguments */
 	  dev = (p->device_init)( &MPID_SecondaryDevice_argc, &MPID_SecondaryDevice_argv, MPID_Short_len, -1 );
+  
+	  PRVERBOSE("Secondary device initialization done.\n");
 	  
 	  /* include device in list of different devices */
 	  dev->next = MPID_devset->dev_list;
