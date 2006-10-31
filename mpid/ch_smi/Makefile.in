@@ -144,10 +144,6 @@ staticlib: default
 libs: staticlib sharedlib
 
 distclean: clean
-	@for file in ${DEVHEADERS} ${DEVSOURCE} ; do  \
-	    if [ -h $$file ] ; then \
-	        rm -f $$file ; fi \
-	done
 	@if [ -d p2ptest -a -s p2ptest/Makefile ] ; then \
 	    rm -f p2ptest/Makefile ; fi
 	@cd ${SMI_HOME}; $(MAKE) distclean
@@ -156,10 +152,14 @@ distclean: clean
 libclean: clean
 	rm -f $(LIBNAME)
 
-devclean: removelinks
+devclean: 
 	@rm -f *~ $(DEVOBJECTS) mprerr.o
 
 clean: devclean
+	@for file in ${DEVHEADERS} ${DEVSOURCE} ; do  \
+	    if [ -h $$file ] ; then \
+	        rm -f $$file ; fi \
+	done
 	@cd ${SMI_HOME}; $(MAKE) clean
 
 setlinks:
@@ -171,17 +171,6 @@ setlinks:
 	    if [ ! -s $$file -a -s ${top_srcdir}/mpid/util/$$file ] ; then \
 		ln -s ${top_srcdir}/mpid/util/$$file $$file ; fi ; \
 	done
-
-removelinks:
-	@for file in $(DEVHEADERS) $(DEVSOURCE) ; do  \
-	    if [ ! -s $$file -a -s ../lfbs_common/$$file ] ; then \
-	 	rm -f $$file ; fi ; \
-	    if [ ! -s $$file -a -s ${top_srcdir}/mpid/ch2/$$file ] ; then \
-	 	rm -f $$file ; fi ; \
-	    if [ ! -s $$file -a -s ${top_srcdir}/mpid/util/$$file ] ; then \
-		rm -f $$file ; fi ; \
-	done
-
 
 .c.o:
 	$(CC) $(CFLAGS) -c $< -o $@ $(MPI_PROFILE)
