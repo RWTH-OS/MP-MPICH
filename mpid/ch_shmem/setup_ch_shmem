@@ -10,7 +10,6 @@ fi
 
 #indicate presence of device
 CFLAGS="$CFLAGS -DCH_SHMEM_PRESENT"
-FFLAGS="$FFLAGS -DCH_SHMEM_PRESENT"
 
 # force linking of device lib in static case
 CLINKERSTATICOPTS="${CLINKERSTATICOPTS} -Wl,-u,MPID_CH_SHMEM_InitMsgPass"

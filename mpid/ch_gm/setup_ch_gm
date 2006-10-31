@@ -7,7 +7,6 @@
 
 #indicate presence of device
 CFLAGS="$CFLAGS -DCH_GM_PRESENT"
-FFLAGS="$FFLAGS -DCH_GM_PRESENT"
 
 # force linking of device lib in static case
 CLINKERSTATICOPTS="${CLINKERSTATICOPTS} -Wl,-u,MPID_CH_GM_InitMsgPass"
