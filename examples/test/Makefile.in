@@ -41,7 +41,7 @@ subdirs:
 			echo " " ;\
 			echo "   Making in directory $$dir" ;\
 			if [ -d $$dir -a -s $$dir/Makefile ] ; then \
-			    (cd $$dir; $(MAKE)) ; fi ;\
+			    (cd $$dir && $(MAKE)) || exit 1 ; fi ;\
 		done
 
 linktest:
@@ -50,7 +50,7 @@ linktest:
 			echo " " ;\
 			echo "   Making linktest in directory $$dir" ;\
 			if [ -d $$dir -a -s $$dir/Makefile ] ; then \
-			    (cd $$dir; $(MAKE) linktest) ; fi ;\
+			    (cd $$dir && $(MAKE) linktest) || exit 1 ; fi ;\
 		done
 
 # Make sure that everything works (don't run the tests if mpirun fails
@@ -58,9 +58,8 @@ linktest:
 # environment (only the pt2pt test has this option).  runtest exits with 1 if
 # the test fails, which will cause the Make to exit.
 runtest:
-	if [ "$(MPITEST_IGNORE_RUNTEST)" != yes ] ; then \
-	(cd util && make) ; \
-	(cd pt2pt && ./runtests $(TESTARGS) -check ) ; fi
+	cd util && $(MAKE)
+	cd pt2pt && ./runtests $(TESTARGS) -check
 
 #
 # This also cleans the files after the testing to keep the
@@ -84,18 +83,16 @@ testing: runtest
 	@echo "<MPISOURCE>@MPIPATH@</MPISOURCE>" >> summary.xml
 	@-for dir in $(TESTDIRS) ;\
 		do \
-			echo " " ;\
 			if [ ! -d $$dir -o ! -s $$dir/Makefile ] ; then \
 				continue ; fi ; \
+			echo " " ;\
 			echo "   Making testing in directory $$dir" ;\
-			(export MPITEST_STOPTEST ; cd $$dir ; $(MAKE) testing TESTARGS="-small -summaryfile=../summary.xml $(TESTARGS)" ; \
-			 $(MAKE) clean > /dev/null 2>&1 ) ;\
-			echo End of testing in directory $$dir ;\
+			(export MPITEST_STOPTEST && cd $$dir && $(MAKE) testing TESTARGS="-small -summaryfile=../summary.xml $(TESTARGS)" && \
+			 $(MAKE) clean > /dev/null 2>&1 ) || exit 1 ;\
 		done
 	@-if [ "@MPI_VERSION@" = "MPICH" ] ; then \
 	    echo "Running tests in directory command" ; \
-	    (cd command && ./runtests -summaryfile=../summary.xml ) ;\
-	    echo "End of testing in directory command" ; \
+	    (cd command && ./runtests -summaryfile=../summary.xml ) || exit 1 ;\
 	fi
 	@echo '</MPITESTRESULTS>' >> summary.xml
 
@@ -127,37 +124,32 @@ testing-boot:
 testing_save: runtest
 	@-for dir in $(TESTDIRS) ;\
 		do \
-			echo " " ;\
 			if [ ! -d $$dir -o ! -s $$dir/Makefile ] ; then \
 				continue ; fi ; \
+			echo " " ;\
 			echo "   Making testing in directory $$dir" ;\
-			(cd $$dir; $(MAKE) testing TESTARGS="-small $(TESTARGS)" ; \
-			 if [ -s $$dir.diff ] ; then cp $$dir.diff .. ; fi ; \
-			 $(MAKE) clean > /dev/null 2>&1 ) ;\
-			echo End of testing in directory $$dir ;\
+			(cd $$dir && $(MAKE) testing TESTARGS="-small $(TESTARGS)" && \
+			 if [ -s $$dir.diff ] ; then cp $$dir.diff .. ; fi && \
+			 $(MAKE) clean > /dev/null 2>&1 ) || exit 1 ;\
 		done
 
 clean:
-	@-rm -f test.log testing.log *.diff sendchar.sun4 sendchar.freebsd \
-		sendshort.sun4 sendshort.freebsd *.o \
-		sendvector.sun4 sendvector.freebsd \
-		sendstruct.sun4 sendstruct.freebsd \
-		sendchar sendshort sendvector sendstruct \
-		work.pc work.pcl
 	@for dir in $(SUBDIRS) ;\
 		do \
 			if [ ! -d $$dir -o ! -s $$dir/Makefile ] ; then \
 			    continue ; fi ; \
 			echo "     directory test/$$dir" ;\
-			(cd $$dir; $(MAKE) clean) ;\
+			(cd $$dir && $(MAKE) clean) || exit 1 ;\
 		done
+	-rm -f test.log testing.log *.diff *.o sendchar sendshort sendvector \
+		sendstruct work.pc work.pcl
 
 distclean: clean
-	-rm -f Makefile runtests config.status config.log command/runtests
 	@for dir in $(SUBDIRS) ;\
 		do \
 			if [ ! -d $$dir -o ! -s $$dir/Makefile ] ; then \
 			    continue ; fi ; \
 			echo "     directory test/$$dir" ;\
-			(cd $$dir; $(MAKE) distclean) ;\
+			(cd $$dir && $(MAKE) distclean) || exit 1 ;\
 		done
+	-rm -f Makefile runtests config.status config.log command/runtests
