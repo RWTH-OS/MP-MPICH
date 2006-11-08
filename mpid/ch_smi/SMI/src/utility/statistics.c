@@ -129,7 +129,7 @@ void _smi_runtime_statistics ( void )
     longlong_t ticks;
     int i, proc;
     int calls = 0;
-    double tns, tus, overhead;
+    double tus, overhead;
     char smin[10], smax[10], savg[10], sacc[13];
 	 
     if (_smi_do_statistics) {
@@ -145,12 +145,11 @@ void _smi_runtime_statistics ( void )
 		sleep(1);
 	    } else {
 		/* print header */
-		tns = (double)1000/((double)cpu_frq);
 		tus = (double)1/((double)cpu_frq);
 		fprintf(stderr, "\nSMI run-time library statistics (proc %d):\n",
 			_smi_my_proc_rank);
 		fprintf(stderr, "based on CPU frequency of %d MHz\n",
-			cpu_frq, tns);
+			cpu_frq);
 		fprintf(stderr, "%-25s %-9s %-9s %-9s %-9s %-9s\n",
 			"function", "#calls", "min [us]", "max [us]", "avg [us]", "acc [s]");
 		fprintf(stderr, "====================================="

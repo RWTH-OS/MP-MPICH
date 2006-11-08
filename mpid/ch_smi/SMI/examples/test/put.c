@@ -96,7 +96,7 @@ int sender (int my_rank, int reg_size, int loops)
     for (l = 0; l < loops; l++) {
 	/* tranfer the data of this region to the remote region */
 	if (verbose)
-	    printf ("[%d] transfering data using DMA.\n", my_rank, my_rank); fflush (stdout);
+	    printf ("[%d] transfering data using DMA.\n", my_rank); fflush (stdout);
 	SMI_Imemcpy (rmt_buffer, local_buffer, reg_size, SMI_MEMCPY_LS_RS, &mc_handle);
 	SMI_Memwait (mc_handle);
 	SMI_Signal_send ((1-my_rank)|SMI_SIGNAL_ANY);

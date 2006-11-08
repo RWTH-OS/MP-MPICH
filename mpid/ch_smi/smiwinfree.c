@@ -67,11 +67,11 @@ int MPID_SMI_Win_free (win)
 	for (i = 0; i < num_proc; i++) {
 		if (i == myrank) 
 			continue;
-		MPID_SMI_Shreg_disconnect (MPID_SMI_Get_shreg (win->devinfo.w_smi.tgt_cmpltcnt_rmt[i]));
+		MPID_SMI_Shreg_disconnect (MPID_SMI_Get_shreg ((void*)win->devinfo.w_smi.tgt_cmpltcnt_rmt[i]));
 		MPID_SMI_Shreg_disconnect (MPID_SMI_Get_shreg (win->devinfo.w_smi.frames[i].start_address));
 	}
 	/* free the job counter in local shared memory */
-	MPID_SMI_Free_mem (win->devinfo.w_smi.ogn_cmpltcnt);
+	MPID_SMI_Free_mem ((void*)win->devinfo.w_smi.ogn_cmpltcnt);
 
 	MPID_FIFO_destroy(win->devinfo.w_smi.putaccu_req_fifo);
 	MPID_FIFO_destroy(win->devinfo.w_smi.get_req_fifo);

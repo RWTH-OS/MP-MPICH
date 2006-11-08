@@ -1,4 +1,4 @@
-/* $Id: sisci_memcpy.c,v 1.1 2004/03/19 22:14:17 joachim Exp $
+/* $Id$
    use the SISCI builtin function for memory transfers */
 
 #include <string.h>
@@ -28,7 +28,7 @@ void *_smi_sisci_memcpy(void *dest, const void *src, size_t len)
 	/* SCIMemCopy() needs 4-byte size alignment */
 	cpy_len = len - (len%4);
 	do {
-	    SCIMemCopy(src, rmtmap, ((unsigned long)dest) - ((unsigned long)rmtseg->address),
+	    SCIMemCopy((void *)src, rmtmap, ((unsigned long)dest) - ((unsigned long)rmtseg->address),
 		       cpy_len, 0 /* SCI_FLAG_ERROR_CHECK */, &sisci_err);
 	} while (sisci_err == SCI_ERR_TRANSFER_FAILED);
 #else

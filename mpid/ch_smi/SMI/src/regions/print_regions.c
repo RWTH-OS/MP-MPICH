@@ -21,7 +21,7 @@ void _smi_print_segment(shseg_t* seg)
 #ifdef _WIN64
 	fprintf(stderr,"    ID/FD = %i/%I64l\n\n", (int) seg->id, seg->fd);
 #else
-   fprintf(stderr,"    ID/FD = %i/%l\n\n", (int) seg->id, (unsigned long) seg->fd);
+   fprintf(stderr,"    ID/FD = %i/%lu\n\n", (int) seg->id, (unsigned long) seg->fd);
 #endif
 #else /* NO_SISCI */
    fprintf(stderr,"    ID = %i\n\n", (int) seg->id);

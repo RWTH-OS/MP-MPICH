@@ -246,7 +246,7 @@ static smi_error_t _smi_create_internal_regions_sci(unsigned int int_segsize)
 	}
 	else {
 	    char* address_to_be_used_for_map;
-	    _smi_ll_bcast(&sgmt_sci_ids[_smi_first_proc_on_node(node)], 1, _smi_first_proc_on_node(node),  _smi_my_proc_rank);
+	    _smi_ll_bcast((int*)&sgmt_sci_ids[_smi_first_proc_on_node(node)], 1, _smi_first_proc_on_node(node),  _smi_my_proc_rank);
 	    _smi_ll_bcast((int*)&address_to_be_used_for_map, 1, _smi_first_proc_on_node(node),  _smi_my_proc_rank);
 	    for (adpt = 0; adpt < _smi_nbr_adapters[_smi_my_proc_rank]; adpt++) {
 		DNOTICEI("checking availability of adapter:", adpt);

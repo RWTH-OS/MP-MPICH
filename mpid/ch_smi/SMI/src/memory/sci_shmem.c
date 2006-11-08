@@ -300,7 +300,7 @@ smi_error_t _smi_unmap_sci_shared_segment(shseg_t *shseg)
 
     rs_SCIUnmapSegment(shseg->map, 0, &sci_error);
 	if (sci_error != SCI_ERR_OK) {
-		DERRORP("SCIUnmapSegment() failed with error",sci_error);
+		DERRORP("SCIUnmapSegment() failed with error",&sci_error);
 		retval = SMI_ERR_MAPFAILED;
 	}    
 #endif
