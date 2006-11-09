@@ -1246,6 +1246,7 @@ if test "${with_ibhome+set}" = set; then
 
 	    # Extract arch-specific args
 	    IBHOME=$withval
+	    IBHOME_LIB=$IBHOME/lib/
 
 else
   IBHOME="./infiniband/"
