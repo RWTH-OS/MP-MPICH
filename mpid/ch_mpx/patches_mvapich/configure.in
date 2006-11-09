@@ -14,6 +14,7 @@ AC_ARG_WITH([ibhome],AS_HELP_STRING(--with-ibhome=IBHOME,
 	    [[
 	    # Extract arch-specific args
 	    IBHOME=$withval
+	    IBHOME_LIB=$IBHOME/lib/
 	    ]],[IBHOME="./infiniband/"])
 
 AC_ARG_WITH([hca],AS_HELP_STRING(--with-hca=HCA_TYPE,

@@ -202,9 +202,10 @@ echo "ch_mpx: configuring `upcase $MPX_IMPL` with $MPX_CONF"
 #
 case "$MPX_IMPL" in
 "mvapich")
-    set `cat $MPX_HOME/config.status | grep BASE_LIB_LIST=`
-    eval BASE_LIB_LIST=`echo $BASE_LIB_LIST`
+    eval `cat $MPX_HOME/config.status | grep BASE_LIB_LIST=`
+    set  "BASE_LIB_LIST=`echo $BASE_LIB_LIST`"
     LIB_LIST="$LIB_LIST $BASE_LIB_LIST"
+    echo "ch_mpx: LIB_LIST=$LIB_LIST"
 ;;
 esac
 
