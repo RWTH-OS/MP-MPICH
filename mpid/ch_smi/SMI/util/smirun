@@ -1,8 +1,9 @@
 #! /bin/sh
 # smirun, based on mpirun
 #
-# $Id: smirun.in,v 1.1 2004/03/19 22:14:48 joachim Exp $
+# $Id$
 #
+#set -x
 jobid=$$
 progname=
 fake_progname=
@@ -15,7 +16,7 @@ cmdLineArgsExecer=
 cmdline=
 CAC=
 #use_execer=0
-mpirun_verbose=0
+smirun_verbose=0
 nolocal=0
 just_testing=0
 machineFile=
@@ -23,6 +24,7 @@ debugger=""
 commandfile=""
 rmcommandfile=""
 rshcmd=rsh
+all_local=0
 narch=0
 stdinfile=
 stdoutfile=
@@ -53,9 +55,9 @@ PrintHelp() {
 # the man pages are updated.
 #
 cat <<EOF
-smiirun [smirun_options...] <progname> [options...]
+smirun [smirun_options...] <progname> [options...]
 
-  smiirun_options:
+  smirun_options:
     -h      This help
 
     -machinefile <machine-file name>
@@ -76,7 +78,7 @@ smiirun [smirun_options...] <progname> [options...]
             if there is no input and you intend to run the program in the
             background.  An alternate is to redirect standard input from
             /dev/null, as in 
-                  mpirun -np 4 a.out < /dev/null
+                  smirun -np 4 a.out < /dev/null
 
     -t      Testing - do not actually run, just print what would be
             executed
@@ -180,7 +182,7 @@ while [ 1 -le $# ] ; do
     -nolocal)
         nolocal=1
 	;;
-    -h)
+    -h|-help)
 	PrintHelp
 	exit 1
 	;;
@@ -191,7 +193,7 @@ while [ 1 -le $# ] ; do
         pager=1
         ;;
     -v|-verbose)
-	mpirun_verbose=1
+	smirun_verbose=1
 	;;
     -t|-show|-test)
 	just_testing=1
@@ -217,15 +219,6 @@ while [ 1 -le $# ] ; do
         smistaton=1
         ;;
     *)
-        # First see if the device knows about this argument:
-        if [ -x $MPIRUN_HOME/mpirun.$default_device.args ] ; then
-            device_knows_arg=0
-	    . $MPIRUN_HOME/mpirun.$default_device.args
-            # If the device handled it, skip to the top of the while loop
-            # on arguments.  ? Does this need to do a shift?  If so, 
-	    # should the number of shifts be the value of the arg?
-            if [ $device_knows_arg != 0 ] ; then continue ; fi
-        fi
 	# The first unrecognized argument is assumed to be the name of
 	# the program, but only if it is executable
 	proginstance=`echo $arg | sed "s/%a/$arch/g"`
@@ -290,7 +283,10 @@ if [ "$globuspgfile" = "" -a "$progname" = "" ] ; then
   echo "Missing: program name"
   if [ "$fake_progname" != "" ] ; then
       echo "Program $fake_progname either does not exist, is not "
-      echo "executable, or is an erroneous argument to mpirun."
+      echo "executable, or is an erroneous argument to smirun."
+      echo ""
+      echo "Try smirun -h for help about supported arguments."
+      echo ""
   fi
   exit 1
 fi
@@ -401,6 +397,10 @@ DIRNAME=`dirname $progname`
 if [ -n "$nodes" ] ; then
     NBR_HOSTS=`nbr $nodes`
     HOSTS=$nodes
+    if [ $np = 0 ] ; then
+	# set number of processes if it was not given as an option
+	np = $NBR_HOSTS
+    fi
     all_local=0
 else
     # find a machine file and find the hosts to use
@@ -415,12 +415,15 @@ else
     fi
     
     if [ -n "$machineFile" ] ; then
-	if [ $mpirun_verbose = 1 ] ; then
+	if [ $smirun_verbose = 1 ] ; then
 	echo "using "$machineFile" to specify the hosts"
 	fi
 	HOSTS=`cat $machineFile | awk 'NF==0 {exit} {print}'` 
 	NBR_HOSTS=`nbr $HOSTS`
-	if [ ! -n "$np0" ] ; then
+	# if -np was not specified, set it to number of hosts found in machinefile (does this work at all??)
+        if [ $np = 0 ] ; then
+	    echo "Warning: You have not specified the number of processes (-np),"
+	    echo "using number of hosts found in machinefile"
 	    np=$NBR_HOSTS
 	fi  
 	all_local=0
@@ -428,11 +431,15 @@ else
 	# no machineFile found - run all processes on the local host
 	i=0
 	HOSTNAME=`hostname`
+	# if -np was not specified, set it to 1
+	if [ $np = 0 ] ; then
+	    np=1
+	fi
 	while [ $i -lt $np ] ; do 
 	    HOSTS="$HOSTS $HOSTNAME"
 	    i=`expr $i + 1`;
 	done
-	if [ $mpirun_verbose = 1 ] ; then
+	if [ $smirun_verbose = 1 ] ; then
 	    echo "no machines file found, running all $np processes on $HOSTNAME"
 	fi
 	NBR_HOSTS=`nbr $HOSTS`
@@ -509,7 +516,7 @@ fi
 
 # if device configuration file is specified, add it to the command line options
 if [ -n "$devFile" ] ; then
-   if [ $mpirun_verbose = 1 ] ; then
+   if [ $smirun_verbose = 1 ] ; then
      echo "using "$devFile" as device configuration file"
    fi
    options="-d $devFile"
@@ -518,7 +525,7 @@ fi
 # set initialization host
 INIT_HOST=`firsthost $HOSTS`
 
-if [ $mpirun_verbose = 1 ] ; then
+if [ $smirun_verbose = 1 ] ; then
     echo "using $INIT_HOST as initialization host"
 fi
 
@@ -527,7 +534,7 @@ MAGIC_NUMBER=`date '+%S'`
 options="$options -h $INIT_HOST -m $MAGIC_NUMBER"
   
 # verbose startup in ch_smi, too ?
-if [ $mpirun_verbose = 1 ] ; then
+if [ $smirun_verbose = 1 ] ; then
     options="$options -v"
 fi
 
@@ -536,14 +543,15 @@ if [ -n "$SMI_SYNCPORT" ] ; then
     options="$options -p $SMI_SYNCPORT"
 fi
 
+# the following is obsolete now
 # set number of processes
-if [ ! -n "$np" ] ; then
-    if [ -n "$machineFile"] ; then
-	np=$NBR_HOSTS
-    else
-	np=1
-    fi
-fi
+#if [ $np -eq 0 ] ; then
+#    if [ "$machineFile" != "" ] ; then
+#	np=$NBR_HOSTS
+#    else
+#	np=1
+#    fi
+#fi
 
 # are enough hosts specified for the desired number of processes ?
 if [ $NBR_HOSTS -lt $np ] ; then
@@ -563,7 +571,7 @@ if [ "$pager" = 1 ] ; then
     LESS=more
   fi
   LESS="$LESS $PAGEROPTS"
-  if [ $mpirun_verbose = 1 ] ; then
+  if [ $smirun_verbose = 1 ] ; then
     echo "using $LESS as pager"
   fi
 fi
@@ -613,7 +621,7 @@ i=0
 for host in $HOSTS
 do
     # more info
-    if [ $mpirun_verbose = 1 ] ; then
+    if [ $smirun_verbose = 1 ] ; then
 	echo "launching process $i of $np on $host"
     fi
 
@@ -633,19 +641,31 @@ do
     rcmd="(cd $DIRNAME; ./$BASENAME -r $i -n $np $options -- $cmdLineArgs $out $err $input)"
     xrcmd="$progname -r $i -n $np $options -- $cmdLineArgs $input 2>&1"
     xprcmd="$progname -r $i -n $np $options -- $cmdLineArgs $input 2>&1 | $LESS"
-    # mpirun is not supposed to return until the MPI application has exited
+    # smirun is not supposed to return until the SMI application has exited
 
     # launch processes
     if [ "$xterm" = 0 ] ; then
-	batchcmd="$rshcmd $host \"$rcmd\""
+    	if [ "$all_local" = 1 ] ; then
+	    batchcmd="$rcmd"
+	else
+	    batchcmd="$rshcmd $host \"$rcmd\""
+	fi
 	$Show $batchcmd $BG
 	retcode=$?
     else  
 	# xterms with a pager
 	if [ "$pager" = 1 ] ; then	
-	    xtermcmd="xterm -title $xtitle -e bash -c \"$rshcmd $host $xprcmd\""
+    	    if [ "$all_local" = 1 ] ; then
+		xtermcmd="xterm -title $xtitle -e bash -c \"$xprcmd\""
+	    else
+	        xtermcmd="xterm -title $xtitle -e bash -c \"$rshcmd $host $xprcmd\""
+	    fi
 	else
-	    xtermcmd="xterm -title $xtitle -e bash -c \"$rshcmd $host $xrcmd\""
+	    if [ "$all_local" = 1 ] ; then
+	        xtermcmd="xterm -title $xtitle -e bash -c \"$xrcmd\""
+	    else
+		xtermcmd="xterm -title $xtitle -e bash -c \"$rshcmd $host $xrcmd\""
+	    fi
 	fi
 	$Show $xtermcmd $BG
 	retcode=$?
@@ -658,7 +678,7 @@ do
     if [ $i = $np ] ; then
 	# xxx improve: wait for individual PIDs and collect return codes
 	wait
-	if [ $mpirun_verbose = 1 ] ; then
+	if [ $smirun_verbose = 1 ] ; then
 	    echo "Application terminated." 
 	fi
 	exit $retcode
