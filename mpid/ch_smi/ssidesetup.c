@@ -14,6 +14,7 @@
 #include "smimem.h"
 #include "uniqtag.h"
 #include "smiostypes.h"
+#include "sendrecvstubs.h"
 
 #ifdef DMALLOC
 #include <dmalloc.h>
@@ -56,8 +57,6 @@ MPID_Sside_protocol *MPID_SMI_Sside_setup (void)
 			FREE (sside);
 			return NULL;
 		}
-		MPID_SMI_Init_sendrecv_stubs();
-		MPID_SMI_Init_pack_dtype_stubs();
 
 		MPID_SMI_os_ta_allocator = MPID_SBinit (sizeof(MPID_SMI_Delayed_ta_t), 
 												INIT_OSTA_ENTRIES, INCR_OSTA_ENTRIES);

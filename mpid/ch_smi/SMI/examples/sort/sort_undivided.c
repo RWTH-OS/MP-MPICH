@@ -102,7 +102,7 @@ void merge(int phase)
 	ECHO("...done");
 }
 
-void main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 	smi_region_info_t regdesc;
 	smi_error_t         error;
@@ -143,7 +143,7 @@ void main(int argc, char **argv)
 		SMI_Init_reginfo(&regdesc, sgmt_size * sizeof(int), 0, i, SMI_ADPT_DEFAULT, 0, 0, NULL);
 		regdesc.adapter = SMI_ADPT_SMP;
 		error = SMI_Create_shreg(SMI_SHM_UNDIVIDED | SMI_SHM_NONFIXED, &regdesc, 
-			&(sgmt_id[i]), (char **) &(sgmt[i]));
+			&(sgmt_id[i]), (void **) &(sgmt[i]));
 		if (error != SMI_SUCCESS) {
 			ECHO("Not enough shared memory!\n");
 			SMI_Abort(-1);
@@ -153,7 +153,7 @@ void main(int argc, char **argv)
 		SMI_Init_reginfo(&regdesc, sgmt_size * sizeof(int), 0, i, SMI_ADPT_DEFAULT, 0, 0, NULL);
 		regdesc.adapter = SMI_ADPT_SMP;
 		error = SMI_Create_shreg(SMI_SHM_UNDIVIDED | SMI_SHM_NONFIXED, &regdesc, 
-			&(sgmt_id2[i]), (char **) &(sgmt2[i]));
+			&(sgmt_id2[i]), (void **) &(sgmt2[i]));
 		if (error != SMI_SUCCESS) {
 			ECHO("Not enough shared memory!\n");
 			SMI_Abort(-1);

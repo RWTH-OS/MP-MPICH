@@ -1,6 +1,7 @@
 /* $Id$ */
 
 #include <unistd.h>
+#include <stddef.h>
 
 #include "env/smidebug.h"
 
@@ -902,7 +903,6 @@ smi_error_t SMI_Init_reginfo(smi_region_info_t* region_desc, size_t size, size_t
 
     ASSERT_R(_smi_initialized, "SMI library not initialized", SMI_ERR_NOINIT);
     ASSERT_R(region_desc != NULL, "NULL ptr for region description", SMI_ERR_PARAM);
-    ASSERT_R(size >= 0, "Illegal size specified (must be >= 0)", SMI_ERR_PARAM);
     ASSERT_R((owner >= 0) && (owner < _smi_nbr_procs), "Illegal owner rank specified", SMI_ERR_PARAM);
     
     memset(region_desc, 0, sizeof(smi_region_info_t));
@@ -947,7 +947,6 @@ smi_error_t SMI_Create_shreg(int region_type, smi_region_info_t *region_desc, in
     DNOTICEI("  size:", region_desc->size);
   
     ASSERT_R(region_desc != NULL, "NULL ptr for region description", SMI_ERR_PARAM);
-    ASSERT_R(region_desc->size >= 0, "Illegal region size", SMI_ERR_PARAM);
     SMI_LOCK(&_smi_region_lock);
 
     device = (_smi_all_on_one == true) ? DEV_SMP : DEV_GLOBAL;

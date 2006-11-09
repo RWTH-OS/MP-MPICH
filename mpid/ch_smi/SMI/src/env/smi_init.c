@@ -249,24 +249,6 @@ static int _smi_write_pidfile(char *pidfile)
   return rval;
 }
 
-smi_error_t SMI_Init(int* argc, char*** argv) {
-    smi_args_t sArgs;
-    smi_error_t error;
-    int i;
-    char *tmp;
-    
-    if (_smi_initialized == false) {
-	if (_smi_get_args(argc,argv, &sArgs) == -1) {
-	    fprintf(stderr, "This is an SMI application. It should be started via a script like smirun.\n");
-	    fprintf(stderr, "Startup options for manual startup are:\n");
-	    fprintf(stderr, " %s -n numprocs -r rank -h synchost -m magicnumber [SMI args] -- [application args]\n",(*argv)[0]);
-	    exit(0);
-	}
-    }
-    
-    return SMI_Init_direct(&sArgs);
-}
-
 
 /* initialize the SMI run-time environment with all its data 
    structures and the basic MPI-like communication mechanisms */
@@ -530,3 +512,22 @@ smi_error_t SMI_Init_direct(smi_args_t *pArgs) {
     DSECTLEAVE;
     return(SMI_SUCCESS);
 }
+
+smi_error_t SMI_Init(int* argc, char*** argv) {
+    smi_args_t sArgs;
+    smi_error_t error;
+    int i;
+    char *tmp;
+    
+    if (_smi_initialized == false) {
+	if (_smi_get_args(argc,argv, &sArgs) == -1) {
+	    fprintf(stderr, "This is an SMI application. It should be started via a script like smirun.\n");
+	    fprintf(stderr, "Startup options for manual startup are:\n");
+	    fprintf(stderr, " %s -n numprocs -r rank -h synchost -m magicnumber [SMI args] -- [application args]\n",(*argv)[0]);
+	    exit(0);
+	}
+    }
+    
+    return SMI_Init_direct(&sArgs);
+}
+

@@ -132,7 +132,7 @@ smi_error_t _smi_map_unix_shared_segment(shseg_t* shseg)
 	    fprintf(stderr, "shmctl() for id %d gives a segment size of %d, errno = %d\n", 
 		    shseg->id, shm_info.shm_segsz, errno);
 #endif
-	    } while (shm_info.shm_segsz < 0 || shm_info.shm_segsz > 1<<30);
+	    } while (shm_info.shm_segsz > 1<<30);
 #endif
 	}
 #endif /* USE_MMAP */

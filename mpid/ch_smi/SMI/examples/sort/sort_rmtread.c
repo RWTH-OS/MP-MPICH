@@ -1,4 +1,4 @@
-/* $Id: sort_rmtread.c,v 1.1 2004/03/19 22:14:45 joachim Exp $
+/* $Id$
    A parallel sort algorithm based on merge-split sort 
 */
 
@@ -72,7 +72,7 @@ void merge(int phase)
   }
 }
 
-void main(int argc, char **argv)
+int main(int argc, char **argv)
 {
     smi_region_info_t regdesc;
     smi_error_t         error;
@@ -101,7 +101,7 @@ void main(int argc, char **argv)
 
     SMI_Init_reginfo(&regdesc, sgmt_size * sizeof(int) * nbr_procs, 0, 0, SMI_ADPT_DEFAULT, 0, 0, NULL);
     regdesc.adapter = SMI_ADPT_SMP;
-    error = SMI_Create_shreg(SMI_SHM_BLOCKED, &regdesc, &sgmt_id, (char **) (&sgmt));
+    error = SMI_Create_shreg(SMI_SHM_BLOCKED, &regdesc, &sgmt_id, (void **) (&sgmt));
     if (error != SMI_SUCCESS) {
       ECHO("Not enough shared memory!\n");
       SMI_Abort(-1);
@@ -109,7 +109,7 @@ void main(int argc, char **argv)
 
     SMI_Init_reginfo(&regdesc, sgmt_size * sizeof(int) * nbr_procs, 0, 0, SMI_ADPT_DEFAULT, 0, 0, NULL);
     regdesc.adapter = SMI_ADPT_SMP;
-    error = SMI_Create_shreg(SMI_SHM_BLOCKED, &regdesc, &sgmt_id2, (char **) &(sgmt2));
+    error = SMI_Create_shreg(SMI_SHM_BLOCKED, &regdesc, &sgmt_id2, (void **) &(sgmt2));
     if (error != SMI_SUCCESS) {
       ECHO("Not enough shared memory!\n");
       SMI_Abort(-1);

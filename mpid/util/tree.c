@@ -44,7 +44,7 @@ MPID_tree_t MPID_tree_init (int (* compare)(void *data1, void *data2), int flags
     return tree;
 }
 
-static tree_free_node(MPID_tree_t tree, tree_node_t node)
+static void tree_free_node(MPID_tree_t tree, tree_node_t node)
 {
     if (tree->data_is_malloced)
 	free(node->data);

@@ -97,8 +97,8 @@ smi_error_t _smi_init_mp()
     }
     DNOTICE("allocating memory for areapointers");
     ALLOCATE(ppAlocatedAreas, char **, _smi_nbr_machines * sizeof(char *));
-    ALLOCATE(ppDest, volatile char **volatile, _smi_nbr_procs * sizeof(char *));
-    ALLOCATE(ppRecv, volatile char **volatile, _smi_nbr_procs * sizeof(char *));
+    ALLOCATE(ppDest, volatile char **, _smi_nbr_procs * sizeof(char *));
+    ALLOCATE(ppRecv, volatile char **, _smi_nbr_procs * sizeof(char *));
     ALLOCATE(pLocked, int *, sizeof(int) * _smi_nbr_procs);
 
     DNOTICE("allocating memoryareas for messagepassing on internal segments");
