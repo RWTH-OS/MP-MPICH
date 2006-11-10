@@ -149,6 +149,16 @@ if ! test -f "$MPX_HOME/mpx_replace.log" ; then
   echo "ch_mpx: renaming all MPI symbols in $MPX_HOME (please hold on...)"
   mpx_replace $MPX_HOME "*" "MPI" "MPX" &> /dev/null
 
+# Do some additional renamings:
+  case "$MPX_IMPL" in
+  "mpich")
+    mpx_replace $MPX_HOME "*" "mpir_init_" "mpx_init_" &> /dev/null
+  ;;
+  "mvapich")
+    mpx_replace $MPX_HOME "*" "mpir_init_" "mpx_init_" &> /dev/null
+  ;;
+  esac
+
 # Correct false renaming, if necessary:
   case "$MPX_IMPL" in
   "lam/mpi")
@@ -196,12 +206,16 @@ esac
 echo "ch_mpx: configuring `upcase $MPX_IMPL` with $MPX_CONF"
 
 (cd $MPX_HOME; ./configure -prefix=$MPX_INST $MPX_CONF)
+if ! test -f "$MPX_HOME/config.status" ; then
+    echo "ch_mpx: ERROR! Confifgure of `upcase $MPX_IMPL` failed! "
+    exit 1
+fi
 
 #
 # Set Implementation dependent enviornment variables:
 #
 case "$MPX_IMPL" in
-"mvapich")
+"mvapich")    
     eval `cat $MPX_HOME/config.status | grep BASE_LIB_LIST=`
     set  "BASE_LIB_LIST=`echo $BASE_LIB_LIST`"
     LIB_LIST="$LIB_LIST $BASE_LIB_LIST"

@@ -1347,6 +1347,8 @@ make distclean &>/dev/null
 echo "$as_me: ARCH is $ARCH" >&6;}
 { echo "$as_me:$LINENO: IBHOME is $IBHOME" >&5
 echo "$as_me: IBHOME is $IBHOME" >&6;}
+{ echo "$as_me:$LINENO: IBHOME_LIB is $IBHOME_LIB" >&5
+echo "$as_me: IBHOME_LIB is $IBHOME_LIB" >&6;}
 { echo "$as_me:$LINENO: HCA type is $HCA_COMPILE_FLAG" >&5
 echo "$as_me: HCA type is $HCA_COMPILE_FLAG" >&6;}
 

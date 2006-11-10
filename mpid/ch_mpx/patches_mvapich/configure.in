@@ -105,6 +105,7 @@ make distclean &>/dev/null
 
 AC_MSG_NOTICE([ARCH is $ARCH])
 AC_MSG_NOTICE([IBHOME is $IBHOME])
+AC_MSG_NOTICE([IBHOME_LIB is $IBHOME_LIB])
 AC_MSG_NOTICE([HCA type is $HCA_COMPILE_FLAG])
 
 echo "Configuring MVAPICH..."
