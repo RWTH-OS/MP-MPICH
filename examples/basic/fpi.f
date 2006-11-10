@@ -14,7 +14,6 @@ c    n   number of points of integration.
 c    x           midpoint of each rectangle's interval
 c    f           function to integrate
 c    sum,pi      area of rectangles
-c    tmp         temporary scratch space for global summation
 c    i           do loop index
 c****************************************************************************
       program main
@@ -34,10 +33,6 @@ c                                 function to integrate
       call MPI_COMM_SIZE( MPI_COMM_WORLD, numprocs, ierr )
       print *, "Process ", myid, " of ", numprocs, " is alive"
 
-      sizetype   = 1
-      sumtype    = 2
-      
-      
  10   n = 10000
 
       call MPI_BCAST(n,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
