@@ -38,7 +38,7 @@ if [ $DoLink = 1 -o $show_link = 1 ] ; then
     # See the comment in mpicc about UseSharedLib
     # Also, don't use if the shared libraries don't exist yet
     # (because -lmpichfarg.a won't exist yet)
-    MPI_LIBS="$DEVICELFLAGS -l$MPILIBNAME -lmpidutil"
+    MPI_LIBS="$DEVICELFLAGS -l$MPILIBNAME -lmpidutil -l$MPILIBNAME"
     if [ "$SHAREDKIND" != "ignore" -a $UseSharedLib = "1" ] ; then 
 	#-a 
 	#	-s $libdir/lib$(MPILIBNAME)farg.a ] ; then
