@@ -68,7 +68,7 @@ if [ $DoLink = 1 -o $show_link = 1 ] ; then
     # Since that enviroment variable would then need to be set for all
     # hosts where the program might run (since rsh doesn't propagate 
     # the environment), we don't make this the default.
-    MPI_LIBS="$DEVICELFLAGS -l$MPILIBNAME -lmpidutil"
+    MPI_LIBS="$DEVICELFLAGS -l$MPILIBNAME -lmpidutil -l$MPILIBNAME"
     if [ "$SHAREDKIND" != "ignore" -a $UseSharedLib = "1" ] ; then
         # -L path is already set in $LIB_PATH - instead, add the dir for the shared libs in front
         LIB_PATH="-L$sharedlib_dir $LIB_PATH"
