@@ -350,11 +350,19 @@ if [ ${nummetahosts} -gt 1 ]; then
 	fi
 fi
 
+# Print help if there are no arguments at all
+if [ $# -lt 1 ] ; then
+	if [ "$hasprinthelp" = "1" ] ; then
+		PrintHelp
+		exit 0
+	fi
+fi
+
 #    -xdbx   Start the first process under xdbx where possible
 while [ 1 -le $# ] ; do
   arg=$1
-  #echo $arg
-  #echo $#
+  #echo "arg = $arg"
+  #echo "\$\# = $#"
   shift
   case $arg in 
      -port)
@@ -732,14 +740,6 @@ while [ 1 -le $# ] ; do
 
 	;;
     *)
-        # For the very first, see if there is any argument at all!
-        if [ -z $1 ] ; then
-           if [ "$hasprinthelp" = "1" ] ; then
-                PrintHelp
-                exit 0
-           fi
-        fi
-
         # First see if the device knows about this argument:
         if [ -f $scriptdir/mpirun.$default_device.args ] ; then
             device_knows_arg=0
