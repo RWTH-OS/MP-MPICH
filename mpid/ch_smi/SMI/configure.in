@@ -23,12 +23,12 @@ fi
 AC_SUBST(docdir)
 
 dnl Use SCI or build a version which only runs on SMP's ?
-dnl options: 
+dnl options:
 dnl DOLPHIN if you use Dolphin drivers and SISI
 dnl SCALI   if you use SCALI drivers and SISCI
 dnl NONE    if you do not use any SCI at all, but only a SMP system
 USE_SCI=NONE
- 
+
 AC_ARG_ENABLE([f77],AS_HELP_STRING(--enable-f77,create F77 bindings))
 
 dnl translate into our macros
@@ -159,30 +159,32 @@ fi
 
 if test "$SISCI" = yes; then
   if test "$SISCIDIR" = ""; then
-    SEARCHDIRS="/opt/DIS /opt/scali /usr/local"
+    SEARCHDIRS="/opt/DIS /opt/scali"
   else
     SEARCHDIRS=$SISCIDIR
   fi
-  for TESTDIR in $SEARCHDIRS ; do 
+  for TESTDIR in $SEARCHDIRS ; do
     EXTRA_CFLAGS=""
-    wi_EXTRA_DIRS(no, $TESTDIR)
-dnl check for any extra dir we might have found
+    wi_EXTRA_DIRS($TESTDIR)
+    # check for any extra dir we might have found
     if test -n "$EXTRA_CFLAGS" ; then
-	SISCIDIR=`echo $EXTRA_CFLAGS | sed s/-I// | sed s/include//`
-        break 
-    else 
+	SISCIDIR=$TESTDIR
+	LDFLAGS="$EXTRA_LDFLAGS $LDFLAGS"
+	CPPFLAGS="$EXTRA_CFLAGS $CPPFLAGS"
+	break
+    else
 	SISCIDIR=default
     fi
   done
   AC_CHECK_HEADERS(sisci_api.h)
-dnl include path is required for gcc, too
+# include path is required for gcc, too
   CFLAGS_ORIG="$CFLAGS"
   LIBS="$PTHREAD"
-dnl Scali SCI on Solaris (Sparc) links to functions from librt - we use it anyway.
-dnl Caution: librt is not provided on Solaris 2.6 and lower. 
-dnl  if test "$OS" = "SOLARIS"; then
-dnl      LIBS="$LIBS -lrt"
-dnl  fi
+# Scali SCI on Solaris (Sparc) links to functions from librt - we use it anyway.
+# Caution: librt is not provided on Solaris 2.6 and lower. 
+#  if test "$OS" = "SOLARIS"; then
+#      LIBS="$LIBS -lrt"
+#  fi
 
   AC_MSG_CHECKING([whether Dolphin or Scali])
   OLDLIBS=$LIBS
@@ -259,16 +261,16 @@ if test -n "$PCISCI_TYPE" ; then
 	fi
 fi
 case $PCISCI_TYPE in
-DOLPHIN_D31x)
-AC_DEFINE(D31x,1,[Define the type of PCI-SCI adapter to use
+  DOLPHIN_D31x)
+    AC_DEFINE(D31x,1,[Define the type of PCI-SCI adapter to use
 	(only relevant for Scali, Dolphin supports autoprobe)])
-;;
-DOLPHIN_D32x)
-AC_DEFINE(D32x,1,[see D31x])
-;;
-DOLPHIN_D33x)
-AC_DEFINE(D33x,1,[see D31x])
-;;
+  ;;
+  DOLPHIN_D32x)
+    AC_DEFINE(D32x,1,[see D31x])
+  ;;
+  DOLPHIN_D33x)
+    AC_DEFINE(D33x,1,[see D31x])
+  ;;
 esac
 
 dnl output into smiconfig.h
@@ -276,19 +278,19 @@ AC_DEFINE(SMI_NONFIXED_MODE,1,[Historical: this one is always set nowadays.])
 AC_DEFINE_UNQUOTED(INT_SHMSEG_BASESIZE,$INTSGMTSIZE,
 	[Size of the internal shared memory segments (one per node)])
 AC_DEFINE_UNQUOTED(SISCI_TYPE, $USE_SCI, [Which kind of SISCI is used, if any?])
-case $USE_SCI in 
-SCALI)
-AC_DEFINE(SCALI_SISCI,1,[SCALI SISCI is used])
-AC_DEFINE_UNQUOTED(SISCIDIR, $SISCIDIR, [Where is the SISCI we use?])
-;;
-DOLPHIN)
-AC_DEFINE(DOLPHIN_SISCI,1,[Dolphin SISCI is used])
-AC_DEFINE_UNQUOTED(SISCIDIR, $SISCIDIR, [Where is the SISCI we use?])
-;;
-NONE)
-AC_DEFINE(NO_SISCI,1,[no SISCI is used])
-;;
+
+case $USE_SCI in
+  SCALI)
+    AC_DEFINE(SCALI_SISCI,1,[SCALI SISCI is used])
+  ;;
+  DOLPHIN)
+    AC_DEFINE(DOLPHIN_SISCI,1,[Dolphin SISCI is used])
+  ;;
+  NONE)
+    AC_DEFINE(NO_SISCI,1,[no SISCI is used])
+  ;;
 esac
+
 if test $USE_SCI = "NONE" ; then
 	AC_DEFINE(SMP,1,[SMP only, no SCI])
 dnl	WATCHDOG_TYPE="none"
@@ -296,22 +298,22 @@ else
 	AC_DEFINE(SCIDEV_PRESENT,1,[Define if a SCI device is present])
 fi
 case $WATCHDOG_TYPE in
-none)
-AC_DEFINE(WD_TYPE_NONE,1,[Define to use no watchdog])
-;;
-signal)
-AC_DEFINE(WD_TYPE_SIGNAL,1,[Define to use signal watchdog])
-;;
-thread)
-AC_DEFINE(WD_TYPE_THREAD,1,[Define to use thread watchdog])
-;;
-callback)
-AC_DEFINE(WD_TYPE_CALLBACK,1,[Define to use callback watchdog])
-;;
+	none)
+	AC_DEFINE(WD_TYPE_NONE,1,[Define to use no watchdog])
+	;;
+	signal)
+	AC_DEFINE(WD_TYPE_SIGNAL,1,[Define to use signal watchdog])
+	;;
+	thread)
+	AC_DEFINE(WD_TYPE_THREAD,1,[Define to use thread watchdog])
+	;;
+	callback)
+	AC_DEFINE(WD_TYPE_CALLBACK,1,[Define to use callback watchdog])
+	;;
 esac
- 
-dnl Checks for libraries.
-dnl Replace `main' with a function in -local:
+
+# Checks for libraries.
+# Replace `main' with a function in -local:
 AC_CHECK_LIB(-local, main)
 
 dnl Checks for header files.
@@ -332,17 +334,15 @@ AC_CHECK_FUNCS(gettimeofday)
 LIBS_save="$LIBS"
 # set some libraries etc.
 
-dnl Only for examples/poisson, which needs full-smi, which is broken
+# Only for examples/poisson
 if test "$enable_full_smi" = "yes"; then
 	AC_SEARCH_LIBS(sin,m)
 fi
 
-dnl posix4 on SOLARIS? For what?
 LIBS_EXAMPLES="$LIBS"
 LIBS="$LIBS_save"
 
-
-dnl substituted variables 
+# substituted variables
 AC_SUBST(OS)
 AC_SUBST(CPU)
 AC_SUBST(USE_SCI)
@@ -374,10 +374,10 @@ AC_CONFIG_FILES([util/smicc],[chmod +x "$ac_file"])
 
 AC_OUTPUT
 
-dnl Determine the SCI topology so we do not need to do this on every run! Most critical on Scali
-dnl sytems, not really critical on Dolphin systems.
-dnl Are there any matching AC macros?
-dnl The closest whouzld be something like AC TRY_RUN(`cat util/sci_topology.c`,...
+# Determine the SCI topology so we do not need to do this on every run! Most critical on Scali
+# sytems, not really critical on Dolphin systems.
+# Are there any matching AC macros?
+# The closest whould be something like AC TRY_RUN(`cat util/sci_topology.c`,...
 if test "$USE_SCI" = "SCALI"; then
   AC_MSG_CHECKING(SCI topology of the cluster)
   if test -z "$TOPOLOGY" ; then
@@ -454,28 +454,27 @@ if test "$USE_SCI" = "SCALI"; then
   rm config.h
 fi
 
-echo " >"
-echo " > configuration of SMI completed"
-echo " >"
+AC_MSG_NOTICE([configuration of SMI completed])
 if test "$USE_SCI" = "NONE" ; then
-echo " > *** no SCI support -> SMP support only ***"
-echo " >"
-echo " > If you want SCI support, check the path to the SISCI API (option --with-sisci)"
-echo " > and make sure that the SISCI library and includes can be found there in the "
-echo " > lib and include subdirectories."
-if test -d /opt/scali ; then
-echo " > For Scali systems, make sure that LD_LIBRARY_PATH contains '/opt/scali',"
-echo " > or call configure like 'CFLAGS=-Wl,-R/opt/scali/lib ./configure'"
-fi
+  AC_MSG_WARN([*** no SCI support -> SMP support only ***])
+  AC_MSG_NOTICE([If you want SCI support, check the path to the SISCI API
+		 (option --with-sisci) and make sure that the SISCI library and
+		 includes can be found there in the lib and include
+		 subdirectories.])
+  if test -d /opt/scali ; then
+    AC_MSG_NOTICE([For Scali systems, make sure that LD_LIBRARY_PATH contains
+		   '/opt/scali', or call configure like
+		   'CFLAGS="-Wl,-R/opt/scali/lib" ./configure'])
+  fi
 else
-echo " > SCI and SMP support enabled"
-if test -r $SISCIDIR/lib/libsisci.so ; then
-echo " > The SISCI API is implemented as a shared library in $SISCIDIR/lib."
-echo " > Make sure that this path is included in the search path for shared."
-echo " > libraries. Set LD_LIBRARY_PATH accordingly if necessary."
+  AC_MSG_NOTICE([SCI and SMP support enabled])
+  if test -r $SISCIDIR/lib/libsisci.so ; then
+    AC_MSG_WARN([The SISCI API is implemented as a shared library in
+		 $SISCIDIR/lib. Make sure that this path is included in the
+		 search path for shared libraries. Set LD_LIBRARY_PATH
+		 accordingly if necessary.])
+  fi
 fi
-fi
-echo " >"
-echo " > Now type 'make' or 'make install' to build (and install) SMI,  "
-echo " > or type 'make distclean' to re-configure from scratch!"
-echo " >"
+
+AC_MSG_NOTICE([Now type 'make' or 'make install' to build (and install) SMI, or
+	       type 'make distclean' to re-configure from scratch!])

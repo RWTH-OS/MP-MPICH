@@ -1,139 +1,69 @@
 dnl
-dnl stolen from tclobj-1.x, which in turn stole it from ncftp-2.3.x
+dnl Check for extra include dir and add it to EXTRA_CFLAGS
+dnl This macro is silent, please use wi_EXTRA_DIRS
 dnl
 AC_DEFUN([wi_EXTRA_IDIR],[
-incdir="$1"
-if test -r $incdir ; then
-	case "$CXXFLAGS" in
-		*-I${incdir}*)
-			# echo "   + already had $incdir" 1>&6
+if test -r "$1" ; then
+	case $EXTRA_CFLAGS in
+		*-I"$1"*)
 			;;
 		*)
-			if test "$CXXFLAGS" = "" ; then
-				CXXFLAGS="-I$incdir"
-			else
-				CXXFLAGS="$CXXFLAGS -I$incdir"
-			fi
-			EXTRA_CXXFLAGS="-I$incdir"
-			echo "   + found $incdir" 1>&6
-			;;
-	esac
-	case "$CPPFLAGS" in
-		*-I${incdir}*)	
-			# echo "   + already had $incdir" 1>&6
-			;;
-		*)
-			if test "$CPPFLAGS" = "" ; then
-				CPPFLAGS="-I$incdir"
-			else
-				CPPFLAGS="$CPPFLAGS -I$incdir"
-			fi
-			#echo "   + found $incdir" 1>&6
-			EXTRA_CPPFLAGS="-I$incdir"
-			;;
-	esac
-	case "$CFLAGS" in
-		*-I${incdir}*)	
-			# echo "   + already had $incdir" 1>&6
-			;;
-		*)
-			if test "$CFLAGS" = "" ; then
-				CFLAGS="-I$incdir"
-			else
-				CFLAGS="$CFLAGS -I$incdir"
-			fi
-			EXTRA_CFLAGS="-I$incdir"
-			#echo "   + found $incdir" 1>&6
+			EXTRA_CFLAGS="$EXTRA_CFLAGS -I$1"
+			wi_result="include $wi_result"
 			;;
 	esac
 fi
 ])
 dnl
-dnl
-dnl
+dnl Check for extra lib dir and add it to EXTRA_LDFLAGS
+dnl This macro is silent, please use wi_EXTRA_DIRS
 dnl
 AC_DEFUN([wi_EXTRA_LDIR],[
-local_libdir="$1"
-if test -r $local_libdir ; then
-	case "$LDFLAGS" in
-		*-L${local_libdir}*)
-			# echo "   + already had $local_libdir" 1>&6
+if test -r "$1" ; then
+	case $EXTRA_LDFLAGS in
+		*-L"$1"*)
 			;;
 		*)
-			if test "$LDFLAGS" = "" ; then
-				LDFLAGS="-L$local_libdir"
-			else
-				LDFLAGS="$LDFLAGS -L$local_libdir"
-			fi
-			EXTRA_LDFLAGS="-L$local_libdir"
-			echo "   + found $local_libdir" 1>&6
+			EXTRA_LDFLAGS="$EXTRA_LDFLAGS -L$1"
+			wi_result="lib $wi_result"
 			;;
 	esac
 fi
 ])
 dnl
-dnl __FP__
-dnl
+dnl Check for extra program dir and add it to the PATH
+dnl This macro is silent, please use wi_EXTRA_DIRS
 dnl
 AC_DEFUN([wi_EXTRA_PDIR],[
-progdir="$1"
-if test -r $progdir ; then
-	case "$PATH" in
-		*:${progdir}*)
-			# echo "   + already had $progdir" 1>&6
-			;;
-		*${progdir}:*)
-			# echo "   + already had $progdir" 1>&6
+if test -r "$1" ; then
+	case $PATH in
+		*:"$1":*|"$1":*|*:"$1")
 			;;
 		*)
-			if test "$PATH" = "" ; then
-				PATH="$progdir"
-			else
-				PATH="$PATH:$progdir"
-			fi
-			echo "   + found $progdir" 1>&6
+			PATH="$PATH:$1"
+			wi_result="bin $wi_result"
 			;;
 	esac
 fi
 ])
 dnl
+dnl If you want to look for a subdirectory in include/lib directories,
+dnl you pass the name in argument 2.
 dnl
-dnl If you want to also look for include and lib subdirectories in the
-dnl $HOME tree, you supply "yes" as the first argument to this macro.
-dnl
-dnl If you want to look for subdirectories in include/lib directories,
-dnl you pass the names in argument 3, otherwise pass a dash.
-dnl
-AC_DEFUN([wi_EXTRA_DIRS],[echo "checking for extra include and lib directories..." 1>&6
-ifelse([$1], yes, [dnl
-b1=`cd .. ; pwd`
-b2=`cd ../.. ; pwd`
-exdirs="$HOME $j $b1 $b2 $prefix $2"
-],[dnl
-exdirs="$prefix $2"
-])
-subexdirs="$3"
-if test "$subexdirs" = "" ; then
-	subexdirs="-"
-fi
-for subexdir in $subexdirs ; do
-if test "$subexdir" = "-" ; then
-	subexdir=""
-else
-	subexdir="/$subexdir"
-fi
-for exdir in $exdirs ; do
-	if test "$exdir" != "/usr" || test "$subexdir" != ""; then
-		incdir="${exdir}/include${subexdir}"
-		wi_EXTRA_IDIR($incdir)
-
-		local_libdir="${exdir}/lib${subexdir}"
-		wi_EXTRA_LDIR($local_libdir)
-
-		progdir="${exdir}/bin${subexdirr}"
-		wi_EXTRA_PDIR($progdir)
+AC_DEFUN([wi_EXTRA_DIRS],[
+for exdir in $1 ; do
+	AC_MSG_CHECKING([for extra include and lib directory in $exdir/*/$2])
+	wi_result=""
+	if test "$exdir" != "/usr" || test "$2" != ""; then
+		wi_EXTRA_IDIR($exdir/include/$2)
+		wi_EXTRA_LDIR($exdir/lib/$2)
+		wi_EXTRA_PDIR($exdir/bin/$2)
 	fi
-done
+	if test "x$wi_result" != "x"; then
+		AC_MSG_RESULT($wi_result)
+	else
+		AC_MSG_RESULT(nothing)
+	fi
 done
 ])
 dnl

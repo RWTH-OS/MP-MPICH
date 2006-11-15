@@ -113,9 +113,6 @@
 /* Very old SISCI versions have another prototype for SCIStoreBarrier() */
 #undef SCISTOREBARRIER_TWOARGS
 
-/* Where is the SISCI we use? */
-#undef SISCIDIR
-
 /* Which kind of SISCI is used, if any? */
 #undef SISCI_TYPE
 

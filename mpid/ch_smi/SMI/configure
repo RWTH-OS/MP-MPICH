@@ -21384,126 +21384,70 @@ fi
 
 if test "$SISCI" = yes; then
   if test "$SISCIDIR" = ""; then
-    SEARCHDIRS="/opt/DIS /opt/scali /usr/local"
+    SEARCHDIRS="/opt/DIS /opt/scali"
   else
     SEARCHDIRS=$SISCIDIR
   fi
   for TESTDIR in $SEARCHDIRS ; do
     EXTRA_CFLAGS=""
-    echo "checking for extra include and lib directories..." 1>&6
-exdirs="$prefix $TESTDIR"
 
-subexdirs=""
-if test "$subexdirs" = "" ; then
-	subexdirs="-"
-fi
-for subexdir in $subexdirs ; do
-if test "$subexdir" = "-" ; then
-	subexdir=""
-else
-	subexdir="/$subexdir"
-fi
-for exdir in $exdirs ; do
-	if test "$exdir" != "/usr" || test "$subexdir" != ""; then
-		incdir="${exdir}/include${subexdir}"
+for exdir in $TESTDIR ; do
+	echo "$as_me:$LINENO: checking for extra include and lib directory in $exdir/*/" >&5
+echo $ECHO_N "checking for extra include and lib directory in $exdir/*/... $ECHO_C" >&6
+	wi_result=""
+	if test "$exdir" != "/usr" || test "" != ""; then
 
-incdir="$incdir"
-if test -r $incdir ; then
-	case "$CXXFLAGS" in
-		*-I${incdir}*)
-			# echo "   + already had $incdir" 1>&6
+if test -r "$exdir/include/" ; then
+	case $EXTRA_CFLAGS in
+		*-I"$exdir/include/"*)
 			;;
 		*)
-			if test "$CXXFLAGS" = "" ; then
-				CXXFLAGS="-I$incdir"
-			else
-				CXXFLAGS="$CXXFLAGS -I$incdir"
-			fi
-			EXTRA_CXXFLAGS="-I$incdir"
-			echo "   + found $incdir" 1>&6
-			;;
-	esac
-	case "$CPPFLAGS" in
-		*-I${incdir}*)
-			# echo "   + already had $incdir" 1>&6
-			;;
-		*)
-			if test "$CPPFLAGS" = "" ; then
-				CPPFLAGS="-I$incdir"
-			else
-				CPPFLAGS="$CPPFLAGS -I$incdir"
-			fi
-			#echo "   + found $incdir" 1>&6
-			EXTRA_CPPFLAGS="-I$incdir"
-			;;
-	esac
-	case "$CFLAGS" in
-		*-I${incdir}*)
-			# echo "   + already had $incdir" 1>&6
-			;;
-		*)
-			if test "$CFLAGS" = "" ; then
-				CFLAGS="-I$incdir"
-			else
-				CFLAGS="$CFLAGS -I$incdir"
-			fi
-			EXTRA_CFLAGS="-I$incdir"
-			#echo "   + found $incdir" 1>&6
+			EXTRA_CFLAGS="$EXTRA_CFLAGS -I$exdir/include/"
+			wi_result="include $wi_result"
 			;;
 	esac
 fi
 
 
-		local_libdir="${exdir}/lib${subexdir}"
-
-local_libdir="$local_libdir"
-if test -r $local_libdir ; then
-	case "$LDFLAGS" in
-		*-L${local_libdir}*)
-			# echo "   + already had $local_libdir" 1>&6
+if test -r "$exdir/lib/" ; then
+	case $EXTRA_LDFLAGS in
+		*-L"$exdir/lib/"*)
 			;;
 		*)
-			if test "$LDFLAGS" = "" ; then
-				LDFLAGS="-L$local_libdir"
-			else
-				LDFLAGS="$LDFLAGS -L$local_libdir"
-			fi
-			EXTRA_LDFLAGS="-L$local_libdir"
-			echo "   + found $local_libdir" 1>&6
+			EXTRA_LDFLAGS="$EXTRA_LDFLAGS -L$exdir/lib/"
+			wi_result="lib $wi_result"
 			;;
 	esac
 fi
 
 
-		progdir="${exdir}/bin${subexdirr}"
-
-progdir="$progdir"
-if test -r $progdir ; then
-	case "$PATH" in
-		*:${progdir}*)
-			# echo "   + already had $progdir" 1>&6
-			;;
-		*${progdir}:*)
-			# echo "   + already had $progdir" 1>&6
+if test -r "$exdir/bin/" ; then
+	case $PATH in
+		*:"$exdir/bin/":*|"$exdir/bin/":*|*:"$exdir/bin/")
 			;;
 		*)
-			if test "$PATH" = "" ; then
-				PATH="$progdir"
-			else
-				PATH="$PATH:$progdir"
-			fi
-			echo "   + found $progdir" 1>&6
+			PATH="$PATH:$exdir/bin/"
+			wi_result="bin $wi_result"
 			;;
 	esac
 fi
 
 	fi
-done
+	if test "x$wi_result" != "x"; then
+		echo "$as_me:$LINENO: result: $wi_result" >&5
+echo "${ECHO_T}$wi_result" >&6
+	else
+		echo "$as_me:$LINENO: result: nothing" >&5
+echo "${ECHO_T}nothing" >&6
+	fi
 done
 
+    # check for any extra dir we might have found
     if test -n "$EXTRA_CFLAGS" ; then
-	SISCIDIR=`echo $EXTRA_CFLAGS | sed s/-I// | sed s/include//`
-        break
+	SISCIDIR=$TESTDIR
+	LDFLAGS="$EXTRA_LDFLAGS $LDFLAGS"
+	CPPFLAGS="$EXTRA_CFLAGS $CPPFLAGS"
+	break
     else
 	SISCIDIR=default
     fi
@@ -21657,8 +21601,14 @@ fi
 
 done
 
+# include path is required for gcc, too
   CFLAGS_ORIG="$CFLAGS"
   LIBS="$PTHREAD"
+# Scali SCI on Solaris (Sparc) links to functions from librt - we use it anyway.
+# Caution: librt is not provided on Solaris 2.6 and lower.
+#  if test "$OS" = "SOLARIS"; then
+#      LIBS="$LIBS -lrt"
+#  fi
 
   echo "$as_me:$LINENO: checking whether Dolphin or Scali" >&5
 echo $ECHO_N "checking whether Dolphin or Scali... $ECHO_C" >&6
@@ -22146,27 +22096,27 @@ echo "$as_me: error: Aborting." >&2;}
 	fi
 fi
 case $PCISCI_TYPE in
-DOLPHIN_D31x)
+  DOLPHIN_D31x)
 
 cat >>confdefs.h <<\_ACEOF
 #define D31x 1
 _ACEOF
 
-;;
-DOLPHIN_D32x)
+  ;;
+  DOLPHIN_D32x)
 
 cat >>confdefs.h <<\_ACEOF
 #define D32x 1
 _ACEOF
 
-;;
-DOLPHIN_D33x)
+  ;;
+  DOLPHIN_D33x)
 
 cat >>confdefs.h <<\_ACEOF
 #define D33x 1
 _ACEOF
 
-;;
+  ;;
 esac
 
 
@@ -22184,39 +22134,31 @@ cat >>confdefs.h <<_ACEOF
 #define SISCI_TYPE $USE_SCI
 _ACEOF
 
+
 case $USE_SCI in
-SCALI)
+  SCALI)
 
 cat >>confdefs.h <<\_ACEOF
 #define SCALI_SISCI 1
 _ACEOF
 
-
-cat >>confdefs.h <<_ACEOF
-#define SISCIDIR $SISCIDIR
-_ACEOF
-
-;;
-DOLPHIN)
+  ;;
+  DOLPHIN)
 
 cat >>confdefs.h <<\_ACEOF
 #define DOLPHIN_SISCI 1
 _ACEOF
 
-
-cat >>confdefs.h <<_ACEOF
-#define SISCIDIR $SISCIDIR
-_ACEOF
-
-;;
-NONE)
+  ;;
+  NONE)
 
 cat >>confdefs.h <<\_ACEOF
 #define NO_SISCI 1
 _ACEOF
 
-;;
+  ;;
 esac
+
 if test $USE_SCI = "NONE" ; then
 
 cat >>confdefs.h <<\_ACEOF
@@ -22231,36 +22173,38 @@ _ACEOF
 
 fi
 case $WATCHDOG_TYPE in
-none)
+	none)
 
 cat >>confdefs.h <<\_ACEOF
 #define WD_TYPE_NONE 1
 _ACEOF
 
-;;
-signal)
+	;;
+	signal)
 
 cat >>confdefs.h <<\_ACEOF
 #define WD_TYPE_SIGNAL 1
 _ACEOF
 
-;;
-thread)
+	;;
+	thread)
 
 cat >>confdefs.h <<\_ACEOF
 #define WD_TYPE_THREAD 1
 _ACEOF
 
-;;
-callback)
+	;;
+	callback)
 
 cat >>confdefs.h <<\_ACEOF
 #define WD_TYPE_CALLBACK 1
 _ACEOF
 
-;;
+	;;
 esac
 
+# Checks for libraries.
+# Replace `main' with a function in -local:
 
 echo "$as_me:$LINENO: checking for main in -l-local" >&5
 echo $ECHO_N "checking for main in -l-local... $ECHO_C" >&6
@@ -23307,6 +23251,7 @@ done
 LIBS_save="$LIBS"
 # set some libraries etc.
 
+# Only for examples/poisson
 if test "$enable_full_smi" = "yes"; then
 	echo "$as_me:$LINENO: checking for library containing sin" >&5
 echo $ECHO_N "checking for library containing sin... $ECHO_C" >&6
@@ -23437,7 +23382,7 @@ fi
 LIBS_EXAMPLES="$LIBS"
 LIBS="$LIBS_save"
 
-
+# substituted variables
 
 
 
@@ -25031,6 +24976,10 @@ if test "$no_create" != yes; then
 fi
 
 
+# Determine the SCI topology so we do not need to do this on every run! Most critical on Scali
+# sytems, not really critical on Dolphin systems.
+# Are there any matching AC macros?
+# The closest whould be something like AC TRY_RUN(`cat util/sci_topology.c`,...
 if test "$USE_SCI" = "SCALI"; then
   echo "$as_me:$LINENO: checking SCI topology of the cluster" >&5
 echo $ECHO_N "checking SCI topology of the cluster... $ECHO_C" >&6
@@ -25122,28 +25071,43 @@ echo "${ECHO_T}ok." >&6
   rm config.h
 fi
 
-echo " >"
-echo " > configuration of SMI completed"
-echo " >"
+{ echo "$as_me:$LINENO: configuration of SMI completed" >&5
+echo "$as_me: configuration of SMI completed" >&6;}
 if test "$USE_SCI" = "NONE" ; then
-echo " > *** no SCI support -> SMP support only ***"
-echo " >"
-echo " > If you want SCI support, check the path to the SISCI API (option --with-sisci)"
-echo " > and make sure that the SISCI library and includes can be found there in the "
-echo " > lib and include subdirectories."
-if test -d /opt/scali ; then
-echo " > For Scali systems, make sure that LD_LIBRARY_PATH contains '/opt/scali',"
-echo " > or call configure like 'CFLAGS=-Wl,-R/opt/scali/lib ./configure'"
-fi
+  { echo "$as_me:$LINENO: WARNING: *** no SCI support -> SMP support only ***" >&5
+echo "$as_me: WARNING: *** no SCI support -> SMP support only ***" >&2;}
+  { echo "$as_me:$LINENO: If you want SCI support, check the path to the SISCI API
+		 (option --with-sisci) and make sure that the SISCI library and
+		 includes can be found there in the lib and include
+		 subdirectories." >&5
+echo "$as_me: If you want SCI support, check the path to the SISCI API
+		 (option --with-sisci) and make sure that the SISCI library and
+		 includes can be found there in the lib and include
+		 subdirectories." >&6;}
+  if test -d /opt/scali ; then
+    { echo "$as_me:$LINENO: For Scali systems, make sure that LD_LIBRARY_PATH contains
+		   '/opt/scali', or call configure like
+		   'CFLAGS=\"-Wl,-R/opt/scali/lib\" ./configure'" >&5
+echo "$as_me: For Scali systems, make sure that LD_LIBRARY_PATH contains
+		   '/opt/scali', or call configure like
+		   'CFLAGS=\"-Wl,-R/opt/scali/lib\" ./configure'" >&6;}
+  fi
 else
-echo " > SCI and SMP support enabled"
-if test -r $SISCIDIR/lib/libsisci.so ; then
-echo " > The SISCI API is implemented as a shared library in $SISCIDIR/lib."
-echo " > Make sure that this path is included in the search path for shared."
-echo " > libraries. Set LD_LIBRARY_PATH accordingly if necessary."
+  { echo "$as_me:$LINENO: SCI and SMP support enabled" >&5
+echo "$as_me: SCI and SMP support enabled" >&6;}
+  if test -r $SISCIDIR/lib/libsisci.so ; then
+    { echo "$as_me:$LINENO: WARNING: The SISCI API is implemented as a shared library in
+		 $SISCIDIR/lib. Make sure that this path is included in the
+		 search path for shared libraries. Set LD_LIBRARY_PATH
+		 accordingly if necessary." >&5
+echo "$as_me: WARNING: The SISCI API is implemented as a shared library in
+		 $SISCIDIR/lib. Make sure that this path is included in the
+		 search path for shared libraries. Set LD_LIBRARY_PATH
+		 accordingly if necessary." >&2;}
+  fi
 fi
-fi
-echo " >"
-echo " > Now type 'make' or 'make install' to build (and install) SMI,  "
-echo " > or type 'make distclean' to re-configure from scratch!"
-echo " >"
+
+{ echo "$as_me:$LINENO: Now type 'make' or 'make install' to build (and install) SMI, or
+	       type 'make distclean' to re-configure from scratch!" >&5
+echo "$as_me: Now type 'make' or 'make install' to build (and install) SMI, or
+	       type 'make distclean' to re-configure from scratch!" >&6;}
