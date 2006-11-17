@@ -216,7 +216,7 @@ void *MPID_Get_SymbolPt( symbolName, dllName, error_code )
     if( (dll_handle = dlopen( 0, RTLD_NOW )) == 0 ) {
 	/* this is an error, handle for main program should always be available */ 
 	*error_code = MPI_ERR_INTERN;
-	return;
+	return NULL;
     }
 
     /* dlerror() returns pointer to an error message if something went wrong during dlsym();
@@ -236,7 +236,7 @@ void *MPID_Get_SymbolPt( symbolName, dllName, error_code )
     }
     if( dlsym_return_msg != 0 ) {
 	*error_code = MPI_ERR_INTERN;
-	return;
+	return NULL;
     }
 
     return symbol_pointer;
