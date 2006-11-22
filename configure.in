@@ -2932,15 +2932,30 @@ else
     MPE_OPTS="$MPE_OPTS --with-f77_extra_flag='$F77_EXTRA_FLAG' --with-flib_path_leader='$FLIB_PATH_LEADER'"
 fi
 
-CLINKERDYNAMICOPTS="${CLINKERDYNAMICOPTS} -Wl,-export-dynamic"
-CLINKERSTATICOPTS="${CLINKERSTATICOPTS} -Wl,-export-dynamic"
+AC_MSG_CHECKING([if C linker supports --export-dynamic])
+LDFLAGS_save="$LDFLAGS"
+LDFLAGS="$LDFLAGS -Wl,--export-dynamic"
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[]])],[
+		CLINKERDYNAMICOPTS="${CLINKERDYNAMICOPTS} -Wl,--export-dynamic"
+		CLINKERSTATICOPTS="${CLINKERSTATICOPTS} -Wl,--export-dynamic"
+		export_check=yes],[export_check=no])
+AC_MSG_RESULT($export_check)
+LDFLAGS="$LDFLAGS_save"
 
-F77LINKERDYNAMICOPTS="${F77LINKERDYNAMICOPTS} -Wl,-export-dynamic"
-F77LINKERSTATICOPTS="${F77LINKERSTATICOPTS} -Wl,-export-dynamic"
+if test "x$F77" != "x"; then
+	AC_MSG_CHECKING([if F77 linker supports --export-dynamic])
+	AC_LANG_PUSH(Fortran 77)
+	LDFLAGS_save="$LDFLAGS"
+	LDFLAGS="$LDFLAGS -Wl,--export-dynamic"
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[]])],[
+			F77LINKERDYNAMICOPTS="${F77LINKERDYNAMICOPTS} -Wl,--export-dynamic"
+			F77LINKERSTATICOPTS="${F77LINKERSTATICOPTS} -Wl,--export-dynamic"
+			export_check=yes],[export_check=no])
+	AC_MSG_RESULT($export_check)
+	LDFLAGS="$LDFLAGS_save"
+	AC_LANG_POP
+fi
 
-
-
-#
 # Substitute variables
 AC_SUBST(RSHCOMMAND)dnl
 # FINC contains an @MPIR_HOME@, so it needs to come first

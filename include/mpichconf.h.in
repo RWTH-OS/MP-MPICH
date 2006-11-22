@@ -9,6 +9,9 @@
 /* device number of ch_gm */
 #undef DEVICE_ch_gm_nbr
 
+/* device number of ch_mpx */
+#undef DEVICE_ch_mpx_nbr
+
 /* device number of ch_p4 */
 #undef DEVICE_ch_p4_nbr
 
@@ -20,9 +23,6 @@
 
 /* device number of ch_usock */
 #undef DEVICE_ch_usock_nbr
-
-/* device number of ch_mpx */
-#undef DEVICE_ch_mpx_nbr
 
 /* Define if Fortran functions are pointers to pointers */
 #undef FORTRAN_SPECIAL_FUNCTION_PTR
