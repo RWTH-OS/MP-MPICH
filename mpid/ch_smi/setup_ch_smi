@@ -126,11 +126,9 @@ if [ $ARCH = "LINUX" -a $SCI_TYPE != "NO_SCI" ] ; then
   fi
 fi
 
-set -x
 if [ $SCI_TYPE != "NO_SCI" ] ; then
   eval `grep '^SISCIDIR=' $SMIDIR/config.log`
 fi
-set +x
 
 # set up library lists and pathes accordingly
 # We need pthreads for the SMI watchdog on SCI and other stuff.
