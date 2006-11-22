@@ -126,9 +126,11 @@ if [ $ARCH = "LINUX" -a $SCI_TYPE != "NO_SCI" ] ; then
   fi
 fi
 
+set -x
 if [ $SCI_TYPE != "NO_SCI" ] ; then
-  SISCIDIR=`cat $SMIDIR/include/smiconfig.h | grep SISCIDIR | cut -d" " -f 3`
+  eval `grep '^SISCIDIR=' $SMIDIR/config.log`
 fi
+set +x
 
 # set up library lists and pathes accordingly
 # We need pthreads for the SMI watchdog on SCI and other stuff.
@@ -160,18 +162,9 @@ fi
 # for dlopen() etc. (used in smicoll.c), libdl is required
 LIB_LIST="${LIB_LIST} -ldl"
 
-# smi.h is needed outside of ch_smi, too
-# XXX why ? 
-# INCLUDE_PATH="$INCLUDE_PATH -I${SMIDIR}/include"
-
-# SMI also needs the define MPI_SMI on compile time
-#DEV_DEFS="${DEV_DEFS} -DMPI_SMI"
 # SCI-MPICH uses the SMI library which is multithreaded (and the
 # device ch_smi may be multithreaded, too)
 CFLAGS="$CFLAGS $THREAD_DEF"
-# need to know the type of SCI drivers running for some low-level optimizations
-# and topology setup
-#CFLAGS="$CFLAGS -D${SCI_TYPE}"
 echo "#define $SCI_TYPE" >> $srcdir/mpid/ch_smi/smi_conf.h
 if [ -n "$THREAD_LIB" -a "(" $ARCH = "solaris" -o $ARCH = "solaris86" ")" ] ; then
 	# If compiling for Solaris, test if Sun or Gnu C is used. Sun C needs the -mt
