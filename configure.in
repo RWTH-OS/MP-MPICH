@@ -94,10 +94,6 @@ AC_ARG_WITH([nt2unix],AS_HELP_STRING(--with-nt2unix=DIR,
 	    [the directory where to find the nt2unix includes & library]),
 	    [NT2UNIXDIR=$withval],[NT2UNIXDIR="$PWD/mpid/nt2unix"])
 
-AC_ARG_WITH([gm],AS_HELP_STRING(--with-gm=DIR,
-	    [the directory where to find the gm includes & library]),
-	    [GM_DIR=$withval],[GM_DIR=""])
-
 AC_ARG_WITH([smi],AS_HELP_STRING(--with-smi=DIR,
 	    [SMI library installation directory (DIR/lib/libcsmi{.a,.so})]),
 	    [SMIDIR=$withval],[SMIDIR=""])
@@ -495,6 +491,15 @@ AC_ARG_ENABLE([romio],AS_HELP_STRING(--disable-romio,
 	       else
 		 ROMIO=0
 	       fi],[ROMIO=1])
+AC_ARG_ENABLE([viola-io],AS_HELP_STRING(--enable-viola-io, 
+              [Use viola-io instead of romio library]), 
+              [if test "$enableval" != "no"; then 
+                 ROMIO_DIR=viola-io 
+                 VIOLAIO=yes 
+                 CFLAGS="${CFLAGS} -DVIOLAIO -I$PWD/viola-io/adio/ad_tunnelfs" 
+               else 
+                 ROMIO_DIR=romio 
+               fi],[ROMIO_DIR=romio])
 
 AC_ARG_ENABLE([mpe],AS_HELP_STRING(--disable-mpe,
 	      [Don't build the MPE routines]),
@@ -1501,16 +1506,6 @@ if test -n "$device_ch_usock" ; then
 	USE_NT2UNIX="yes"
         CFLAGS="$CFLAGS -DUSE_NT2UNIX -I$NT2UNIXDIR/include"
 	USER_CFLAGS="$USER_CFLAGS -DUSE_NT2UNIX"
-fi
-
-# ch_gm
-if test -n "$DEVICE_ch_gm" ; then
-	if test -z "$GM_DIR" ; then
-		GM_DIR="/opt/gm"
-		echo "GM_DIR ist $GM_DIR"
-	fi
-        CFLAGS="$CFLAGS -I$GM_DIR/include"
-	LDFLAGS="$LDFLAGS -L$GM_DIR/lib"
 fi
 
 #
@@ -3016,7 +3011,6 @@ AC_DEFINE_UNQUOTED(MPIRUN_DEVICE,$q$DEVICE$q,[MPI device])
 AC_DEFINE_UNQUOTED(DEVICE_ch_smi_nbr,$DEVICE_ch_smi_nbr,[device number of ch_smi device])
 AC_DEFINE_UNQUOTED(DEVICE_ch_shmem_nbr,$DEVICE_ch_shmem_nbr,[device number of ch_shmem])
 AC_DEFINE_UNQUOTED(DEVICE_ch_p4_nbr,$DEVICE_ch_p4_nbr,[device number of ch_p4])
-AC_DEFINE_UNQUOTED(DEVICE_ch_gm_nbr,$DEVICE_ch_gm_nbr,[device number of ch_gm])
 AC_DEFINE_UNQUOTED(DEVICE_ch_usock_nbr,$DEVICE_ch_usock_nbr,[device number of ch_usock])
 AC_DEFINE_UNQUOTED(DEVICE_ch_mpx_nbr,$DEVICE_ch_mpx_nbr,[device number of ch_mpx])
 
