@@ -344,7 +344,6 @@ void createProcGroup(char *pgName, char *execPath, int h, char *metahostname) {
 				int j;
 				for (j=0; pn->extraProcList[j]; j++)
 					{
-#ifdef _DEBUG_META_ZERO_APPS
 						if(i==0 && j==0)
 							{
 								int k, num;
@@ -359,8 +358,7 @@ void createProcGroup(char *pgName, char *execPath, int h, char *metahostname) {
 											}
 									}
 				    
-							}				
-#endif
+							}
 						fprintf(pgFile,"%s", pn->extraProcList[j]);
 					}
 

@@ -328,14 +328,6 @@ AC_ARG_ENABLE([meta],AS_HELP_STRING(--enable-meta,
 		 META='yes'
 	       fi],)
 
-AC_ARG_ENABLE([meta-zero-apps],AS_HELP_STRING(--enable-meta-zero-apps,
-	      [for debug purpose...]),
-	      [if test "$enableval" != "no"; then
-		 CFLAGS="$CFLAGS -D_DEBUG_META_ZERO_APPS"
-		 FFLAGS="$FFLAGS -D_DEBUG_META_ZERO_APPS"
-		 USER_CFLAGS="$USER_CFLAGS -D_DEBUG_META_ZERO_APPS"
-	       fi],)
-
 AC_ARG_ENABLE([meta-atm],AS_HELP_STRING(--enable-meta-atm,
 	      [Enable meta-computing with ATM support]),
 	      [if test "$enableval" != "no"; then
