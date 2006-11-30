@@ -62,7 +62,7 @@ endif
 DIRS     := $(MPIDIRS) $(MPI2DIRS) $(DEVICE_DIRS) $(METADEVS) examples src/routing
 
 # This is a list of the devices that are available
-AVAILDEVICES  := mpid/ch_p4 mpid/ch_lfshmem mpid/ch_shmem mpid/ch_smi mpid/ch_usock mpid/ch_gm $(METADEVS)
+AVAILDEVICES  := mpid/ch_p4 mpid/ch_lfshmem mpid/ch_shmem mpid/ch_smi mpid/ch_usock $(METADEVS)
 
 # Installation directories
 prefix           := @prefix@
@@ -502,9 +502,9 @@ mpiflib: ${top_srcdir}/Makefile.in
 rmlib:
 	@echo ""
 	@echo "*# removing libraries"
-	@/bin/rm -f $(libbuild_dir)/lib*.a 
-	@/bin/rm -f $(libbuild_dir)/shared/lib*.so*
-	@/bin/rm -rf $(libbuild_dir)/*.obj
+	@rm -f $(libbuild_dir)/lib*.a 
+	@rm -f $(libbuild_dir)/shared/lib*.so*
+	@rm -rf $(libbuild_dir)/*.obj
 
 
 mpelib:
@@ -564,7 +564,7 @@ cpplib:
             fi ; \
 	fi
 	@(cd MPI-2-C++ ; MAKE="$(MAKE)" ; export MAKE ; \
-	/bin/rm -f config.cache ; \
+	rm -f config.cache ; \
 	CXXFLAGS="" ; export CXXFLAGS ; \
 	CXX="g++" ; export CXX ; \
 	ldir=`echo $(libdir) | sed -e 's%$(MPIR_HOME)/%%g'` ; \
@@ -666,7 +666,7 @@ profileliblink:
 # the master Makefile (this also applies to the server targets).
 # Note that we copy rather than link to the programs
 mpirun_chp4mpd:
-	/bin/rm -f ${binbuild_dir}/startdaemons
+	rm -f ${binbuild_dir}/startdaemons
 	if [ -d mpid/mpd ] ; then \
 	    if [ ! -f mpid/mpd/mpdcon ] ; then \
 	        ( cd mpid/mpd ; $(MAKE) mpdcon ) ; \
@@ -729,24 +729,20 @@ distclean: cleanslate rmlib
 		do if [ -d $$dir ] && [ -s $$dir/Makefile ]; then \
 			(cd $$dir && $(MAKE) distclean ); \
 		fi; done
-	-rm -f *~ *.ln bin/mpi* ID bin/upshot bin/jumpshot \
-		bin/tkrun_smi bin/startdaemons \
+	-rm -f *~ bin/mpicc bin/mpiCC bin/mpirun bin/mpicompile.args bin/mpif77 \
+		bin/mpif90 bin/mpiman bin/mpirun.args bin/mpirun.ch_smi \
+		bin/mpirun.meta bin/mpirun.meta.create bin/mpirun_dbg.totalview \
+		bin/upshot bin/jumpshot bin/tkrun_smi bin/startdaemons \
 		installtest/Makefile installtest/Makefile.proto \
 		include/mpidefs.h include/mpif.h include/mpio.h \
-		include/mpichconf.h Makefile config.log config.status \
-		bin/config.status doc/port doc/portbuild doc/portperf \
-		doc/porttest lib/*.[oa] lib/*.so.* lib/*.so bin/tstmachines \
-		mpe/slog_api/config.log \
-		mpe/slog_api/confdefs.h \
-		romio/test/pfcoll_test.f \
-		MPI-2-C++/config.log \
-		MPI-2-C++/confdefs.h \
-		examples/test/third.out \
-		examples/test/summary.xml \
-		examples/meta/Makefile \
-		examples/meta/metabench/Makefile \
-		examples/test/io \
-		bin/chkserv bin/chkmachine 
+		include/mpichconf.h Makefile config.log config.status doc/port \
+		doc/portbuild doc/portperf doc/porttest lib/*.[oa] lib/*.so.* \
+		lib/*.so bin/tstmachines mpe/slog_api/config.log \
+		mpe/slog_api/confdefs.h romio/test/pfcoll_test.f \
+		MPI-2-C++/config.log MPI-2-C++/confdefs.h \
+		examples/test/third.out examples/test/summary.xml \
+		examples/meta/Makefile examples/meta/metabench/Makefile \
+		examples/test/io bin/chkserv bin/chkmachine
 	-rm -rf include/mpi2c++ lib/obj lib/shared romio/lib
 
 install: lib/lib$(MPILIBNAME).a
@@ -806,11 +802,6 @@ install: lib/lib$(MPILIBNAME).a
 		$(INSTALL_DATA) $(ROMIO_DIR)/include/mpio.h $(ROMIO_DIR)/include/mpiof.h \
 			$(includedir); \
 		$(INSTALL_DATA) $(ROMIO_DIR)/test/simple.c $(datadir)/examples/simpleio.c; \
-	fi
-	# VIOLA-IO
-	if test "$(ROMIO_DIR)" = "viola-io"; then \
-        $(INSTALL_DATA) include/violaio.h $(includedir); \
-        $(INSTALL_SCRIPT) src/tunnelfs_io_server/tunnelfs_io_server $(bindir); \
 	fi
 	# ch_p4
 	if expr match "$(DEVICES)" ".*ch_p4.*"; then \
