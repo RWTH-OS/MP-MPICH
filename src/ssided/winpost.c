@@ -1,4 +1,4 @@
-/* $Id: winpost.c,v 1.5 2003/06/13 17:55:51 rainer Exp $
+/* $Id$
  *
  * MPI_Win_post		starts an RMA exposure epoch for the local
  *					window associated with win

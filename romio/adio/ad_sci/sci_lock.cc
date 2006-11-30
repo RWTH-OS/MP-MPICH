@@ -1,5 +1,5 @@
 //
-// $Id: sci_lock.cc,v 1.3 2001/05/10 18:46:45 joachim Exp $
+// $Id$
 //
 //
 

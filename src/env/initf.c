@@ -1,5 +1,5 @@
 /*
- *  $Id: initf.c,v 1.9 2003/06/12 13:29:13 joachim Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.

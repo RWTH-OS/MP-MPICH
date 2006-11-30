@@ -1,4 +1,4 @@
-/* $Id: smicheck.h,v 1.10 2002/10/28 21:17:47 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _MPID_SMI_CHECK
 #define _MPID_SMI_CHECK

@@ -1,5 +1,5 @@
 #!@PYTHON@
-#$Id: tkrun_smi.in,v 1.1 2000/11/15 14:41:42 joachim Exp $
+#$Id$
 from Tkinter import Tk
 from Tkinter import Frame
 from Tkinter import Button

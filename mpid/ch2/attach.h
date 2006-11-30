@@ -1,4 +1,4 @@
-/*  $Id: attach.h,v 1.1 2000/04/12 16:20:54 joachim Exp $
+/*  $Id$
  */
 
 /* This file contains support for bringing processes up stopped, so that

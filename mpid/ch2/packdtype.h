@@ -1,4 +1,4 @@
-/* $Id: packdtype.h,v 1.2 2002/05/17 16:17:53 joachim Exp $ */
+/* $Id$ */
 
 #ifndef MPID_PACKDTYPE_H
 #define MPID_PACKDTYPE_H

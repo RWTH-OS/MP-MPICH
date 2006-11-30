@@ -1,5 +1,5 @@
 /*
- *  $Id: chflow.c,v 1.3 2000/08/09 14:14:13 joachim Exp $
+ *  $Id$
  *
  *  (C) 1996 by Argonne National Laboratory and Mississipi State University.
  *      All rights reserved.  See COPYRIGHT in top-level directory.

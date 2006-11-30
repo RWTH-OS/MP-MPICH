@@ -1,5 +1,5 @@
 /* 
- *   $Id: ad_sci_open.c,v 1.3 2001/04/25 15:23:43 joachim Exp $    
+ *   $Id$    
  *
  *   
  *   

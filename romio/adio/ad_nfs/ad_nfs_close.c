@@ -1,5 +1,5 @@
 /* 
- *   $Id: ad_nfs_close.c,v 1.4 2003/06/05 11:50:29 rainer Exp $    
+ *   $Id$    
  *
  *   Copyright (C) 1997 University of Chicago. 
  *   See COPYRIGHT notice in top-level directory.

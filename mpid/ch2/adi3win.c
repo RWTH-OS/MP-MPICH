@@ -1,4 +1,4 @@
-/* $Id: adi3win.c,v 1.2 2002/03/28 16:30:58 joachim Exp $
+/* $Id$
    
    Wrapper for device-specific Window-creation.  */
 

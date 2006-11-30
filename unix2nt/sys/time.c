@@ -1,4 +1,4 @@
-/* $Id: time.c,v 1.1 2001/11/08 23:05:51 martin Exp $ */
+/* $Id$ */
 
 #include <sys/time.h>
 

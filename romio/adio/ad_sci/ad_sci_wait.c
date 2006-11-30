@@ -1,5 +1,5 @@
 /* 
- *   $Id: ad_sci_wait.c,v 1.1 2001/01/03 17:34:54 joachim Exp $    
+ *   $Id$    
  *
  *   
  *   

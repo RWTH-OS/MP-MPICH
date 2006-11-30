@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.1.2.1 2004/12/20 17:26:37 tobias Exp $
+## $Id$
 
 exampleexecdir = ${pkglibdir}/examples/sort
 

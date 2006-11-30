@@ -1,4 +1,4 @@
-/* $Id: signal.c,v 1.1.2.1 2004/12/20 17:26:37 tobias Exp $ */
+/* $Id$ */
 /* signal.c - test the usage of signals */
 
 #include <stdio.h>

@@ -1,5 +1,5 @@
 //
-// $Id: sci_barrier.h,v 1.2 2001/05/10 18:46:45 joachim Exp $
+// $Id$
 //
 // Inter-process barriers based on SCI fetch-and-add memory
 //

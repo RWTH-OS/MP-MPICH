@@ -1,4 +1,4 @@
-/*  $Id: mpdattach.h,v 1.1.4.1 2004/12/08 17:19:10 carsten Exp $
+/*  $Id$
  */
 
 /* This file contains support for bringing processes up stopped, so that

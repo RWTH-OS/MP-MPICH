@@ -1,4 +1,4 @@
-/* $Id: tree.h,v 1.7 2002/05/22 19:43:46 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _MPID_TREE_H
 #define _MPID_TREE_H

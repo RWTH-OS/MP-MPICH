@@ -1,5 +1,5 @@
 /*
- *  $Id: chhetero.c,v 1.2.14.1 2004/12/10 17:26:52 carsten Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      All rights reserved.  See COPYRIGHT in top-level directory.

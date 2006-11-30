@@ -1,5 +1,5 @@
 /* 
- *   $Id: ad_svm.h,v 1.2 2000/09/11 09:48:01 joachim Exp $    
+ *   $Id$    
  *
  *   Copyright (C) 1997 University of Chicago. 
  *   See COPYRIGHT notice in top-level directory.

@@ -1,4 +1,4 @@
-/* $Id: winunlock.c,v 1.6 2003/06/13 17:55:51 rainer Exp $
+/* $Id$
  *
  * MPI_Win_unlock		completes an RMA access epoch started
  *						by MPI_Win_lock

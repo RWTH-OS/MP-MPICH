@@ -1,5 +1,5 @@
 /*
- *  $Id: statusf2c.c,v 1.2 2003/06/05 11:50:35 rainer Exp $
+ *  $Id$
  *
  *  (C) 1997 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.

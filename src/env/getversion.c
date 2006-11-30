@@ -1,5 +1,5 @@
 /*
- *  $Id: getversion.c,v 1.3 2003/06/05 11:50:34 rainer Exp $
+ *  $Id$
  *
  *  (C) 1997 by Argonne National Laboratory.
  *      See COPYRIGHT in top-level directory.

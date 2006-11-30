@@ -1,5 +1,5 @@
 /*
- *  $Id: getpname.c,v 1.3.8.1 2004/12/01 15:55:43 martin Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.

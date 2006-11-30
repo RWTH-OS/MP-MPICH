@@ -1,5 +1,5 @@
 /* 
- *   $Id: ad_svm_wrcoll.c,v 1.1 2000/04/19 17:42:13 joachim Exp $    
+ *   $Id$    
  *
  *   Copyright (C) 1997 University of Chicago. 
  *   See COPYRIGHT notice in top-level directory.

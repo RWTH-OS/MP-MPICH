@@ -1,5 +1,5 @@
 /*
- *  $Id: shmemchkdev.c,v 1.4 2002/08/15 12:55:31 silke Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      All rights reserved.  See COPYRIGHT in top-level directory.

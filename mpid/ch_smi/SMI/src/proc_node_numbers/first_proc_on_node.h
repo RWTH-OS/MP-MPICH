@@ -1,4 +1,4 @@
-/* $Id: first_proc_on_node.h,v 1.1 2004/03/19 22:14:18 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _FIRST_PROC_ON_NODE_H_
 #define _FIRST_PROC_ON_NODE_H_

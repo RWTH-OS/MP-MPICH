@@ -1,4 +1,4 @@
-/* $Id: segv.c,v 1.3 2004/03/09 10:04:28 joachim Exp $ */
+/* $Id$ */
 
 /* Provoke abnormal termination to test the resource management 
    of SCI-MPICH. It should be possible to let this programm loop

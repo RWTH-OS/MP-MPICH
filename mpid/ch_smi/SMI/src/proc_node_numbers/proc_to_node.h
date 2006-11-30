@@ -1,4 +1,4 @@
-/* $Id: proc_to_node.h,v 1.1 2004/03/19 22:14:19 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _PROC_TO_NODE_H_
 #define _PROC_TO_NODE_H_

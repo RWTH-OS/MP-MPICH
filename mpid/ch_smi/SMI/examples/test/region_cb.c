@@ -1,4 +1,4 @@
-/* $Id: region_cb.c,v 1.1 2004/03/19 22:14:46 joachim Exp $
+/* $Id$
   
    Test callbacks for shared memory regions.
 

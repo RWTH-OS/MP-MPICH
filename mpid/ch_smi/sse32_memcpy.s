@@ -4,7 +4,7 @@
 .globl  _mpid_smi_sse32_memcpy
 .type  _mpid_smi_sse32_memcpy,@function
 .align 16
-		# $Id: sse32_memcpy.s,v 1.1 2002/10/23 21:52:39 joachim Exp $ 
+		# $Id$ 
 		# Fast remote SCI copy for systems with write-combining enabled.
 		# This is the version using SSE instructions to copy 128 Byte blocks,
 		# and flushes after 32 Byte.

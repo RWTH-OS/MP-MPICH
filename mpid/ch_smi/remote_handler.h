@@ -1,4 +1,4 @@
-/* $Id: remote_handler.h,v 1.4 2002/04/29 15:43:25 joachim Exp $ */
+/* $Id$ */
 
 #ifndef MPID_SMI_SSIDE_REMOTE_HANDLER_H
 #define MPID_SMI_SSIDE_REMOTE_HANDLER_H

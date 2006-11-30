@@ -1,4 +1,4 @@
-/* $Id: smiperf.h,v 1.4 2002/01/16 12:01:10 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _MPID_SMI_PERF_H
 #define _MPID_SMI_PERF_H

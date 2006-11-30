@@ -1,4 +1,4 @@
-/* $Id: err.h,v 1.1 2004/03/19 22:14:15 joachim Exp $ */
+/* $Id$ */
 
 #ifndef __ERR_H
 #define __ERR_H

@@ -1,5 +1,5 @@
 /*
- *  $Id: debugutil.c,v 1.3 2001/08/14 08:06:51 joachim Exp $
+ *  $Id$
  *
  *  (C) 1996 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.

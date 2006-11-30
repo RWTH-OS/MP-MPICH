@@ -1,4 +1,4 @@
-/* $Id: log_wrap.c,v 1.8 2001/07/12 18:32:44 stef Exp $ */
+/* $Id$ */
 
 /* 
    This is a large file and may exceed some compilers ability to handle.

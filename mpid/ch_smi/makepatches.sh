@@ -1,5 +1,5 @@
 #! /bin/sh
-# $Id: makepatches.sh,v 1.2 2000/05/16 10:05:34 joachim Exp $
+# $Id$
 #set -x
 
 echo "testing patch-file consistency"

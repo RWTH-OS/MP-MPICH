@@ -4,7 +4,7 @@
 .globl  _mpid_smi_mmx_memcpy
 .type _mpid_smi_mmx_memcpy,@function
 .align 16
-		# $Id: mmx_memcpy.s,v 1.8 2001/06/20 17:40:08 joachim Exp $ - fast remote SCI copy
+		# $Id$ - fast remote SCI copy
 	
 _mpid_smi_mmx_memcpy:
                 pushl %edi 

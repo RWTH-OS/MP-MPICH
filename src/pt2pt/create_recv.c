@@ -1,5 +1,5 @@
 /*
- *  $Id: create_recv.c,v 1.4 2003/06/05 11:50:37 rainer Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.

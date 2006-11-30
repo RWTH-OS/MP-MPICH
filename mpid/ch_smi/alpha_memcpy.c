@@ -1,4 +1,4 @@
-/* $Id: alpha_memcpy.c,v 1.1 2001/07/11 15:55:42 joachim Exp $ 
+/* $Id$ 
 
    Optimized memcpy function for Alpha Processor Platform. 
    Initially taken from /usr/src/linux/arch/alpha/lib/memcpy.c */

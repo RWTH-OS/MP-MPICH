@@ -1,4 +1,4 @@
-/* $Id: smistat.h,v 1.63 2004/03/30 09:31:45 boris Exp $ */
+/* $Id$ */
 
 #ifndef _MPID_SMI_STAT_H
 #define _MPID_SMI_STAT_H

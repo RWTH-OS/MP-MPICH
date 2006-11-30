@@ -1,4 +1,4 @@
-/* $Id: node_rank.h,v 1.1 2004/03/19 22:14:18 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _NODE_RANK_H_
 #define _NODE_RANK_H_

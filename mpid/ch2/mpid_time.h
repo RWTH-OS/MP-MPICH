@@ -1,4 +1,4 @@
-/* $Id: mpid_time.h,v 1.1 2000/08/09 17:14:49 joachim Exp $ */
+/* $Id$ */
 #ifndef _MPID_TIME_H
 #define _MPID_TIME_H
 

@@ -1,4 +1,4 @@
-/* $Id: sendrecv.h,v 1.1 2004/03/19 22:14:18 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _SMI_SENDRECV_H
 #define _SMI_SENDRECV_H

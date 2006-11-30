@@ -1,5 +1,5 @@
 
-/*$Id: stack.c,v 1.7 2002/01/24 14:37:42 joachim Exp $*/
+/*$Id$*/
 
 #include "stack.h"
 

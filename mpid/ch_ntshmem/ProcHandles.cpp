@@ -1,5 +1,5 @@
 /*
- * $Id: ProcHandles.cpp,v 1.2 2000/04/13 14:23:52 karsten Exp $
+ * $Id$
  *
  */
 

@@ -1,5 +1,5 @@
 /*
- *  $Id: gatewaychkdev.c,v 1.1 2000/04/13 07:19:29 martin Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      All rights reserved.  See COPYRIGHT in top-level directory.

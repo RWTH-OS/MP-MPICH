@@ -1,4 +1,4 @@
-/* $Id: ad_sci_stat.h,v 1.2 2001/05/10 18:46:45 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _AD_SCI_STAT_H
 #define _AD_SCI_STAT_H

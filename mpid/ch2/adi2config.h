@@ -1,4 +1,4 @@
-/* $Id: adi2config.h,v 1.4.14.1 2004/12/16 12:59:17 boris Exp $ */
+/* $Id$ */
 
 #ifndef _ADI2CONFIG_INC
 #define _ADI2CONFIG_INC

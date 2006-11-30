@@ -484,6 +484,7 @@ AC_ARG_ENABLE([f90modules],AS_HELP_STRING(--enable-f90modules,
 		 do_f90modules=no
 	       fi],[do_f90modules=yes])
 
+ROMIO_DIR=romio
 AC_ARG_ENABLE([romio],AS_HELP_STRING(--disable-romio,
 	      [Disable the compilation and usage of the romio library]),
 	      [if test "$enableval" != "no"; then
@@ -491,15 +492,6 @@ AC_ARG_ENABLE([romio],AS_HELP_STRING(--disable-romio,
 	       else
 		 ROMIO=0
 	       fi],[ROMIO=1])
-AC_ARG_ENABLE([viola-io],AS_HELP_STRING(--enable-viola-io, 
-              [Use viola-io instead of romio library]), 
-              [if test "$enableval" != "no"; then 
-                 ROMIO_DIR=viola-io 
-                 VIOLAIO=yes 
-                 CFLAGS="${CFLAGS} -DVIOLAIO -I$PWD/viola-io/adio/ad_tunnelfs" 
-               else 
-                 ROMIO_DIR=romio 
-               fi],[ROMIO_DIR=romio])
 
 AC_ARG_ENABLE([mpe],AS_HELP_STRING(--disable-mpe,
 	      [Don't build the MPE routines]),
@@ -3061,7 +3053,6 @@ AC_SUBST(ROMIO_TCPPFLAGS)dnl
 AC_SUBST(ROMIO_TFFLAGS)dnl
 AC_SUBST(ROMIO_DEVLIBS)dnl
 AC_SUBST(ROMIO_DEVPLIBS)dnl
-AC_SUBST(VIOLAIO)dnl
 AC_SUBST(SMIDIR) dnl
 AC_SUBST(SMIARCH)dnl
 AC_SUBST(NT2UNIXDIR) dnl

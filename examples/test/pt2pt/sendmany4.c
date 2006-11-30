@@ -1,4 +1,4 @@
-/* $Id: sendmany4.c,v 1.1 2002/01/29 11:10:32 joachim Exp $
+/* $Id$
 
    Nonblocking send and recv from all other processes, starting with proc 0 */
 

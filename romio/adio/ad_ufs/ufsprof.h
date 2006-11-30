@@ -1,4 +1,4 @@
-/* $Id: ufsprof.h,v 1.1 2001/11/16 17:12:01 joachim Exp $ */
+/* $Id$ */
 
 /* 
    This header file converts all ADIOI_UFS_ names into PDIOI_UFS_ names, for use

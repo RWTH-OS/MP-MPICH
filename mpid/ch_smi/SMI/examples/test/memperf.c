@@ -1,4 +1,4 @@
-/* $Id: memperf.c,v 1.1 2004/03/19 22:14:46 joachim Exp $ */
+/* $Id$ */
 /* memperf.c - determine the basic remote memory performance values:
    - integer latency read/write
    - pingpong latency write

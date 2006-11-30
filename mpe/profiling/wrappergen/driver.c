@@ -1,5 +1,5 @@
 #ifndef LINT
-static char vcid[] = "$Id: driver.c,v 1.1 2000/04/12 16:20:34 joachim Exp $";
+static char vcid[] = "$Id$";
 #endif
 
 #include <ctype.h>

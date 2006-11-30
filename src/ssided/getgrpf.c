@@ -1,4 +1,4 @@
-/* $Id: getgrpf.c,v 1.2 2003/06/13 17:24:24 rainer Exp $ */
+/* $Id$ */
 
 /* universal fortran binding */
 

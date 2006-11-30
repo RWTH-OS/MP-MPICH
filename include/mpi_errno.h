@@ -1,6 +1,6 @@
 
 /*
- *  $Id: mpi_errno.h,v 1.4 2001/09/08 00:10:55 frank Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      All rights reserved.  See COPYRIGHT in top-level directory.

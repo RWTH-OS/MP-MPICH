@@ -3,7 +3,7 @@
 .globl  _smi_mmx_memcpy
 .type _smi_mmx_memcpy,@function
 	
-	# $Id: mmx_scimemcpy.s,v 1.1 2004/03/19 22:14:17 joachim Exp $
+	# $Id$
 	# memcpy() using MMX instructions
 	# call: void _smi_mmx_memcpy(void *dst, const void *src, unsigned int size)
 	

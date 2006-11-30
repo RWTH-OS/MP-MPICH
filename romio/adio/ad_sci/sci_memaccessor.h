@@ -1,5 +1,5 @@
 //
-// $Id: sci_memaccessor.h,v 1.7 2001/06/15 15:41:49 joachim Exp $
+// $Id$
 //
 // Access memory from local or remote SCI segments
 //  - stride-based access via SCI_macc descriptors

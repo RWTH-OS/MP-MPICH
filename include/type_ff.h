@@ -1,4 +1,4 @@
-/* $Id: type_ff.h,v 1.2 2002/05/17 09:50:41 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _MPI_TYPE_FF_H
 #define _MPI_TYPE_FF_H

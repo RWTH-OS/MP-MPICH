@@ -1,5 +1,5 @@
 /*
- *  $Id: wsockbeager.c,v 1.4 2001/08/02 08:03:39 joachim Exp $
+ *  $Id$
  *
  *  (C) 1995 by Argonne National Laboratory and Mississipi State University.
  *      All rights reserved.  See COPYRIGHT in top-level directory.

@@ -1,4 +1,4 @@
-/* $Id: shm.c,v 1.1 2001/11/08 23:05:52 martin Exp $ */
+/* $Id$ */
 
 #include <windows.h>
 #include <stdlib.h>

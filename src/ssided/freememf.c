@@ -1,4 +1,4 @@
-/* $Id: freememf.c,v 1.2 2003/06/13 17:55:51 rainer Exp $ */
+/* $Id$ */
 
 /* universal fortran binding */
 

@@ -1,4 +1,4 @@
-/* $Id: tools.h,v 1.1 2000/04/12 16:20:35 joachim Exp $ */
+/* $Id$ */
 
 /*
     This file contains some basic definitions that the tools routines

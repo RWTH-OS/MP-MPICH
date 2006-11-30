@@ -1,4 +1,4 @@
-/* 	$Id: coll.h,v 1.2 2000/05/04 15:55:12 karsten Exp $	 */
+/* 	$Id$	 */
 
 #ifndef MPIR_MIN
 

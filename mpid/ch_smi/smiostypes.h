@@ -1,4 +1,4 @@
-/* $Id: smiostypes.h,v 1.3 2002/09/17 18:57:38 joachim Exp $ */
+/* $Id$ */
 
 #ifndef MPID_SMI_ONESIDED_TYPES_H
 #define MPID_SMI_ONESIDED_TYPES_H

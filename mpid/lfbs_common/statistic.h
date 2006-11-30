@@ -1,4 +1,4 @@
-/* $Id: statistic.h,v 1.3 2000/08/09 17:02:10 joachim Exp $ */
+/* $Id$ */
 
 #ifndef MPID_STAT_H
 #define MPID_STAT_H

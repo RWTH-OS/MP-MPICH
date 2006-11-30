@@ -1,4 +1,4 @@
-/* $Id: progress.c,v 1.2.8.1 2004/11/24 17:17:15 rainer Exp $ */
+/* $Id$ */
 
 /* benchmark to rate the effective performance of one-sided communication 
    for scenarios in which the target process does *not* frequently, or even 

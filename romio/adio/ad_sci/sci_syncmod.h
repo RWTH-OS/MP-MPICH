@@ -1,5 +1,5 @@
 //
-// $Id: sci_syncmod.h,v 1.3 2001/05/10 18:46:46 joachim Exp $
+// $Id$
 //
 // 'SCI_syncmod' (synchronization module) provide SCI-based locks and barriers. 
 // The SCI_syncmod object provides the required infrastructure and can create

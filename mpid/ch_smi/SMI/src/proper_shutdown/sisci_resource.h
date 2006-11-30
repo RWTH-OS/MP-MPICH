@@ -1,4 +1,4 @@
-/* $Id: sisci_resource.h,v 1.1 2004/03/19 22:14:19 joachim Exp $ */
+/* $Id$ */
 
 /* This header is used to generally switch any sisci calls to the resourcelist
  * controlled calls */

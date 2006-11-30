@@ -1,4 +1,4 @@
-/* $Id: binding.h,v 1.2 2002/03/11 10:30:17 joachim Exp $ */
+/* $Id$ */
 
 #ifndef __MPI_BINDINGS
 #define __MPI_BINDINGS

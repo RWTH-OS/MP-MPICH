@@ -1,4 +1,4 @@
-/* $Id: sciid.c,v 1.3 2001/11/12 14:28:03 joachim Exp $ */
+/* $Id$ */
  
 /* get SCI id via SCI device */
 

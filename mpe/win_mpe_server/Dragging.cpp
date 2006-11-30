@@ -1,5 +1,5 @@
 /*
-    $Id: Dragging.cpp,v 1.3 2000/11/14 08:35:36 karsten Exp $
+    $Id$
 */
 
 

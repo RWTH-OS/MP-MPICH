@@ -1,4 +1,4 @@
-/* $Id: unistd.h,v 1.1 2004/03/19 22:14:24 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _UNISTD_H_
 #define _UNISTD_H_

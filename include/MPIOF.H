@@ -1,5 +1,5 @@
 C 
-C     $Id: MPIOF.H,v 1.1 2000/05/16 13:16:34 karsten Exp $    
+C     $Id$    
 C 
 C     Copyright (C) 1997 University of Chicago. 
 C     See COPYRIGHT notice in top-level directory.

@@ -1,5 +1,5 @@
 /*
-    $Id: mpe_win_client.c,v 1.8 2001/05/31 14:04:00 karsten Exp $
+    $Id$
 */
 
 #include <windows.h>

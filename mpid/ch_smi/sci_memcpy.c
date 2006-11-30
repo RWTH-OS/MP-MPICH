@@ -1,4 +1,4 @@
-/* $Id: sci_memcpy.c,v 1.4 2001/11/22 13:55:08 nicolas Exp $ */
+/* $Id$ */
 
 #include <stdlib.h>
 #include <stdio.h>

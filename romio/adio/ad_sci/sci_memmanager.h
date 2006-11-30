@@ -1,5 +1,5 @@
 //
-// $Id: sci_memmanager.h,v 1.2 2001/05/10 18:46:46 joachim Exp $
+// $Id$
 //
 // Simple memory manager for local SCI segments:
 //  - manages only blocks of fixed size

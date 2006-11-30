@@ -1,4 +1,4 @@
-/* $Id: sendself.c,v 1.1 2000/04/12 16:22:04 joachim Exp $ */
+/* $Id$ */
 
 /* Test the performance of sending message to itself. For SCI-MPICH,
    use the SENDSELF configuration switch to measure the difference

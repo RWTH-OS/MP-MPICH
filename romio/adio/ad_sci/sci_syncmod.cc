@@ -1,5 +1,5 @@
 //
-// $Id: sci_syncmod.cc,v 1.3 2001/05/10 18:46:46 joachim Exp $
+// $Id$
 //
 // Implementation of SCI_syncmod
 //

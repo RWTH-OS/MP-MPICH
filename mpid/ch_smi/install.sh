@@ -1,5 +1,5 @@
 #! /bin/sh
-# $Id: install.sh,v 1.5 2000/05/15 12:25:19 joachim Exp $
+# $Id$
 
 # this scripts install the necessary files which reside outside from mpid/ch_smi
 #

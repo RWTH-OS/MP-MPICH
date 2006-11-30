@@ -1,4 +1,4 @@
-/* $Id: rr_write.c,v 1.1 2001/06/19 13:59:36 joachim Exp $ */
+/* $Id$ */
 
 /* Synthetic benchmark 'rr_write' (round-robin write): 
    All processes create a common file, then each process N writes to the 

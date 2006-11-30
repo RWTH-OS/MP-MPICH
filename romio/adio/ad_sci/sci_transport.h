@@ -1,5 +1,5 @@
 //
-// $Id: sci_transport.h,v 1.1 2001/11/15 18:41:20 joachim Exp $
+// $Id$
 //
 // Transport arbitrary amounts of data via SCI.
 // 

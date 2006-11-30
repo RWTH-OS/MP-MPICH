@@ -1,4 +1,4 @@
-/*   $Id: lrctx.h,v 1.1 2000/04/12 16:19:28 joachim Exp $ */
+/*   $Id$ */
 
 #ifndef _LRCTX
 #define _LRCTX

@@ -1,4 +1,4 @@
-/* $Id: sortedtree.c,v 1.1 2001/09/12 13:48:53 boris Exp $ */
+/* $Id$ */
 
 #include "sortedtree.h"
 

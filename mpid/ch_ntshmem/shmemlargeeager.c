@@ -1,5 +1,5 @@
 /*
- *  $Id: shmemlargeeager.c,v 1.8 2002/08/15 12:55:31 silke Exp $
+ *  $Id$
  *
  */
 

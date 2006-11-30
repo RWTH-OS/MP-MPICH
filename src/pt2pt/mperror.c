@@ -1,5 +1,5 @@
 /*
- *  $Id: mperror.c,v 1.2 2003/10/22 09:44:45 silke Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.

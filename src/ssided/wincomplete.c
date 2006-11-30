@@ -1,4 +1,4 @@
-/* $Id: wincomplete.c,v 1.5 2003/06/13 17:55:51 rainer Exp $
+/* $Id$
  *
  * MPI_Win_complete		completes an RMA access epoch on win started
  *						by MPI_Win_start

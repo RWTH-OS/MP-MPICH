@@ -1,4 +1,4 @@
-/* $Id: sse_ops_gcc.c,v 1.5 2001/10/11 12:29:36 stef Exp $ */
+/* $Id$ */
 
 #if ( ! defined MPI_LINUX && ! defined MPI_solaris86 )
 #error sse_ops_gcc.c is for Linux/Solaris86 only

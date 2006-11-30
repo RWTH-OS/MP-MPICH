@@ -1,5 +1,5 @@
 //
-// $Id: ad_sci_fragment.h,v 1.2 2001/05/10 18:46:45 joachim Exp $
+// $Id$
 //
 // A fragment is a contignous piece of the file located on one node
 //

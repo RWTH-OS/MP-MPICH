@@ -1,4 +1,4 @@
-/* $Id: address_to_region.h,v 1.1 2004/03/19 22:14:20 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _SMI_ADDRESS_TO_REGION_H_
 #define _SMI_ADDRESS_TO_REGION_H_

@@ -1,4 +1,4 @@
-/* $Id: test_file_mapping_3.cpp,v 1.1.2.1 2004/11/25 16:19:24 carsten Exp $ */
+/* $Id$ */
 
 #include <windows.h>
 #include <stdio.h>

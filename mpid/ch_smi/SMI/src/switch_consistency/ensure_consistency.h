@@ -1,4 +1,4 @@
-/* $Id: ensure_consistency.h,v 1.1 2004/03/19 22:14:21 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _ENSURE_CONSISTENCY_H_
 #define _ENSURE_CONSISTENCY_H_

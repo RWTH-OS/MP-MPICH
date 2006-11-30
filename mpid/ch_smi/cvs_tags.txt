@@ -1,4 +1,4 @@
-$Id: cvs_tags.txt,v 1.12 2001/12/20 18:51:42 joachim Exp $
+$Id$
 
 These tags are "historical" tags from the ch_smi repository. The new tags
 for mp-mpich/mpid/ch_smi start below.

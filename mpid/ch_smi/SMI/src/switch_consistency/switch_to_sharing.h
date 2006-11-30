@@ -1,4 +1,4 @@
-/* $Id: switch_to_sharing.h,v 1.1 2004/03/19 22:14:22 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _SWITCH_TO_SHARING_H_
 #define _SWITCH_TO_SHARING_H_

@@ -1,4 +1,4 @@
-/* $Id: busy_sndrcv.c,v 1.4 2004/03/05 13:57:06 joachim Exp $ */
+/* $Id$ */
 
 /* busy_sndrcv - measure overlapping of computation and communication */
 

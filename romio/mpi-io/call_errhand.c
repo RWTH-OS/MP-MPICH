@@ -1,5 +1,5 @@
 /*
-*   $Id: call_errhand.c,v 1.2 2003/06/05 11:50:31 rainer Exp $    
+*   $Id$    
 */
 
 #include "mpioimpl.h"

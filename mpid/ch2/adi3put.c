@@ -1,4 +1,4 @@
-/* $Id: adi3put.c,v 1.4 2002/10/25 16:23:22 joachim Exp $
+/* $Id$
 
    Wrapper for device-specific execution of MPI_Put. */
 

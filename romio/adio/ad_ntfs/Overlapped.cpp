@@ -1,5 +1,5 @@
 /*
- * $Id: Overlapped.cpp,v 1.4 2004/06/30 08:50:16 martin Exp $
+ * $Id$
  *
  */
 

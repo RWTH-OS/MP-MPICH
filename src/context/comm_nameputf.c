@@ -1,5 +1,5 @@
 /*
- *  $Id: comm_nameputf.c,v 1.4 2003/06/13 09:39:35 rainer Exp $
+ *  $Id$
  *
  *  (C) 1996 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.

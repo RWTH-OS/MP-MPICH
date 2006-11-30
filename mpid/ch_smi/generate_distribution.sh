@@ -1,6 +1,6 @@
 #! /bin/sh
 #
-# $Id: generate_distribution.sh,v 1.8 2000/05/23 14:56:27 joachim Exp $
+# $Id$
 #
 #set -x
 

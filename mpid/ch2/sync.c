@@ -1,4 +1,4 @@
-/* $Id: sync.c,v 1.3 2002/03/28 16:30:58 joachim Exp $
+/* $Id$
 
    Wrapper for device-specific execution of window synchronization. */
 

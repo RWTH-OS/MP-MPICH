@@ -1,4 +1,4 @@
-/* $Id: startup.h,v 1.1 2004/03/19 22:14:21 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _SMI_STARTUP_H__
 #define _SMI_STARTUP_H__

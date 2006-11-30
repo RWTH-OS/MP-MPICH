@@ -1,4 +1,4 @@
-/* $Id: page_size.h,v 1.1 2004/03/19 22:14:15 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _PAGE_SIZE_H_
 #define _PAGE_SIZE_H_

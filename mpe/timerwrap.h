@@ -1,4 +1,4 @@
-/* $Id: timerwrap.h,v 1.2 2002/03/11 10:30:18 joachim Exp $ */
+/* $Id$ */
 #ifndef _MPI_TIMERWRAP_H
 #define _MPI_TIMERWRAP_H
 

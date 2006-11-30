@@ -1,4 +1,4 @@
-/* $Id: store_barrier.h,v 1.1 2004/03/19 22:14:23 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _STORE_BARRIER_H_
 #define _STORE_BARRIER_H_

@@ -1,4 +1,4 @@
-/* $Id: general.c,v 1.1 2004/03/19 22:14:25 joachim Exp $ */
+/* $Id$ */
 
 #include "env/general_definitions.h"
 #include "general.h"

@@ -1,5 +1,5 @@
 //
-// $Id: sci_msg.h,v 1.4 2001/06/15 15:41:49 joachim Exp $
+// $Id$
 //
 // SCI_msg is a low-level messaging facility for sending and receiving fixed-size
 // messages via SCI. 

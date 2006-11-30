@@ -13,11 +13,6 @@
 #endif
 /* /META */
 
-#ifdef VIOLAIO
-#include "ad_tunnelfs_common.h"
-#include "ad_tunnelfs_msg.h"
-#endif
-
 #include "mpiimpl.h"
 
 #ifdef HAVE_WEAK_SYMBOLS
@@ -77,28 +72,6 @@ EXPORT_MPI_API int MPI_Finalize()
     TR_PUSH("MPI_Finalize");
 
     DBG(FPRINTF( stderr, "Entering system finalize\n" ); fflush(stderr);)
-
-#ifdef VIOLAIO
-    if (!MPIR_meta_cfg.extra && !MPIR_meta_cfg.router &&
-        (TUNNELFS_GLOBAL_MASTER >= 0))
-    {
-        void *buf = NULL;
-        int buf_size = 0;
-        int recvd = 0;
-        int msg_id = TUNNELFS_NEXT_MSG_ID;
-        
-        /* log off at master io server */
-
-        /* sending end request */
-        tunnelfs_msg_send_end();
-
-        /* receiving reply */
-        tunnelfs_msg_get_reply(&buf, &buf_size, &recvd, TUNNELFS_GLOBAL_MASTER, msg_id);
-    }
-    /* synchronize all non-router processes */
-    if (!MPIR_meta_cfg.router)
-        MPI_Barrier(MPI_COMM_META);
-#endif
 
     /* Complete any remaining buffered sends first */
     { void *a; int b;

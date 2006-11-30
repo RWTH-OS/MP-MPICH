@@ -1,4 +1,4 @@
-/* $Id: loop_interface.h,v 1.1 2004/03/19 22:14:16 joachim Exp $ */
+/* $Id$ */
 
 #ifndef __LOOP_INTERFACE_H
 #define __LOOP_INTERFACE_H

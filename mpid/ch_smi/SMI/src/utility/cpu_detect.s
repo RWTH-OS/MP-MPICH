@@ -1,4 +1,4 @@
-			# $Id: cpu_detect.s,v 1.1 2004/03/19 22:14:24 joachim Exp $
+			# $Id$
 			# determine command extensions of x86 CPUs	
 			#  call:	CPU_detect(int* MMX,int* SSE,int* _3DNow)
 .686: 

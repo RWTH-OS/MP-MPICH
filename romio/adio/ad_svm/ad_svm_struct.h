@@ -1,4 +1,4 @@
-/* $Id: ad_svm_struct.h,v 1.1 2000/04/19 17:42:12 joachim Exp $
+/* $Id$
  *	ad_svm_struct.h
  *
  *	routines to synchronize data-structure-accesses

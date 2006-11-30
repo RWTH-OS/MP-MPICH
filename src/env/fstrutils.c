@@ -1,5 +1,5 @@
 /*
- *  $Id: fstrutils.c,v 1.3 2001/04/19 15:09:34 karsten Exp $
+ *  $Id$
  *
  *  (C) 1996 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.

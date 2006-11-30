@@ -1,4 +1,4 @@
-/* $Id: allocmem.c,v 1.10 2003/06/13 16:20:42 joachim Exp $
+/* $Id$
  *
  * MPI_Alloc_mem	allocates memory to be used by communication windows
  *					the use of allocated memory is strongly recommanded

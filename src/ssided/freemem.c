@@ -1,4 +1,4 @@
-/* $Id: freemem.c,v 1.7 2003/06/13 16:20:42 joachim Exp $
+/* $Id$
  *
  * MPI_Free_mem		frees a memory prior allocated by MPI_Alloc_mem
  *

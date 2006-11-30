@@ -1,4 +1,4 @@
-/* $Id: free_shreg.h,v 1.1 2004/03/19 22:14:20 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _FREE_SHREG_H_
 #define _FREE_SHREG_H_

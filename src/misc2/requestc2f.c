@@ -1,5 +1,5 @@
 /*
- *  $Id: requestc2f.c,v 1.3 2003/06/10 11:47:46 rainer Exp $
+ *  $Id$
  *
  *  (C) 1997 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.

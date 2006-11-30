@@ -4,7 +4,7 @@
 .globl  _smi_wc_memcpy
 .type _smi_wc_memcpy,@function
 .align 16
-		# $Id: wc_scimemcpy.s,v 1.1 2004/03/19 22:14:17 joachim Exp $ 
+		# $Id$ 
 		# fast remote SCI copy for systems with write-combining enabled
 	
 _smi_wc_memcpy:

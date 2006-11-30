@@ -1,4 +1,4 @@
-/* $Id: page_size.c,v 1.1 2004/03/19 22:14:15 joachim Exp $ */
+/* $Id$ */
 
 #define _DEBUG_EXTERN_REC
 #include "smidebug.h"

@@ -1,4 +1,4 @@
-/* $Id: error_count.h,v 1.1 2004/03/19 22:14:14 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _ERROR_COUNT_H_
 #define _ERROR_COUNT_H_

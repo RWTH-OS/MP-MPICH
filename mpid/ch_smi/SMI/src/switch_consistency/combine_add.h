@@ -1,4 +1,4 @@
-/* $Id: combine_add.h,v 1.1 2004/03/19 22:14:21 joachim Exp $ */
+/* $Id$ */
 
 #ifndef __COMBINE_ADD_H
 #define __COMBINE_ADD_H

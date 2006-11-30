@@ -1,4 +1,4 @@
-/* $Id: uniqtag.c,v 1.12.8.1 2004/12/15 13:45:21 boris Exp $ */
+/* $Id$ */
 
 #include <stdlib.h>
 

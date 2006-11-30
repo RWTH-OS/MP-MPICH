@@ -1,5 +1,5 @@
 /*
- *  $Id: wsockchkdev.c,v 1.3 2000/10/11 17:18:38 karsten Exp $
+ *  $Id$
  *
  */
 

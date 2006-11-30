@@ -1,5 +1,5 @@
 /*
- *  $Id: chhetero.c,v 1.6 2004/04/08 11:40:44 boris Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      All rights reserved.  See COPYRIGHT in top-level directory.

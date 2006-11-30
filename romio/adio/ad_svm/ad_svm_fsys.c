@@ -1,4 +1,4 @@
-/* $Id: ad_svm_fsys.c,v 1.3 2000/09/11 09:48:03 joachim Exp $
+/* $Id$
   *
   *	ad_svm_fsys.c
   *

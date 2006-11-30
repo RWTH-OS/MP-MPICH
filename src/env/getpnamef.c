@@ -1,5 +1,5 @@
 /*
- *  $Id: getpnamef.c,v 1.4 2003/06/13 09:39:36 rainer Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.

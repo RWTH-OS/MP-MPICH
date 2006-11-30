@@ -1,5 +1,5 @@
 /*
- *  $Id: sbcnst.h,v 1.2 2001/10/24 11:15:05 martin Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      All rights reserved.  See COPYRIGHT in top-level directory.

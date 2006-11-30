@@ -1,5 +1,5 @@
 /*
- *  $Id: comm_name_put.c,v 1.1 2000/04/12 16:22:08 joachim Exp $
+ *  $Id$
  *
  *  (C) 1996 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.

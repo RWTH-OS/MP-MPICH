@@ -1,5 +1,5 @@
 /* 
- *   $Id: ad_svm_iwrite.c,v 1.2 2000/09/11 09:48:04 joachim Exp $    
+ *   $Id$    
  *
  *   Copyright (C) 1997 University of Chicago. 
  *   See COPYRIGHT notice in top-level directory.

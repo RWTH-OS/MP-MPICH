@@ -1,4 +1,4 @@
-/* $Id: allocmem.c,v 1.2.8.1 2004/11/24 17:17:15 rainer Exp $ */
+/* $Id$ */
 
 /* Test memory allocation via MPI_Alloc_mem(), including some attributes
    which may or may not be supported. */

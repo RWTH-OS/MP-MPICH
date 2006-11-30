@@ -1,4 +1,4 @@
-/* $Id: redirect_io.h,v 1.1 2004/03/19 22:14:15 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _REDIRECT_IO_H_
 #define _REDIRECT_IO_H_

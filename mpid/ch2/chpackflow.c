@@ -1,5 +1,5 @@
 /*
- *  $Id: chpackflow.c,v 1.2 2000/05/04 16:05:32 karsten Exp $
+ *  $Id$
  *
  *  (C) 1996 by Argonne National Laboratory and Mississipi State University.
  *      All rights reserved.  See COPYRIGHT in top-level directory.

@@ -1,5 +1,5 @@
 
-/* $Id: direct_ff.h,v 1.4 2002/05/23 14:58:51 joachim Exp $
+/* $Id$
 
   These file provides the functions to copy non-contiguous data directly into the
   shared memory with the use of the ff algorithm.

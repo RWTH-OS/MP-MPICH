@@ -1,4 +1,4 @@
-/* $Id: errhandler.c,v 1.3 2003/06/13 17:55:51 rainer Exp $ */
+/* $Id$ */
 
 #include <stdlib.h>
 

@@ -1,4 +1,4 @@
-/* $Id: usertime.c,v 1.2 2001/01/18 13:55:42 joachim Exp $
+/* $Id$
 
    Test the system load (CPU usage) while waiting for a message:
    process 0 is busy for a certain period, while process 1 waits

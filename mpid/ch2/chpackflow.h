@@ -1,6 +1,6 @@
 #ifndef CH_PACKET_FLOW_INC
 #define CH_PACKET_FLOW_INC
-/* $Id: chpackflow.h,v 1.4.16.1 2004/10/28 13:30:34 tobias Exp $ */
+/* $Id$ */
 
 /* I disabled the packet control for ch_shmem to work (as a device-DLL). 
    We need to check for side-effects! joachim */

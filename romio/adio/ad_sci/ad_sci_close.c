@@ -1,5 +1,5 @@
 /* 
- *   $Id: ad_sci_close.c,v 1.1 2001/01/03 17:34:53 joachim Exp $    
+ *   $Id$    
  *
  */
 

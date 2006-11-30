@@ -1,5 +1,5 @@
 /*
- *  $Id: chshort.c,v 1.1.1.1.16.1 2004/12/10 17:28:18 carsten Exp $
+ *  $Id$
  *
  *  (C) 1995 by Argonne National Laboratory and Mississipi State University.
  *      All rights reserved.  See COPYRIGHT in top-level directory.

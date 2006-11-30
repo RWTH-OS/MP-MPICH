@@ -150,31 +150,6 @@ char *comm_name;
 	return;
     }
     
-#ifdef VIOLAIO
-    /* COMM_LOCAL_EXTRA */
-    if (!strcmp(comm_name, "MPI_COMM_LOCAL_EXTRA")) {
-	int app_proc, proc;
-
-	app_proc = 0;
-	proc = 0;
-
-	while( proc < ( MPIR_meta_cfg.np_metahost[MPIR_meta_cfg.my_metahost_rank]
-			+ MPIR_meta_cfg.nrp_metahost[MPIR_meta_cfg.my_metahost_rank] )  ) {
-	    if( !MPIR_meta_cfg.isRouter[proc] ) {
-		map[app_proc] = MPIR_meta_cfg.metahost_firstrank + proc;
-		app_proc++;
-	    }		
-	    proc++;
-	}
-
-	grp->local_rank = MPID_MyLocalRank;
-	comm->local_rank = MPID_MyLocalRank;
-	
-	return;
-    }
-#endif
-  /* VIOLAIO */
-
     /* COMM_META */
     if (!strcmp(comm_name, "MPI_COMM_META")) {
 	int local_rank, global_rank, metahost, app_proc;
@@ -205,39 +180,6 @@ char *comm_name;
 	return;
     }
 
-#ifdef VIOLAIO
-    /* COMM_META */
-    if (!strcmp(comm_name, "MPI_COMM_META_EXTRA")) {
-	int local_rank, global_rank, metahost, app_proc;
-	Snode *node;
-
-	local_rank = 0;
-	global_rank = 0;
-	/* loop over all metahosts */
-	for( metahost = 0; metahost < rh_getNumMetahosts(); metahost++ ) {
-	    /* loop over all nodes on the metahost */
-	    node = metahostlist[metahost].nodeList;
-	    while( node ) {
-		/* routers are the first processes on the node */
-		global_rank += node->numRouters;
-		/* the other procs on the node are procs in MPI_COMM_META -> set mapping for them */
-		for( app_proc = 0; app_proc < node->np; app_proc++ ) {
-		    map[local_rank] = global_rank;
-		    local_rank++;
-		    global_rank++;
-		}
-		node = node->next;
-	    }
-	}
-
-	grp->local_rank = MPID_MyMetaRank;
-	comm->local_rank = MPID_MyMetaRank;
-	
-	return;
-    }
-#endif
-  /* VIOLAIO */
-  
     /* COMM_ALL */
     /* for COMM_ALL, the mapping set by MPIR_SetToIdentity() is correct and we assume here,
        that this function has already been called for this communicator, but we must set here

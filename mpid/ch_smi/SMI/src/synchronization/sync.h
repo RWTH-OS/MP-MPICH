@@ -1,4 +1,4 @@
-/* $Id: sync.h,v 1.1 2004/03/19 22:14:23 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _SMI_SYNC_H_
 #define _SMI_SYNC_H_

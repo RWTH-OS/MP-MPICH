@@ -711,9 +711,6 @@ clean:
 	    (cd mpid/ch_shmem/p2ptest ; $(MAKE) clean ) ; fi
 	-@if [ -s mpid/tests/Makefile ] ; then \
 	    (cd mpid/tests ; $(MAKE) clean ) ; fi
-	@echo "Cleaning Tunnelfs IO Server"; 
-	-@if [ -s src/tunnelfs_io_server/Makefile ] ; then \
-	    (cd src/tunnelfs_io_server ; $(MAKE) clean ) ; fi
 	-rm -f bin/metarouter
 
 cleanslate: clean

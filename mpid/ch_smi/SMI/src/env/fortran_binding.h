@@ -1,4 +1,4 @@
-/* $Id: fortran_binding.h,v 1.1 2004/03/19 22:14:14 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _FORTRAN_BINDING_H_
 #define _FORTRAN_BINDING_H_

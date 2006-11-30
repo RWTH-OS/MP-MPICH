@@ -1,5 +1,5 @@
 /*
- *  $Id: dup_fn.c,v 1.1 2000/04/12 16:22:09 joachim Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.

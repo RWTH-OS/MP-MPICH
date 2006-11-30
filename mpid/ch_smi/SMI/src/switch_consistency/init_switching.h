@@ -1,4 +1,4 @@
-/* $Id: init_switching.h,v 1.1 2004/03/19 22:14:22 joachim Exp $ */
+/* $Id$ */
 
 #include "env/general_definitions.h"
 

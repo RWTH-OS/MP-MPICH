@@ -1,4 +1,4 @@
-/* $Id: sync_finalize.c,v 1.1 2004/03/19 22:14:23 joachim Exp $ */
+/* $Id$ */
 
 #include "env/general_definitions.h"
 #include "sync_finalize.h"

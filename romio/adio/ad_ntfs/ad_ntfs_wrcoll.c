@@ -1,5 +1,5 @@
 /* 
- *   $Id: ad_ntfs_wrcoll.c,v 1.2 2000/04/13 13:45:33 karsten Exp $    
+ *   $Id$    
  *
  */
 

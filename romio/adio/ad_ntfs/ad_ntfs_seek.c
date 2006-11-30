@@ -1,5 +1,5 @@
 /* 
- *   $Id: ad_ntfs_seek.c,v 1.2 2000/04/13 13:45:32 karsten Exp $    
+ *   $Id$    
  *
  */
 

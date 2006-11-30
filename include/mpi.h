@@ -129,7 +129,6 @@ typedef int MPI_Comm;
 #define MPI_COMM_WORLD 93
 extern MPI_Comm MPI_COMM_LOCAL_REDUCED;
 extern MPI_Comm MPI_COMM_META_REDUCED;
-extern MPI_Comm MPI_COMM_TUNNELFS_SELF;
 #else /* NOT META */
 #define MPI_COMM_WORLD 91
 #define MPI_COMM_SELF  92

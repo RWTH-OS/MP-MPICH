@@ -1,4 +1,4 @@
-/* $Id: sendmany2.c,v 1.2 2002/01/29 11:10:32 joachim Exp $
+/* $Id$
 
    Blocking send (after posting recvs) with all other processes, starting with 
    upper neighbor process. */

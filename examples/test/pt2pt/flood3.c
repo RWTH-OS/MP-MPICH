@@ -1,4 +1,4 @@
-/* $Id: flood3.c,v 1.3 2004/03/05 13:59:28 joachim Exp $ */
+/* $Id$ */
 
 /* This program tests a flood of data for both unexpected and expected messages   
    to test any internal message fragmentation or protocol shifts.

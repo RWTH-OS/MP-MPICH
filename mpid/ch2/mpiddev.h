@@ -1,4 +1,4 @@
-/* $Id: mpiddev.h,v 1.2 2001/01/08 10:12:01 joachim Exp $ */
+/* $Id$ */
 
 /* the global device-related definitions */
 

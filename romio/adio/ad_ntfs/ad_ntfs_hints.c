@@ -1,5 +1,5 @@
 /* 
- *   $Id: ad_ntfs_hints.c,v 1.2 2000/04/13 13:45:27 karsten Exp $    
+ *   $Id$    
  *
  */
 

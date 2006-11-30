@@ -1,4 +1,4 @@
-/* $Id: ensure_consistency.c,v 1.1 2004/03/19 22:14:21 joachim Exp $ */
+/* $Id$ */
 
 #define _DEBUG_EXTERN_REC
 #include "env/smidebug.h"

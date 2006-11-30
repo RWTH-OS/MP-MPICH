@@ -1,4 +1,4 @@
-/* $Id: idstack.h,v 1.1 2004/03/19 22:14:20 joachim Exp $ */
+/* $Id$ */
 #ifndef __IDSTACK_H__
 #define __IDSTACK_H__
 

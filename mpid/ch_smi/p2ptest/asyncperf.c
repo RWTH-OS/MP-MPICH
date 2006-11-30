@@ -1,4 +1,4 @@
-/* $Id: asyncperf.c,v 1.1 2000/04/12 16:22:03 joachim Exp $ */
+/* $Id$ */
 
 /* A small testcase for the performance of asychnronous send & recv
    between two processes. Use mhostperf for a more general test. */

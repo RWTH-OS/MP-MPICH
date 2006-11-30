@@ -1,4 +1,4 @@
-/* $Id: smicheck.c,v 1.7 2003/07/23 15:59:54 joachim Exp $ */
+/* $Id$ */
 
 #include "smicheck.h"
 

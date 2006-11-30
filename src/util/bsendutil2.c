@@ -1,5 +1,5 @@
 /*
- *  $Id: bsendutil2.c,v 1.4 2004/04/01 10:52:37 boris Exp $
+ *  $Id$
  *
  *  (C) 1993, 1996 by Argonne National Laboratory and 
  *      Mississipi State University.

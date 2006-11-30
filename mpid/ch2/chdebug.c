@@ -1,5 +1,5 @@
 /*
- *  $Id: chdebug.c,v 1.2 2000/09/11 17:30:56 joachim Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      All rights reserved.  See COPYRIGHT in top-level directory.

@@ -1,6 +1,6 @@
 #! /bin/sh
 #
-# $Id: makesharedlib,v 1.11 2002/08/15 10:38:36 martin Exp $
+# $Id$
 #
 # Simple script to build shared libraries
 #

@@ -1,5 +1,5 @@
 /*
- *  $Id: issend.c,v 1.7 2004/04/01 10:51:28 boris Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.

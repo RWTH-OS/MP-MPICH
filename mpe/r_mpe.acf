@@ -1,5 +1,5 @@
 /*
-    $Id: r_mpe.acf,v 1.6 2000/11/14 08:57:31 karsten Exp $
+    $Id$
 */
 [explicit_handle]
 interface R_MPE

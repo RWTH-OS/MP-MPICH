@@ -1,4 +1,4 @@
-/* $Id: job.h,v 1.6 2004/03/09 10:04:27 joachim Exp $ */
+/* $Id$ */
 
 #ifndef MPID_SMI_SSIDE_JOB_MANAGEMENT_H
 #define MPID_SMI_SSIDE_JOB_MANAGEMENT_H

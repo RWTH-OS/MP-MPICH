@@ -1,4 +1,4 @@
-/* $Id: sci_topology.c,v 1.1 2004/03/19 22:14:48 joachim Exp $
+/* $Id$
 
    Determine type and size of SCI topology, most notable multidimensional 
    torus topologies (the famous "n-ary k-cubes"). The result of this

@@ -1,5 +1,5 @@
 //
-// $Id: sci_hash.h,v 1.2 2001/05/10 18:46:45 joachim Exp $
+// $Id$
 //
 // Hash-table distributed across multiple SCI memory segments
 //

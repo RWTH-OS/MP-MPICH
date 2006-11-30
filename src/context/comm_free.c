@@ -1,5 +1,5 @@
 /*
- *  $Id: comm_free.c,v 1.4 2004/06/08 14:34:36 joachim Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.

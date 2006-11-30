@@ -1,4 +1,4 @@
-/*$Id: fifo.h,v 1.6 2002/01/24 14:37:42 joachim Exp $*/
+/*$Id$*/
 #ifndef _MPID_FIFO_H
 #define _MPID_FIFO_H
 

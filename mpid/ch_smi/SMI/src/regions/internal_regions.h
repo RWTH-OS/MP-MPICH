@@ -1,4 +1,4 @@
-/* $Id: internal_regions.h,v 1.1 2004/03/19 22:14:20 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _SMI_INTERNAL_REGIONS_H_
 #define _SMI_INTERNAL_REGIONS_H_

@@ -1,4 +1,4 @@
-/* $Id: time.h,v 1.1 2001/11/08 23:05:51 martin Exp $ */
+/* $Id$ */
 
 #ifndef _SYS_TIME_H_
 #define _SYS_TIME_H_

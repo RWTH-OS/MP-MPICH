@@ -1,4 +1,4 @@
-/* $Id: sync_finalize.h,v 1.1 2004/03/19 22:14:23 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _SYNC_FINALIZE_H_
 #define _SYNC_FINALIZE_H_

@@ -1,7 +1,7 @@
 #ifndef _MPID_SMI_SYNC_H
 #define _MPID_SMI_SYNC_H
 
-/* $Id: smisync.h,v 1.9.12.1 2004/12/15 12:14:40 boris Exp $ */
+/* $Id$ */
 /* macros for memcpy-synchronization between processes */
 
 #include "smidef.h"

@@ -4,7 +4,7 @@
 .globl  _mpid_smi_mmx32_memcpy
 .type _mpid_smi_mmx32_memcpy,@function
 .align 16
-		# $Id: mmx32_memcpy.s,v 1.1 2002/10/23 21:52:39 joachim Exp $ - fast remote SCI copy
+		# $Id$ - fast remote SCI copy
 		# for write-combining memory areas with wc-buffer size of 32 Byte
 		# (Intel Pentium4/AMD Athlon)
 	

@@ -1,4 +1,4 @@
-/* $Id: smi_init.h,v 1.1 2004/03/19 22:14:15 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _INIT_H_
 #define _INIT_H_

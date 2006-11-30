@@ -1,5 +1,5 @@
 /*
- *  $Id: send.c,v 1.3 2003/05/13 08:34:57 joachim Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.

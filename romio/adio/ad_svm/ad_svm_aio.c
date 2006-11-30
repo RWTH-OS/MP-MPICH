@@ -1,4 +1,4 @@
-/* $Id: ad_svm_aio.c,v 1.2 2000/09/11 09:48:01 joachim Exp $
+/* $Id$
  *	ad_svm_aio.c
  *
  *	routines to manage the asynchronous file-accesses to the virtual parallel filesystem

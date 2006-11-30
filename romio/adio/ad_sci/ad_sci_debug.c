@@ -1,5 +1,5 @@
 /* 
- * $Id: ad_sci_debug.c,v 1.1 2001/03/21 12:00:44 joachim Exp $
+ * $Id$
  *
  * debug and tracing macros
  */

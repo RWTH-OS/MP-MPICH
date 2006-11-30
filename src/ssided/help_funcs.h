@@ -1,4 +1,4 @@
-/* $Id: help_funcs.h,v 1.2 2003/06/13 17:08:37 joachim Exp $ */
+/* $Id$ */
 
 #ifndef MPI_SSIDE_HELP_FUNCS_H
 #define MPI_SSIDE_HELP_FUNCS_H

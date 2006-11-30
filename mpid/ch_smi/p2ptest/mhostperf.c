@@ -1,4 +1,4 @@
-/* $Id: mhostperf.c,v 1.1 2000/04/12 16:22:03 joachim Exp $ */
+/* $Id$ */
 
 /* This program tests the performance of asynchronous ("immediate")
    send and receive operations between a number of hosts. It was 

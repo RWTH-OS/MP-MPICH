@@ -1,5 +1,5 @@
 /*
- *  $Id: errcreate.c,v 1.5 2003/06/06 12:31:17 nicolas Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.

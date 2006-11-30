@@ -1,6 +1,6 @@
 /* -*- Mode: C; c-basic-offset:4 ; -*- */
 /*
- *  $Id: session.c,v 1.1.4.1 2004/12/10 17:33:23 carsten Exp $
+ *  $Id$
  *
  *  (C) 2002 by Argonne National Laboratory.
  *      See COPYRIGHT in top-level directory.

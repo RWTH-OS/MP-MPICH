@@ -1,4 +1,4 @@
-/* $Id: create_shreg.h,v 1.1 2004/03/19 22:14:20 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _SMI_CREATE_SHREG_H_
 #define _SMI_CREATE_SHREG_H_

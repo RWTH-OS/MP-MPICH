@@ -1,4 +1,4 @@
-/* $Id: put.c,v 1.8 2003/06/13 17:55:51 rainer Exp $
+/* $Id$
  *
  * MPI_Put		writes data to remote memory
  *

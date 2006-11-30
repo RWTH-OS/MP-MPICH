@@ -1,4 +1,4 @@
-# $Id: rs6000.s,v 1.1.4.1 2004/12/10 16:50:20 carsten Exp $
+# $Id$
 #
 # $Source: /var/svn/mp-mpich/mpid/ch_p4/Attic/rs6000.s,v $
 #

@@ -1,4 +1,4 @@
-/* $Id: winincr.c,v 1.5.2.1 2004/12/15 13:45:21 boris Exp $
+/* $Id$
  * 
  * MPID_SMI_Win_incr	- manipulates the ref_count field in win
  *

@@ -1,4 +1,4 @@
-/* $Id: proc_rank.h,v 1.1 2004/03/19 22:14:19 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _SMI_PROC_RANK_H_
 #define _SMI_PROC_RANK_H_

@@ -1,4 +1,4 @@
-/*$Id: fifo.c,v 1.10 2004/03/19 22:15:49 joachim Exp $*/
+/*$Id$*/
 
 #include "fifo.h"
 

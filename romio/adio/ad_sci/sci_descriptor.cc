@@ -1,5 +1,5 @@
 //
-// $Id: sci_descriptor.cc,v 1.2 2001/05/10 18:46:45 joachim Exp $ 
+// $Id$ 
 //
 // Management of SCI device descriptors:
 //  Amount of descriptors is limited, and because each descriptor can be used

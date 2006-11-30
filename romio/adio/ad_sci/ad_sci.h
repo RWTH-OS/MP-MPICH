@@ -1,4 +1,4 @@
-/* $Id: ad_sci.h,v 1.5 2001/05/10 18:46:45 joachim Exp $    
+/* $Id$    
  */
 
 #ifndef AD_SCI_INCLUDE

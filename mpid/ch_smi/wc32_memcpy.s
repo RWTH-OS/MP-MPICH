@@ -4,7 +4,7 @@
 .globl  _mpid_smi_wc32_memcpy
 .type _mpid_smi_wc32_memcpy,@function
 .align 16
-		# $Id: wc32_memcpy.s,v 1.1 2002/04/25 16:15:00 joachim Exp $ 
+		# $Id$ 
 		# Fast remote SCI copy for systems with write-combining enabled
 		# For Pentium II/III with 32-byte cache lines / write-combine buffer
 	

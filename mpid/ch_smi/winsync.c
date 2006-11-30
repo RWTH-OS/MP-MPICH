@@ -1,4 +1,4 @@
-/* $Id: winsync.c,v 1.21.8.1 2004/12/15 13:45:21 boris Exp $
+/* $Id$
  *
  * MPID_Win_sync		- used to create or free exposure epochs
  *

@@ -1,4 +1,4 @@
-/* $Id: utildefs.h,v 1.7 2004/03/09 10:04:28 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _MPID_UTILDEFS_H
 #define _MPID_UTILDEFS_H

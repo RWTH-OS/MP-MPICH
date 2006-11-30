@@ -1,4 +1,4 @@
-/* $Id: log_wrap_io.c,v 1.4 2001/08/14 14:51:36 joachim Exp $ */
+/* $Id$ */
 
 #include "log_wrap.h"
 

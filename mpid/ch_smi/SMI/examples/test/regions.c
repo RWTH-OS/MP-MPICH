@@ -1,4 +1,4 @@
-/* $Id: regions.c,v 1.1 2004/03/19 22:14:46 joachim Exp $ */
+/* $Id$ */
 /* regions.c - test the creation of different kinds of shared memory regions */
 
 #include <stdio.h>

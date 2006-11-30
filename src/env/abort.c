@@ -1,5 +1,5 @@
 /*
- *  $Id: abort.c,v 1.8.2.1 2004/11/12 15:38:27 carsten Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.

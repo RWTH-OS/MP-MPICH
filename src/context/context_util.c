@@ -1,5 +1,5 @@
 /*
- *  $Id: context_util.c,v 1.2 2004/03/09 10:04:29 joachim Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.

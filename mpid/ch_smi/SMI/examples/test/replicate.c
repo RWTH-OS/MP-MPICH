@@ -1,4 +1,4 @@
-/* $Id: replicate.c,v 1.1 2004/03/19 22:14:46 joachim Exp $ */
+/* $Id$ */
 /* replicate.c - test the replication and re-shareding of shared memory regions */
 
 #include <stdio.h>

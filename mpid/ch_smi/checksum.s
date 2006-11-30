@@ -1,4 +1,4 @@
-# $Id: checksum.s,v 1.3 2001/04/04 08:31:19 karsten Exp $
+# $Id$
 	
 # INET checksum algorithm taken from the Linux kernel 
 #  (arch/i386/lib/checksum.S, optimized version for 686 (>= Pentium II) CPUs

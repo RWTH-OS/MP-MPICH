@@ -1,4 +1,4 @@
-/* $Id: dataqueue.c,v 1.3 2002/01/24 14:37:42 joachim Exp $ */
+/* $Id$ */
 
 #include "dataqueue.h"
 

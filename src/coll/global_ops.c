@@ -1,5 +1,5 @@
 /*
- *  $Id: global_ops.c,v 1.5 2002/05/17 16:23:26 joachim Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.

@@ -1,5 +1,5 @@
 /*
- *  $Id: adi2init.c,v 1.5 2001/08/14 14:51:48 joachim Exp $
+ *  $Id$
  *
  *  (C) 1995 by Argonne National Laboratory and Mississipi State University.
  *      All rights reserved.  See COPYRIGHT in top-level directory.

@@ -1,4 +1,4 @@
-/* $Id: mmx_ops_gcc.c,v 1.12 2001/10/29 18:00:48 joachim Exp $ */
+/* $Id$ */
 
 /* MMX-optimized reduce functions in GCC inline assembler syntax */
 

@@ -1,4 +1,4 @@
-/* $Id: unistd.c,v 1.1 2001/11/08 23:05:18 martin Exp $ */
+/* $Id$ */
 
 #include <unistd.h>
 #include <windows.h>

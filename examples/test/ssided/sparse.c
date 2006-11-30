@@ -1,4 +1,4 @@
-/* $Id: sparse.c,v 1.18.2.1 2004/11/24 17:17:15 rainer Exp $ */
+/* $Id$ */
 
 /* simulate read-write access to a sparse matrix via single-sided communication */
 

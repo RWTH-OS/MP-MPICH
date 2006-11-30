@@ -1,4 +1,4 @@
-/* $Id: sendrecvstubs.h,v 1.4.8.1 2004/12/15 13:45:21 boris Exp $ */
+/* $Id$ */
 
 #ifndef MPID_SMI_SEND_RECV_STUBS_H
 #define MPID_SMI_SEND_RECV_STUBS_H

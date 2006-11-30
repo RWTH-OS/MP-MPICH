@@ -1,4 +1,4 @@
-/* $Id: loop_split.h,v 1.1 2004/03/19 22:14:16 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _LOOP_SPLIT_H_
 #define _LOOP_SPLIT_H_

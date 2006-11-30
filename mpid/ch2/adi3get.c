@@ -1,4 +1,4 @@
-/* $Id: adi3get.c,v 1.2 2002/03/28 16:30:58 joachim Exp $
+/* $Id$
 
    Wrapper for device-specific execution of MPI_Get. */
 

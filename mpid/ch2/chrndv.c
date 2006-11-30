@@ -1,5 +1,5 @@
 /*
- *  $Id: chrndv.c,v 1.1 2000/04/12 16:20:54 joachim Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      All rights reserved.  See COPYRIGHT in top-level directory.
@@ -7,7 +7,7 @@
 
 
 #ifndef lint
-static char vcid[] = "$Id: chrndv.c,v 1.1 2000/04/12 16:20:54 joachim Exp $";
+static char vcid[] = "$Id$";
 #endif /* lint */
 
 #include "mpid.h"

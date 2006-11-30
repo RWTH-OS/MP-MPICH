@@ -1,4 +1,4 @@
-/* $Id: loop_partition.cpp,v 1.1 2004/03/19 22:14:16 joachim Exp $ */
+/* $Id$ */
 
 #include "loop.h"
 #include "synchronization/barrier.h"

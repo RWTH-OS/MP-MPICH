@@ -1,5 +1,5 @@
 #! /bin/bash
-# $Id: resource_test.sh.in,v 1.1 2000/04/12 16:22:04 joachim Exp $
+# $Id$
 #
 # shell script to let the segv programm loop (test of resource management)
 

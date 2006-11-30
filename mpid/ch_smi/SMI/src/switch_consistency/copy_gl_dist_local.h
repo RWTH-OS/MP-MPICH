@@ -1,4 +1,4 @@
-/* $Id: copy_gl_dist_local.h,v 1.1 2004/03/19 22:14:21 joachim Exp $ */
+/* $Id$ */
 
 #ifndef __COPY_GL_DIST_LOCAL_H
 #define __COPY_GL_DIST_LOCAL_H

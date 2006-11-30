@@ -1,4 +1,4 @@
-/* $Id: pvfsprof.h,v 1.2 2001/07/17 15:57:31 stef Exp $ */
+/* $Id$ */
 
 /* 
    This header file converts all ADIOI_PVFS_ names into PDIOI_PVFS_ names, for use

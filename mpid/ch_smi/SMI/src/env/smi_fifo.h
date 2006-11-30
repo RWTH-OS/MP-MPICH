@@ -1,4 +1,4 @@
-/*$Id: smi_fifo.h,v 1.1 2004/03/19 22:14:15 joachim Exp $*/
+/*$Id$*/
 #ifndef _SMI_FIFO_H
 #define _SMI_FIFO_H
 

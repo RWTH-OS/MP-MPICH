@@ -1,5 +1,5 @@
 //
-// $Id: sci_memaccessor.cc,v 1.5 2001/05/14 17:54:22 joachim Exp $
+// $Id$
 //
 // Access memory from local or remote SCI segments
 //

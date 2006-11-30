@@ -1,4 +1,4 @@
-/* $Id: loop.cpp,v 1.1 2004/03/19 22:14:16 joachim Exp $ */
+/* $Id$ */
 
 #include "loop.h"
 #include "dyn_mem/dyn_mem.h"

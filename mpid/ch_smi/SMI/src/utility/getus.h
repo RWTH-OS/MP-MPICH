@@ -1,4 +1,4 @@
-/* $Id: getus.h,v 1.1 2004/03/19 22:14:25 joachim Exp $ */
+/* $Id$ */
 
 #ifndef _SMI_GETUS_
 #define _SMI_GETUS_

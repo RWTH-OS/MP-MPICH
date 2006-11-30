@@ -1,4 +1,4 @@
-/* $Id: timer.h,v 1.1 2004/03/19 22:14:16 joachim Exp $ */
+/* $Id$ */
 
 #ifndef __TIMER_H
 #define __TIMER_H

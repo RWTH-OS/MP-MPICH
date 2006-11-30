@@ -1,5 +1,5 @@
 //
-// $Id: ad_sci_file.h,v 1.2 2001/05/10 18:46:45 joachim Exp $
+// $Id$
 //
 // AD_SCI_file is the "master class" which contains all methods to access a 
 // SCI-distributed file.

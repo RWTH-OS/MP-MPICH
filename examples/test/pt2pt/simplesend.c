@@ -1,4 +1,4 @@
-/* $Id: simplesend.c,v 1.3 2004/04/06 09:12:48 boris Exp $ */
+/* $Id$ */
 
 /* minimal send/receive for testing purposes */
 

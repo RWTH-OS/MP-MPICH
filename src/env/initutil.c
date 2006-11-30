@@ -103,15 +103,6 @@ that use C convention. */
 #define FORTRAN_API
 #endif
 
-#ifdef VIOLAIO
-/* MPI_COMM_WORLD needs to be a variable as it is changed on runtime */
-/*int MPI_COMM_WORLD = MPI_COMM_META;*/
-
-/* defines and variables needed von tunnelfs io */
-#include "ad_tunnelfs_common.h"
-#include "ad_tunnelfs_msg.h"
-#endif
-
 /* Prototypes for Fortran interface functions */
 void FORTRAN_API mpir_init_fcm_ ( void );
 void FORTRAN_API mpir_init_flog_ ( MPI_Fint *, MPI_Fint * );
@@ -162,22 +153,6 @@ MPIR_MetaConfig MPIR_meta_cfg;
 /* multi-device configuration */
 MPID_Config *MPID_multidev_cfg = (MPID_Config *) 0;
 MPID_Config primary_device, secondary_device, tn_device, gw_device;
-
-#ifdef VIOLAIO
-/* additional global communicator for tunnelfs io servers:
-_LOCAL_REDUCED: seperating extra procs from the rest on a single metahost
-_META_REDUCED:  seperating extra procs from the rest in global view
-*/
-/*
-struct MPIR_COMMUNICATOR *MPIR_COMM_LOCAL_REDUCED = 0;
-struct MPIR_COMMUNICATOR *MPIR_COMM_META_REDUCED = 0;
-*/
-MPI_Comm MPI_COMM_LOCAL_REDUCED  = MPI_COMM_NULL;
-MPI_Comm MPI_COMM_META_REDUCED   = MPI_COMM_NULL;
-MPI_Comm MPI_COMM_TUNNELFS_SELF  = MPI_COMM_NULL;
-MPI_Comm MPI_COMM_TUNNELFS_WORLD = MPI_COMM_NULL;
-#endif 
-/* /VIOLAIO */
 
 #endif
 /* /META */
@@ -337,11 +312,6 @@ MPID_Config **dev_cfg;
 		    /* FIXME: This should be parsed from a commandline parameter or a
 		     * similar method, as the user should specify where the initial
 		     * data is kept. - MH */
-#ifdef VIOLAIO
-#if 0
-		    if (TUNNELFS_GLOBAL_MASTER < 0) TUNNELFS_GLOBAL_MASTER = MPIR_meta_cfg.npExtra_ranks[j];
-#endif
-#endif
 		    j++;
 		}
 	    rankOffset += MPIR_meta_cfg.np_metahost[metaHost] +
@@ -1753,124 +1723,6 @@ char ***argv;
 	}
 #endif
 	/* /META */
-#ifdef VIOLAIO
-	/* TODO: Here, we have only user Processes and Extra Processes */
-	
-	/* first let's determine if this is an extra process */
-	{
-	    int my_meta_rank;
-	    int i;
-	    
-	    if (MPI_COMM_META != MPI_COMM_NULL)
-		MPI_Comm_rank(MPI_COMM_META, &my_meta_rank);
-	    
-	    /*
-	      fprintf(stderr, "[%i] running binary: %s\n", my_meta_rank, (*argv)[0]);
-	    */
-	    if (strstr((*argv)[0], "tunnelfs_io_server") != NULL)
-		MPIR_meta_cfg.extra = 1;
-	    
-	    /*
-	      for (i=0; i<MPIR_meta_cfg.npExtra; i++)
-	      if (my_meta_rank == MPIR_meta_cfg.npExtra_ranks[i]) 
-	      MPIR_meta_cfg.extra = 1;
-	    */
-	}
-	
-	/* distribute ranks of extra procs to all client procs */
-	{
-	    int i,j;
-	    void *extras = NULL;
-	    int count;
-	    int master_set = 0;
-	    
-	    
-	    count = MPIR_meta_cfg.np + MPIR_meta_cfg.npExtra;
-	    
-	    if (count > 0)
-		{
-		    extras = malloc(count * sizeof(int));
-		    
-		    if (extras == NULL)
-			{
-			    fprintf(stderr, "Memory allocation failed for list of extra processes! (%i)\n", count); 
-			    exit(-1);
-			}
-		    
-		    MPI_Allgather(&(MPIR_meta_cfg.extra), 1, MPI_INT, extras, 1, MPI_INT,
-				  MPI_COMM_META);
-		    
-		    j=0;
-		    for (i=0; i < MPIR_meta_cfg.np + MPIR_meta_cfg.npExtra; i++)
-			{
-			    if (((int*)extras)[i] != 0)
-				{
-				    if (!master_set) 
-					{
-					    /* first discovered IO Server will be master */
-					    TUNNELFS_GLOBAL_MASTER = i;
-					    master_set = 1;
-					}
-				    MPIR_meta_cfg.npExtra_ranks[j++] = i;
-				    break;
-				}
-			}
-		    if (extras != NULL) free(extras);
-		}
-	}
-	
-	/* we have at least ONE io server */
-	if (MPI_COMM_LOCAL != MPI_COMM_NULL)
-	    MPI_Comm_split(MPI_COMM_LOCAL, MPIR_meta_cfg.extra, 0,
-			   &MPI_COMM_LOCAL_REDUCED);
-	
-	if (MPI_COMM_META != MPI_COMM_NULL)
-	    {
-		int rank;
-
-                /* seperate servers from clients */
-                MPI_Comm_split(MPI_COMM_META, MPIR_meta_cfg.extra, 0,
-                               &MPI_COMM_META_REDUCED);
-		
-                /* create new singleton communicator */
-                MPI_Comm_rank(MPI_COMM_META, &rank);
-                MPI_Comm_split(MPI_COMM_META, rank, 0, &MPI_COMM_TUNNELFS_SELF);
-
-                fprintf(stderr, "Duplicating comm\n");
-                /* create global communicator for tunnelfs messages */
-                MPI_Comm_dup(MPI_COMM_META, &MPI_COMM_TUNNELFS_WORLD);
-	    }
-	
-	if (MPI_COMM_META_REDUCED != 143) 
-	    fprintf(stderr, "MPI_COMM_META_REDUCED has wrong value: %i\n", 
-		    MPI_COMM_META_REDUCED);
-	if (MPI_COMM_LOCAL_REDUCED != 140) 
-	    fprintf(stderr, "MPI_COMM_LOCAL_REDUCED has wrong value: %i\n", 
-		    MPI_COMM_LOCAL_REDUCED);
-	if (MPI_COMM_TUNNELFS_SELF != 146) 
-	    fprintf(stderr, "MPI_COMM_TUNNELFS_SELF has wrong value: %i\n", 
-		    MPI_COMM_TUNNELFS_SELF);
-        fprintf(stderr, "MPI_COMM_TUNNELFS_WORLD has value of %i\n",
-                MPI_COMM_TUNNELFS_WORLD);
-	
-	if (!MPIR_meta_cfg.extra && (TUNNELFS_GLOBAL_MASTER >= 0))
-	    {
-		void *buf = NULL;
-		int buf_size = 0;
-		int recvd = 0;
-		int msg_id = TUNNELFS_NEXT_MSG_ID;
-		
-		/* I am an io client and have to contact the master io server */
-		
-		/* sending init request */
-		tunnelfs_msg_send_init(&buf, &buf_size, *argc, *argv);
-		
-		/* receiving reply */
-		tunnelfs_msg_get_reply(&buf, &buf_size, &recvd, TUNNELFS_GLOBAL_MASTER, msg_id);
-		
-		free(buf);
-	    }
-#endif
 	
 	DEBUG(PRINTF("[%d] About to exit from MPI_Init\n", MPIR_tid);)
 	    TR_POP;

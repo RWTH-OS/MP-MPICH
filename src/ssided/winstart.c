@@ -1,4 +1,4 @@
-/* $Id: winstart.c,v 1.6 2003/07/03 21:42:28 joachim Exp $
+/* $Id$
  *
  * MPI_Win_start	Starts an RMA access epoch for win
  *

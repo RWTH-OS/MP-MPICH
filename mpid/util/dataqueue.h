@@ -1,4 +1,4 @@
-/* $Id: dataqueue.h,v 1.4 2002/01/24 14:37:42 joachim Exp $ */
+/* $Id$ */
 #ifndef _MPID_DATAQUEUE_H
 #define _MPID_DATAQUEUE_H
 

@@ -1,4 +1,4 @@
-/* $Id: alltoall.c,v 1.1 2004/03/19 22:14:46 joachim Exp $ */
+/* $Id$ */
 /* alltoall.c - test the behaviour of the cluster under high communication load */
 
 #include <stdio.h>

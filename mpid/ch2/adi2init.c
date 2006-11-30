@@ -48,10 +48,6 @@ int MPID_MyAllSize   = -1, MPID_MyAllRank   = -1;
 
 
 #ifdef META
-#ifdef VIOLAIO
-int             MPID_MyLocalExtraSize, MPID_MyLocalExtraRank;
-int             MPID_MyMetaExtraSize, MPID_MyMetaExtraRank;
-#endif /* VIOLAIO */
 
 extern MPID_Device **MPID_Tunnel_native_dev;
 

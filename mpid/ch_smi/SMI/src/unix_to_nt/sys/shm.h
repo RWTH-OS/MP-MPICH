@@ -1,4 +1,4 @@
-/* $Id: shm.h,v 1.3 2004/07/02 11:26:27 martin Exp $ */
+/* $Id$ */
 
 #ifndef _SYS_SHM_H
 #define _SYS_SHM_H

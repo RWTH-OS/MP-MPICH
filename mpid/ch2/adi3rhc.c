@@ -1,4 +1,4 @@
-/* $Id: adi3rhc.c,v 1.2 2002/03/28 16:30:58 joachim Exp $
+/* $Id$
 
    Remote-Handler-Call (vectorized) for emulated remote memory access and synchronization. */
 

@@ -1,4 +1,4 @@
-$Id: mpptest.hlp,v 1.3 2004/03/05 13:57:06 joachim Exp $
+$Id$
 
 mpptest - test individual communication speeds
 Test a single communication link by various methods.  The tests are 

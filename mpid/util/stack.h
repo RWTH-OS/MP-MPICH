@@ -1,4 +1,4 @@
-/*$Id: stack.h,v 1.8 2002/01/24 14:37:42 joachim Exp $*/
+/*$Id$*/
 #ifndef _MPID_STACK_H
 #define _MPID_STACK_H
 

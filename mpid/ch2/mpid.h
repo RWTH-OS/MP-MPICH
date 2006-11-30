@@ -235,14 +235,6 @@ extern int MPID_MyMetaSize,  MPID_MyMetaRank;
 extern int MPID_MyAllSize,   MPID_MyAllRank;
 #endif
 
-
-#ifdef META
-#ifdef VIOLAIO
-extern int          MPID_MyLocalExtraSize, MPID_MyLocalExtraRank;
-extern int          MPID_MyMetaExtraSize, MPID_MyMetaExtraRank;
-#endif /* VIOLAIO */
-#endif /* META */
-
 /* External routines */
 #include "mpid_bind.h"
 

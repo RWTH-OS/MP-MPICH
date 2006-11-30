@@ -1,5 +1,5 @@
 /*
- *  $Id: sendutil.c,v 1.2 2004/05/14 20:44:21 joachim Exp $
+ *  $Id$
  *
  *  (C) 1996 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.

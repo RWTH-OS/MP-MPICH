@@ -1,5 +1,5 @@
 /*
- *  $Id: topo_test.c,v 1.2 2003/06/05 11:50:38 rainer Exp $
+ *  $Id$
  *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.

@@ -1,4 +1,4 @@
-/* $Id: reqrndv.h,v 1.1 2002/01/24 18:06:40 joachim Exp $ 
+/* $Id$ 
  
    Defintion for rndv-information type in handles. */
 

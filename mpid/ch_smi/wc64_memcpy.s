@@ -4,7 +4,7 @@
 .globl  _mpid_smi_wc64_memcpy
 .type _mpid_smi_wc64_memcpy,@function
 .align 16
-		# $Id: wc64_memcpy.s,v 1.2 2002/10/23 21:52:39 joachim Exp $ 
+		# $Id$ 
 		# Fast remote SCI copy for systems with write-combining enabled.
 		# This is the version for 64-byte write-combine buffer in the CPU,
 		# as required for the Pentium4.

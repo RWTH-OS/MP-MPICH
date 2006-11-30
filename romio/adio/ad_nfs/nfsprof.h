@@ -1,4 +1,4 @@
-/* $Id: nfsprof.h,v 1.2 2001/07/17 15:57:30 stef Exp $ */
+/* $Id$ */
 
 /* 
    This header file converts all ADIOI_NFS_ names into PDIOI_NFS_ names, for use

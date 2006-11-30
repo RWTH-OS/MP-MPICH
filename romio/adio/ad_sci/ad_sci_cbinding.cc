@@ -1,5 +1,5 @@
 //
-// $Id: ad_sci_cbinding.cc,v 1.2 2001/05/10 18:46:45 joachim Exp $
+// $Id$
 //
 // C bindings for the SCI file objects
 //

@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.15.8.1 2004/12/15 13:45:20 boris Exp $ */
+/* $Id$ */
 
 #include <stdlib.h>
 
