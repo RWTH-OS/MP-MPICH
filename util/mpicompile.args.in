@@ -25,11 +25,13 @@ includedir="@includedir@"
 libdir="@libdir@"
 sharedlib_dir="@sharedlib_dir@"
 # $scriptdir is clean if it comes from one of the other mpi* scripts, $bindir may not,
-# so we try to sanitize it:
-rundir="`pwd`"
-cd "$bindir"
-bindir="`pwd`"
-cd "$rundir"
+# so we try to sanitize it. Since the user may have chosen a new prefix, we
+# need to make sure bindir exists at all before changing into it.
+if [ -e "$bindir" ]
+then
+	bindir="`cd "$bindir"; pwd`"
+fi
+
 if [ "$scriptdir" = "$bindir" ]
 then
 	installed="yes"
