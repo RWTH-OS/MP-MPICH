@@ -1,5 +1,8 @@
 /* include/mpichconf.h.in.  Generated from configure.in by autoheader.  */
 
+/* These provide information for initutil about the configuration options */
+#undef CONFIGURE_ARGS_CLEAN
+
 /* Define if extra traceback information should be kept */
 #undef DEBUG_TRACE
 

@@ -3,6 +3,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT([mp-mpich],[1.5.0],[mp-mpich@lfbs.rwth-aachen.de],[mp-mpich])
 AC_PREREQ(2.59)
 AC_REVISION($Revision$)
+CONFIGURE_ARGS_CLEAN="$@"
 
 dnl Place the definitions into a configuration file, rather than sedding
 dnl them into Makefiles.
@@ -2972,6 +2973,8 @@ AC_SUBST(ENABLE_MPEDBG)
 MPICH_VERSION="MPICH $PACKAGE_VERSION"
 
 dnl initutil 
+AC_DEFINE_UNQUOTED(CONFIGURE_ARGS_CLEAN,["$CONFIGURE_ARGS_CLEAN"],
+       [These provide information for initutil about the configuration options])
 AC_DEFINE_UNQUOTED(MPIRUN_MACHINE,["$DEFAULT_MACHINE"],[MPI machine])
 AC_DEFINE_UNQUOTED(MPIRUN_DEVICE,["$DEFAULT_DEVICE"],[MPI device])
 
