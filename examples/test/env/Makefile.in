@@ -1,13 +1,10 @@
-ALL: default
+# $Id$
 ##### User configurable options #####
 
-MPIR_HOME    := @MPIR_HOME@
 CC           := @MPICC@
-CLINKER      := @MPICC@
-CCC          := @MPICPLUSPLUS@
-CCLINKER     := $(CCC)
+CLINKER      := $(CC)
 F77          := @MPIF77@
-FLINKER      := @MPIF77@
+FLINKER      := $(F77)
 OPTFLAGS     := @OPTFLAGS@
 ### End User configurable options ###
 
@@ -17,20 +14,18 @@ top_srcdir := @top_srcdir@
 srcdir     := @srcdir@
 @VPATH@
 
-PROFLIB :=
 CFLAGS  := @CFLAGS@ @DEFS@
-CCFLAGS := $(CFLAGS)
 FFLAGS := @FFLAGS@
 # Use LIBS to add any special libraries for C programs
 LIBS := @LIB_PATH@ @LIB_LIST@
 # Use FLIBS to add any special libraries for Fortran programs
-FLIBS := @FLIB_PATH@ @LIB_LIST@
+FLIBS := @LIB_LIST@
 EXECS := timers baseattr errhand sigchk timertest init gtime aborttest testerr \
 	cmdline errhand2 getproc
 OTHEREXECS := baseattrf errstringsf getprocf errhandf
+
 default: $(EXECS)
 
-#
 # Note that runtests builds the executables as required
 testing:
 	-./runtests $(TESTARGS)
@@ -40,37 +35,42 @@ linktest: default clean
 all: testing
 
 init: init.o
-	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o init init.o $(LIBS)
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
 timers: timers.o test.o
-	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o timers timers.o test.o $(LIBS)
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
 timertest: timertest.o test.o
-	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o timertest timertest.o test.o $(LIBS)
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
 baseattr: baseattr.o test.o
-	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o baseattr baseattr.o test.o $(LIBS)
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
 gtime: gtime.o test.o
-	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o ./gtime gtime.o test.o $(LIBS) -lm
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS) -lm
 
 baseattrf: baseattrf.o
-	$(FLINKER) $(OPTFLAGS) -o baseattrf baseattrf.o $(LIBS)
+	$(FLINKER) $(OPTFLAGS) -o $@ $^ $(LIBS)
 
 getprocf: getprocf.o
-	$(FLINKER) $(OPTFLAGS) -o getprocf getprocf.o $(LIBS)
+	$(FLINKER) $(OPTFLAGS) -o $@ $^ $(LIBS)
 errhandf: errhandf.o
-	$(FLINKER) $(OPTFLAGS) -o errhandf errhandf.o $(LIBS)
+	$(FLINKER) $(OPTFLAGS) -o $@ $^ $(LIBS)
 
 errstringsf: errstringsf.o
-	$(FLINKER) $(OPTFLAGS) -o errstringsf errstringsf.o $(LIBS)
+	$(FLINKER) $(OPTFLAGS) -o $@ $^ $(LIBS)
 
 errhand: errhand.o test.o
-	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o errhand errhand.o test.o $(LIBS)
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
 sigchk: sigchk.o test.o
-	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o sigchk sigchk.o test.o $(LIBS)
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
 aborttest: aborttest.o
-	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o aborttest aborttest.o $(LIBS)
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
 testerr: testerr.o
-	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o testerr testerr.o $(LIBS)
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
 getproc: getproc.o
-	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o getproc getproc.o $(LIBS)
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+cmdline: cmdline.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+errhand2: errhand2.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+
 clean:
 	@-rm -f *.o *~ PI* $(EXECS) core *.out *.orig env.diff \
 	argstest $(OTHEREXECS) mpif.h ${srcdir}/*.o *.stdo
@@ -78,9 +78,6 @@ clean:
 distclean: clean
 	@-rm -f Makefile runtests
 
-.c:
-	$(CC) $(CFLAGS) -c $<
-	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $* $*.o $(LIBS)
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 .f.o:

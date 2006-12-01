@@ -1,15 +1,11 @@
-ALL: default
+# $Id$
 ##### User configurable options #####
 
-MPIR_HOME   := @MPIR_HOME@
 CC          := @MPICC@
-CLINKER     := @MPICC@
-CCC         := @MPICPLUSPLUS@
-CCLINKER    := $(CCC)
+CLINKER     := $(CC)
 F77         := @MPIF77@
-FLINKER     := @MPIF77@
+FLINKER     := $(F77)
 OPTFLAGS    := @OPTFLAGS@
-
 ### End User configurable options ###
 
 SHELL := /bin/sh
@@ -18,21 +14,19 @@ top_srcdir := @top_srcdir@
 srcdir     := @srcdir@
 @VPATH@
 
-PROFLIB :=
 CFLAGS  := @CFLAGS@ @DEFS@
-CCFLAGS := $(CFLAGS)
 FFLAGS := @FFLAGS@
 # Use LIBS to add any special libraries for C programs
 LIBS := @LIB_PATH@ @LIB_LIST@
 # Use FLIBS to add any special libraries for Fortran programs
-FLIBS := @FLIB_PATH@ @LIB_LIST@
+FLIBS := @LIB_LIST@
 EXECS := ptest colluses
-OTHEREXECS := 
+
 default: $(EXECS)
 
 #
 # Note that runtests builds the executables as required
-testing: 
+testing:
 	  -./runtests $(TESTARGS)
 
 all: testing
@@ -40,16 +34,16 @@ all: testing
 fortran_tests:
 
 ptest: ptest.o
-	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o ptest ptest.o $(LIBS)
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
 
 colluses: colluses.o
-	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o colluses colluses.o $(LIBS)
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
 
 #
 # Make sure that we remove executables for specific architectures
 clean:
 	@-rm -f *.o *~ PI* $(EXECS) *.out core profile.diff \
-		$(OTHEREXECS) mpif.h ${srcdir}/*.o *.stdo
+		mpif.h ${srcdir}/*.o *.stdo
 	@-for file in $(EXECS) ; do \
 	   rm -f $$file.sun4 $$file.alpha $$file.IRIX $$file.freebsd ;\
 	done

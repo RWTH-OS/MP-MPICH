@@ -1,36 +1,11 @@
-ALL: default
-##### User configurable options #####
+# $Id$
+# Since this is the top-level makefile for all tests, it does not need to
+# compile anything.
 
-ARCH        := @ARCH@
-MPIR_HOME   := @MPIR_HOME@
-CC          := @MPICC@
-CLINKER     := @MPICC@
-CCC         := @MPICPLUSPLUS@
-CCLINKER    := $(CCC)
-F77         := @MPIF77@
-FLINKER     := @MPIF77@
-OPTFLAGS    := @OPTFLAGS@
-MAKE        := @MAKE@
+TESTDIRS := pt2pt coll topol env context profile @IO@ ssided resources command
+SUBDIRS := util pt2pt coll topol env context profile @IO@ ssided resources command
 
-# mpiboot and mpiunboot are used to execute any steps that must
-# be executed before and after running programs.
-MPIBOOT     = @MPIBOOT@
-MPIUNBOOT   = @MPIUNBOOT@
-
-### End User configurable options ###
-
-SHELL := /bin/sh
-
-PROFLIB :=
-CFLAGS  := @CFLAGS@ $(OPTFLAGS) 
-CCFLAGS := $(CFLAGS)
-FFLAGS := $(OPTFLAGS)
-# Use LIBS to add any special libraries for C programs
-LIBS := 
-# Use FLIBS to add any special libraries for Fortran programs
-FLIBS := 
-TESTDIRS := pt2pt coll topol env context profile @IO@ ssided resources 
-SUBDIRS := util pt2pt coll topol env context profile @IO@ ssided resources 
+srcdir := @srcdir@
 
 default: subdirs
 	@echo "Type \"make testing\" to compile and run tests"
@@ -61,7 +36,7 @@ runtest:
 	cd util && $(MAKE)
 	cd pt2pt && ./runtests $(TESTARGS) -check
 
-#
+
 # This also cleans the files after the testing to keep the
 # total size down.  You can use TESTARGS to pass arguments to the
 # test program; for example, 
@@ -80,7 +55,7 @@ testing: runtest
 	@echo '<?xml-stylesheet href="er.xsl" type="text/xsl" ?>' >> summary.xml
 	@echo '<MPITESTRESULTS>' >> summary.xml
 	@echo "<DATE>`date`</DATE>" >> summary.xml
-	@echo "<MPISOURCE>@MPIPATH@</MPISOURCE>" >> summary.xml
+	@echo "<MPISOURCE>$(srcdir)</MPISOURCE>" >> summary.xml
 	@-for dir in $(TESTDIRS) ;\
 		do \
 			if [ ! -d $$dir -o ! -s $$dir/Makefile ] ; then \
@@ -90,35 +65,8 @@ testing: runtest
 			(export MPITEST_STOPTEST && cd $$dir && $(MAKE) testing TESTARGS="-small -summaryfile=../summary.xml $(TESTARGS)" && \
 			 $(MAKE) clean > /dev/null 2>&1 ) || exit 1 ;\
 		done
-	@-if [ "@MPI_VERSION@" = "MPICH" ] ; then \
-	    echo "Running tests in directory command" ; \
-	    (cd command && ./runtests -summaryfile=../summary.xml ) || exit 1 ;\
-	fi
 	@echo '</MPITESTRESULTS>' >> summary.xml
 
-#
-# These tests require that the boot and unboot steps are programs, not
-# programs with arguments.
-boot-mpi:
-	@if [ ! -x "${MPIBOOT}" ] ; then \
-	  echo "Could not find the MPI boot program" ; \
-	  echo "You may need to install MPICH before running the test suite"; \
-	fi
-	${MPIBOOT}
-unboot-mpi:
-	@if [ -x "${MPIUNBOOT}" ] ; then \
-	    ${MPIUNBOOT} ; \
-	fi
-
-# It is important to have the - in the make testing step to ensure that
-# the unboot is executed even if the tests fail
-testing-boot:
-	@-if [ -n "${MPIBOOT}" ] ; then \
-	    ${MAKE} boot-mpi ; fi
-	-${MAKE} testing
-	@-if [ -n "${MPIUNBOOT}" ] ; then \
-	    ${MAKE} unboot-mpi ; fi
-#
 # This is a version of testing, but it saves the "diff" files in the top 
 # level directory
 testing_save: runtest

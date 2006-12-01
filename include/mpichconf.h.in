@@ -1,13 +1,7 @@
 /* include/mpichconf.h.in.  Generated from configure.in by autoheader.  */
 
-/* These provide information for initutil about the configuration options */
-#undef CONFIGURE_ARGS_CLEAN
-
 /* Define if extra traceback information should be kept */
 #undef DEBUG_TRACE
-
-/* device number of ch_gm */
-#undef DEVICE_ch_gm_nbr
 
 /* device number of ch_mpx */
 #undef DEVICE_ch_mpx_nbr

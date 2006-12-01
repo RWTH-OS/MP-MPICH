@@ -6,7 +6,7 @@
 #   
 STOPFILE=${MPITEST_STOPTEST:-"$HOME/.stopmpichtests"}
 mpicc="@MPICC@"
-mpiCC="@MPICPLUSPLUS@"
+mpicxx="@MPICPLUSPLUS@"
 mpif77="@MPIF77@"
 mpif90="@MPIF90@"
 
@@ -35,30 +35,29 @@ int main( int argc, char *argv[] )
 EOF
 outlog="/dev/null"
 
-cmd=mpicc
 if $mpicc -Dtestname=\"foo\" rtest.c > $outlog 2>&1 ; then
     :
 else
-    echo "Error with escaped double quotes in $cmd"
+    echo "Error with escaped double quotes in mpicc"
 fi
 if $mpicc -Dtestname='"foo bar"' rtest.c  > $outlog 2>&1 ; then 
     :
 else
-    echo "Error with double inside of single quotes in $cmd"
+    echo "Error with double inside of single quotes in mpicc"
 fi
 
 # Run this test only if mpiCC is valid (
-if [ "@HAS_CXX@" = "yes" ] ; then
-    cmd=mpiCC
-    if $mpiCC -Dtestname=\"foo\" rtest.cc  > $outlog 2>&1; then
+if test "x$mpicxx" != "x"
+then
+    if $mpicxx -Dtestname=\"foo\" rtest.cc  > $outlog 2>&1; then
         :
     else
-        echo "Error with escaped double quotes in $cmd"
+        echo "Error with escaped double quotes in mpiCC"
     fi
-    if $mpiCC -Dtestname='"foo bar"' rtest.cc > $outlog 2>&1 ; then 
+    if $mpicxx -Dtestname='"foo bar"' rtest.cc > $outlog 2>&1 ; then 
         :
     else
-        echo "Error with double inside of single quotes in $cmd"
+        echo "Error with double inside of single quotes in mpiCC"
     fi
 fi
 #

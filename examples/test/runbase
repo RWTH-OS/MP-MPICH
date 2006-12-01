@@ -187,19 +187,20 @@ RunTest() {
         echo "$mname" >> $pgm.out
         echo "$mname"
         mvarg=""
-        if [ -n "$5" ] ; then rm -f $5 ; 
-            if [ -n "$MPIRUNMVBACK" ] ; then mvarg="$MPIRUNMVBACK \"$5\"" ; fi 
+        if [ -n "$5" ]
+        then
+            rm -f $5
         fi
-        # The eval is necessary to ensure that the mvarg value is properly
+        # The eval is necessary to ensure that the values are properly
         # tokenized.  The ./$1 ensures that the program will be found,
         # even if . is not in the PATH.
-        
-        if [ x"@META@" = x"yes" ] ; then
+
+        if [ x"$META" = x"yes" ] ; then
             # meta is very special, we have to override the number of processes in
             # the configuration file. we also need a configuration file in the local directory
-            eval "$mpirun $args -metaparam $2 -meta ./runtest_meta.cfg  $mvarg $1 $4 </dev/null >> $1.out 2>&1 --"
+            eval "$mpirun $args -metaparam $2 -meta ./runtest_meta.cfg $1 $4 </dev/null >> $1.out 2>&1 --"
         else
-            eval $mpirun $args -np $np $mvarg ./$pgm $4 </dev/null >> $pgm.out 2>&1
+            eval $mpirun $args -np $np ./$pgm $4 </dev/null >> $pgm.out 2>&1
         fi
         if [ -n "$5" ] ; then 
             for file in $5 ; do 

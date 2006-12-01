@@ -3,18 +3,16 @@
 # Run some of the tests.  If any arguments are provided, pass them to the
 # test programs.
 #
-# -mvhome is needed for the ANL SP, and is ignored by others
-args=@MPIRUNARGS@
-device=@DEVICE@
-top_srcdir=@top_srcdir@
+args=""
 srcdir=@srcdir@
-MPICH_VERSION=@MPICH_VERSION@
+MPICH_VERSION="@MPICH_VERSION@"
 STOPFILE=${MPITEST_STOPTEST:-"$HOME/.stopmpichtests"}
-mpirun=${MPIRUN:-"@MPIRUN@"}
+mpirun=${MPIRUN:-"../../../bin/mpirun"}
 MAKE="@MAKE@"
+F77="@F77@"
 #
 # Load basic procedures
-. ${top_srcdir}/runbase
+. ${srcdir}/../runbase
 #
 # Set mpirun to the name/path of the mpirun program
 FindMPIRUN
@@ -26,7 +24,6 @@ runtests=1
 makeeach=0
 writesummaryfile=no
 quiet=0
-MAKE="@MAKE@"
 for arg in "$@" ; do
     case $arg in 
 	-checkonly )
@@ -84,7 +81,8 @@ RunTest cartorder 4 "**** Testing MPI_Cart_create etc (2) ****"
 RunTest graphtest 4 "**** Testing MPI_Graph_create etc ****"
 #
 # Run Fortran tests ONLY if Fortran available
-if [ @HAS_FORTRAN@ = 1 ] ; then 
+if test "x$F77" != "x"
+then
     echo "FORTRAN TESTS"
 
     echo FIXME: RunTest cartf 4 "*** Testing cart from Fortran ***"

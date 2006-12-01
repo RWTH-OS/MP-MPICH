@@ -1,16 +1,11 @@
-ALL: default
+# $Id$
 ##### User configurable options #####
 
-MPIR_HOME    := @MPIR_HOME@
 CC           := @MPICC@
-CLINKER      := @MPICC@
-CCC          := @MPICPLUSPLUS@
-CCLINKER     := $(CCC)
+CLINKER      := $(CC)
 F77          := @MPIF77@
-FLINKER      := @MPIF77@
+FLINKER      := $(F77)
 OPTFLAGS     := @OPTFLAGS@
-MPIFDEP      := @MPIFDEP@
-MAKE         := @MAKE@
 ### End User configurable options ###
 
 SHELL := /bin/sh
@@ -19,24 +14,22 @@ top_srcdir := @top_srcdir@
 srcdir     := @srcdir@
 @VPATH@
 
-PROFLIB :=
 CFLAGS  := @CFLAGS@ @DEFS@
-CCFLAGS := $(CFLAGS)
 FFLAGS := @FFLAGS@
 # Use LIBS to add any special libraries for C programs
 LIBS := @LIB_PATH@ @LIB_LIST@
 # Use FLIBS to add any special libraries for Fortran programs
-FLIBS := @FLIB_PATH@ @LIB_LIST@
+FLIBS := @LIB_LIST@
 CEXECS := coll1 coll2 coll3 coll4 coll5 coll6 coll7 coll8 coll9 \
 	coll10 coll11 coll12 coll13 bcastbug bcastbug2 grouptest redtst \
 	barrier bcast allred allred_prod allred2 allgather \
 	scatterv redscat alltoallv  shortint \
 	allredmany longuser scattern bcastvec scantst \
 	reduce scatter alltoall allgatherv  nbcoll
-ifeq (@HAS_FORTRAN@,1)
-	FEXECS := allredf assocf bcastlog allgatherf bcast2
-else
+ifeq ($(F77),)
 	FEXECS :=
+else
+	FEXECS := allredf assocf bcastlog allgatherf bcast2
 endif
 EXECS := $(CEXECS) $(FEXECS)
 
@@ -67,26 +60,26 @@ coll7: coll7.o ../util/test.o
 	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
 coll8: coll8.o ../util/test.o
 	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
-coll9: coll9.o ../util/test.o 
+coll9: coll9.o ../util/test.o
 	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
-coll10: coll10.o ../util/test.o 
+coll10: coll10.o ../util/test.o
 	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
-coll11: coll11.o ../util/test.o 
+coll11: coll11.o ../util/test.o
 	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
 coll12: coll12.o ../util/test.o
 	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
-coll13: coll13.o 
-	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o coll13 coll13.o $(LIBS)
-allredmany: allredmany.o 
-	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o allredmany allredmany.o $(LIBS)
-bcastbug2: bcastbug2.o ../util/test.o 
+coll13: coll13.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+allredmany: allredmany.o
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
+bcastbug2: bcastbug2.o ../util/test.o
 	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
 bcastbug: bcastbug.o ../util/test.o
 	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
-bcastvec: bcastvec.o ../util/test.o 
+bcastvec: bcastvec.o ../util/test.o
 	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
-bcastlog: $(MPIFDEP) bcastlog.o
-	$(FLINKER) $(OPTFLAGS) -o ./bcastlog bcastlog.o $(FLIBS)
+bcastlog: bcastlog.o
+	$(FLINKER) $(OPTFLAGS) -o $@ $^ $(FLIBS)
 grouptest: grouptest.o ../util/test.o
 	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
 redtst: redtst.o ../util/test.o
@@ -100,13 +93,13 @@ allred: allred.o ../pt2pt/gcomm.o ../util/test.o
 allred_prod: allred_prod.o ../pt2pt/gcomm.o ../util/test.o
 	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS) -lm
 scatterv: scatterv.o
-	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o scatterv scatterv.o $(LIBS) -lm
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS) -lm
 scatter: scatter.o
-	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o scatter scatter.o $(LIBS)
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
 scattern: scattern.o
-	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o scattern scattern.o $(LIBS) -lm
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS) -lm
 redscat: redscat.o
-	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o redscat redscat.o $(LIBS) -lm
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS) -lm
 alltoallv: alltoallv.o ../util/test.o
 	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
 alltoall: alltoall.o ../util/test.o
@@ -120,20 +113,20 @@ scantst: scantst.o ../util/test.o
 shortint: shortint.o ../util/test.o
 	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
 
-allredf: $(MPIFDEP) allredf.o
-	$(FLINKER) $(OPTFLAGS) -o allredf allredf.o $(FLIBS)
+allredf: allredf.o
+	$(FLINKER) $(OPTFLAGS) -o $@ $^ $(FLIBS)
 
-assocf: $(MPIFDEP) assocf.o 
-	$(FLINKER) $(OPTFLAGS) -o assocf assocf.o $(FLIBS)
+assocf: assocf.o
+	$(FLINKER) $(OPTFLAGS) -o $@ $^ $(FLIBS)
 
-allgatherf: $(MPIFDEP) allgatherf.o
-	$(FLINKER) $(OPTFLAGS) -o allgatherf allgatherf.o $(FLIBS)
+allgatherf: allgatherf.o
+	$(FLINKER) $(OPTFLAGS) -o $@ $^ $(FLIBS)
 
-bcast2: $(MPIFDEP) bcast2.o
-	$(FLINKER) $(OPTFLAGS) -o bcast2 bcast2.o $(FLIBS)
+bcast2: bcast2.o
+	$(FLINKER) $(OPTFLAGS) -o $@ $^ $(FLIBS)
 
 longuser: longuser.o
-	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o longuser longuser.o $(LIBS)
+	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
 nbcoll: nbcoll.o ../util/test.o
 	$(CLINKER) $(CFLAGS) $(OPTFLAGS) -o $@ $^ $(LIBS)
 

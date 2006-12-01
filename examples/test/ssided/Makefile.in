@@ -1,7 +1,6 @@
-ALL: default
+# $Id$
 ##### User configurable options #####
 
-MPIR_HOME    := @MPIR_HOME@
 CC           := @MPICC@
 CLINKER      := @MPICC@
 CCC          := @MPICPLUSPLUS@
@@ -9,9 +8,6 @@ CCLINKER     := $(CCC)
 F77          := @MPIF77@
 FLINKER      := @MPIF77@
 OPTFLAGS     := @OPTFLAGS@
-MPIFDEP      := @MPIFDEP@
-F77_OPTFLAGS := @F77_EXTRA_FLAG@
-MPIRUN       := @MPIRUN@
 ### End User configurable options ###
 
 SHELL := /bin/sh
@@ -20,14 +16,12 @@ top_srcdir := @top_srcdir@
 srcdir     := @srcdir@
 @VPATH@
 
-PROFLIB :=
 CFLAGS  := @CFLAGS@ @DEFS@ $(OPTFLAGS)
-CCFLAGS := $(CFLAGS)
-FFLAGS := $(OPTFLAGS)
+FFLAGS := @FFLAGS@
 # Use LIBS to add any special libraries for C programs
 LIBS := @LIB_PATH@ @LIB_LIST@
 # Use FLIBS to add any special libraries for Fortran programs
-FLIBS := @FLIB_PATH@ @LIB_LIST@
+FLIBS := @LIB_LIST@
 
 MPI2EXECS := accu_test allocmem get_contig_test1 get_contig_test2 \
 	get_difftype_test get_sametype_test1 get_sametype_test2 progress \
@@ -40,7 +34,7 @@ MPI2EXECS := accu_test allocmem get_contig_test1 get_contig_test2 \
 default: $(MPI2EXECS)
 
 testing: default
-	-./runtests $(MPIRUN)
+	-./runtests
 
 linktest: default clean
 
@@ -143,4 +137,4 @@ distclean: clean
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 .f.o:
-	$(F77) $(FFLAGS) $(F77_OPTFLAGS) -c $<
+	$(F77) $(FFLAGS) -c $<

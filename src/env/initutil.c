@@ -1602,7 +1602,6 @@ char ***argv;
 			    PRINTF ("  build of %s\n", __DATE__);
 			    MPID_Version_name( ADIname );
 			    PRINTF( "%s\n", ADIname);
-			    PRINTF( "Configured with %s\n", CONFIGURE_ARGS_CLEAN );
 			    (*argv)[i] = 0;
 			}
 #ifdef HAVE_NICE
