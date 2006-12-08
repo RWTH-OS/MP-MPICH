@@ -358,10 +358,10 @@ int MPIOI_Type_cyclic(int *array_of_gsizes, int dim, int ndims, int nprocs,
 /* nprocs = no. of processes in dimension dim of grid
    rank = coordinate of this process in dimension dim */
 
-    int blksize, i, blklens[2], st_index, end_index, local_size, rem, count;
+    int blksize, i, blklens[3], st_index, end_index, local_size, rem, count;
     int mpi_errno;
-    MPI_Aint stride, disps[2];
-    MPI_Datatype type_tmp, types[2];
+    MPI_Aint stride, disps[3];
+    MPI_Datatype type_tmp, types[3];
 
     if (darg == MPI_DISTRIBUTE_DFLT_DARG) blksize = 1;
     else blksize = darg;
@@ -411,10 +411,32 @@ int MPIOI_Type_cyclic(int *array_of_gsizes, int dim, int ndims, int nprocs,
 	*type_new = type_tmp;
     }
 
-    *st_offset = rank * blksize; 
-     /* in terms of no. of elements of type oldtype in this dimension */
+    /* In the first iteration, we need to set the displacement in that
+       dimension correctly. */ 
+    if ( ((order == MPI_ORDER_FORTRAN) && (dim == 0)) ||
+         ((order == MPI_ORDER_C) && (dim == ndims-1)) ) {
+        types[0] = MPI_LB;
+        disps[0] = 0;
+        types[1] = *type_new;
+        disps[1] = rank * blksize * orig_extent;
+        types[2] = MPI_UB;
+        disps[2] = orig_extent * array_of_gsizes[dim];
+        blklens[0] = blklens[1] = blklens[2] = 1;
+        MPI_Type_struct(3, blklens, disps, types, &type_tmp);
+        MPI_Type_free(type_new);
+        *type_new = type_tmp;
+
+        *st_offset = 0;  /* set it to 0 because it is taken care of in
+                            the struct above */
+    }
+    else {
+        *st_offset = rank * blksize; 
+        /* st_offset is in terms of no. of elements of type oldtype in
+         * this dimension */ 
+    }
+
     if (local_size == 0) *st_offset = 0;
-    
+
     return MPI_SUCCESS;
 }
 #endif
