@@ -77,6 +77,9 @@ struct MPIR_DATATYPE *dtype;
     /* Is this a short message? */
     if( len <  MPID_CH_USOCK_long_len() )
     {
+#ifndef USE_NT2UNIX
+#define alloca _alloca
+#endif
       pkt=(MPID_PKT_LONG_T*)alloca(sizeof(MPID_PKT_LONG_T)+len);
     }
     else pkt=&pkt_cont;
