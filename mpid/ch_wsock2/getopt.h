@@ -9,7 +9,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int getopt(int nargc, char * const *nargv, const char *ostr); 
+int getopt(int nargc, char * const *nargv,char *ostr); 
 #ifdef __cplusplus
 }
 #endif
