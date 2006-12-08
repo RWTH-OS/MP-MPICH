@@ -82,12 +82,12 @@ We ported this function to NT.
 */
 
 int
-getopt(int nargc, char * const *nargv, const char *ostr)
+getopt(int nargc, char * const *nargv, char *ostr)
 //	int nargc;
 //	char * const *nargv;
 //	const char *ostr;
 {
-	
+
 	register char *oli;			/* option letter list index */
 	char *p;
 
@@ -102,6 +102,7 @@ getopt(int nargc, char * const *nargv, const char *ostr)
 			return(EOF);
 		}
 	}					/* option letter okay? */
+	
 	if ((optopt = (int)*place++) == (int)':' ||
 	    !(oli = index(ostr, optopt))) {
 		/*
