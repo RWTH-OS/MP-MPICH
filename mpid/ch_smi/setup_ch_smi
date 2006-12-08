@@ -3,6 +3,12 @@
 #
 # ch_smi setup for MP-MPICH configure
 #
+# FIXME: We really should propagate ALL configure arguments to sub-configures.
+# The current way for example only propagates $prefix and not any other
+# prefixes, so it breaks if someone only wants to set one of the *_prefix
+# variables. Since that may also break other parts of MP-MPICH, we ignore this
+# scenario completly.
+
 if test -n "$DEVICE_ARGS_ch_smi" ; then
     echo "ch_smi: running device specific setup with args: $DEVICE_ARGS_ch_smi"
 else
@@ -26,7 +32,7 @@ for arg in $DEVICE_ARGS_ch_smi $@; do
 	  DevThreadsEnabled=1
 	fi
         echo "ch_smi: enabling asynchronous transfers"
-	UsePthreads=1	
+	UsePthreads=1
 	;;
 
      --disable-dynamic)
@@ -90,7 +96,7 @@ SMI_configure_args=`echo "$SMI_configure_args" | tr ":" " "`
 echo "*** configuring internal SMI library"
 test -n "$verbose" && echo "	args: $SMI_configure_args"
 rm -f include/smiconfig.h
-(cd $SMIDIR; CFLAGS="$OPTCFLAGS $CFLAGS" $srcdir/$SMIDIR/configure $SMI_configure_args)
+(cd $SMIDIR; CFLAGS="$OPTCFLAGS $CFLAGS" $srcdir/$SMIDIR/configure --prefix="$prefix" $SMI_configure_args)
 if [ ! -r $SMIDIR/include/smiconfig.h ] ; then
    echo "configure of SMI failed!"
    exit 1
