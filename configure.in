@@ -2897,13 +2897,17 @@ if test "x$F77" != "x"; then
 	AC_MSG_RESULT($export_check)
 	LDFLAGS="$LDFLAGS_save"
 
-	AC_MSG_CHECKING([if F77 compiler supports -Wno-globals])
-	FFLAGS_save="$FFLAGS"
-	FFLAGS="$FFLAGS -Wno-globals"
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [])],[globals_check=yes],[
+	# use internal autoconf variable to only test this if we are using a
+	# GNU fortran compiler...
+	if test "x$ac_cv_f77_compiler_gnu" = "xyes"; then
+		AC_MSG_CHECKING([if F77 compiler supports -Wno-globals])
+		FFLAGS_save="$FFLAGS"
+		FFLAGS="$FFLAGS -Wno-globals"
+		AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [])],[globals_check=yes],[
 			   FFLAGS="$FFLAGS_save"
 			   globals_check=no])
-	AC_MSG_RESULT($globals_check)
+		AC_MSG_RESULT($globals_check)
+	fi
 
 	AC_LANG_POP
 fi
