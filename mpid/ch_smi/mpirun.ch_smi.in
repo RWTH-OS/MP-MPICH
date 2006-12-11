@@ -37,7 +37,7 @@ if [ -n "$echo_test" ] ; then
 	    if [ -z "$echo_test" ] ; then break; fi
 	fi
     done
-fi    
+fi
 # fallback if no other echo was found
 if [ ! -x $ECHO ] ; then ECHO=echo; fi
 
@@ -62,16 +62,16 @@ else
 	    machineFile="$MPIR_HOME/util/machines"
 	fi
     fi
-    
+
     if [ -n "$machineFile" ] ; then
 	if [ $mpirun_verbose != 0 ] ; then
 	    $ECHO "using "$machineFile" to specify the hosts"
 	fi
-	HOSTS=`cat $machineFile | awk -F: 'NF==0 {exit} NF==1 { print $1 } NF==2 { for (i = $2; i > 0; i--) print $1 }'` 
+	HOSTS=`cat $machineFile | awk -F: 'NF==0 {exit} NF==1 { print $1 } NF==2 { for (i = $2; i > 0; i--) print $1 }'`
 	NBR_HOSTS=`nbr $HOSTS`
 	if [ "$np" = "0" ] ; then
 	    np=$NBR_HOSTS
-	fi  
+	fi
 	all_local=0
     else
 	# no machineFile found - run all processes on the local host
@@ -81,7 +81,7 @@ else
 	fi
 	i=0
 	HOSTNAME=`hostname`
-	while [ $i -lt $np ] ; do 
+	while [ $i -lt $np ] ; do
 	    HOSTS="$HOSTS $HOSTNAME"
 	    i=`expr $i + 1`;
 	done
@@ -110,7 +110,7 @@ if [ $ppn -gt 0 ] ; then
 	PPN_HOSTS=""
 	for h in $HOSTS ; do
 	    i=$ppn
-	    while [ $i -gt 0 ] ; do 
+	    while [ $i -gt 0 ] ; do
 		PPN_HOSTS="$PPN_HOSTS $h"
 		i=`expr $i - 1`;
 	    done
@@ -121,7 +121,7 @@ if [ $ppn -gt 0 ] ; then
 fi
 
 if [ $all_local -eq 0 ] ; then
-    # if more processes are requested than nodes are given in the command line, 
+    # if more processes are requested than nodes are given in the command line,
     # schedule the processes in round-robin manner
     if [ $np -gt $NBR_HOSTS ] ; then
 	NEWHOSTS=$HOSTS
@@ -206,7 +206,7 @@ if [ ! -n "$devFile" ] ; then
 	    if [ $mpirun_verbose != 0 ] ; then
 		$ECHO "*** mpirun.ch_smi: no device configuration file found, using defaults"
 	    fi
-	fi  
+	fi
     else
 	if [ $mpirun_verbose != 0 ] ; then
 	    $ECHO "*** mpirun.ch_smi: no device configuration file found, using defaults"
@@ -222,7 +222,7 @@ else
 fi
 
 # by default, disable interrupts in SMI initialization to save resources
-# to toggle this default, change the default value for "async_progress" in smidef.h 
+# to toggle this default, change the default value for "async_progress" in smidef.h
 # to '1' and init 'smi_interrupt_option' as an empty string.
 smi_irq_opt="-g"
 # if device configuration file is found/specified, add it to the command line options
@@ -233,9 +233,9 @@ if [ -n "$devFile" ] ; then
    options="-d $devFile"
 
    # we need to check here if asynchronous progress is specified, because this info
-   # is needed when SMI is initialized - to init remote SCI interrupts or not   
-   async=`cat $devFile | grep -i async_progress | awk '{ print $2}'` 
-   irq=`cat $devFile | grep -i msgchk_type | awk '{ print $2}'` 
+   # is needed when SMI is initialized - to init remote SCI interrupts or not
+   async=`cat $devFile | grep -i async_progress | awk '{ print $2}'`
+   irq=`cat $devFile | grep -i msgchk_type | awk '{ print $2}'`
    if [ "(" -n "$async" -a "$async" != "0" ")" -o "(" -n "$irq" -a "$irq" != "0" ")" ] ; then
 	# this means "do not disable interrupts in SMI initialization"
 	smi_irq_opt=""
@@ -249,7 +249,7 @@ INIT_HOST=`firsthost $HOSTS`
 # generate random magic number
 MAGIC_NUMBER=`date '+%S'`
 options="$options -h $INIT_HOST -m $MAGIC_NUMBER"
-  
+
 # verbose startup in ch_smi, too ?
 if [ $mpirun_verbose = 2 ] ; then
     options="$options -v"
@@ -314,20 +314,20 @@ if [ $nolocal = 0 ] ; then
     smp=0
     i=0
     for host in $HOSTS ; do
-	if [ $INIT_HOST = $host ] ; then 
+	if [ $INIT_HOST = $host ] ; then
 	    smp=`expr $smp + 1`
 	fi
-	# only check the first np hosts  
+	# only check the first np hosts
 	i=`expr $i + 1`
 	if [ $i = $np ] ; then
 	    break;
 	fi
     done
-    if [ $np = $smp ] ; then 
+    if [ $np = $smp ] ; then
 	options="$options -l"
     fi
 fi
-    
+
 # check if user wants SMI to print debugging/trace informations
 if [ $smitraceon = 1 ] ; then
     options="$options -T"
@@ -341,9 +341,9 @@ if [ $smistaton = 1 ] ; then
 fi
 
 # check if user has turned of the watchdog
-if [ $watchdog = "no" ] ; then
+if [ $watchdog = "no" -o -n "$debugprocs" ] ; then
     options="$options -w"
-fi    
+fi
 
 # get number of ch_smi-device as specified in mpichconf.h and add
 # according usedevice-switch to command line
@@ -400,7 +400,7 @@ USE_JOBCONTROL=""
 if [ -n "$USE_JOBCONTROL" ] ; then
     # job control
     set -m
-	
+
     # catch signals
     job_pids=""
     trap '$ECHO "received signal, terminating remote application processes:"; \
@@ -411,7 +411,7 @@ if [ -n "$USE_JOBCONTROL" ] ; then
     done ; exit 1' 1 2 3 15
 fi
 
-# now launch the processes 
+# now launch the processes
 mpipids=""
 trap '$ECHO "*** mpirun.ch_smi: starting up - try again later.";'  1 2 3 15
 BG="&"
@@ -429,6 +429,18 @@ do
 done
 cmdLineArgs=$tmpLineArgs
 
+
+#configFile: filename for TotalView's configfile
+mID=`date +%H%M%S`
+mID=$mID.$$
+configFile="${PWD}/tvconf.tmp.${mID}"
+
+#replace %f with filename
+#sed: changed delimiter in sed from '/' to ':' since configFile contains slashes
+commandfile=`echo ${commandfile} | sed s:%f:${configFile}:g`
+tv_item=1
+
+
 PIDHOST=""
 CHILD_PIDS=""
 for host in $HOSTS
@@ -444,7 +456,7 @@ do
     if [ -z "$PIDHOST" ] ; then
 	PIDHOST=$host
     fi
-    
+
     # set stderr/stdout/stdin and make backupfiles if they exist
     if [ -n "$stderrfile" ] ; then
 	err="2>"${stderrfile}"_"${i}
@@ -461,77 +473,113 @@ do
     if [ -n "$stdinfile" ] ; then
 	input="<"${stdinfile}
     fi
-     
+
     # construct the launch command line
     xtitle="\"$BASENAME on $host ($i/$np)\""
-    
+
     ## disabled due to timing problems when closing pid-files (the process hung)
     # pidarg="-f ${PIDBASE}_$i"
     pidarg=""
-    rcmd="(cd $WDNAME; $EXP_ENV $EXENAME -r $i -n $np $pidarg $options -- $cmdLineArgs $out $err $input)"
+    rcmd="(cd $WDNAME; $EXP_ENV $progname $mpichtv -r $i -n $np $pidarg $options -- $cmdLineArgs $out $err $input)"
     xrcmd="$progname -r $i -n $np $options -- $cmdLineArgs $input 2>&1"
     xprcmd="$progname -r $i -n $np $options -- $cmdLineArgs $input 2>&1 | $LESS"
-    if [ -n "$debugprocs" ] ; then
-      case $debugger in
-      gdb)
-	gdbcmd="gdb -exec $progname -x $progname.$MAGIC_NUMBER.$i"
-	$ECHO "set args -r $i -n $np $options -- $cmdLineArgs" >$progname.$MAGIC_NUMBER.$i
-	$ECHO "file $progname" >>$progname.$MAGIC_NUMBER.$i
-	if [ -n "$breakpoint" ] ; then
-	    $ECHO "break $breakpoint" >>$progname.$MAGIC_NUMBER.$i
+	if [ -n "$debugprocs" ] ; then
+		case $debugger in
+		gdb)
+			gdbcmd="gdb -exec $progname -x $progname.$MAGIC_NUMBER.$i"
+			$ECHO "set args -r $i -n $np $options -- $cmdLineArgs" >$progname.$MAGIC_NUMBER.$i
+			$ECHO "file $progname" >>$progname.$MAGIC_NUMBER.$i
+			if [ -n "$breakpoint" ] ; then
+				$ECHO "break $breakpoint" >>$progname.$MAGIC_NUMBER.$i
+			fi
+			$ECHO "run" >>$progname.$MAGIC_NUMBER.$i
+			;;
+		dbx)
+			dbxcmd="dbx -r $progname -r $i -n $np $options -- $cmdLineArgs"
+			;;
+		ddd)
+			dddcmd="(cd $WDNAME; $EXP_ENV ddd $EXENAME)"
+			$ECHO "set args -r 0 -n $np $options -- $cmdLineArgs" >$WDNAME/.gdbinit
+			if [ -n "$breakpoint" ] ; then
+				$ECHO "break $breakpoint" >>$WDNAME/.gdbinit
+			fi
+			;;
+		totalview)
+			mpichtv="-mpichtv"
+			totalviewcmd="cd $WDNAME; $SET_ENV DISPLAY=$DISPLAY ;$EXP_ENV totalview $progname -a $mpichtv -r 0 -n $np $options -- $cmdLineArgs"
+			;;
+		totalview2)
+			totalview2cmd="\"( cd $WDNAME; $EXP_ENV export DISPLAY=$DISPLAY ; totalview ${commandfile} )\""
+      		;;
+		*)
+			$ECHO "*** mpirun.ch_smi: The debugger $debugger is not supported (yet)."
+			exit 1
+			;;
+		esac
 	fi
-	$ECHO "run" >>$progname.$MAGIC_NUMBER.$i
-      ;;
-      dbx)
-	dbxcmd="dbx -r $progname -r $i -n $np $options -- $cmdLineArgs"
-      ;;
-      ddd)
-        dddcmd="(cd $WDNAME; $EXP_ENV ddd $EXENAME)"
-	$ECHO "set args -r 0 -n $np $options -- $cmdLineArgs" >$WDNAME/.gdbinit
-	if [ -n "$breakpoint" ] ; then
-	    $ECHO "break $breakpoint" >>$WDNAME/.gdbinit
-	fi
-      ;;
-      *) 
-	$ECHO "*** mpirun.ch_smi: The debugger $debugger is not supported (yet)."
-	exit 1
-      ;;
-      esac
-    fi
 
-    if [ "$xterm" = 0 -a "$console" = 0 ] ; then
-        launch_cmd="$rshcmd $host \"$rcmd\""
-    elif [ "$console" = 1 ] ; then
-	launch_cmd="$rshcmd $host \"$rcmd\""
-	# search host and rank in console list
-	for cons in $consoles; do
-	    if [ "$cons" = "all" -o "$cons" = "$host" -o "$cons" = "$i" ] ; then
-		if [ -n "$BV" -a "$BV" -gt "1" -a "${is_debug[$i]}" = "1" ] ; then
-                  case $debugger in
-		    gdb)
-		      launch_cmd=$XTERMCMD" -title $xtitle -e bash -c \"$rshcmd $host $gdbcmd\""
-		    ;; 
-		    dbx)
-		      launch_cmd=$XTERMCMD" -title $xtitle -e bash -c \"$rshcmd $host $dbxcmd\""
-		    ;;
-		    ddd)
-		      launch_cmd="$rshcmd $host \"$dddcmd\""
-		    ;;
-		    *)
-		      $ECHO "*** mpirun.ch_smi: the debugger $debugger currently is not supported"
-		      exit 1
-		    ;;
-		  esac
-		else
-		  if [ "$pager" = 1 ] ; then	
-		    launch_cmd=$XTERMCMD" -title $xtitle -e bash -c \"$rshcmd $host $xprcmd\""
-		  else
-		    launch_cmd=$XTERMCMD" -title $xtitle -e bash -c \"$rshcmd $host $xrcmd\""
-		  fi
-                fi
-	    fi
+	if [ "$xterm" = 0 -a "$console" = 0 ] ; then
+		launch_cmd="$rshcmd $host \"$rcmd\""
+	elif [ "$console" = 1 ] ; then
+		launch_cmd="$rshcmd $host \"$rcmd\""
+		# search host and rank in console list
+		for cons in $consoles; do
+			if [ "$cons" = "all" -o "$cons" = "$host" -o "$cons" = "$i" ] ; then
+			if [ -n "$BV" -a "$BV" -gt "1" -a "${is_debug[$i]}" = "1" ] ; then
+			case $debugger in
+			gdb)
+				launch_cmd=$XTERMCMD" -title $xtitle -e bash -c \"$rshcmd $host $gdbcmd\""
+				;;
+			dbx)
+				launch_cmd=$XTERMCMD" -title $xtitle -e bash -c \"$rshcmd $host $dbxcmd\""
+				;;
+			ddd)
+				launch_cmd="$rshcmd $host \"$dddcmd\""
+				;;
+			totalview)
+				launch_cmd="$rshcmd $host \"( $totalviewcmd )\""
+				;;
+			totalview2)
+				h=$host
+				#save first host, this is the one totalview is being launched on
+				if [ ${tv_item} -eq 1 ] ; then
+					tvhost=$host
+				fi
+
+    			#creating TotalView configfile
+
+				#check if local process
+				if [ "`hostname`" == "$h" -o "$h" == "$tvhost" ] ; then
+					echo "dload $progname;" >>$configFile
+				else
+					echo "dload $progname -r $h;" >>$configFile
+				fi
+				echo "dset ARGS(${tv_item}) { -r $i -n $np $pidarg $options -- $cmdLineArgs $out $err $input };">>$configFile
+				#echo "dbreak MPID_Init;">>$configFile
+				echo "dbreak main;">>$configFile
+				echo "G;">>$configFile
+				if [ $tv_item -gt 1 ] ; then
+					echo "dset CGROUP(${tv_item}) \$CGROUP(1);">>$configFile
+				fi
+				tv_item=`expr ${tv_item} + 1`
+
+				launch_cmd=""
+				;;
+			*)
+				$ECHO "*** mpirun.ch_smi: the debugger $debugger currently is not supported"
+				exit 1
+				;;
+			esac
+			else
+				if [ "$pager" = 1 ] ; then
+					launch_cmd=$XTERMCMD" -title $xtitle -e bash -c \"$rshcmd $host $xprcmd\""
+				else
+					launch_cmd=$XTERMCMD" -title $xtitle -e bash -c \"$rshcmd $host $xrcmd\""
+				fi
+			fi
+		fi
 	done
-    else
+	else
 	# xterms (with a pager)
 	if [ "$pager" = 1 ] ; then
 	    launch_cmd=$XTERMCMD" -title $xtitle -e bash -c \"$rshcmd $host $xprcmd\""
@@ -539,7 +587,7 @@ do
 	    launch_cmd=$XTERMCMD" -title $xtitle -e bash -c \"$rshcmd $host $xrcmd\""
 	fi
     fi
-    
+
     # more info
     if [ $mpirun_verbose != 0 ] ; then
 	if [ $i != "0" ] ; then
@@ -553,33 +601,49 @@ do
 	    $ECHO "***"
 	fi
     fi
-    
+
     # finally, launch the process
     if [ $Skip = "0" ] ; then
 	# to let the user see what's happening
-	if [ $i = 0 -a $mpirun_verbose != 0 ] ; then  
+	if [ $i = 0 -a $mpirun_verbose != 0 ] ; then
 	    $ECHO "*** mpirun.ch_smi: launching $np processes:"
 	    $ECHO "                   startup master on $host"
 	    $ECHO "                   other $np_minus_one processes on hosts:"
             $ECHO -n "                   "
 	fi
-	$Show $launch_cmd $BG && mpipids="$mpipids $!"
-	# these two are currently not used
-	retcode=$?
-	pid=$!
-    fi	   
+	if [ -n "$launch_cmd" ] ; then
+		$Show $launch_cmd $BG && mpipids="$mpipids $!"
+		# these two are currently not used
+		retcode=$?
+		pid=$!
+	fi
+    fi
     i=`expr $i + 1`
     CHILD_PIDS="$CHILD_PIDS $!"
 
 done
+
+
+if [ "$debugger" == "totalview2" ] ; then
+	if [ "${Show}" == "echo" ] ; then
+		echo
+		echo "Debug-Config-File=${configFile}"
+		cat ${configFile}
+		echo
+	fi
+	#launch totalview
+	$Show $rshcmd $tvhost $totalview2cmd && mpipids="$mpipids $!"
+fi
+
+
 if [ $mpirun_verbose != 0 ] ; then
     $ECHO ""
 fi
 if [ $mpirun_verbose = 2 ] ; then  $ECHO "*** mpirun.ch_smi: Initializing SCI-MPICH:"; fi
- 
+
 # Install trap to ensure proper shutdown. We first kill process 0, which will then usually
-# make all other processes quit as well. To be sure, we check for correct abort of all 
-# processes (with some delay) of the application by testing if all the pid-files on the nodes are gone. 
+# make all other processes quit as well. To be sure, we check for correct abort of all
+# processes (with some delay) of the application by testing if all the pid-files on the nodes are gone.
 # This may take some seconds, but aborting needs not to be especially fast, but should
 # be reliable.
 in_trap=""
@@ -610,7 +674,7 @@ done ; fi ; ' 1 2 3 15
 
 # START PAPI-Perfserv
 if [ "$MPIPAPI" = "true" ] ; then
-  eval "$EXP_ENV" 
+  eval "$EXP_ENV"
 
   # Start the Papi-Server, when all clients are ready
   declare -i CNT=0;
@@ -619,12 +683,12 @@ if [ "$MPIPAPI" = "true" ] ; then
   if [ -z "$PAPI_PROCLIST" ] ; then
     for item in $HOSTS ; do
 	PERFPROCS="$PERFPROCS $CNT"
-	CNT=$CNT+1	
+	CNT=$CNT+1
     done
   else
     PERFPROCS="$PAPI_PROCLIST"
   fi
-  
+
   PERFHOSTLIST=""
   PERFOPTS=""
 
@@ -644,11 +708,11 @@ if [ "$MPIPAPI" = "true" ] ; then
       sleep 1
     done
     PERFHOST=`cat $MPIRUNWD/$MPIRUNPID.$item`
-    if [ $mpirun_verbose = 2 ] ; then $ECHO "host $item: $PERFHOST ready"; fi 
+    if [ $mpirun_verbose = 2 ] ; then $ECHO "host $item: $PERFHOST ready"; fi
     PERFHOSTLIST="$PERFHOSTLIST $PERFHOST"
     rm $MPIRUNWD/$MPIRUNPID.$item
   done
-  
+
   # $ECHO " $PERFSERVPATH/perfometerserver $PERFHOSTLIST"
   $PERFSERVPATH/perfometerserver $PERFOPTS $PERFHOSTLIST&
 fi
@@ -661,7 +725,7 @@ rc_mpirun=0
 # waiting for PIDs makes problems with bash 1.x
 if [ -n "$BV" -a "$BV" -gt "1" ] ; then
   for pid in $mpipids ; do
-    wait $pid 
+    wait $pid
     rc_proc=$?
     if [ $rc_proc != 0 -a $mpirun_verbose != 0 ] ; then
 	$ECHO "*** mpirun.ch_smi: process $i had non-zero return-code:" $rc_proc
@@ -676,7 +740,7 @@ fi
 trap - 1 2 3 15
 wait
 
-# Clean up output files. If only one proc created output, 
+# Clean up output files. If only one proc created output,
 # rename its file from 'filename_procrank' to 'filename';
 # empty output files are deleted.
 for op_file in "$stdoutfile" "$stderrfile" ; do
@@ -703,7 +767,7 @@ for op_file in "$stdoutfile" "$stderrfile" ; do
 done
 
 # delete debug helpskript
-if [ -n "$debugprocs" ] ; then 
+if [ -n "$debugprocs" ] ; then
   case $debugger in
       gdb)
 	rm $progname.$MAGIC_NUMBER.* ;;
@@ -711,7 +775,12 @@ if [ -n "$debugprocs" ] ; then
       ;;
       ddd)
         rm $WDNAME/.gdbinit ;;
-      *) 
+	  totalview)
+	  ;;
+	  totalview2)
+		rm -f ${configFile}
+		;;
+      *)
 	$ECHO "*** mpirun.ch_smi: the debugger $debugger currently is not supported"
 	exit 1
       ;;
@@ -720,7 +789,7 @@ fi
 
 
 if [ $mpirun_verbose != 0 ] ; then
-    $ECHO "*** mpirun.ch_smi: Application terminated." 
+    $ECHO "*** mpirun.ch_smi: Application terminated."
 fi
 
 exit $rc_mpirun

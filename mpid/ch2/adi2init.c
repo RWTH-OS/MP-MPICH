@@ -46,6 +46,8 @@ int MPID_MyLocalSize = -1, MPID_MyLocalRank = -1;
 int MPID_MyMetaSize  = -1, MPID_MyMetaRank  = -1;
 int MPID_MyAllSize   = -1, MPID_MyAllRank   = -1;
 
+/* flag to indicate an -mpichtv-switch */
+int mpichtv_flag = 0;
 
 #ifdef META
 
@@ -176,24 +178,35 @@ MPID_Init(argc, argv, config, error_code)
      * form?
      */
     
-    if (config_info) {
-	/* config_info != NULL means that we are running a meta computer (with at least two meta hosts) */
-#ifdef META
-      MPID_Config    *p;
-      int global_rank, metahost_rank;
-      MPID_Device *primary_dev;
-      
-      /* 
+	  /* 
        * check for verbose startup
        * this is necessary to be able to have verbose output before MPIR_Init has been called
        */
       for (i=1; i<*argc; i++) {
       	if ((*argv)[i]) {
-			if (strcmp((*argv)[i],"-metaverbose" ) == 0) {
+			if (strcmp((*argv)[i],"-mpichtv" ) == 0) {
+				(*argv)[i] = 0; /* Eat it up so the user doesn't see it */
+				mpichtv_flag = 1;
+			}
+#ifdef META
+			else if (strcmp((*argv)[i],"-metaverbose" ) == 0) {
 			    RDEBUG_verbose = 1;
 			}
+#endif /*META*/
       	}
       }
+      
+      MPID_ArgSqueeze( argc, *argv );
+    
+    
+    if (config_info) {
+	/* config_info != NULL means that we are running a meta computer (with at least two meta hosts) */
+	
+#ifdef META
+      MPID_Config    *p;
+      int global_rank, metahost_rank;
+      MPID_Device *primary_dev;
+
       if (RDEBUG_verbose){
 	  	strcpy(RDEBUG_dbgprefix, "[");
 	  	strcat(RDEBUG_dbgprefix, MPIR_meta_cfg.my_metahostname);

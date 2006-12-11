@@ -73,7 +73,7 @@ cmdLineArgs="$cmdLineArgs -- $usermetaArgs"
 startpgm="$progname $cmdLineArgs"
 
 if [ "$debugger" != "" ] ; then
-    if [ "$debugger" = "totalview" ] ; then
+    if [ "$debugger" = "totalview" -o "$debugger" = "totalview2" ] ; then
         if [ "$TOTALVIEW" = "" ] ; then
 	   TOTALVIEW="totalview"
         fi
@@ -102,7 +102,7 @@ if [ "$debugger" != "" ] ; then
     #    if [ "$debugger" = "xxgdb" -a -r $HOME/.gdbinit ] ; then
     #	cat $HOME/.gdbini > $dbgfile
     #    fi
-        # handle USR1 pass for gdb; add an initial break 
+        # handle USR1 pass for gdb; add an initial break
         if [ "$debugger" = "gdb" -o "$debugger" = "xxgdb" -o \
 	     "$debugger" = "ddd" ] ; then
 	    echo "handle SIGUSR1 nostop pass" >> $dbgfile
@@ -110,10 +110,10 @@ if [ "$debugger" != "" ] ; then
 	    #echo "set args $cmdLineArgs -np $np" >> $dbgfile
 	    echo "set args $cmdLineArgs" >> $dbgfile
 	    echo "run" >> $dbgfile
-        else 
+        else
             echo "ignore USR1" >> $dbgfile
             # This may not work, depending on when the symbol table is read.
-            # An alternative is to use the startup file to load the 
+            # An alternative is to use the startup file to load the
             # program with "debug $progname" ,followed with this, followed
 	    # with run command args.
 	    echo "debug $progname" >> $dbgfile
@@ -151,7 +151,7 @@ if [ `nbr $nodes` -gt 0 ] ; then
     if [ $mpirun_verbose -gt 0 ] ; then
 	echo "*** mpirun.ch_shmem: launching the processes on host `firsthost $nodes`"
     fi
-    startpgm="$rshcmd `firsthost $nodes` \"$startpgm\" "
+    startpgm="$rshcmd `firsthost $nodes` \"export DISPLAY=$DISPLAY; $startpgm\" "
 fi
 
 $doitall $startpgm

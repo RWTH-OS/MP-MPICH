@@ -3090,6 +3090,7 @@ AC_CONFIG_FILES([bin/mpicc:util/mpicc.in
 		 bin/mpirun:util/mpirun.in bin/mpirun.args:util/mpirun.args.in
 		 bin/mpirun.meta:util/mpirun.meta.in
 		 bin/mpirun.meta.create:util/mpirun.meta.create.in
+		 bin/mpirun_dbg.totalview:util/mpirun_dbg.totalview.in
 		 examples/test/pt2pt/runtests examples/test/coll/runtests
 		 examples/test/topol/runtests examples/test/context/runtests
 		 examples/test/command/runtests examples/test/env/runtests

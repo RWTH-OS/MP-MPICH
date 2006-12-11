@@ -124,7 +124,7 @@ if [ -f $scriptdir/mpirun.$default_device.args ] ; then
 fi
 
 #
-# polling_mode is for systems that can select between polling and 
+# polling_mode is for systems that can select between polling and
 # interrupt-driven operation.  Currently, only IBM POE is so supported
 # (TMC CMMD has some support for this choice of mode, but we do not use it.)
 polling_mode=1
@@ -164,17 +164,17 @@ cat <<EOF
     -np <np>
             specify the number of processes to run
     -ppn <ppn>
-            specify the number of processes per node 
+            specify the number of processes per node
     -stdin filename
             Use filename as the standard input for the program.  This
             is needed for programs that must be run as batch jobs, such
-            as some IBM SP systems and Intel Paragons using NQS (see 
+            as some IBM SP systems and Intel Paragons using NQS (see
             -paragontype below).
-	    use 
-                  -stdin /dev/null 
+	    use
+                  -stdin /dev/null
             if there is no input and you intend to run the program in the
             background.  An alternate is to redirect standard input from
-            /dev/null, as in 
+            /dev/null, as in
                   mpirun -np 4 a.out < /dev/null
     -t | -testing | -show
 	    Testing - do not actually run, just print what would be
@@ -184,20 +184,22 @@ cat <<EOF
     -V | -Verbose
 	    Very verbose - throw in a lot of comments
     -dbx all | <rank | host,...,rank | host>
-            Start the specified processes under dbx 
+            Start the specified processes under dbx
     -gdb all | <rank | host,...,rank | host>
-            Start the specified processes under gdb 
-    -ddd all | <rank | host,...,rank | host>   
+            Start the specified processes under gdb
+    -ddd all | <rank | host,...,rank | host>
             Start the specified processes under ddd
-    -xxgdb all | <rank | host,...,rank | host>   
+    -xxgdb all | <rank | host,...,rank | host>
             Start the specified processes under xxgdb
     -tv     Start under totalview
+    -tv2    all | <rank | host,...,rank | host>
+            Start the specified processes under totalview
     -break  <specification>
-	    Set a breakpoint at the location specified. The syntax of the
-	    specification needs to match the selected debugger.
+            Set a breakpoint at the location specified. The syntax of the
+            specification needs to match the selected debugger.
     -ksq    Keep the send queue. This is useful if you expect later
             to attach totalview to the running (or deadlocked) job, and
-	    want to see the send queues. (Normally they are not maintained 
+            want to see the send queues. (Normally they are not maintained
             in a way which is visible to the debugger).
     -ld_lib_path <path>
             Adds <path> at the beginning of LD_LIBRARY_PATH before executing
@@ -208,7 +210,7 @@ Special options for the ch_usock device
 	    use port number <nbr> for synchronization of processes; if this option
 	    is not given, a default port numer is used
 
-Special options or different meaning of existing options for SCI-conected cluster 
+Special options or different meaning of existing options for SCI-conected cluster
 (using the ch_smi device):
 
     -console all | <rank | host,...,rank | host>
@@ -220,19 +222,19 @@ Special options or different meaning of existing options for SCI-conected cluste
          of hosts therein in case -np is not specified
     -nodes <hostname{,hostname}> or -hosts <hostname{,hostname}>
 	 Supply the hostnames of the nodes to run the processes on via a comma-
-	 separated list on the commandline instead of the machinefile. 
+	 separated list on the commandline instead of the machinefile.
 
-	 If there are less hosts provided than processes requested, 
-	 the processes are scheduled in a round-robin style manner.	 
+	 If there are less hosts provided than processes requested,
+	 the processes are scheduled in a round-robin style manner.
     -wd | -workingdir
          Specify a working directory. Default is the directory in which the
          executable is located.
-    -smp 
+    -smp
 	 allow SMP configurations of the machine file (more than 1 process of
 	 an application running on one node). Older SCI drivers do not allow
 	 such a configuration!
     -pager
-	 pipe stdout and stderr to a pager (onyl valid if -console is used)    
+	 pipe stdout and stderr to a pager (onyl valid if -console is used)
     -devconf <device-config-file>
          Use <device-config-file> for configuration of the device;
          if not specified, <machine-file name> is used or the defaults are
@@ -253,10 +255,10 @@ Special options or different meaning of existing options for SCI-conected cluste
     -mpipapi gui | nogui[=eventname1[@eventname2@...]][,logfile=<filename>][,<rank1>,<rank2>,...]>
 	 Start the papi-performance server use if executable has been compiled
 	 with -mpipapi option.
-	 "gui" will start the server for online visualization whith the 
+	 "gui" will start the server for online visualization whith the
 	 perfometer GUI.
 	 "nogui" will allow applications to be monitored without the GUI. Multiple
-         events to be monitored can be specified, separated by @.  
+         events to be monitored can be specified, separated by @.
 	 Eventnames are recognized by beginning with PAPI_. If something else
          is given for eventname, the results are unspecified. If no event
          is specified as the default of PAPI_TOT_CYC@PAPI_FP_INS will be used.
@@ -265,7 +267,7 @@ Special options or different meaning of existing options for SCI-conected cluste
 	 The ranks can be used to specify certain processes to be monitored
          only. If no ranks are given all processes will be monitored
 	 Examples:
-	   -mpipapi gui    
+	   -mpipapi gui
 		starts up the job with GUI monitoring all processes
    	   -mpipapi nogui,logfile=foo.bar
 		starts up the job without GUI, tracing the events PAPI_TOT_CYC
@@ -280,7 +282,7 @@ Special options or different meaning of existing options for SCI-conected cluste
 	a detailed list of events can be found in src/papiStrings.h of your
 	papi distribution.
 
-   Special Options for MetaMPICH	   
+   Special Options for MetaMPICH
 
     -meta name
            Start an MPI application on a MetaMPICH configuration, giving
@@ -293,11 +295,11 @@ Special options or different meaning of existing options for SCI-conected cluste
 
 
 On exit, mpirun returns a status of zero unless mpirun detected a problem, in
-which case it returns a non-zero status (currently, all are one, but this 
+which case it returns a non-zero status (currently, all are one, but this
 may change in the future).
 
-Multiple architectures may be handled by giving multiple -arch and -np 
-arguments.  For example, to run a program on 2 sun4s and 3 rs6000s, with 
+Multiple architectures may be handled by giving multiple -arch and -np
+arguments.  For example, to run a program on 2 sun4s and 3 rs6000s, with
 the local machine being a sun4, use
 
     $mpirun_arg -arch sun4 -np 2 -arch rs6000 -np 3 program
@@ -309,14 +311,14 @@ command is
 
     $mpirun_arg -arch sun4 -np 2 -arch rs6000 -np 3 program.%a
 
-If instead the executables are in different directories; for example, 
+If instead the executables are in different directories; for example,
 /tmp/me/sun4 and /tmp/me/rs6000, then the command is
 
     $mpirun_arg -arch sun4 -np 2 -arch rs6000 -np 3 /tmp/me/%a/program
 
 It is important to specify the architecture with -arch BEFORE specifying
 the number of processors.  Also, the FIRST -arch command must refer to the
-processor on which the job will be started.  Specifically, if -nolocal is 
+processor on which the job will be started.  Specifically, if -nolocal is
 NOT specified, then the first -arch must refer to the processor from which
 mpirun is running.
 
@@ -349,8 +351,7 @@ if [ ${nummetahosts} -gt 1 ]; then
 		exit 1
 	fi
 fi
-
-# Print help if there are no arguments at all
+# Print help if there are no arguments at all!
 if [ $# -lt 1 ] ; then
 	if [ "$hasprinthelp" = "1" ] ; then
 		PrintHelp
@@ -364,7 +365,7 @@ while [ 1 -le $# ] ; do
   #echo "arg = $arg"
   #echo "\$\# = $#"
   shift
-  case $arg in 
+  case $arg in
      -port)
 	port_nbr=$1
 	port_range=$1
@@ -390,11 +391,11 @@ while [ 1 -le $# ] ; do
 	;;
      -unicore)
      	unicore=1
-	;; 
+	;;
      -metacon)
      	metacon=1
 	;;
-     -arch) 
+     -arch)
      	arch=$1
 	narch=`expr $narch + 1`
 	eval arch$narch=$1
@@ -491,13 +492,13 @@ while [ 1 -le $# ] ; do
         ;;
     -nolocal)
         nolocal=1
-	;;	
+	;;
     -h)
 	if [ "$hasprinthelp" = 1 ] ; then
 	   PrintHelp
         fi
       	exit 1
-	;;	
+	;;
 #    -e)
 #      	use_execer=1
 #	;;
@@ -582,6 +583,20 @@ while [ 1 -le $# ] ; do
 	;;
     -tv|-totalview)
         debugger="totalview"
+        debugprocs=0
+        console=1
+        consoles=0
+	;;
+    -tv2)
+	debugger="totalview2"
+	commandfile="-s %f"
+	debugargs=`echo $1 | sed "s/,/ /g"`
+	console=1
+	shift
+	for d in $debugargs ; do
+	    debugprocs=${debugprocs}" "$d
+	    consoles=${consoles}" "$d
+	done
 	;;
     -ld_lib_path)
         ld_lib_path="$1"
@@ -714,7 +729,7 @@ while [ 1 -le $# ] ; do
 	MPIPAPIARGS=`echo $1 | sed 's/,/ /g'`
 	shift
 	PAPI_PROCLIST=""
-	for item in $MPIPAPIARGS ; do 
+	for item in $MPIPAPIARGS ; do
 	    case $item in
 	    gui)
 		PAPI_NOGUI=""
@@ -745,7 +760,7 @@ while [ 1 -le $# ] ; do
             device_knows_arg=0
 	    . $scriptdir/mpirun.$default_device.args
             # If the device handled it, skip to the top of the while loop
-            # on arguments.  ? Does this need to do a shift?  If so, 
+            # on arguments.  ? Does this need to do a shift?  If so,
 	    # should the number of shifts be the value of the arg?
             if [ $device_knows_arg != 0 ] ; then continue ; fi
         fi
@@ -755,7 +770,7 @@ while [ 1 -le $# ] ; do
       	if [ "$progname" = "" -a "$fake_progname" = "" -a \
 		! -x "$proginstance" ] ; then
 	    fake_progname="$arg"
-      	elif [ "$progname" = "" -a -x "$proginstance" ] ; then 
+      	elif [ "$progname" = "" -a -x "$proginstance" ] ; then
 	    progname="$arg"
             # any following unrecognized arguments are assumed to be arguments
             # to be passed to the program, as well as all future args
@@ -763,11 +778,11 @@ while [ 1 -le $# ] ; do
 	    # arguments, since we may later change it (see the switch on arch)
 	    # Thus we store the args in two forms:
 	    # cmdLineArgsExecer and cmdLineArgs.  Notes that we need
-	    # to preserve strings in cmdLineArgs, so 
+	    # to preserve strings in cmdLineArgs, so
 	    while [ 1 -le $# ] ; do
 	        arg="$1"
-	        case $arg in 
-	           *\'*) 
+	        case $arg in
+	           *\'*)
                    cmdLineArgsExecer="$cmdLineArgsExecer -arg=\"$arg\""
                    cmdLineArgs="$cmdLineArgs \"$arg\""
 		   ;;
@@ -787,8 +802,8 @@ while [ 1 -le $# ] ; do
             echo "    WARNING: Command line arguments for program should be given"
             echo "             after the program name.  Assuming that $arg is a"
             echo "             command line argument for the program."
-            case $arg in 
-	        *\'*) 
+            case $arg in
+	        *\'*)
                 cmdLineArgsExecer="$cmdLineArgsExecer -arg=\"$arg\""
                 cmdLineArgs="$cmdLineArgs \"$arg\""
 	        ;;
@@ -802,7 +817,7 @@ while [ 1 -le $# ] ; do
 		;;
 	    esac
          fi
-	 # note that the commandline args should get one more eval to 
+	 # note that the commandline args should get one more eval to
 	 # strip off any quotes
       ;;
   esac
@@ -848,16 +863,16 @@ else
            echo "*** mpirun.args: (meta-run)"
            echo "    WARNING: Missing program name -- hope that it is stated in the meta-config-file!"
 	fi
-     fi 
+     fi
   fi
 fi
-# 
+#
 # Warning: Some systems (OSF 1 at least) have a command called dbx
 # with different command-line arguments.  In particular, it needs
 # -c here (and that does not implement the remove part of the -sr).
 #
 # Turns out that this doesn't matter so much, because the dbx is terribly,
-# terribly crippled (on Alpha).  
+# terribly crippled (on Alpha).
 #
 larch=$arch
 if [ -z "$larch" ] ; then larch=$default_arch ; fi
@@ -873,7 +888,7 @@ PWD_TRIAL=`pwd`
 # The test for PWD_TRIAL usable is within the p4/execer test (since that
 # is where it matters)
 #
-tail=`echo $progname | sed 's/\/.*//'` 
+tail=`echo $progname | sed 's/\/.*//'`
 if  [ "$tail" = "" ] ; then
   #echo Absolute path, don't need to change anything
   true
@@ -892,8 +907,8 @@ if [ "$arch" = "" ] ; then
 fi
 
 archlist="$arch"
-case $arch in 
-    HP-UX) archlist="hpux hp9000s700 hp9000s735 HP-UX" 
+case $arch in
+    HP-UX) archlist="hpux hp9000s700 hp9000s735 HP-UX"
 	;;
     IRIX|sgi|SGI) archlist="IRIX sgi"
 	;;
@@ -919,9 +934,9 @@ esac
 
 #
 # Try to find the machine
-if [ "$machine" = "" ] ; then 
+if [ "$machine" = "" ] ; then
   machine=$arch
-  case $arch in 
+  case $arch in
     sun4|solaris)
       # This device should only exits on sun4s that are actually
       # MEIKO machines.
@@ -935,7 +950,7 @@ if [ "$machine" = "" ] ; then
         machine="execer"
       fi
       ;;
-    
+
     rs6000)
       # This only works on the ANL sp system
       # -e for "exists" isn't available on all systems
@@ -1028,7 +1043,7 @@ if [ -z "$metacfg" ] ; then
  fi
 else
  if [ $mpirun_verbose -gt 0 ] ; then
-  echo "*** mpirun.args: starting meta mpirun..." 
+  echo "*** mpirun.args: starting meta mpirun..."
  fi
 fi
 

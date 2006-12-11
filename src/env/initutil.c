@@ -5,7 +5,7 @@
 *      See COPYRIGHT in top-level directory.
 */
 
-/* 
+/*
 define MPID_NO_FORTRAN if the Fortran interface is not to be supported
 (perhaps because there is no Fortran compiler)
 */
@@ -21,6 +21,13 @@ define MPID_NO_FORTRAN if the Fortran interface is not to be supported
 #include "sbcnst2.h"
 /* Error handlers in pt2pt */
 #include "mpipt2pt.h"
+
+#ifndef HOST_NAME_MAX
+#define HOST_NAME_MAX 255
+#endif
+
+
+extern int mpichtv_flag; /* mpichtv_flag lies in adi2init.c */
 
 /* META */
 #include "comm.h"
@@ -38,13 +45,14 @@ define MPID_NO_FORTRAN if the Fortran interface is not to be supported
 #ifndef WIN32
 #include <unistd.h>
 #endif
+
 /* we need MPID_Config for multi-device-setup */
 /*#include "dev.h"*/
 /*#include "mpiddev.h" */
 /*#include "mpiddevbase.h"*/
 #include "metampi.h"
 #include "../routing/mpi_router.h"
-#endif     
+#endif
 /* /META */
 
 #include "multidevice.h"
@@ -72,7 +80,7 @@ define MPID_NO_FORTRAN if the Fortran interface is not to be supported
 #define PATCHLEVEL_SUBMINOR 0
 #endif
 
-/* #define DEBUG(a) {a}  */
+/* #define DEBUG(a) {a} */
 #define DEBUG(a)
 
 /* need to change these later */
@@ -103,6 +111,7 @@ that use C convention. */
 #define FORTRAN_API
 #endif
 
+
 /* Prototypes for Fortran interface functions */
 void FORTRAN_API mpir_init_fcm_ ( void );
 void FORTRAN_API mpir_init_flog_ ( MPI_Fint *, MPI_Fint * );
@@ -116,7 +125,7 @@ void *MPIR_fdtels; /* sbcnst flat datatype elements */
 void *MPIR_topo_els;/* sbcnst topology elements */
 
 /* Global communicators.  Initialize as null in case we fail during startup */
-/* We need the structure that MPI_COMM_WORLD refers to so often, 
+/* We need the structure that MPI_COMM_WORLD refers to so often,
    we export it */
 struct MPIR_COMMUNICATOR *MPIR_COMM_WORLD = 0;
 struct MPIR_COMMUNICATOR *MPIR_COMM_SELF  = 0;
@@ -184,7 +193,7 @@ int MPIR_Dump_Mem = 1;
 /* Fortran logical values */
 MPI_Fint MPIR_F_TRUE=-1, MPIR_F_FALSE=-1;
 
-/* 
+/*
 Location of the Fortran marker for MPI_BOTTOM.  The Fortran wrappers
 must detect the use of this address and replace it with MPI_BOTTOM.
 This is done by the macro MPIR_F_PTR.
@@ -197,11 +206,15 @@ void *MPIR_F_STATUSES_IGNORE = 0;
 /* MPICH extension keyvals */
 int MPICHX_QOS_BANDWIDTH = MPI_KEYVAL_INVALID;
 
+int MPID_write_deb_file(int rank);
+int MPID_getpid(int rank, char** hostname, char** executable);
+
+
 /* META */
 
 #ifdef META
 
-/* this function parses the meta-configuration file 
+/* this function parses the meta-configuration file
 * and sets up the devices
 *
 */
@@ -214,7 +227,7 @@ MPID_Config **dev_cfg;
     int metaHost;
     int rankOffset;
     int i,j;
-    int error, secondaryDeviceNbr; 
+    int error, secondaryDeviceNbr;
     int global_rank, rank_array_index;
     Snode *node;
     MPID_Device *(*InitMsgPassPt)(int *, char ***, int, int); /* pointer to device initialization function */
@@ -249,7 +262,7 @@ MPID_Config **dev_cfg;
     MPIR_meta_cfg.isRouter = (int*) malloc ( sizeof(int) *
 					     (MPIR_meta_cfg.np_metahost[MPIR_meta_cfg.my_metahost_rank] +
 					      MPIR_meta_cfg.nrp_metahost[MPIR_meta_cfg.my_metahost_rank]) );
-    
+
     MPIR_meta_cfg.npExtra=	MPIR_RouterConfig.npExtra;
     for (i=0; i< MPIR_meta_cfg.nbr_metahosts; i++)
 	MPIR_meta_cfg.npExtra_metahost[i] = MPIR_RouterConfig.npExtra_metahost[i];
@@ -257,25 +270,33 @@ MPID_Config **dev_cfg;
     for( i = 0; i < (MPIR_meta_cfg.np_metahost[MPIR_meta_cfg.my_metahost_rank] +
 		     MPIR_meta_cfg.nrp_metahost[MPIR_meta_cfg.my_metahost_rank]); i++ )
 	MPIR_meta_cfg.isRouter[i] = 0;
-    
+
     for( i = 0; i < rh_getNumRouters(); i++ )
 	MPIR_meta_cfg.isRouter[routerlist[i].metahostrank] = 1;
 
     gethostname(MPIR_meta_cfg.nodeName, MPI_MAX_PROCESSOR_NAME);
 
     MPIR_meta_cfg.myNodeNr=0;
-
+/*
+  	strcpy(RDEBUG_dbgprefix, "[");
+	strcat(RDEBUG_dbgprefix, MPIR_meta_cfg.my_metahostname);
+	strcat(RDEBUG_dbgprefix, "|" );
+	strcat(RDEBUG_dbgprefix, MPIR_meta_cfg.nodeName);
+	strcat(RDEBUG_dbgprefix, "]" );
+*/
     /* let's see if we are about to use the secondary device, router procs or both */
     MPIR_meta_cfg.useRouterToMetahost = (int *)calloc( MPIR_meta_cfg.nbr_metahosts, sizeof(int) ); /* init to zero */
-    for( i = 0; i < rh_getNumRouters(); i++ )
-	MPIR_meta_cfg.useRouterToMetahost[routerlist[i].host] = 1;
+   	/* fprintf(stderr, "%s rh_getNumRouters()=%d\n", RDEBUG_dbgprefix, rh_getNumRouters()); */
+    for( i = 0; i < rh_getNumRouters(); i++ ){
+		MPIR_meta_cfg.useRouterToMetahost[routerlist[i].host] = 1;
+    }
 
     for( i = 0; i < MPIR_meta_cfg.nbr_metahosts; i++ ) {
 
 	/* if there is some metahost which we reach via routers, well, then we have to use routers */
 	if( MPIR_meta_cfg.useRouterToMetahost[i] )
 	    MPIR_meta_cfg.useRouters = 1;
-	    
+
 	/* if there is a metahost other than our own which we don't reach via router,
 	   we have to use the secondary device */
 	if( (MPIR_meta_cfg.useRouterToMetahost[i] == 0) && (i != MPIR_meta_cfg.my_metahost_rank) )
@@ -289,22 +310,22 @@ MPID_Config **dev_cfg;
 		MPIR_meta_cfg.metahostUsesSecondaryDevice[i] = 1;
 
     }
-    
+
     /* ----------------------------------------------- */
     /* TODO */
     if (MPIR_meta_cfg.npExtra > 0)
-	MPIR_meta_cfg.npExtra_ranks = 
+	MPIR_meta_cfg.npExtra_ranks =
 	    (int*) malloc( sizeof(int) * MPIR_meta_cfg.npExtra);
-    
+
 #if 0
     j=0;
     rankOffset = 0;
     MPIR_meta_cfg.extra = 0;
     /* for each metahost ... */
-    for (metaHost=0; metaHost < MPIR_meta_cfg.nbr_metahosts; metaHost++) 
+    for (metaHost=0; metaHost < MPIR_meta_cfg.nbr_metahosts; metaHost++)
 	{
 	    /* ... get the ranks of extra procs */
-	    for (i=0; i<MPIR_meta_cfg.npExtra_metahost[metaHost]; i++) 
+	    for (i=0; i<MPIR_meta_cfg.npExtra_metahost[metaHost]; i++)
 		{
 		    MPIR_meta_cfg.npExtra_ranks[j] = rankOffset +
 			MPIR_meta_cfg.np_metahost[metaHost] -
@@ -318,12 +339,12 @@ MPID_Config **dev_cfg;
 		MPIR_meta_cfg.npExtra_metahost[metaHost];
 	}
 #endif
-    
+
     if (MPIR_meta_cfg.npExtra_metahost[MPIR_meta_cfg.my_metahost_rank] > 0)
-	MPIR_meta_cfg.npExtra_local_ranks = 
+	MPIR_meta_cfg.npExtra_local_ranks =
 	    (int*) malloc( sizeof(int) *
 			   MPIR_meta_cfg.npExtra_metahost[MPIR_meta_cfg.my_metahost_rank]);
-    
+
 #if 0
     /* on my local metahost ... */
     for (i=0; i<MPIR_meta_cfg.npExtra_metahost[MPIR_meta_cfg.my_metahost_rank]; i++) {
@@ -334,7 +355,7 @@ MPID_Config **dev_cfg;
     }
 #endif
     /* ----------------------------------------------- */
-    
+
     /* prepare the MPID_Config entries */
     *dev_cfg = &primary_device;
 
@@ -346,13 +367,13 @@ MPID_Config **dev_cfg;
 #ifdef CH_SHMEM_PRESENT
     case DEVICE_ch_shmem_nbr:
 #endif
-#ifdef CH_P4_PRESENT	    
+#ifdef CH_P4_PRESENT
     case DEVICE_ch_p4_nbr:
 #endif
-#ifdef CH_USOCK_PRESENT	    
+#ifdef CH_USOCK_PRESENT
     case DEVICE_ch_usock_nbr:
 #endif
-#ifdef CH_MPX_PRESENT	    
+#ifdef CH_MPX_PRESENT
     case DEVICE_ch_mpx_nbr:
 #endif
 	/* look up initialization function */
@@ -366,7 +387,7 @@ MPID_Config **dev_cfg;
 	else
 	    primary_device.device_init = *InitMsgPassPt;
 	break;
-#ifdef CH_GM_PRESENT	    
+#ifdef CH_GM_PRESENT
     case DEVICE_ch_gm_nbr:
 	break;
 #endif
@@ -420,11 +441,11 @@ MPID_Config **dev_cfg;
     gw_device.device_init = MPID_Gateway_InitMsgPass;
     gw_device.num_served = 0;
     gw_device.next = (MPID_Config *) NULL;
-    
+
     tn_device.device_init = MPID_Tunnel_InitMsgPass;
     tn_device.num_served = 0;
     tn_device.next = (MPID_Config *) NULL;
-    
+
 
     if (MPIR_meta_cfg.nbr_metahosts == 1) {
 	/* no META-functionality required */
@@ -437,7 +458,7 @@ MPID_Config **dev_cfg;
 	secondary_device.granks_served = (int *)MALLOC( sizeof(int) * (MPIR_meta_cfg.np + MPIR_meta_cfg.nrp) );
     gw_device.granks_served = (int *)MALLOC( sizeof(int) * (MPIR_meta_cfg.np + MPIR_meta_cfg.nrp) );
     tn_device.granks_served = (int *)MALLOC( sizeof(int) * (MPIR_meta_cfg.np + MPIR_meta_cfg.nrp) );
-	
+
     /* initialize mappings with dummy values */
     for( i=0; i<(MPIR_meta_cfg.np + MPIR_meta_cfg.nrp); i++ ) {
 	primary_device.granks_served[i] = -1;
@@ -446,9 +467,9 @@ MPID_Config **dev_cfg;
 	gw_device.granks_served[i] = -1;
 	tn_device.granks_served[i] = -1;
     }
-	
 
-    /* now we calculate which process can be reached via which device and how 
+
+    /* now we calculate which process can be reached via which device and how
        many processes each device serves */
 
     /* walk through all global ranks by arranging all processes of all metahosts in one line */
@@ -456,37 +477,37 @@ MPID_Config **dev_cfg;
 
 	if ( metaHost == MPIR_meta_cfg.my_metahost_rank ) { /* its me! */
 	    MPIR_meta_cfg.metahost_firstrank = nall;
-		
-	    for (i = 0; i < MPIR_meta_cfg.np_metahost[metaHost] + MPIR_meta_cfg.nrp_metahost[metaHost]; i++) { 
-		/*  mappings for me  */ 
-		primary_device.granks_served[i] = nall + i; /* add linear mapping */ 
+
+	    for (i = 0; i < MPIR_meta_cfg.np_metahost[metaHost] + MPIR_meta_cfg.nrp_metahost[metaHost]; i++) {
+		/*  mappings for me  */
+		primary_device.granks_served[i] = nall + i; /* add linear mapping */
 	    }
-	    primary_device.num_served += MPIR_meta_cfg.np_metahost[metaHost] + 
-		MPIR_meta_cfg.nrp_metahost[metaHost]; 
-	} 
+	    primary_device.num_served += MPIR_meta_cfg.np_metahost[metaHost] +
+		MPIR_meta_cfg.nrp_metahost[metaHost];
+	}
 	else {/* it's a remote metahost */
 	    if( MPIR_meta_cfg.useRouterToMetahost[metaHost] ) {
-		    
+
 		/* use gateway-device */
-		for( i = 0; i < MPIR_meta_cfg.np_metahost[metaHost] + MPIR_meta_cfg.nrp_metahost[metaHost]; i++ ) 
+		for( i = 0; i < MPIR_meta_cfg.np_metahost[metaHost] + MPIR_meta_cfg.nrp_metahost[metaHost]; i++ )
 		    gw_device.granks_served[gw_device.num_served + i] = nall + i;
 		gw_device.num_served += MPIR_meta_cfg.np_metahost[metaHost] + MPIR_meta_cfg.nrp_metahost[metaHost];
 	    }
 	    else {
-		
+
 		/* use secondary device */
 		for( i = 0; i < MPIR_meta_cfg.np_metahost[metaHost] + MPIR_meta_cfg.nrp_metahost[metaHost]; i++ )
 		    secondary_device.granks_served[secondary_device.num_served + i] = nall + i;
 		secondary_device.num_served += MPIR_meta_cfg.np_metahost[metaHost] + MPIR_meta_cfg.nrp_metahost[metaHost];
 	    }
-	    
+
 	}
 
 	/* add all local processes to rank counter */
 	nall += MPIR_meta_cfg.np_metahost[metaHost] + MPIR_meta_cfg.nrp_metahost[metaHost];
 
     } /* end of loop over all metahosts */
-	    
+
     /* this was for the primary, secondary and gateway device, now comes ch_tunnel ->
        mapping of the tunnel device for all MPI procs on this metahost (msgs with other global
        IDs shouldn't arrive here); if this metahost never imports messages via router, the following
@@ -506,9 +527,9 @@ MPID_Config **dev_cfg;
 	}
 	node = node->next;
     }
-    
+
     tn_device.num_served =  MPIR_meta_cfg.np_metahost[MPIR_meta_cfg.my_metahost_rank];
-    
+
     TR_POP;
     return MPI_SUCCESS;
 }
@@ -520,7 +541,7 @@ struct MPIR_COMMUNICATOR *comm;
 	MPIR_COLLOPS new_collops;
 
 	if ((new_collops = (MPIR_COLLOPS ) MALLOC (sizeof (*new_collops))) == NULL) {
-		return MPIR_ERROR( comm, MPI_ERR_EXHAUSTED, 
+		return MPIR_ERROR( comm, MPI_ERR_EXHAUSTED,
 			"Out of space in MPIR_Copy_collops" );
 	}
 	memcpy ((void *)new_collops, (void *)comm->collops, sizeof (*new_collops));
@@ -548,12 +569,12 @@ EXPORT_MPI_API int get_COMM_LOCAL(void)
 MPIR_Init - Initialize the MPI execution environment
 
 Input Parameters:
-+  argc - Pointer to the number of arguments 
++  argc - Pointer to the number of arguments
 -  argv - Pointer to the argument vector
 
 See MPI_Init for the description of the input to this routine.
 
-This routine is in a separate file from MPI_Init to allow profiling 
+This routine is in a separate file from MPI_Init to allow profiling
 libraries to not replace MPI_Init; without this, you can get errors
 from the linker about multiply defined libraries.
 
@@ -580,11 +601,11 @@ char ***argv;
 #endif
 	/* /META */
 	TR_PUSH("MPIR_Init");
-	if (MPIR_Has_been_initialized){ 
+	if (MPIR_Has_been_initialized){
 		TR_MSG("MPIR_Has_been_initialized");
 		TR_POP;
-		return 
-			MPIR_ERROR( (struct MPIR_COMMUNICATOR *)0, 
+		return
+			MPIR_ERROR( (struct MPIR_COMMUNICATOR *)0,
 			MPIR_ERRCLASS_TO_CODE(MPI_ERR_OTHER,MPIR_ERR_INIT), myname);
 	}
 
@@ -611,14 +632,14 @@ char ***argv;
 #endif
 
 	mpi_errno = MPI_SUCCESS;
-	p1 = getenv( "MPIRUN_DEVICE" );   
-	p2 = getenv( "MPIRUN_MACHINE" );   
+	p1 = getenv( "MPIRUN_DEVICE" );
+	p2 = getenv( "MPIRUN_MACHINE" );
 	if (p1 && strcmp( p1, MPIRUN_DEVICE ) != 0) {
 		mpi_errno = MPIR_Err_setmsg( MPI_ERR_OTHER, MPIR_ERR_MPIRUN, myname,
 			(char *)0,(char *)0, p1, MPIRUN_DEVICE );
 	}
 	else if (p2 && strcmp( p2, MPIRUN_MACHINE ) != 0) {
-		mpi_errno = MPIR_Err_setmsg( MPI_ERR_OTHER, MPIR_ERR_MPIRUN_MACHINE, 
+		mpi_errno = MPIR_Err_setmsg( MPI_ERR_OTHER, MPIR_ERR_MPIRUN_MACHINE,
 			myname,
 			(char *)0,(char *)0, p2, MPIRUN_MACHINE );
 	}
@@ -638,30 +659,30 @@ char ***argv;
 	/* get number of selected primary device;
 	   by default, device 0 is selected */
 	MPID_selected_primary_device = 0;
-
+	
 	for( i = 0; i < *argc; i++ )
 	    if((*argv)[i] ) {
 		/* number of selected device */
 		if( strcmp( (*argv)[i], "-usedevice" ) == 0 ) {
 		    (*argv)[i] = 0;
 		    i++;
-		    
+
 		    MPID_selected_primary_device = atoi( (*argv)[i] );
-		    
+
 		    (*argv)[i] = 0;
 		}
 	    }
 
-	
+
 	/* META */
 #ifdef META
 	/* Parsing of MetaMPICH-relevant args */
 	TR_MSG("META defined");
-	MPIR_meta_cfg.isMeta = 0; 
+	MPIR_meta_cfg.isMeta = 0;
 	MPIR_meta_cfg.router = 0;
 	MPIR_meta_cfg.routerAutoCfg = 1;
 	MPIR_meta_cfg.nbr_metahosts = 1;
-	MPIR_meta_cfg.dedicated_rp = 0; 
+	MPIR_meta_cfg.dedicated_rp = 0;
 	MPIR_meta_cfg.my_routingid = -1;
 	MPIR_meta_cfg.my_localrank = -1;
 	MPIR_meta_cfg.my_metahostname[0] = '\0';
@@ -669,7 +690,7 @@ char ***argv;
 	MPIR_meta_cfg.secondaryDevice = DEVICE_NULL;
 	MPIR_meta_cfg.useSecondaryDevice = 0;
 	MPIR_meta_cfg.useRouters = 0;
-	
+
 	/* The META-MPICH needs multiple device support which seems not
 	 * to be fully functioning yet. We have to search for the -meta
 	 * cmdLineArg to determine if we are to be META-configured and
@@ -679,7 +700,7 @@ char ***argv;
 	    /* check for metahost argument and delete it */
 	    for (i = 0; i < *argc; i++) {
 		if ((*argv)[i]) {
-		    /* get the name of the metahost */ 
+		    /* get the name of the metahost */
 		    if (strcmp( (*argv)[i], "-metahost" ) == 0) {
 			(*argv)[i] = 0;
 			i++;
@@ -687,12 +708,12 @@ char ***argv;
 			(*argv)[i] = 0;
 		    }
 		}
-	    }	
+	    }
 	    MPIR_meta_cfg.np_override=0;
 	    /* check for metaconfiguation parameters */
 	    for (i = 0; i < *argc; i++) {
 		if ((*argv)[i]) {
-		    /* get the parameter string */ 
+		    /* get the parameter string */
 		    if (strcmp( (*argv)[i], "-metaparam" ) == 0) {
 			(*argv)[i] = 0;
 			i++;
@@ -700,12 +721,12 @@ char ***argv;
 			(*argv)[i] = 0;
 		    }
 		}
-	    }	
+	    }
 
 	    /* check for a "magic meta key": */
 	    for (i = 0; i < *argc; i++) {
 		if ((*argv)[i]) {
-		    /* get the parameter string */ 
+		    /* get the parameter string */
 		    if (strcmp( (*argv)[i], "-metakey" ) == 0) {
 			(*argv)[i] = 0;
 			i++;
@@ -726,25 +747,25 @@ char ***argv;
 		}
 	    }
 #endif
-	    
-	    for (i = 0; i < *argc; i++) 
+
+	    for (i = 0; i < *argc; i++)
 		if ((*argv)[i]) {
 		    /* if found, stop at barrier for allowing attaching
 		       with the debugger */
 		    if (strcmp( (*argv)[i], "-barrier" ) == 0) {
 			meta_barrier = 1;
 			(*argv)[i] = 0;
-		    } 
+		    }
 		}
-	    for (i = 0; i < *argc; i++) 
+	    for (i = 0; i < *argc; i++)
 		if ((*argv)[i]) {
 		    /* router shall attach to a meta console  */
 		    if (strcmp( (*argv)[i], "-metacon" ) == 0) {
 			metacon = 1;
 			(*argv)[i] = 0;
-		    } 
+		    }
 		}
-	    for (i = 0; i < *argc; i++) 
+	    for (i = 0; i < *argc; i++)
 		if ((*argv)[i]) {
 		    /* router shall attach to a meta console  */
 		    if (strcmp( (*argv)[i], "-router" ) == 0) {
@@ -754,21 +775,21 @@ char ***argv;
 			(*argv)[i] = 0;
 			MPIR_meta_cfg.routerAutoCfg=0;
 			MPIR_meta_cfg.router=1;
-		    } 
+		    }
 		}
-	    for (i = 0; i < *argc; i++) 
+	    for (i = 0; i < *argc; i++)
 		if ((*argv)[i]) {
 		    /* router shall attach to a meta console  */
 		    if (strcmp( (*argv)[i], "-app" ) == 0) {
 			(*argv)[i] = 0;
 			MPIR_meta_cfg.routerAutoCfg=0;
 			MPIR_meta_cfg.router=0;
-		    } 
+		    }
 		}
-	    for (i = 0; i < *argc; i++) 
+	    for (i = 0; i < *argc; i++)
 		if ((*argv)[i]) {
-		    /* get the name of the meta config file */ 
-		    if (strcmp( (*argv)[i], "-metarun" ) == 0) {		    
+		    /* get the name of the meta config file */
+		    if (strcmp( (*argv)[i], "-metarun" ) == 0) {
 			MPIR_meta_cfg.isMeta=1;
 			if (i+1 <*argc) {
 			    strcpy (meta_config_file, (*argv)[i+1]);
@@ -777,31 +798,31 @@ char ***argv;
 			    MPIR_init_systemconfig (meta_config_file, &MPID_multidev_cfg);
 #ifdef FOO
 			    /* (currently removed to avoid clashes with devices that do NOT expect the -np option in the arg list) */
-			    
+
 			    /* eventually adjust the number of MPI processes given via -np or -n option
 			       to the real number of processes in the system. the devices need this ! */
 			    if (MPID_multidev_cfg != NULL) {
 				int j;
 				int npFound=0;
 				int nFound=0;
-				for (j = 0; j < *argc; j++) 
+				for (j = 0; j < *argc; j++)
 				    if ((*argv)[j]) {
 					if (strcmp( (*argv)[j], "-np" ) == 0) {
 					    npFound=1;
-					    sprintf ((*argv)[j+1], "%d", 
-						     MPIR_meta_cfg.np_metahost[MPIR_meta_cfg.my_metahost_rank] 
+					    sprintf ((*argv)[j+1], "%d",
+						     MPIR_meta_cfg.np_metahost[MPIR_meta_cfg.my_metahost_rank]
 						     + MPIR_meta_cfg.nrp_metahost[MPIR_meta_cfg.my_metahost_rank]);
 					}
 					if (strcmp( (*argv)[j], "-n" ) == 0) {
 					    nFound=1;
-					    sprintf ((*argv)[j+1], "%d", 
-						     MPIR_meta_cfg.np_metahost[MPIR_meta_cfg.my_metahost_rank] 
+					    sprintf ((*argv)[j+1], "%d",
+						     MPIR_meta_cfg.np_metahost[MPIR_meta_cfg.my_metahost_rank]
 						     + MPIR_meta_cfg.nrp_metahost[MPIR_meta_cfg.my_metahost_rank]);
 					}
 				    }
 				if (!npFound && !nFound) { /* we have no -np arg : set it! */
 				    sprintf((*argv)[i],"-np");
-				    sprintf((*argv)[i+1],"%d", MPIR_meta_cfg.np_metahost[MPIR_meta_cfg.my_metahost_rank] 
+				    sprintf((*argv)[i+1],"%d", MPIR_meta_cfg.np_metahost[MPIR_meta_cfg.my_metahost_rank]
 					    + MPIR_meta_cfg.nrp_metahost[MPIR_meta_cfg.my_metahost_rank]);
 				} else { /* delete arg */
 				    (*argv)[i] = 0;
@@ -818,24 +839,24 @@ char ***argv;
 			i += 1;
 		    }
 		}
-	    
+
 	}
 #endif
 	/* /META */
-	
+
 	MPID_ArgSqueeze( argc, *argv );
-	
+
 	/* If we wanted to be able to check if we're being debugged,
 	 * (so that we could explicitly request that the other processes
 	 * come up stopped), this would be a good place to do it.
 	 * That information should be available by looking at a global.
 	 *
 	 * For now we don't bother, but assume that we're cheating and using
-	 * an extra argument to mpirun which 
+	 * an extra argument to mpirun which
 	 * 1) starts a debugger on the host process
 	 * 2) causes the other processes to stop in mpi_init (see below).
 	 */
-	
+
 	/* META */
 #ifdef META
 	TR_MSG("META defined");
@@ -844,111 +865,131 @@ char ***argv;
 	TR_MSG("META not defined");
 	MPID_Init( argc, argv, (void *)0, &mpi_errno );
 #endif
-	
+
 	/* need to do this again, there may have been new cmdline-args created (e.g. ch_p4) */
 	/* MPID_ArgSqueeze( argc, *argv ); */
-	
+
 	if (mpi_errno) {
-	    MPIR_Errors_are_fatal( (MPI_Comm*)0, &mpi_errno, myname, 
+	    MPIR_Errors_are_fatal( (MPI_Comm*)0, &mpi_errno, myname,
 				   __FILE__, (int *)0 );
 	}
 	DEBUG(MPIR_tid=MPID_MyWorldRank;)
-	    
+
 #ifdef MPID_HAS_PROC_INFO
 	    TR_MSG("MPID_HAS_PROC_INFO defined");
+/* 
+ * only gather information about other processes
+ * when the mpichtv_flag is set (which is done by "-mpichtv")
+ * as a program parameter or if the device is ch_p4
+ */
+	if(mpichtv_flag
+#ifdef CH_P4_PRESENT
+	   || MPID_selected_primary_device==DEVICE_ch_p4_nbr) {
+#else
+	  ) {
+#endif
+
+	/* 
+	 * write initial infofile 
+	 */
+	mpi_errno = MPID_write_deb_file(MPID_MyWorldRank);
+	if ( mpi_errno != MPI_SUCCESS){
+		return mpi_errno;
+	}
+
 	if (MPID_MyWorldRank == 0) {
 	    /* We're the master process, so we need to grab the info
-	     * about where and who all the other processes are 
+	     * about where and who all the other processes are
 	     * and flatten it in case the debugger wants it.
 	     */
 	    int i;
 	    MPIR_proctable = (MPIR_PROCDESC *)MALLOC(MPID_MyWorldSize*sizeof(MPIR_PROCDESC));
-	    
+
 	    /* Cause extra state to be remembered */
 	    MPIR_being_debugged = 1;
-	    
+
 	    /* Link in the routine that contains info on the location of
 	       the message queue DLL */
 	    MPIR_Msg_queue_export();
-	    
 	    if (MPIR_proctable)
 		{
 		    for (i=0; i<MPID_MyWorldSize; i++)
 			{
 			    MPIR_PROCDESC *this = &MPIR_proctable[i];
-			    
+
 			    this->pid = MPID_getpid(i, &this->host_name, &this->executable_name);
-			    DEBUG(PRINTF("[%d] %s :: %s %d\n", i, 
-					 this->host_name ? this->hostname : "local",
-					 this->executable_name ? this->executable_name : "", 
+			    DEBUG(printf("[%d] %s :: %s %d\n", i,
+					 this->host_name ? this->host_name : "local",
+					 this->executable_name ? this->executable_name : "",
 					 this->pid);)
 				}
-		    
+
 		    MPIR_proctable_size = MPID_MyWorldSize;
 		    /* Let the debugger know that the info is now valid */
 		    MPIR_debug_state    = MPIR_DEBUG_SPAWNED;
-		    MPIR_Breakpoint();  
+		    MPIR_Breakpoint();
 		}
-	} 
+	}
+}
 #endif
-	
+
 	/* Indicate that any pointer conversions are permanent */
 	MPIR_PointerPerm( 1 );
-	
+
 	DEBUG(PRINTF("[%d] About to do allocations\n", MPIR_tid);)
-	    
+
 	    /* initialize topology code */
 	    MPIR_Topology_init();
-	
+
 	/* initialize memory allocation data structures */
 	MPIR_errhandlers= MPID_SBinit( sizeof( struct MPIR_Errhandler ), 10, 10 );
-	
+
 	MPIR_SENDQ_INIT();
 #ifdef FOO
 	MPIR_fdtels     = MPIR_SBinit( sizeof( MPIR_FDTEL ), 100, 100 );
 #endif
 	MPIR_HBT_Init();
 	MPIR_Topology_Init();
-	
+
 	/* This handles ALL datatype initialization */
 	MPIR_Init_dtes();
-	
+
 	/* Predefined combination functions */
 	DEBUG(PRINTF("[%d] About to create combination functions\n", MPIR_tid);)
 	    MPIR_Setup_Reduce_Ops();
-	
+
 	/* Create Error handlers */
 	/* Must create at preassigned values */
 	MPIR_Errhandler_create( MPIR_Errors_are_fatal, MPI_ERRORS_ARE_FATAL );
 	MPIR_Errhandler_create( MPIR_Errors_return,    MPI_ERRORS_RETURN );
 	MPIR_Errhandler_create( MPIR_Errors_warn,      MPIR_ERRORS_WARN );
-	
+
 	/* GROUP_EMPTY is a valid empty group */
 	DEBUG(PRINTF("[%d] About to create groups and communicators\n", MPIR_tid);)
 	    MPIR_GROUP_EMPTY     = MPIR_CreateGroup(0);
 	MPIR_GROUP_EMPTY->self = MPI_GROUP_EMPTY;
 	MPIR_RegPointerIdx( MPI_GROUP_EMPTY, MPIR_GROUP_EMPTY );
 	MPIR_GROUP_EMPTY->permanent = 1;
-	
+
 	/* META */
 #ifdef META
 	if (MPIR_meta_cfg.nbr_metahosts == 1) {
 #endif
 	    /* /META */
-	    
+
 	    MPIR_ALLOC(MPIR_COMM_WORLD,NEW(struct MPIR_COMMUNICATOR),
 		       (struct MPIR_COMMUNICATOR *)0,
 		       MPI_ERR_EXHAUSTED,myname);
 	    MPIR_SET_COOKIE(MPIR_COMM_WORLD,MPIR_COMM_COOKIE)
 		MPIR_RegPointerIdx( MPI_COMM_WORLD, MPIR_COMM_WORLD );
 	    MPIR_COMM_WORLD->self = MPI_COMM_WORLD;
-	    
+
 	    MPIR_COMM_WORLD->comm_type	   = MPIR_INTRA;
 	    MPIR_COMM_WORLD->ADIctx	   = ADIctx;
 	    size     = MPID_MyWorldSize;
 	    MPIR_tid = MPID_MyWorldRank;
 	    MPIR_COMM_WORLD->group	   = MPIR_CreateGroup( size );
-	    MPIR_COMM_WORLD->group->self   = 
+	    MPIR_COMM_WORLD->group->self   =
 		(MPI_Group) MPIR_FromPointer( MPIR_COMM_WORLD->group );
 #if defined(MPID_DEVICE_SETS_LRANKS)
 	    TR_MSG("MPID_DEVICE_SETS_LRANKS defined");
@@ -956,7 +997,7 @@ char ***argv;
 #else
 	    MPIR_SetToIdentity( MPIR_COMM_WORLD->group );
 #endif
-	    MPIR_Group_dup ( MPIR_COMM_WORLD->group, 
+	    MPIR_Group_dup ( MPIR_COMM_WORLD->group,
 			     &(MPIR_COMM_WORLD->local_group) );
 	    MPIR_COMM_WORLD->local_rank	   = MPIR_COMM_WORLD->local_group->local_rank;
 	    MPIR_COMM_WORLD->lrank_to_grank = MPIR_COMM_WORLD->group->lrank_to_grank;
@@ -969,22 +1010,22 @@ char ***argv;
 	    MPIR_COMM_WORLD->ref_count	   = 1;
 	    MPIR_COMM_WORLD->permanent	   = 1;
 	    (void)MPID_CommInit( (struct MPIR_COMMUNICATOR *)0, MPIR_COMM_WORLD );
-	    
+
 	    MPIR_Attr_create_tree ( MPIR_COMM_WORLD );
 	    MPIR_COMM_WORLD->comm_cache	   = 0;
 	    MPIR_Comm_make_coll ( MPIR_COMM_WORLD, MPIR_INTRA );
-	    
+
 	    MPIR_COMM_WORLD->comm_name      = 0;
 	    MPI_Comm_set_name ( MPI_COMM_WORLD, "MPI_COMM_WORLD");
-	    
+
 	    /* Predefined attributes for MPI_COMM_WORLD */
 	    DEBUG(PRINTF("[%d] About to create keyvals\n", MPIR_tid);)
 #define NULL_COPY (MPI_Copy_function *)0
 #define NULL_DEL  (MPI_Delete_function*)0
-#ifdef WIN32 
+#ifdef WIN32
 #define WINEXT ,0,0
-#else 
-#define WINEXT	
+#else
+#define WINEXT
 #endif
 		i = MPI_TAG_UB;
 	    MPIR_Keyval_create( NULL_COPY, NULL_DEL, &i, (void *)0, 0 WINEXT);
@@ -994,18 +1035,18 @@ char ***argv;
 	    MPIR_Keyval_create( NULL_COPY, NULL_DEL, &i, (void *)0, 0 WINEXT);
 	    i = MPI_WTIME_IS_GLOBAL;
 	    MPIR_Keyval_create( NULL_COPY, NULL_DEL, &i, (void *)0, 0 WINEXT);
-	    
+
 	    /* Initialize any device-specific keyvals */
 	    MPID_KEYVAL_INIT();
 	    MPI_TAG_UB_VAL = MPID_TAG_UB;
 #ifndef MPID_HOST
 #define MPID_HOST MPI_PROC_NULL
-#endif    
+#endif
 	    MPI_HOST_VAL   = MPID_HOST;
-	    
+
 	    /* The following isn't strictly correct, but I'm going to leave it
 	       in for now.  I've tried to make this correct for a few systems
-	       for which I know the answer.  
+	       for which I know the answer.
 	    */
 	    /* MPI_PROC_NULL is the correct answer for IBM MPL version 1 and
 	       perhaps for some other systems */
@@ -1014,14 +1055,14 @@ char ***argv;
 #define MPID_IO MPI_ANY_SOURCE
 #endif
 	    MPI_IO_VAL = MPID_IO;
-	    /* The C versions - pass the address of the variable containing the 
+	    /* The C versions - pass the address of the variable containing the
 	       value */
 	    MPI_Attr_put( MPI_COMM_WORLD, MPI_TAG_UB, (void*)&MPI_TAG_UB_VAL );
 	    MPI_Attr_put( MPI_COMM_WORLD, MPI_HOST,   (void*)&MPI_HOST_VAL );
 	    MPI_Attr_put( MPI_COMM_WORLD, MPI_IO,     (void*)&MPI_IO_VAL );
-	    
+
 	    /* Do the Fortran versions - Pass the actual value.  Note that these
-	       use MPIR_Keyval_create with the "is_fortran" flag set. 
+	       use MPIR_Keyval_create with the "is_fortran" flag set.
 	       If you change these; change the removal in finalize.c. */
 	    i = MPIR_TAG_UB;
 	    MPIR_Keyval_create( NULL_COPY, NULL_DEL, &i, (void *)0, 1 WINEXT);
@@ -1034,17 +1075,17 @@ char ***argv;
 	    MPI_Attr_put( MPI_COMM_WORLD, MPIR_TAG_UB, (void*)MPI_TAG_UB_VAL );
 	    MPI_Attr_put( MPI_COMM_WORLD, MPIR_HOST,   (void*)MPI_HOST_VAL );
 	    MPI_Attr_put( MPI_COMM_WORLD, MPIR_IO,     (void*)MPI_IO_VAL );
-	    
+
 	    /* Add the flag on whether the timer is global */
 #ifdef MPID_Wtime_is_global
 	    TR_MSG("MPID_Wtime_is_global defined");
 	    MPI_WTIME_IS_GLOBAL_VAL = MPID_Wtime_is_global();
 #else
 	    MPI_WTIME_IS_GLOBAL_VAL = 0;
-#endif    
-	    MPI_Attr_put( MPI_COMM_WORLD, MPI_WTIME_IS_GLOBAL, 
+#endif
+	    MPI_Attr_put( MPI_COMM_WORLD, MPI_WTIME_IS_GLOBAL,
 			  (void *)&MPI_WTIME_IS_GLOBAL_VAL );
-	    MPI_Attr_put( MPI_COMM_WORLD, MPIR_WTIME_IS_GLOBAL, 
+	    MPI_Attr_put( MPI_COMM_WORLD, MPIR_WTIME_IS_GLOBAL,
 			  (void *)MPI_WTIME_IS_GLOBAL_VAL );
 	    /* Make these permanent.  Must do this AFTER the values are set (because
 	       changing a value of a permanent attribute is an error) */
@@ -1056,15 +1097,15 @@ char ***argv;
 	    MPIR_Attr_make_perm( MPIR_HOST );
 	    MPIR_Attr_make_perm( MPIR_IO );
 	    MPIR_Attr_make_perm( MPIR_WTIME_IS_GLOBAL );
-	    
+
 	    /* Remember COMM_WORLD for the debugger */
 	    MPIR_Comm_remember ( MPIR_COMM_WORLD );
-	    
+
 	    /* META */
 #ifdef META
 	}
 	else {
-	    
+
 	    /* create  MPI_COMM_ALL including ALL MPI- and routing procs */
 	    MPIR_ALLOC(MPIR_COMM_ALL,NEW(struct MPIR_COMMUNICATOR),
 		       (struct MPIR_COMMUNICATOR *)0,
@@ -1072,7 +1113,7 @@ char ***argv;
 	    MPIR_SET_COOKIE(MPIR_COMM_ALL,MPIR_COMM_COOKIE)
 		MPIR_RegPointerIdx( MPI_COMM_ALL, MPIR_COMM_ALL );
 	    MPIR_COMM_ALL->self = MPI_COMM_ALL;
-	    
+
 	    MPIR_COMM_ALL->comm_type	   = MPIR_INTRA;
 	    MPIR_COMM_ALL->ADIctx	   = ADIctx;
 	    size     = MPID_MyAllSize;
@@ -1099,27 +1140,27 @@ char ***argv;
 	    MPIR_COMM_ALL->ref_count	   = 1;
 	    MPIR_COMM_ALL->permanent	   = 1;
 	    MPID_CommInit( (struct MPIR_COMMUNICATOR *)0, MPIR_COMM_ALL );
-	    
+
 	    /* default msg represensation does not work for heterogenous cluster */
 	    if (MPIR_meta_cfg.is_hetero)
 		MPIR_COMM_ALL->msgform = MPID_MSG_XDR;
-	    
+
 	    MPIR_Attr_create_tree ( MPIR_COMM_ALL );
 	    MPIR_COMM_ALL->comm_cache	   = 0;
-	    
+
 	    MPID_Set_mapping( MPIR_COMM_ALL, "MPI_COMM_ALL" );
-	    
+
 	    MPIR_Comm_make_coll ( MPIR_COMM_ALL, MPIR_INTRA );
-	    
+
 	    MPIR_COMM_ALL->comm_name      = 0;
 	    MPI_Comm_set_name ( MPI_COMM_ALL, "MPI_COMM_ALL");
-	    
+
 	    /* Predefined attributes for MPI_COMM_ALL */
 	    DEBUG(PRINTF("[%d] About to create keyvals\n", MPIR_tid);)
-		
+
 #define NULL_COPY (MPI_Copy_function *)0
 #define NULL_DEL  (MPI_Delete_function*)0
-		
+
 		i = MPI_TAG_UB;
 	    MPIR_Keyval_create( NULL_COPY, NULL_DEL, &i, (void *)0, 0 WINEXT);
 	    i = MPI_HOST;
@@ -1132,13 +1173,13 @@ char ***argv;
 
 #ifndef MPID_HOST
 #define MPID_HOST MPI_PROC_NULL
-#endif    
-	    
+#endif
+
 	    MPI_HOST_VAL   = MPID_HOST;
-	    
+
 	    /* The following isn't strictly correct, but I'm going to leave it
 	       in for now.  I've tried to make this correct for a few systems
-	       for which I know the answer.  
+	       for which I know the answer.
 	    */
 	    /* MPI_PROC_NULL is the correct answer for IBM MPL version 1 and
 	       perhaps for some other systems */
@@ -1146,16 +1187,16 @@ char ***argv;
 #ifndef MPID_IO
 #define MPID_IO MPI_ANY_SOURCE
 #endif
-	    
+
 	    MPI_IO_VAL = MPID_IO;
-	    /* The C versions - pass the address of the variable containing the 
+	    /* The C versions - pass the address of the variable containing the
 	       value */
 	    MPI_Attr_put( MPI_COMM_ALL, MPI_TAG_UB, (void*)&MPI_TAG_UB_VAL );
 	    MPI_Attr_put( MPI_COMM_ALL, MPI_HOST,   (void*)&MPI_HOST_VAL );
 	    MPI_Attr_put( MPI_COMM_ALL, MPI_IO,     (void*)&MPI_IO_VAL );
-	    
+
 	    /* Do the Fortran versions - Pass the actual value.  Note that these
-	       use MPIR_Keyval_create with the "is_fortran" flag set. 
+	       use MPIR_Keyval_create with the "is_fortran" flag set.
 	       If you change these; change the removal in finalize.c. */
 	    i = MPIR_TAG_UB;
 	    MPIR_Keyval_create( NULL_COPY, NULL_DEL, &i, (void *)0, 1 WINEXT);
@@ -1168,28 +1209,28 @@ char ***argv;
 	    MPI_Attr_put( MPI_COMM_ALL, MPIR_TAG_UB, (void*)MPI_TAG_UB_VAL );
 	    MPI_Attr_put( MPI_COMM_ALL, MPIR_HOST,   (void*)MPI_HOST_VAL );
 	    MPI_Attr_put( MPI_COMM_ALL, MPIR_IO,     (void*)MPI_IO_VAL );
-	    
+
 	    /* Add the flag on whether the timer is global */
 #ifdef MPID_Wtime_is_global
 	    MPI_WTIME_IS_GLOBAL_VAL = MPID_Wtime_is_global();
 #else
 	    MPI_WTIME_IS_GLOBAL_VAL = 0;
-#endif    
+#endif
 	    MPI_Attr_put( MPI_COMM_ALL, MPI_WTIME_IS_GLOBAL, (void *)&MPI_WTIME_IS_GLOBAL_VAL );
 	    MPI_Attr_put( MPI_COMM_ALL, MPIR_WTIME_IS_GLOBAL, (void *)MPI_WTIME_IS_GLOBAL_VAL );
-	    
-	    /* permanent'ing of the attributes is done after 
+
+	    /* permanent'ing of the attributes is done after
 	       creating the last communicator */
-	    
+
 	    /* Remember COMM_ALL for the debugger */
 	    MPIR_Comm_remember ( MPIR_COMM_ALL );
-	    
+
 	    /* The Router uses COMM_ALL for COMM_WOLRD */
 	    if (MPIR_meta_cfg.router)
 		MPIR_COMM_WORLD = MPIR_COMM_ALL;
-	    
+
 	    if (!MPIR_meta_cfg.router) {
-		/* create COMM_LOCAL which includes all local MPI-Processes without 
+		/* create COMM_LOCAL which includes all local MPI-Processes without
 		   the routing processes */
 		MPIR_ALLOC(MPIR_COMM_LOCAL,NEW(struct MPIR_COMMUNICATOR),
 			   (struct MPIR_COMMUNICATOR *)0,
@@ -1200,22 +1241,22 @@ char ***argv;
 		/* MPI_COMM_LOCAL = MPI_COMM_LOCAL_BASE + MPIR_meta_cfg.my_metahost_rank; */
 		MPIR_RegPointerIdx( MPI_COMM_LOCAL, MPIR_COMM_LOCAL );
 		MPIR_COMM_LOCAL->self = MPI_COMM_LOCAL;
-		
+
 		MPIR_COMM_LOCAL->comm_type = MPIR_INTRA;
 		MPIR_COMM_LOCAL->ADIctx	   = ADIctx;
 		size     = MPID_MyLocalSize;
 		MPIR_tid = MPID_MyLocalRank;
 		MPIR_COMM_LOCAL->group	   = MPIR_CreateGroup( size );
-		MPIR_COMM_LOCAL->group->self   = 
+		MPIR_COMM_LOCAL->group->self   =
 		    (MPI_Group) MPIR_FromPointer( MPIR_COMM_LOCAL->group );
 #if defined(MPID_DEVICE_SETS_LRANKS)
 		MPID_Set_lranks ( MPIR_COMM_LOCAL->group );
 #else
 		MPIR_SetToIdentity( MPIR_COMM_LOCAL->group );
 #endif
-		MPIR_Group_dup ( MPIR_COMM_LOCAL->group, 
+		MPIR_Group_dup ( MPIR_COMM_LOCAL->group,
 				 &(MPIR_COMM_LOCAL->local_group) );
-		
+
 		MPIR_COMM_LOCAL->local_rank	   = MPIR_COMM_LOCAL->local_group->local_rank;
 		MPIR_COMM_LOCAL->lrank_to_grank    = MPIR_COMM_LOCAL->group->lrank_to_grank;
 		MPIR_COMM_LOCAL->np		   = MPIR_COMM_LOCAL->group->np;
@@ -1227,70 +1268,70 @@ char ***argv;
 		MPIR_COMM_LOCAL->ref_count	   = 1;
 		MPIR_COMM_LOCAL->permanent	   = 1;
 		MPID_CommInit( (struct MPIR_COMMUNICATOR *)0, MPIR_COMM_LOCAL );
-		
+
 		MPIR_Attr_create_tree ( MPIR_COMM_LOCAL );
 		MPIR_COMM_LOCAL->comm_cache	   = 0;
-		
+
 		/* set the specific mapping from lranks to granks */
 		MPID_Set_mapping (MPIR_COMM_LOCAL, "MPI_COMM_LOCAL");
-		
+
 		MPIR_Comm_make_coll ( MPIR_COMM_LOCAL, MPIR_INTRA );
-		
+
 		MPIR_COMM_LOCAL->comm_name      = 0;
 		MPI_Comm_set_name ( MPI_COMM_LOCAL, "MPI_COMM_LOCAL");
-		
+
 		/* Predefined attributes for MPI_COMM_LOCAL */
 		DEBUG(PRINTF("[%d] About to create keyvals\n", MPIR_tid);)
-		    
+
 #define NULL_COPY (MPI_Copy_function *)0
 #define NULL_DEL  (MPI_Delete_function*)0
-		    
+
 		    /* keyvalues are to be created only once  (when initalizing COMM_WORLD) */
-		    
+
 #ifndef MPID_HOST
 #define MPID_HOST MPI_PROC_NULL
-#endif    
-		    
+#endif
+
 		    MPI_HOST_VAL   = MPID_HOST;
-		
+
 		/* The following isn't strictly correct, but I'm going to leave it
 		   in for now.  I've tried to make this correct for a few systems
-		   for which I know the answer.  
+		   for which I know the answer.
 		*/
 		/* MPI_PROC_NULL is the correct answer for IBM MPL version 1 and
 		   perhaps for some other systems */
 		/*     MPI_IO_VAL = MPI_PROC_NULL; */
-		
+
 #ifndef MPID_IO
 #define MPID_IO MPI_ANY_SOURCE
 #endif
-		
+
 		MPI_IO_VAL = MPID_IO;
-		
-		/* The C versions - pass the address of the variable containing the 
+
+		/* The C versions - pass the address of the variable containing the
 		   value */
 		MPI_Attr_put( MPI_COMM_LOCAL, MPI_TAG_UB, (void*)&MPI_TAG_UB_VAL );
 		MPI_Attr_put( MPI_COMM_LOCAL, MPI_HOST,   (void*)&MPI_HOST_VAL );
 		MPI_Attr_put( MPI_COMM_LOCAL, MPI_IO,     (void*)&MPI_IO_VAL );
-		
-		
+
+
 		/* Do the Fortran versions - Pass the actual value.  Note that these
-		   use MPIR_Keyval_create with the "is_fortran" flag set. 
+		   use MPIR_Keyval_create with the "is_fortran" flag set.
 		   If you change these; change the removal in finalize.c. */
 		/* keyvalues are to be created only once  (when initalizing COMM_WORLD) */
-		
+
 		/* Add the flag on whether the timer is global */
-		
+
 #ifdef MPID_Wtime_is_global
 		MPI_WTIME_IS_GLOBAL_VAL = MPID_Wtime_is_global();
 #else
 		MPI_WTIME_IS_GLOBAL_VAL = 0;
-#endif    
-		
+#endif
+
 		MPI_Attr_put( MPI_COMM_LOCAL, MPI_WTIME_IS_GLOBAL, (void *)&MPI_WTIME_IS_GLOBAL_VAL );
 		MPI_Attr_put( MPI_COMM_LOCAL, MPIR_WTIME_IS_GLOBAL,(void *)MPI_WTIME_IS_GLOBAL_VAL );
 		/* Make these permanent.  Must do this AFTER the values are set (because
-		   changing a value of a permanent attribute is an error) 
+		   changing a value of a permanent attribute is an error)
 		   MPIR_Attr_make_perm( MPI_TAG_UB );
 		   MPIR_Attr_make_perm( MPI_HOST );
 		   MPIR_Attr_make_perm( MPI_IO );
@@ -1302,7 +1343,7 @@ char ***argv;
 		*/
 		/* Remember COMM_LOCAL for the debugger */
 		MPIR_Comm_remember ( MPIR_COMM_LOCAL );
-		
+
 		/* create COMMM_META which includes all MPI-Processes and is used
 		   like COMM_WORLD by the application (in fact, a #define replaces
 		   all occurences of MPI_COMM_WORLD by MPI_COMM_META) */
@@ -1313,14 +1354,14 @@ char ***argv;
 		   identical names on the involved hosts */
 		MPIR_RegPointerIdx( MPI_COMM_META, MPIR_COMM_META );
 		MPIR_COMM_META->self = MPI_COMM_META;
-		
+
 		MPIR_COMM_META->comm_type = MPIR_INTRA;
 		MPIR_COMM_META->ADIctx	   = ADIctx;
 		size     = MPID_MyMetaSize;
 		MPIR_tid = MPID_MyMetaRank;
 		MPIR_COMM_META->group	   = MPIR_CreateGroup( size );
 		MPIR_COMM_META->group->self   =  (MPI_Group) MPIR_FromPointer( MPIR_COMM_META->group );
-		
+
 #if defined(MPID_DEVICE_SETS_LRANKS)
 		MPID_Set_lranks ( MPIR_COMM_META->group );
 #else
@@ -1342,41 +1383,41 @@ char ***argv;
 		/* default msg represensation does not work for heterogenous cluster */
 		if (MPIR_meta_cfg.is_hetero)
 		    MPIR_COMM_META->msgform = MPID_MSG_XDR;
-		
+
 		MPIR_Attr_create_tree ( MPIR_COMM_META );
 		MPIR_COMM_META->comm_cache	   = 0;
-		
+
 		/* set the specific mapping from lranks to granks */
 		MPID_Set_mapping (MPIR_COMM_META, "MPI_COMM_META");
-		
-		/* use special meta-barrier 
+
+		/* use special meta-barrier
 		   XXX is there a better (cleaner) way to install this new barrier ? */
 		MPIR_Comm_make_coll ( MPIR_COMM_META, MPIR_INTRA );
-		/* copy old collops pointer, then set pointer 
+		/* copy old collops pointer, then set pointer
 		   MPIR_Copy_collops (MPIR_COMM_META);
 		   MPIR_REF_INCR (MPIR_COMM_META->collops);
 		   MPIR_COMM_META->collops->Barrier = MPID_Gateway_Barrier;*/
-		
+
 		MPIR_COMM_META->comm_name      = 0;
 		MPI_Comm_set_name ( MPI_COMM_META, "MPI_COMM_META");
-		
+
 		/* Predefined attributes for MPI_COMM_META */
 		DEBUG(PRINTF("[%d] About to create keyvals\n", MPIR_tid);)
-		    
+
 #define NULL_COPY (MPI_Copy_function *)0
 #define NULL_DEL  (MPI_Delete_function*)0
-		    
+
 		    /* keyvalues are to be created only once  (when initalizing COMM_WORLD) */
-		    
+
 #ifndef MPID_HOST
 #define MPID_HOST MPI_PROC_NULL
-#endif    
-		    
+#endif
+
 		    MPI_HOST_VAL   = MPID_HOST;
-		
+
 		/* The following isn't strictly correct, but I'm going to leave it
 		   in for now.  I've tried to make this correct for a few systems
-		   for which I know the answer.  
+		   for which I know the answer.
 		*/
 		/* MPI_PROC_NULL is the correct answer for IBM MPL version 1 and
 		   perhaps for some other systems */
@@ -1384,39 +1425,39 @@ char ***argv;
 #ifndef MPID_IO
 #define MPID_IO MPI_ANY_SOURCE
 #endif
-		
+
 		MPI_IO_VAL = MPID_IO;
-		/* The C versions - pass the address of the variable containing the 
+		/* The C versions - pass the address of the variable containing the
 		   value */
 		MPI_Attr_put( MPI_COMM_META, MPI_TAG_UB, (void*)&MPI_TAG_UB_VAL );
 		MPI_Attr_put( MPI_COMM_META, MPI_HOST,   (void*)&MPI_HOST_VAL );
 		MPI_Attr_put( MPI_COMM_META, MPI_IO,     (void*)&MPI_IO_VAL );
-		
+
 		/* Do the Fortran versions - Pass the actual value.  Note that these
-		   use MPIR_Keyval_create with the "is_fortran" flag set. 
+		   use MPIR_Keyval_create with the "is_fortran" flag set.
 		   If you change these; change the removal in finalize.c. */
 		/* keyvalues are to be created only once  (when initalizing COMM_WORLD) */
-		
+
 		/* Add the flag on whether the timer is global */
 #ifdef MPID_Wtime_is_global
 		MPI_WTIME_IS_GLOBAL_VAL = MPID_Wtime_is_global();
 #else
 		MPI_WTIME_IS_GLOBAL_VAL = 0;
-#endif    
+#endif
 		/* XXX - sind die Attrib notwendig ?
-		   MPI_Attr_put( MPI_COMM_META, MPI_WTIME_IS_GLOBAL, 
+		   MPI_Attr_put( MPI_COMM_META, MPI_WTIME_IS_GLOBAL,
 		   (void *)&MPI_WTIME_IS_GLOBAL_VAL );
-		   MPI_Attr_put( MPI_COMM_META, MPIR_WTIME_IS_GLOBAL, 
+		   MPI_Attr_put( MPI_COMM_META, MPIR_WTIME_IS_GLOBAL,
 		   (void *)MPI_WTIME_IS_GLOBAL_VAL );
 		*/
-		
+
 		/* Remember COMM_META for the debugger */
 		MPIR_Comm_remember ( MPIR_COMM_META );
-		
+
 		/* The normal MPI procs use COMM_META for COMM_WOLRD */
 		MPIR_COMM_WORLD = MPIR_COMM_META;
 	    }
-	    
+
 	    /* create COMM_HOST which includes all local MPI-Processes and
 	       the routing processes. It is used for transmitting messages
 	       between the gateway- and the tunnel-ADI */
@@ -1428,7 +1469,7 @@ char ***argv;
 		/*	  	MPI_COMM_HOST = MPI_COMM_HOST_BASE + MPIR_meta_cfg.my_metahost_rank;*/
 		MPIR_RegPointerIdx( MPI_COMM_HOST, MPIR_COMM_HOST );
 	    MPIR_COMM_HOST->self = MPI_COMM_HOST;
-	    
+
 	    MPIR_COMM_HOST->comm_type	   = MPIR_INTRA;
 	    MPIR_COMM_HOST->ADIctx	   = ADIctx;
 	    size     = MPID_MyHostSize;
@@ -1441,7 +1482,7 @@ char ***argv;
 	    MPIR_SetToIdentity( MPIR_COMM_HOST->group );
 #endif
 	    MPIR_Group_dup ( MPIR_COMM_HOST->group, &(MPIR_COMM_HOST->local_group) );
-	    
+
 	    MPIR_COMM_HOST->local_rank	   = MPIR_COMM_HOST->local_group->local_rank;
 	    MPIR_COMM_HOST->lrank_to_grank = MPIR_COMM_HOST->group->lrank_to_grank;
 	    MPIR_COMM_HOST->np		   = MPIR_COMM_HOST->group->np;
@@ -1453,34 +1494,34 @@ char ***argv;
 	    MPIR_COMM_HOST->ref_count	   = 1;
 	    MPIR_COMM_HOST->permanent	   = 1;
 	    MPID_CommInit( (struct MPIR_COMMUNICATOR *)0, MPIR_COMM_HOST );
-	    
+
 	    MPIR_Attr_create_tree ( MPIR_COMM_HOST );
 	    MPIR_COMM_HOST->comm_cache	   = 0;
-	    
+
 	    /* set the specific mapping from lranks to granks */
 	    MPID_Set_mapping (MPIR_COMM_HOST, "MPI_COMM_HOST");
-	    
+
 	    MPIR_Comm_make_coll ( MPIR_COMM_HOST, MPIR_INTRA );
-	    
+
 	    MPIR_COMM_HOST->comm_name      = 0;
 	    MPI_Comm_set_name ( MPI_COMM_HOST, "MPI_COMM_HOST");
-	    
+
 	    /* Predefined attributes for MPI_COMM_HOST */
 	    DEBUG(PRINTF("[%d] About to create keyvals\n", MPIR_tid);)
 #define NULL_COPY (MPI_Copy_function *)0
 #define NULL_DEL  (MPI_Delete_function*)0
-		
+
 		/* keyvalues are to be created only once  (when initalizing COMM_WORLD) */
-		
+
 #ifndef MPID_HOST
 #define MPID_HOST MPI_PROC_NULL
-#endif    
-		
+#endif
+
 		MPI_HOST_VAL   = MPID_HOST;
-	    
+
 	    /* The following isn't strictly correct, but I'm going to leave it
 	       in for now.  I've tried to make this correct for a few systems
-	       for which I know the answer.  
+	       for which I know the answer.
 	    */
 	    /* MPI_PROC_NULL is the correct answer for IBM MPL version 1 and
 	       perhaps for some other systems */
@@ -1488,29 +1529,29 @@ char ***argv;
 #ifndef MPID_IO
 #define MPID_IO MPI_ANY_SOURCE
 #endif
-	    
+
 	    MPI_IO_VAL = MPID_IO;
-	    /* The C versions - pass the address of the variable containing the 
+	    /* The C versions - pass the address of the variable containing the
 	       value */
 	    MPI_Attr_put( MPI_COMM_HOST, MPI_TAG_UB, (void*)&MPI_TAG_UB_VAL );
 	    MPI_Attr_put( MPI_COMM_HOST, MPI_HOST,   (void*)&MPI_HOST_VAL );
 	    MPI_Attr_put( MPI_COMM_HOST, MPI_IO,     (void*)&MPI_IO_VAL );
-	    
+
 	    /* Do the Fortran versions - Pass the actual value.  Note that these
-	       use MPIR_Keyval_create with the "is_fortran" flag set. 
+	       use MPIR_Keyval_create with the "is_fortran" flag set.
 	       If you change these; change the removal in finalize.c. */
 	    /* keyvalues are to be created only once (when initalizing COMM_WORLD) */
-	    
+
 	    /* Add the flag on whether the timer is global */
-	    
+
 #ifdef MPID_Wtime_is_global
 	    MPI_WTIME_IS_GLOBAL_VAL = MPID_Wtime_is_global();
 #else
 	    MPI_WTIME_IS_GLOBAL_VAL = 0;
-#endif    
+#endif
 	    MPI_Attr_put( MPI_COMM_HOST, MPI_WTIME_IS_GLOBAL, (void *)&MPI_WTIME_IS_GLOBAL_VAL );
 	    MPI_Attr_put( MPI_COMM_HOST, MPIR_WTIME_IS_GLOBAL, (void *)MPI_WTIME_IS_GLOBAL_VAL );
-	    
+
 	    /* Make these permanent.  Must do this AFTER the values are set (because
 	       changing a value of a permanent attribute is an error) */
 	    MPIR_Attr_make_perm( MPI_TAG_UB );
@@ -1521,14 +1562,14 @@ char ***argv;
 	    MPIR_Attr_make_perm( MPIR_HOST );
 	    MPIR_Attr_make_perm( MPIR_IO );
 	    MPIR_Attr_make_perm( MPIR_WTIME_IS_GLOBAL );
-	    
+
 	    /* Remember COMM_HOST for the debugger */
 	    MPIR_Comm_remember ( MPIR_COMM_HOST );
-	    
+
 	}
 #endif
 	/* /META */
-	
+
 	/* COMM_SELF is the communicator consisting only of myself */
 	MPIR_ALLOC(MPIR_COMM_SELF,NEW(struct MPIR_COMMUNICATOR),
 		   (struct MPIR_COMMUNICATOR *)0,
@@ -1536,18 +1577,18 @@ char ***argv;
 	MPIR_SET_COOKIE(MPIR_COMM_SELF,MPIR_COMM_COOKIE)
 	    MPIR_RegPointerIdx( MPI_COMM_SELF, MPIR_COMM_SELF );
 	MPIR_COMM_SELF->self = MPI_COMM_SELF;
-	
+
 	MPIR_COMM_SELF->comm_type		    = MPIR_INTRA;
 	MPIR_COMM_SELF->group		    = MPIR_CreateGroup( 1 );
-	MPIR_COMM_SELF->group->self   = 
+	MPIR_COMM_SELF->group->self   =
 	    (MPI_Group) MPIR_FromPointer( MPIR_COMM_SELF->group );
 	MPIR_COMM_SELF->group->local_rank	    = 0;
 	MPIR_COMM_SELF->group->lrank_to_grank[0] = MPIR_tid;
-	MPIR_Group_dup ( MPIR_COMM_SELF->group, 
+	MPIR_Group_dup ( MPIR_COMM_SELF->group,
 			 &(MPIR_COMM_SELF->local_group) );
-	MPIR_COMM_SELF->local_rank	      = 
+	MPIR_COMM_SELF->local_rank	      =
 	    MPIR_COMM_SELF->local_group->local_rank;
-	MPIR_COMM_SELF->lrank_to_grank     = 
+	MPIR_COMM_SELF->lrank_to_grank     =
 	    MPIR_COMM_SELF->group->lrank_to_grank;
 	MPIR_COMM_SELF->np		      = MPIR_COMM_SELF->group->np;
 	MPIR_COMM_SELF->send_context	      = MPIR_SELF_PT2PT_CONTEXT;
@@ -1565,7 +1606,7 @@ char ***argv;
 	MPIR_COMM_SELF->comm_name          = 0;
 	MPI_Comm_set_name ( MPI_COMM_SELF, "MPI_COMM_SELF");
 	MPIR_Comm_remember ( MPIR_COMM_SELF );
-	
+
 #if !defined(MPID_NO_FORTRAN)
 	/* fcm sets MPI_BOTTOM */
 #if  !defined(WIN32)
@@ -1573,11 +1614,11 @@ char ***argv;
 	mpir_init_fcm_( );
 #endif
 #endif
-	
+
 	MPIR_PointerPerm( 0 );
-	
+
 	DEBUG(PRINTF("[%d] About to search for argument list options\n",MPIR_tid);)
-	    
+
 	    /* Search for "-mpi debug" options etc.  We need a better interface.... */
 	    if (argv && *argv) {
 		int i;
@@ -1590,13 +1631,18 @@ char ***argv;
 			else if (strcmp((*argv)[i],"-metaverbose" ) == 0) {
 #ifdef META
 			    RDEBUG_verbose = 1;
+			  	strcpy(RDEBUG_dbgprefix, "[");
+	  			strcat(RDEBUG_dbgprefix, MPIR_meta_cfg.my_metahostname);
+	  			strcat(RDEBUG_dbgprefix, "|" );
+	  			strcat(RDEBUG_dbgprefix, MPIR_meta_cfg.nodeName);
+	  			strcat(RDEBUG_dbgprefix, "]" );
 #endif /* META */
 			    (*argv)[i] = 0;
-			    
+
 			}
 			else if (strcmp((*argv)[i],"-mpiversion" ) == 0) {
 			    char ADIname[MPID_MAX_VERSION_NAME];
-			    PRINTF( "MP-MPICH version %3.1f.%d%s\n", PATCHLEVEL, PATCHLEVEL_SUBMINOR, 
+			    PRINTF( "MP-MPICH version %3.1f.%d%s\n", PATCHLEVEL, PATCHLEVEL_SUBMINOR,
 				    PATCHLEVEL_RELEASE_KIND);
 			    PRINTF ("  %s\n", PATCHLEVEL_RELEASE_DATE);
 			    PRINTF ("  build of %s\n", __DATE__);
@@ -1623,62 +1669,27 @@ char ***argv;
 #ifdef FOO
 #if defined(MPE_USE_EXTENSIONS) && !defined(MPI_NO_MPEDBG)
 			else if (strcmp((*argv)[i],"-mpedbg" ) == 0) {
-			    MPE_Errors_call_dbx_in_xterm( (*argv)[0], (char *)0 ); 
+			    MPE_Errors_call_dbx_in_xterm( (*argv)[0], (char *)0 );
 			    MPE_Signals_call_debugger();
 			    (*argv)[i] = 0;
 			}
 #endif
 #if defined(MPE_USE_EXTENSIONS) && !defined(MPI_NO_MPEDBG)
 			else if (strcmp((*argv)[i],"-mpegdb" ) == 0) {
-			    MPE_Errors_call_gdb_in_xterm( (*argv)[0], (char *)0 ); 
+			    MPE_Errors_call_gdb_in_xterm( (*argv)[0], (char *)0 );
 			    MPE_Signals_call_debugger();
 			    (*argv)[i] = 0;
 			}
 #endif
 #endif
-			else if (strcmp((*argv)[i],"-mpichtv" ) == 0) {
-			    (*argv)[i] = 0; /* Eat it up so the user doesn't see it */
-			    
-			    /* Cause extra state to be remembered */
-			    MPIR_being_debugged = 1;
-			    
-			    /* As per Jim Cownie's request #3683; allows debugging even if this startup
-			       code should not be used. */
-			    /* The real answer is to use a different definition for this, since
-			       stop-when-starting-for-debugger is different from HAS_PROC_INFO */
-#ifdef MPID_HAS_PROC_INFO
-			    /* Check to see if we're not the master,
-			     * and wait for the debugger to attach if we're 
-			     * a slave. The debugger will reset the debug_gate.
-			     * There is no code in the library which will do it !
-			     */
-			    if (MPID_MyWorldRank != 0) {
-				while (MPIR_debug_gate == 0) {
-				    /* Wait to be attached to, select avoids 
-				     * signaling and allows a smaller timeout than 
-				     * sleep(1)
-				     */
-#ifndef WIN32
-				    struct timeval timeout;
-				    timeout.tv_sec  = 0;
-				    timeout.tv_usec = 250000;
-				    select( 0, (void *)0, (void *)0, (void *)0,
-					    &timeout );
-#else
-				    Sleep(250);
-#endif
-				}
-			    }
-#endif
-			}
 			else if (strcmp((*argv)[i],"-mpichksq") == 0) {
-			    /* This tells us to Keep Send Queues so that we 
+			    /* This tells us to Keep Send Queues so that we
 			     * can look at them if we're attached to.
 			     */
 			    (*argv)[i] = 0; /* Eat it up so the user doesn't see it */
 			    MPIR_being_debugged = 1;
 			}
-			
+
 #ifdef MPIR_PTRDEBUG
 			else if (strcmp((*argv)[i],"-mpiptrs") == 0) {
 			    MPIR_Dump_Mem = 1;
@@ -1694,27 +1705,66 @@ char ***argv;
 		/* Remove the null arguments */
 		MPID_ArgSqueeze( argc, *argv );
 	    }
-	
+		
+	if (mpichtv_flag) {
+		/* reset the flag */
+		//mpichtv_flag = 0;
+		
+	    /* Cause extra state to be remembered */
+	    MPIR_being_debugged = 1;
+		    
+	    /* As per Jim Cownie's request #3683; allows debugging even if this startup
+	       code should not be used. */
+	    /* The real answer is to use a different definition for this, since
+	       stop-when-starting-for-debugger is different from HAS_PROC_INFO */
+#ifdef MPID_HAS_PROC_INFO
+	    /* Check to see if we're not the master,
+	     * and wait for the debugger to attach if we're
+	     * a slave. The debugger will reset the debug_gate.
+	     * There is no code in the library which will do it !
+	     */
+		    
+	    if (MPID_MyWorldRank != 0) {
+		while (MPIR_debug_gate == 0) {
+		    /* Wait to be attached to, select avoids
+		     * signaling and allows a smaller timeout than
+		     * sleep(1)
+		     */
+#ifndef WIN32
+		    struct timeval timeout;
+		    timeout.tv_sec  = 0;
+		    timeout.tv_usec = 250000;
+		    select( 0, (void *)0, (void *)0, (void *)0,
+			    &timeout );
+#else
+		    Sleep(250);
+#endif /* !WIN32 */
+		}
+	    }
+#endif /* MPID_HAS_PROC_INFO */
+	}		
+		
+
 	/* barrier */
 	MPIR_Has_been_initialized = 1;
-	
+
 	/* META */
 #ifdef META
-	/* XXX debug barrier 
+	/* XXX debug barrier
 	   while (meta_barrier) {
 	   usleep (1000);
 	   }
 	*/
-	
+
 	/* print some debugging information  */
 	/* debug_print_communicator_setup(); */
-	
-	
+
+
 	if (MPIR_meta_cfg.router) {
 	    /* this process never returns from MPI_Init() but becomes a  routing process */
 	    MPIR_Router(meta_config_file, MPIR_meta_cfg.metahost_firstrank,
 			metacon,
-			MPIR_meta_cfg.my_metahostname);      
+			MPIR_meta_cfg.my_metahostname);
 	    exit (0);
 	}
 	/* wait until the routing procs are synchronized */
@@ -1723,7 +1773,7 @@ char ***argv;
 	}
 #endif
 	/* /META */
-	
+
 	DEBUG(PRINTF("[%d] About to exit from MPI_Init\n", MPIR_tid);)
 	    TR_POP;
 	return MPI_SUCCESS;
@@ -1738,15 +1788,15 @@ void __cdecl mpir_init_bottom_win32( void *p ) {
     MPIR_F_MPI_BOTTOM	   = p;
     MPIR_F_STATUS_IGNORE   = ((MPI_Fint*)p) + 1;
     MPIR_F_STATUSES_IGNORE = ((MPI_Fint*)p) + 2;
-    
-    
+
+
 }
 
 #else
-/* 
-   This routine is CALLED by MPIR_init_fcm to provide the address of 
-   the Fortran MPI_BOTTOM to C 
-*/ 
+/*
+   This routine is CALLED by MPIR_init_fcm to provide the address of
+   the Fortran MPI_BOTTOM to C
+*/
 void FORTRAN_API mpir_init_bottom_( p )
      void *p;
 {
@@ -1775,11 +1825,11 @@ int MPIR_Errhandler_create( function, errhandler )
      MPI_Errhandler       errhandler;
 {
 	struct MPIR_Errhandler *new;
-	
+
 	MPIR_ALLOC(new,(struct MPIR_Errhandler*) MPIR_SBalloc( MPIR_errhandlers ),
-		   MPIR_COMM_WORLD, MPI_ERR_EXHAUSTED, 
+		   MPIR_COMM_WORLD, MPI_ERR_EXHAUSTED,
 		   "MPI_ERRHANDLER_CREATE" );
-	
+
 	MPIR_SET_COOKIE(new,MPIR_ERRHANDLER_COOKIE);
 	new->routine   = function;
 	new->ref_count = 1;
@@ -1796,7 +1846,7 @@ void MPIR_Errhandler_mark( errhandler, incr )
      MPI_Errhandler errhandler;
      int            incr;
 {
-    struct MPIR_Errhandler *new = (struct MPIR_Errhandler *) 
+    struct MPIR_Errhandler *new = (struct MPIR_Errhandler *)
 	MPIR_ToPointer( errhandler );
     if (new) {
 	if (incr == 1) {
@@ -1818,20 +1868,20 @@ void debug_print_communicator_setup()
 {
     struct MPIR_COMMUNICATOR *comm;
     int n;
-    
+
     printf( "\n--------------------------------------------------\n" );
     printf( "Communicator Setup:\n" );
     if( MPIR_meta_cfg.router ) {
 	/* in router processes, only MPI_COMM_ALL and MPIR_COMM_HOST are relevant, because
 	   routers do not belong to the other two communicators */
 	printf( "  router process:\n" );
-	
+
 	comm = MPIR_COMM_ALL;
 	printf( "    MPI_COMM_ALL: size = %d, rank = %d, lrank_to_grank = ", comm->np, comm->local_rank );
 	for( n = 0; n < comm->np; n++ )
 	    printf( "%d ", comm->lrank_to_grank[n] );
 	printf( "\n" );
-	
+
 	comm = MPIR_COMM_HOST;
 	printf( "    MPI_COMM_HOST: size = %d, rank = %d, lrank_to_grank = ", comm->np, comm->local_rank );
 	for( n = 0; n < comm->np; n++ )
@@ -1840,33 +1890,94 @@ void debug_print_communicator_setup()
     }
     else {
 	printf( "  application process:\n" );
-	
+
 	comm = MPIR_COMM_ALL;
 	printf( "    MPI_COMM_ALL: size = %d, rank = %d, lrank_to_grank = ", comm->np, comm->local_rank );
 	for( n = 0; n < comm->np; n++ )
 	    printf( "%d ", comm->lrank_to_grank[n] );
 	printf( "\n" );
-	
+
 	comm = MPIR_COMM_WORLD;
 	printf( "    MPI_COMM_WORLD: size = %d, rank = %d, lrank_to_grank = ", comm->np, comm->local_rank );
 	for( n = 0; n < comm->np; n++ )
 	    printf( "%d ", comm->lrank_to_grank[n] );
 	printf( "\n" );
-	
+
 	comm = MPIR_COMM_HOST;
 	printf( "    MPI_COMM_HOST: size = %d, rank = %d, lrank_to_grank = ", comm->np, comm->local_rank );
 	for( n = 0; n < comm->np; n++ )
 	    printf( "%d ", comm->lrank_to_grank[n] );
 	printf( "\n" );
-	
+
 	comm = MPIR_COMM_LOCAL;
 	printf( "    MPI_COMM_LOCAL: size = %d, rank = %d, lrank_to_grank = ", comm->np, comm->local_rank );
 	for( n = 0; n < comm->np; n++ )
 	    printf( "%d ", comm->lrank_to_grank[n] );
 	printf( "\n" );
     }
-    
+
     printf( "--------------------------------------------------\n" );
 }
 
 #endif
+
+/*
+ * MPID_write_deb_file writes information about current process,
+ * format of the file is: <rank> <hostname> <executable> <pid> 
+ * to a temporary file, so that MPID_getpid can read it out
+ */
+int MPID_write_deb_file(int rank)
+{
+	static char myname[] = "MPID_write_deb_file";
+	char error_string[100];
+	
+	char* hostname;
+	FILE *f;
+	
+	char fname[20]; /* 20 should be enough for filename length */
+	sprintf(fname, "tmp_%d", rank);
+	f = fopen(fname, "w+");
+	if( f == NULL ) {
+		sprintf(error_string, "%s: Could not open file %s for writing process information", myname, fname);
+		return MPIR_ERROR( (struct MPIR_COMMUNICATOR *)0,
+			MPIR_ERRCLASS_TO_CODE(MPI_ERR_OTHER,MPIR_ERR_INIT), error_string);
+	}
+	
+	hostname = (char*) malloc(HOST_NAME_MAX*sizeof(char));
+	gethostname(hostname, HOST_NAME_MAX);
+	fprintf(f, "%s %s %d\n", hostname, MPIR_process_name, getpid());
+	fclose(f);
+	DEBUG(fprintf(stderr, "File %s written.\n", fname);)
+	return MPI_SUCCESS;
+}
+
+/*
+ * MPID_getpid is for Totalview, so it can attach to 
+ * all running mpi-processes.
+ */
+int MPID_getpid(int rank, char** hostname, char** executable)
+{
+	int pid;
+	int loops = 100;
+	FILE *f = NULL;
+	char fname[20]; /* 20 should be enough for filename length */
+	sprintf(fname, "tmp_%d", rank);
+	while ((f == NULL) && (loops))
+	{
+		f = fopen(fname, "r");
+		loops--;
+		usleep(100);
+	}
+	if( f == NULL ) {
+   		fprintf(stderr, "MPID_getpid: Could not open file %s for reading process information.\n", fname);
+   		return -1;
+	}
+	
+	*hostname = (char*) malloc(HOST_NAME_MAX*sizeof(char));
+	*executable = (char*) malloc(255*sizeof(char));
+	fscanf(f, "%s %s %d", *hostname, *executable, &pid);
+	fclose(f);
+	DEBUG(fprintf(stderr, "File %s completely read.\n", fname);)
+	remove(fname);
+	return pid;
+}

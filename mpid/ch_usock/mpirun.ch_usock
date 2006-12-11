@@ -17,24 +17,24 @@ nbr() { echo $#;}
 
 # tell the world who I am
 if [ $mpirun_verbose -gt 1 ] ; then
-    echo "*** This is mpirun.ch_usock running on `hostname`"
+	echo "*** This is mpirun.ch_usock running on `hostname`"
 # set the usock-verbose-flag:
-    USOCK_VERBOSE="export USOCK_VERBOSE=${mpirun_verbose} ;"
+	 USOCK_VERBOSE="export USOCK_VERBOSE=${mpirun_verbose} ;"
 fi
 
 
 # remember if there are special sizes for short and long messages:
 if [ -n "$USOCK_SHORT_SIZE" -o -n "$USOCK_LONG_SIZE" ] ; then
-    USOCK_SIZES="export "
+	USOCK_SIZES="export "
 fi
 if [ -n "$USOCK_SHORT_SIZE" ] ; then
-    USOCK_SIZES="$USOCK_SIZES USOCK_SHORT_SIZE=$USOCK_SHORT_SIZE"
+	USOCK_SIZES="$USOCK_SIZES USOCK_SHORT_SIZE=$USOCK_SHORT_SIZE"
 fi
 if [ -n "$USOCK_LONG_SIZE" ] ; then
-    USOCK_SIZES="$USOCK_SIZES USOCK_LONG_SIZE=$USOCK_LONG_SIZE"
+	USOCK_SIZES="$USOCK_SIZES USOCK_LONG_SIZE=$USOCK_LONG_SIZE"
 fi
 if [ -n "$USOCK_SIZES" ] ; then
-    USOCK_SIZES="$USOCK_SIZES ;"
+	USOCK_SIZES="$USOCK_SIZES ;"
 fi
 
 
@@ -42,11 +42,11 @@ fi
 BASENAME=`basename $progname`
 DIRNAME=`dirname $progname`
 if [ -z "$workingdir" ] ; then
-    EXENAME=./$BASENAME
-    WDNAME=$DIRNAME
+	EXENAME=./$BASENAME
+	WDNAME=$DIRNAME
 else
-    EXENAME=$progname
-    WDNAME=$workingdir
+	EXENAME=$progname
+	WDNAME=$workingdir
 fi
 
 #
@@ -58,10 +58,10 @@ fi
 #
 if [ -n "$nodes" ] ; then
 # if the user supplied a list of nodes on the command line, use these nodes
-    HOSTS=$nodes
+	HOSTS=$nodes
 else
 # try to find a machine file and use the nodes contained therein
-    if [ -z "$machineFile" ] ; then
+	if [ -z "$machineFile" ] ; then
 	if [ -f ./machines ] ; then
 	    machineFile=$DIRNAME"/machines"
 	elif [ -f $HOME/.machines ] ; then
@@ -69,14 +69,14 @@ else
 	elif [ -f $datadir/machines ] ; then
 	    machineFile="$datadir/machines"
 	fi
-    fi
+	fi
 
-    if [ -n "$machineFile" ] ; then
+	if [ -n "$machineFile" ] ; then
 	# we have a machine file, get the nodes from it
 	if [ ${mpirun_verbose} != 0 ] ; then
 	    echo "*** mpirun.ch_usock: using "$machineFile" to specify the hosts"
 	fi
-	HOSTS=`cat $machineFile | awk -F\  'NF==0 {exit} NF==1 { print $1 } NF==2 { for (i = $2; i > 0; i--) print $1 }  NF==3 { for (i=$2; i>0; i--) print $1" "$3}'` 
+	HOSTS=`cat $machineFile | awk -F\  'NF==0 {exit} NF==1 { print $1 } NF==2 { for (i = $2; i > 0; i--) print $1 }  NF==3 { for (i=$2; i>0; i--) print $1" "$3}'`
 	# increment the first process if it is a prcogroup file
 	# aditionally allow otional login and flags parameter
 	if test -n "$givenPGFile"  ; then
@@ -84,7 +84,7 @@ else
 						    NF==1 { print $1 } \
 						    NF==3 { if (FNR==1) $2++;for (i=$2; i>0; i--) print $1":"$3} \
 						    NF==4 { if (FNR==1) $2++;for (i=$2; i>0; i--) print $1":"$3":"$4} \
-						    NF>=5 { if (FNR==1) $2++;for (i=$2; i>0; i--) print $1":"$3":"$4":"$5"§"$6"§"$7"§"$8"§"$9"§"$10"§"$11"§"$12}'` 
+						    NF>=5 { if (FNR==1) $2++;for (i=$2; i>0; i--) print $1":"$3":"$4":"$5"§"$6"§"$7"§"$8"§"$9"§"$10"§"$11"§"$12}'`
 	fi
     else
 	HOSTS=`hostname`
@@ -118,7 +118,7 @@ if [ ${np} -lt ${NBR_HOSTS} ] ; then
     HOSTS=${NEWHOSTS}
 fi
 
-# if more processes are requested than nodes are given in the command line, 
+# if more processes are requested than nodes are given in the command line,
 # schedule the processes in round-robin manner
 if [ ${np} -gt ${NBR_HOSTS} ] ; then
     NEWHOSTS=$HOSTS
@@ -207,7 +207,7 @@ if [ $lower_port_bound -ge $upper_port_bound ] ; then
 # only one port was supplied, so use it:
    port_nbr=$lower_port_bound
 else
-# create a randomized port by using the local process id: 
+# create a randomized port by using the local process id:
    port_nbr=$[$$ % $port_range]
    port_nbr=$[$lower_port_bound + $port_nbr]
 fi
@@ -254,32 +254,93 @@ for c in $cmdLineArgs
 done
 cmdLineArgs=$tmpLineArgs
 
+#configFile: filename for TotalView's configfile
+mID=`date +%H%M%S`
+mID=$mID.$$
+configFile="${PWD}/tvconf.tmp.${mID}"
+
+#replace %f with filename
+#sed: changed delimiter in sed from '/' to ':' since configFile contains slashes
+commandfile=`echo ${commandfile} | sed s:%f:${configFile}:g`
+
 # build the commands to launch the processes
 is_master=1
-rank_count=1
+tv_item=1
+rank_count=0
 for h in ${HOSTS} ; do
 	THIS_USER=""
 	THIS_ARGS=""
     if [ x != x`echo $h | grep ":"` ] ; then
-    	THIS_EXENAME=`echo $h | cut -d:  -f 2`
-	THIS_USER=`echo $h | cut -d: -f 3`
-	THIS_ARGS=`echo $h | cut -d: -f 4`
-	if test -n "$THIS_ARGS" ; then common_options=`echo $THIS_ARGS | sed 's/§/ /g'`; fi
-	h=`echo $h | cut -d:  -f 1`
+		THIS_EXENAME=`echo $h | cut -d:  -f 2`
+		THIS_USER=`echo $h | cut -d: -f 3`
+		THIS_ARGS=`echo $h | cut -d: -f 4`
+		if test -n "$THIS_ARGS" ; then common_options=`echo $THIS_ARGS | sed 's/§/ /g'`; fi
+		h=`echo $h | cut -d:  -f 1`
     else
-    	THIS_EXENAME=${EXENAME}
+		THIS_EXENAME=${EXENAME}
     fi
     if [ ${is_master} -eq 1 ] ; then
-	# the first process is the master process
-	master_launch_cmd="$Show $rshcmd $h ( cd ${WDNAME} ; ${EXP_ENV} ${USOCK_VERBOSE} ${USOCK_SIZES} ${THIS_EXENAME} ${common_options} ${master_options} -r 0 -- ${cmdLineArgs} )"
-	is_master=0
+		# the first process is the master process
+   		totalviewcmd="totalview"
+    	if [ "$debugger" == "totalview" ] ; then
+    		mpichtv="-mpichtv"
+			master_launch_cmd="$Show $rshcmd $h \" ( cd ${WDNAME} ; $SET_ENV DISPLAY=$DISPLAY ; ${EXP_ENV} ${USOCK_VERBOSE} ${USOCK_SIZES} ${totalviewcmd} ${DIRNAME}/${BASENAME} -a ${mpichtv} ${common_options} ${master_options} -r 0 -- ${cmdLineArgs} ) \" "
+    	elif [ "$debugger" == "totalview2" -a ${is_debug[0]} -eq 1 ] ; then
+    		#creating TotalView configfile
+
+			#check if local process
+			if [ "`hostname`" == "$h" -o $tv_item -eq 1 ] ; then
+				echo "dload ${DIRNAME}/${BASENAME};" >>$configFile
+			else
+				echo "dload ${DIRNAME}/${BASENAME} -r $h;" >>$configFile
+			fi
+			echo "dset ARGS(${tv_item}) { ${common_options} ${master_options} -r ${rank_count} -- ${cmdLineArgs} };">>$configFile
+			echo "dbreak main;">>$configFile
+			echo "G;">>$configFile
+			tv_item=`expr ${tv_item} + 1`
+    		master_launch_cmd="${Show} $rshcmd $h \" ( cd ${WDNAME} ; $SET_ENV DISPLAY=$DISPLAY ; ${EXP_ENV} ${USOCK_VERBOSE} ${USOCK_SIZES} ${totalviewcmd} ${commandfile}; rm -f ${configFile} ) \" "
+		else
+			master_launch_cmd="$Show $rshcmd $h \" ( cd ${WDNAME} ; ${EXP_ENV} ${USOCK_VERBOSE} ${USOCK_SIZES} ${DIRNAME}/${BASENAME} ${common_options} ${master_options} -r 0 -- ${cmdLineArgs} ) \" "
+		fi
+		is_master=0
     else
-	# this is a client process
-	client_launch_cmd="$Show $rshcmd $h ' ( cd ${WDNAME} ; sleep 2 ; ${EXP_ENV} ${USOCK_SIZES} ${THIS_EXENAME} ${common_options} ${client_options} -r ${rank_count} -- ${cmdLineArgs} ) ' &"
-	eval $client_launch_cmd
-	rank_count=$[$rank_count+1]
+		# this is a client process
+    	if [ "$debugger" == "totalview2" -a ${is_debug[${rank_count}]} -eq 1 ] ; then
+    		#creating TotalView configfile
+
+			#check if local process
+			if [ "`hostname`" == "$h" -o $tv_item -eq 1 ] ; then
+				echo "dload ${DIRNAME}/${BASENAME};" >>$configFile
+			else
+				echo "dload ${DIRNAME}/${BASENAME} -r $h;" >>$configFile
+			fi
+			echo "dset ARGS(${tv_item}) { ${common_options} ${client_options} -r ${rank_count} -- ${cmdLineArgs} };">>$configFile
+			#echo "dbreak MPID_Init;">>$configFile
+			echo "dbreak main;">>$configFile
+			echo "G;">>$configFile
+			echo "dset CGROUP(${tv_item}) \$CGROUP(1);">>$configFile
+
+			#if this is the first rank under totalview control, the cmd_line should be tha last to be started
+			if [ $tv_item -eq 1 ] ; then
+				BG="&"
+				eval ${master_launch_cmd} ${BG}
+				master_launch_cmd="$Show $rshcmd $h ' ( ${SET_ENV} DISPLAY=${DISPLAY}; cd ${WDNAME} ; ${EXP_ENV} ${USOCK_SIZES} ${totalviewcmd} ${commandfile} ; rm -f ${configFile};)'"
+			fi
+			tv_item=`expr ${tv_item} + 1`
+		else
+			client_launch_cmd="$Show $rshcmd $h ' ( cd ${WDNAME} ; sleep 2 ; ${EXP_ENV} ${USOCK_SIZES} ${DIRNAME}/${BASENAME} ${mpichtv} ${common_options} ${client_options} -r ${rank_count} -- ${cmdLineArgs} ) ' &"
+			eval $client_launch_cmd
+		fi
     fi
+	rank_count=$[$rank_count+1]
 done
 
-${master_launch_cmd}
+if [ "${Show}" == "echo" -a "$debugger" == "totalview2" ] ; then
+	echo
+	echo "Debug-Config-File=${configFile}"
+	cat ${configFile}
+	echo
+fi
+
+eval ${master_launch_cmd}
 

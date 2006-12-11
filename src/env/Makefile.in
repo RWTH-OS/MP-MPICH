@@ -15,7 +15,7 @@ libbuild_dir = @libbuild_dir@
 ARCH        = @ARCH@
 
 DEFS        = -DMPI_@ARCH@ -DMPIR_LIB_CODE @DEFS@ ${MPIPROFILE} -I. -I${srcdir} @mpich_includes@
-CFLAGS      = @CFLAGS@ 
+CFLAGS      = @CFLAGS@
 
 SHELL       = /bin/sh
 
@@ -42,7 +42,7 @@ MPI_CSOURCES = abort.c debugutil.c init.c initthread.c initutil.c \
 	wtime.c wtick.c nerrmsg.c getversion.c msgqdllloc.c
 
 
-MPI_TSOURCES = errclass.c 
+MPI_TSOURCES = errclass.c
 MPI_WSOURCES = abortf.c finalizef.c errclassf.c
 MPI_WOBJECTS = initializef.o abortf.o initf.o finalizef.o errorstringf.o \
 	getpnamef.o errcreatef.o errsetf.o errgetf.o errfreef.o errclassf.o \
@@ -59,13 +59,13 @@ default: ${libbuild_dir}/lib@MPILIBNAME@.a
 profile: ${libbuild_dir}/libp@MPILIBNAME@.a
 
 wrapperlib: ${MPI_WOBJECTS}
-	${AR} ${libbuild_dir}/libf@MPILIBNAME@.a $?	
+	${AR} ${libbuild_dir}/libf@MPILIBNAME@.a $?
 
 # default_all is the same as default, but without the RANLIB.  This
-# can speed up the build (ranlibs can take a LONG time).  profile_all 
+# can speed up the build (ranlibs can take a LONG time).  profile_all
 # is the same, but for the profile library
 default_all: default_objs
-default_objs: ${MPI_OBJECTS} @MPI_FOBJECTS@ 
+default_objs: ${MPI_OBJECTS} @MPI_FOBJECTS@
 	${AR} ${libbuild_dir}/lib@MPILIBNAME@.a $?
 	if [ -n "@MPI_FOBJECTS@" ] ; then \
 	$(MAKE) ${libbuild_dir}/lib@MPILIBNAME@f.a ; fi
@@ -79,7 +79,7 @@ mpe_debug_objs: @MPE_MPI_EXT_O@
 	${AR} ${libbuild_dir}/lib@MPILIBNAME@.a @MPE_MPI_EXT_O@
 	${RANLIB} ${libbuild_dir}/lib@MPILIBNAME@.a
 
-# 
+#
 # This is needed for initutil.c
 #setlinks:
 #	if [ ! -s ${top_srcdir}/include/mpeexten.h ] ; then \
@@ -130,20 +130,20 @@ message_cat: mpich.En_US.cat
 
 #
 # We should really put this entire directory AFTER src/infoexport; then we
-# can test on the existance of the library.  
+# can test on the existance of the library.
 # We use PREFIX instead of MPIR_HOME so that the result of installing
 # the MPI libraries will work
 msgqdllloc.o: ${top_srcdir}/src/env/msgqdllloc.c
 	@if test -n "@SHAREDKIND_FOR_TV@" -a "@SHAREDKIND_FOR_TV@" != "ignore" ; then \
 	  ${CC} ${DEFS} ${CFLAGS} -c @CC_SHARED_OPT_FOR_TV@ \
-	    -DMPICH_INFODLL_LOC='"@MPIR_HOME@/build/${ARCH}/${DEVICE}/lib/libtvmpich.so"' \
+	    -DMPICH_INFODLL_LOC='"${libbuild_dir}/libtvmpich.so"' \
 	    ${top_srcdir}/src/env/msgqdllloc.c ; \
 	else \
 	    ${CC} ${DEFS} ${CFLAGS} -c ${top_srcdir}/src/env/msgqdllloc.c ; \
 	fi
 .c.o:
 	${CC} ${DEFS} ${INCLUDES} ${CFLAGS} ${OPTFLAGSC} ${OPTFLAGS} -c $<
-# For VPATH builds, some Fortran compilers use the directory of the file 
+# For VPATH builds, some Fortran compilers use the directory of the file
 # rather than the directory of the build.
 .f.o:
 	if [ -n "@FINCARG@" ] ; then \
@@ -164,11 +164,11 @@ debugutil.o: ${srcdir}/debugutil.c
 # GETNAME_DEFS are needed by mpehname.c; these need mpe includes
 mpehname.o: ${top_srcdir}/mpe/mpehname.c
 	${CC} ${DEFS} ${CFLAGS} @GETNAME_DEFS@ -c -I${top_srcdir}/mpe \
-		${top_srcdir}/mpe/mpehname.c 
+		${top_srcdir}/mpe/mpehname.c
 # Note that we remove the link after we use it.
 dbxerr.o: ${top_srcdir}/mpe/dbxerr.c
 	${CC} ${DEFS} ${CFLAGS} @GETNAME_DEFS@ -c -I${top_srcdir}/mpe \
-		${top_srcdir}/mpe/dbxerr.c 
+		${top_srcdir}/mpe/dbxerr.c
 	rm -f dbxerr.c
 # errmsg needs to know about NLS definitions.
 nerrmsg.o: ${srcdir}/nerrmsg.c mpierrstrings.h
@@ -181,7 +181,7 @@ farg90.o: ${srcdir}/farg90.f
 	fi
 
 ${libbuild_dir}/lib@MPILIBNAME@.a: \
-		${MPI_OBJECTS} @MPI_FOBJECTS@ 
+		${MPI_OBJECTS} @MPI_FOBJECTS@
 	${AR} $@ $?
 	${RANLIB} $@
 

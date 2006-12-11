@@ -43,7 +43,8 @@ typedef struct
   int context_id_offs;	
   int tag_offs;
   int tagmask_offs;
-  int lsrc_offs;
+  /*int lsrc_offs;*/ /*this was the original name, but instead, we use src_comm_lrank*/
+  int src_comm_lrank_offs;
   int srcmask_offs;
   int next_offs;
   int ptr_offs;
