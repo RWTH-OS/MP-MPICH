@@ -67,10 +67,18 @@ extern int mpichtv_flag; /* mpichtv_flag lies in adi2init.c */
 #include <sys/types.h>
 #endif
 
-#ifdef HAVE_UNISTD_H
 /* For nice, sleep */
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif
+#endif /* HAVE_UNISTD_H */
+#ifdef WIN32
+/* These functions are used for Totalview support.
+ * Totalview is currently only available for Unix variants, but who knows....
+ */
+#define usleep(x) Sleep( (unsigned int) (x /1000))
+/* GetCurrentProcessId returns a DWORD, which is casted to unsigned long in nt2unix.h */
+#define getpid() (int) GetCurrentProcessId()
+#endif /* WIN32 */
 
 #if defined(MPE_USE_EXTENSIONS) && !defined(MPI_NO_MPEDBG)
 #include "../../mpe/mpeexten.h"
