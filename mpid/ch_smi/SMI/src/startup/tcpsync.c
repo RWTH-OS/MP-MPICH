@@ -10,6 +10,7 @@
 
 #ifdef WIN32
 #define close(s) closesocket(s)
+typedef int socklen_t;
 #endif
 
 static tcp_node_info_t* tcp_create_node_list(int iNbrNodes)

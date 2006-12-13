@@ -35,6 +35,7 @@ extern MPID_INFO   *MPID_tinfo;
 #include "smidebug.h"
 #include "smieager.h"
 #include "smistat.h"
+#include "smiostypes.h"
 
 /* version information */
 #define MPIDTRANSPORT "ch_smi 6.0"
