@@ -7,6 +7,7 @@
 
 #include "mpid.h"
 #include "mpiddev.h"
+#include "mpipt2pt.h"
 #include "reqalloc.h"
 #include "../util/queue.h"
 

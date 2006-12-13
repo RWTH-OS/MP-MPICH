@@ -1,7 +1,10 @@
 #include "mpid.h"
 #include "mpiddev.h"
+#include "mpidmpi.h"
 #include "mpimem.h"
+#include "mpipt2pt.h"
 #include "reqalloc.h"
+#include "queue.h"
 #include "ntshmemdebug.h"
 #include "LogMpid.h"
 

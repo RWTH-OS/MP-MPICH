@@ -91,8 +91,11 @@ extern MPID_Protocol *MPID_SHMEM_Short_setup ANSI_ARGS((void));
 extern MPID_Protocol *MPID_SHMEM_Eagerb_setup ANSI_ARGS((void));
 extern MPID_Protocol *MPID_SHMEM_Rndvb_setup ANSI_ARGS((void));
 extern MPID_Protocol *MPID_SHMEM_Eagern_setup ANSI_ARGS((void));
+extern int MPID_SHMEM_Eagern_send_local( void*, int, int, int, int, int, MPID_Msgrep_t, MPIR_SHANDLE *,int,struct MPIR_DATATYPE*);
+
 #ifdef SINGLECOPY
 extern MPID_Protocol *MPID_SHMEM_LEagern_setup ANSI_ARGS((void));
+extern int MPID_SHMEM_LEagern_isend( void*, int, int, int, int, int, MPID_Msgrep_t, MPIR_SHANDLE *,struct MPIR_DATATYPE*);
 #endif
 extern MPID_Protocol *MPID_SHMEM_Rndvn_setup ANSI_ARGS((void));
 extern int MPID_SHMEM_Check_incoming ANSI_ARGS(( MPID_Device *, 

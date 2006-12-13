@@ -16,10 +16,10 @@
 #include "mpid.h"
 #include "mpiddev.h"
 #include "mpimem.h"
+#include "mpipt2pt.h"
 #include "reqalloc.h"
 #include "ntshmemdebug.h"
 #include "LogMpid.h"
-
 
 /* Prototype definitions */
 int MPID_SHMEM_LEagern_send ANSI_ARGS(( void *, int, int, int, int, int, 
@@ -44,6 +44,7 @@ void MPID_SHMEM_Eagern_delete ANSI_ARGS(( MPID_Protocol * ));
 int MPID_SHMEM_LEagern_irecv ANSI_ARGS(( MPIR_RHANDLE *, int, void * ));
 int MPID_SHMEM_Rndvn_irecv ANSI_ARGS(( MPIR_RHANDLE *, int, void * ));
 int MPID_SHMEM_Rndvn_ack ANSI_ARGS(( void *, int ));
+int MPID_SHMEM_Rndvn_save ANSI_ARGS(( MPIR_RHANDLE *, int, void *));
 
 /* 
  * Blocking operations come from chbeager.c

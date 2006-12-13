@@ -108,6 +108,7 @@ int                 MPID_numids = 0; /* Number local processes +1 */
 /* Forward declarations */
 #define MPID_SHMEM_lbarrier() MPID_SHMEM_genBarrier(&(MPID_shmem->barrier))
 void MPID_SHMEM_genBarrier ANSI_ARGS( (MPID_SHMEM_Barrier_t*) );
+void p2p_write_sync();
 /*
    Get an integer from the environment; otherwise, return defval.
  

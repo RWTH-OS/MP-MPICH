@@ -1,6 +1,7 @@
 #include "mpid.h"
 #include "mpiddev.h"
 #include "mpimem.h"
+#include "mpipt2pt.h"
 #include "reqalloc.h"
 #include "sendq.h"
 #include "ntshmemdebug.h"

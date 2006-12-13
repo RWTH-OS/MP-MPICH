@@ -478,12 +478,6 @@
 				RelativePath="..\ch2\mpid_time.h">
 			</File>
 			<File
-				RelativePath="mpid_time.h">
-			</File>
-			<File
-				RelativePath="..\ch2\mpiddev.h">
-			</File>
-			<File
 				RelativePath="..\ch_ntshmem\mpiddev.h">
 			</File>
 			<File

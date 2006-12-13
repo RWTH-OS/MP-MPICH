@@ -42,8 +42,8 @@ if ((actlen) < (msglen)) {\
     }
 
 /* Function prototypes for routines known only to the device */
-extern MPID_Device *MPID_CH_InitMsgPass ANSI_ARGS(( int *, char ***, 
-						    int, int ));
+extern MPID_Device *MPID_CH_InitMsgPass ANSI_ARGS(( int *, char ***, int, int ));
+extern MPID_Device *MPID_CH_WSOCK_InitMsgPass( int *, char ***, int, int );
 extern MPID_Protocol *MPID_CH_Short_setup ANSI_ARGS((void));
 extern MPID_Protocol *MPID_WSOCK_Eagerb_setup ANSI_ARGS((void));
 extern MPID_Protocol *MPID_WSOCK_Rndvb_setup ANSI_ARGS((void));
@@ -66,11 +66,14 @@ extern void MPID_UnpackMessageSetup ANSI_ARGS(( int, struct MPIR_DATATYPE *,
 						int *, int * ));
 extern int MPID_UnpackMessageComplete ANSI_ARGS(( MPIR_RHANDLE * ));
 
-int MPID_WSOCK_SendCancelPacket ANSI_ARGS(( MPIR_SHANDLE* ));
-int MPID_SHMEM_Eagern_send_local( void*, int, int, int, int, int,
-							MPID_Msgrep_t, MPIR_SHANDLE *,int,struct MPIR_DATATYPE*);
-int MPID_SHMEM_LEagern_isend( void*, int, int, int, int, int,
-							MPID_Msgrep_t, MPIR_SHANDLE *,struct MPIR_DATATYPE*);
+extern int MPID_WSOCK_SendCancelPacket ANSI_ARGS(( MPIR_SHANDLE* ));
+extern void MPID_FinishCancelPackets ( MPID_Device * );
+extern void MPID_RecvCancelOkPacket ( void *, int );
+extern void MPID_SendCancelOkPacket ( void *, int );
+
+extern int MPID_SHMEM_Eagern_send_local( void*, int, int, int, int, int, MPID_Msgrep_t, MPIR_SHANDLE *,int,struct MPIR_DATATYPE*);
+
+
 
 /* 
    Devices that provide their own datatype handling may need to provide their

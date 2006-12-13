@@ -2,6 +2,7 @@
 #include "mpid.h"
 #include "mpiddev.h"
 #include "mpimem.h"
+#include "mpipt2pt.h"
 #include "reqalloc.h"
 #include "ntshmemdebug.h"
 
@@ -98,7 +99,7 @@ struct MPIR_DATATYPE* dtypeptr;
 	shandle.finish=0;
 	MPID_STAT_EXIT(mpid_send_short);
 	return MPID_SHMEM_Eagern_send_local(buf, len, src_lrank, tag, context_id, dest,
-	    msgrep, &shandle,MPID_BLOCKING );
+	    msgrep, &shandle,MPID_BLOCKING,dtypeptr );
     } 
     
     MPID_SHMEM_GetSendPacket((MPID_PKT_TSH**)&pkt,dest);

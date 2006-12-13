@@ -13,6 +13,7 @@
 #include "mpid.h"
 #include "../ch_ntshmem/mpiddev.h"
 #include "mpimem.h"
+#include "wsock2debug.h"
 #include <stdio.h>
 
 /* #define DEBUG(a) {a} */

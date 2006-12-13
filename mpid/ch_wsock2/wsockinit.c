@@ -14,7 +14,7 @@
    version; since these includes may define malloc etc., we need to include 
    them before mpid.h 
  */
- 
+
 #ifdef _WIN32
 #define _WIN32_WINNT 0x0400
 
@@ -42,6 +42,7 @@ extern char *getenv();
 #include "mpiddev.h"
 #include "mpimem.h"
 #include "flow.h"
+#include "wsock2debug.h"
 #include <stdio.h>
 
 
