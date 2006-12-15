@@ -49,7 +49,7 @@ devenv %VSPARAM% Release /project coll6 coll.sln
 devenv %VSPARAM% Release /project coll7 coll.sln 
 devenv %VSPARAM% Release /project coll8 coll.sln 
 devenv %VSPARAM% Release /project coll9 coll.sln 
-devenv %VSPARAM% Release /project grouptest coll.sln 
+devenv %VSPARAM% Release /project grouptestcoll coll.sln 
 devenv %VSPARAM% Release /project longuser coll.sln 
 devenv %VSPARAM% Release /project redscat coll.sln 
 devenv %VSPARAM% Release /project redtest coll.sln 
