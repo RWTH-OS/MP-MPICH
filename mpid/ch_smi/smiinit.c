@@ -2023,7 +2023,7 @@ void MPID_SMI_Read_settings( void ) {
        has been choosen */
     if (MPID_SMI_cfg.USE_WATCHDOG == -MPID_SMI_WATCHDOG_DEF) {
 		MPID_SMI_cfg.USE_WATCHDOG = MPID_SMI_WATCHDOG_DEF 
-			+ MPID_SMI_numids*MPID_SMI_WATCHDOG_INC_PER_PROC;
+			+ (int)(MPID_SMI_numids*MPID_SMI_WATCHDOG_INC_PER_PROC);
 		/* This call may fail if SMI has watchdog disabled. */
 		SMI_Watchdog( MPID_SMI_cfg.USE_WATCHDOG);
     }
