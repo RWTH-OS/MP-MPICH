@@ -33,18 +33,24 @@ linktest:
 # environment (only the pt2pt test has this option).  runtest exits with 1 if
 # the test fails, which will cause the Make to exit.
 runtest:
+	@if [ -z "$(TESTARGS)" ] ; then \
+	echo "If you have compiled more than one device (such as ch_usock and ch_shmem),"; \
+	echo "you have to specify which device to use for the tests by passing arguments to"; \
+	echo "the mpirun-call. This is done by using \"-margs=''\", e.g.:" ;\
+	echo "make TESTARGS=\"-small -margs='-machine ch_usock -nodes p4-01,p4-02'\" testing" ; \
+	fi
 	cd util && $(MAKE)
 	cd pt2pt && ./runtests $(TESTARGS) -check
 
 
 # This also cleans the files after the testing to keep the
 # total size down.  You can use TESTARGS to pass arguments to the
-# test program; for example, 
+# test program; for example,
 # make TESTARGS="-echo"
 # to run in "echo" mode (show what scripts are doing)
 # The tests are run in "small" mode (build one executable at a time) to
 # reduce the amount of disk space that is used.
-# The make clean is directed into dev null to keep the testing as 
+# The make clean is directed into dev null to keep the testing as
 # quiet as possible.
 # We export the MPITEST_STOPTEST environment variable to allow the
 # user to set an alternate file to be used to abort the tests; this
@@ -67,7 +73,7 @@ testing: runtest
 		done
 	@echo '</MPITESTRESULTS>' >> summary.xml
 
-# This is a version of testing, but it saves the "diff" files in the top 
+# This is a version of testing, but it saves the "diff" files in the top
 # level directory
 testing_save: runtest
 	@-for dir in $(TESTDIRS) ;\
