@@ -2,19 +2,7 @@
 # $Id$
 
 args=""
-srcdir=/work/gsell/src/mp-mpich/rc-1.5/examples/test/env
-MPICH_VERSION="MPICH 1.5.0"
-STOPFILE=${MPITEST_STOPTEST:-"$HOME/.stopmpichtests"}
 mpirun=${MPIRUN:-"../../../bin/mpirun"}
-MAKE="make"
-F77="g77"
-#
-# Load basic procedures
-. ${srcdir}/../runbase
-#
-# Set mpirun to the name/path of the mpirun program
-FindMPIRUN
-#
 quiet=0
 runtests=1
 makeeach=0
