@@ -285,7 +285,7 @@ for h in ${HOSTS} ; do
     	if [ "$debugger" == "totalview" ] ; then
     		mpichtv="-mpichtv"
 			master_launch_cmd="$Show $rshcmd $h \" ( cd ${WDNAME} ; $SET_ENV DISPLAY=$DISPLAY ; ${EXP_ENV} ${USOCK_VERBOSE} ${USOCK_SIZES} ${totalviewcmd} ${DIRNAME}/${BASENAME} -a ${mpichtv} ${common_options} ${master_options} -r 0 -- ${cmdLineArgs} ) \" "
-    	elif [ "$debugger" == "totalview2" -a ${is_debug[0]} -eq 1 ] ; then
+    	elif [ "$debugger" == "totalview2" -a "${is_debug[0]}" = "1" ] ; then
     		#creating TotalView configfile
 
 			#check if local process
@@ -305,7 +305,7 @@ for h in ${HOSTS} ; do
 		is_master=0
     else
 		# this is a client process
-    	if [ "$debugger" == "totalview2" -a ${is_debug[${rank_count}]} -eq 1 ] ; then
+    	if [ "$debugger" == "totalview2" -a "${is_debug[${rank_count}]}" = "1" ] ; then
     		#creating TotalView configfile
 
 			#check if local process
