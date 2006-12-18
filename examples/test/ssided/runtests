@@ -1,46 +1,132 @@
 #!/bin/sh
 # $Id$
 
-MPIRUN=${1:-"../../../bin/mpirun"}
+args=""
+srcdir=/work/gsell/src/mp-mpich/rc-1.5/examples/test/env
+MPICH_VERSION="MPICH 1.5.0"
+STOPFILE=${MPITEST_STOPTEST:-"$HOME/.stopmpichtests"}
+mpirun=${MPIRUN:-"../../../bin/mpirun"}
+MAKE="make"
+F77="g77"
+#
+# Load basic procedures
+. ${srcdir}/../runbase
+#
+# Set mpirun to the name/path of the mpirun program
+FindMPIRUN
+#
+quiet=0
+runtests=1
+makeeach=0
+writesummaryfile=no
+# Using shifts should  remove args from the list.
+for arg in "$@" ; do
+    case $arg in
+	-checkonly)
+	shift
+	echo "Ignoring option $arg"
+# 	runtests=0
+	;;
+	-margs=*)
+	shift
+	margs=`echo $arg | sed 's/-margs=//'`
+	args="$args $margs"
+	;;
+	-summaryfile=*)
+	echo "Ignoring option $arg"
+# 	writesummaryfile=yes
+# 	summaryfile=`echo A$arg | sed 's/A-summaryfile=//'`
+	;;
+	-echo)
+	shift
+ 	set -x
+	;;
+	-check)
+	shift
+	echo "Ignoring option $arg"
+# 	check_canrun=1
+	;;
+	-quiet)
+	shift
+	echo "Ignoring option $arg"
+# 	quiet=1
+	;;
+	-small)
+	shift
+	echo "Ignoring option $arg"
+# 	makeeach=1
+	;;
+	-atend)
+	shift
+	echo "Ignoring option $arg"
+# 	check_at_once=0
+	;;
+	-help|-u)
+	shift
+	echo "runtests [-checkonly] [-margs='...'] [-atend] [-check]"
+	echo "run tests in this directory."
+# 	echo  "If -checkonly set, just run"
+# 	echo "the differences check (do NO rerun the test programs)."
+	echo "If -margs is used, these options are passed to mpirun."
+# 	echo "If -small is used, the examples are built, run, and deleted."
+# 	echo "If -atend is used, the success of the tests is checked only"
+# 	echo "at the end of the test rather than also after each test."
+# 	echo "If -check is used, only a single simple test is run; this"
+# 	echo "is used to check that mpirun can run an MPI program."
+	exit 1
+	;;
+	*)
+	if test -n "$arg" ; then
+   	    echo "runtests: Unknown argument ($arg)"
+	    exit 1
+        fi
+	;;
+    esac
+done
+
+# If the programs are not available, run make.
+#  if [ ! -x timers -a $makeeach = 0 -a $runtests = 1 ] ; then
+    $MAKE default
+# fi
 
 echo "Testing MPI_Put ..."
 
 echo "with shared memory (direct copy)"
-$MPIRUN -devconf ch_smi.put_shared put_contig_test1 -n 100
-$MPIRUN -devconf ch_smi.put_shared put_contig_test2 -n 100
-$MPIRUN -devconf ch_smi.put_shared put_sametype_test1 -n 100
-$MPIRUN -devconf ch_smi.put_shared put_sametype_test2 -n 100
+$mpirun $args -devconf ch_smi.put_shared put_contig_test1 -n 100
+$mpirun $args -devconf ch_smi.put_shared put_contig_test2 -n 100
+$mpirun $args -devconf ch_smi.put_shared put_sametype_test1 -n 100
+$mpirun $args -devconf ch_smi.put_shared put_sametype_test2 -n 100
 
 echo "with private memory (emulate)"
-$MPIRUN -devconf ch_smi.put_private put_contig_test1 -n 100
-$MPIRUN -devconf ch_smi.put_private put_contig_test3 -n 100
-$MPIRUN -devconf ch_smi.put_private put_sametype_test1 -n 100
-$MPIRUN -devconf ch_smi.put_private put_difftype_test -n 100
+$mpirun $args -devconf ch_smi.put_private put_contig_test1 -n 100
+$mpirun $args -devconf ch_smi.put_private put_contig_test3 -n 100
+$mpirun $args -devconf ch_smi.put_private put_sametype_test1 -n 100
+$mpirun $args -devconf ch_smi.put_private put_difftype_test -n 100
 
 
 echo "Testing MPI_Get ..."
 
 echo "with shared memory (direct copy) - no remote put"
-$MPIRUN -devconf ch_smi.get_shared get_contig_test1 -n 100
-$MPIRUN -devconf ch_smi.get_shared get_contig_test2 -n 100
-$MPIRUN -devconf ch_smi.get_shared get_sametype_test1 -n 100
-#$MPIRUN -devconf ch_smi.get_shared get_sametype_test2 -n 100
+$mpirun $args -devconf ch_smi.get_shared get_contig_test1 -n 100
+$mpirun $args -devconf ch_smi.get_shared get_contig_test2 -n 100
+$mpirun $args -devconf ch_smi.get_shared get_sametype_test1 -n 100
+#$mpirun $args -devconf ch_smi.get_shared get_sametype_test2 -n 100
 
 echo "with shared memory - remote put"
-$MPIRUN -devconf ch_smi.get_shared_emu get_contig_test1 -n 100
-$MPIRUN -devconf ch_smi.get_shared_emu get_contig_test2 -n 100
-$MPIRUN -devconf ch_smi.get_shared_emu get_sametype_test1 -n 100
-#$MPIRUN -devconf ch_smi.get_shared_emu get_sametype_test2 -n 100
+$mpirun $args -devconf ch_smi.get_shared_emu get_contig_test1 -n 100
+$mpirun $args -devconf ch_smi.get_shared_emu get_contig_test2 -n 100
+$mpirun $args -devconf ch_smi.get_shared_emu get_sametype_test1 -n 100
+#$mpirun $args -devconf ch_smi.get_shared_emu get_sametype_test2 -n 100
 
 echo "with private memory (emulate)"
-$MPIRUN -devconf ch_smi.get_private get_contig_test1 -n 100
-$MPIRUN -devconf ch_smi.get_private get_sametype_test1 -n 100
-#$MPIRUN -devconf ch_smi.get_private get_difftype_test -n 100
+$mpirun $args -devconf ch_smi.get_private get_contig_test1 -n 100
+$mpirun $args -devconf ch_smi.get_private get_sametype_test1 -n 100
+#$mpirun $args -devconf ch_smi.get_private get_difftype_test -n 100
 
 
 echo "Testing MPI_Accumulate ..."
-$MPIRUN -devconf ch_smi.get_private accu_test -n 100 -b 5
-$MPIRUN -devconf ch_smi.get_private accu_test -n 100 -b 30
+$mpirun $args -devconf ch_smi.get_private accu_test -n 100 -b 5
+$mpirun $args -devconf ch_smi.get_private accu_test -n 100 -b 30
 
 exit 0
 

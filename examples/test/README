@@ -1,21 +1,21 @@
-This directory contains a variety of different test codes 
+This directory contains a variety of different test codes
 of different types. This directory and many of the files in
 it are still undergoing active development and change. Please
 forgive (and report) any problems you have with these programs.
 
-These tests may be used with any MPI implementation.  In a few cases, 
+These tests may be used with any MPI implementation.  In a few cases,
 differences in error messages may be reported; these are not errors, of
 course.  However, the accuracy and detail of the messages should be evaluated.
 
-To build and run the tests, execute configure followed by make testing.  
+To build and run the tests, execute configure followed by make testing.
 The options to configure for some MPI implementations follow:
 
 SGI:
       ./configure -cc=cc -fc=f77
 IBM:
-      ./configure -cc=mpcc -fc=mpxlf 
+      ./configure -cc=mpcc -fc=mpxlf
       (You also need a script called "mpirun" that takes a -np number-of-procs
-      argument, since there are so many different ways to run parallel 
+      argument, since there are so many different ways to run parallel
       programs on IBM systems)
 MPICH:
       ./configure -mpichpath=<path to MPICH build bin directory>
@@ -24,7 +24,7 @@ The directories are as follows:
 
 pt2pt	-	Test cases that generally cover various point to point
 		routines, such as send, isend, probe, etc... The
- 		README in this directory contains some additional 
+ 		README in this directory contains some additional
   		useful information about running the tests. The tests
 		in this directory are most complete.
 
@@ -54,8 +54,12 @@ testing-boot instead of testint:
 
   make TESTARGS=-small testing-boot >& testing.out
 
-This will boot any MPI startup demons, and it will stop them at the end of the 
+This will boot any MPI startup demons, and it will stop them at the end of the
 test.
+
+To pass arguments to the mpirun-call, you can use "-margs=''", e.g.:
+
+  make TESTARGS="-small -margs='-machine ch_usock -nodes p4-01,p4-02'" testing
 
 If you are NOT using the MPICH implementation, then you can run the configure
 script in this directory.  If you need to view the configure options, then type

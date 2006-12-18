@@ -34,7 +34,7 @@ MPI2EXECS := accu_test allocmem get_contig_test1 get_contig_test2 \
 default: $(MPI2EXECS)
 
 testing: default
-	-./runtests
+	-./runtests $(TESTARGS)
 
 linktest: default clean
 
