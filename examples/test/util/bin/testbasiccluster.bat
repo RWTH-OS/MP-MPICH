@@ -1,0 +1,1 @@
+.\runtests -noscan -eachexe -showpassed -showdifferent -n 4 -deltxt -delequal -account lfbs/silke -host p4-05,p4-06,p4-07,p4-08 -wdirtests \\Drogo\exp_imp\nt-mpich-test\basic
