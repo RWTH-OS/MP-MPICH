@@ -10,6 +10,9 @@
 #include <dmalloc.h>
 #endif
 
+#if (_MSC_VER >=1400)
+#pragma warning (disable:4996)
+#endif
 
 /* Internal functions */
 void _smi_SIGINT_Handler(int sig);

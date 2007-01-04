@@ -64,27 +64,30 @@ char	*optarg;		/* argument associated with option */
 
 static char *place = EMSG;		/* option letter processing */
 
-#ifdef _WIN32			// ** by Karsten 
-void NTResetGetOpt() {	// **
-	opterr=1;			// **
-	optind=1;			// **
-	optopt=0;			// **
-	optarg=0;			// **
-	place=EMSG;			// **
-}						// **
-#endif					// **
+/*!
+This is used by CTCPCommunicator if any following layers
+want to use getopt() as well.
+*/
+void resetGetOpt() {
+	opterr=1;
+	optind=1;
+	optopt=0;
+	optarg=0;
+	place=EMSG;
+}
+
 /*!
 this is the well known function used to pares commandline parameters.
 We ported this function to NT.
 */
 
 int
-getopt(int nargc, char * const *nargv, const char *ostr)
+getopt(int nargc, char * const *nargv, char *ostr)
 //	int nargc;
 //	char * const *nargv;
 //	const char *ostr;
 {
-	
+
 	register char *oli;			/* option letter list index */
 	char *p;
 
@@ -99,6 +102,7 @@ getopt(int nargc, char * const *nargv, const char *ostr)
 			return(EOF);
 		}
 	}					/* option letter okay? */
+	
 	if ((optopt = (int)*place++) == (int)':' ||
 	    !(oli = index(ostr, optopt))) {
 		/*
