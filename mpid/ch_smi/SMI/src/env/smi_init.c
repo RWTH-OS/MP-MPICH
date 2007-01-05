@@ -8,6 +8,7 @@
 #define O_CREAT        0x0100  /* create and open file */
 #define O_TRUNC        0x0200  /* open and truncate */
 #define O_EXCL         0x0400  /* open only if file doesn't already exist */
+#define O_WRONLY       0x0001  /* open for writing only */
 /*#include <stdio.h>*/
 #include <io.h>
 #include <getopt.h>
