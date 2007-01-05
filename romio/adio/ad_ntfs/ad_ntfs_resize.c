@@ -8,6 +8,10 @@
 
 #include "ad_ntfs.h"
 
+#if (_MSC_VER >=1400)
+#pragma warning (disable:4996)
+#endif
+
 void ADIOI_NTFS_Resize(ADIO_File fd, ADIO_Offset size, int *error_code)
 {
     DWORD dwTemp;

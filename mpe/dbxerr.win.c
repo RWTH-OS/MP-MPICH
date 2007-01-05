@@ -2,6 +2,10 @@
 #define _WIN32_WINNT 0x0400
 #endif
 
+#if (_MSC_VER >=1400)
+#pragma warning (disable:4996)
+#endif
+
 #ifdef HAVE_MPICHCONF_H
 #include "mpichconf.h"
 #else

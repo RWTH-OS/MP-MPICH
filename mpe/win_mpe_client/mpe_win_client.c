@@ -10,6 +10,10 @@
 #include "mpe_win_graphics.h"
 #include "r_mpe.h"
 
+#if (_MSC_VER >=1400)
+#pragma warning (disable:4996)
+#endif
+
 #define BUFSIZE 2000
 #define NUMCOL 16
 

@@ -15,6 +15,10 @@
 #include "../ch_gm/gmpi.h"
 #endif /* CH_GM */
 
+#if (_MSC_VER >=1400)
+#pragma warning (disable:4996)
+#endif
+
 #include "mpi.h"
 #include "mpid.h"
 #include "mpiddev.h"

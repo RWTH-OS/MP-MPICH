@@ -8,6 +8,10 @@
 
 #include "ad_ntfs.h"
 
+#if (_MSC_VER >=1400)
+#pragma warning (disable:4996)
+#endif
+
 void ADIOI_NTFS_IreadContig(ADIO_File fd, void *buf, int count, 
                 MPI_Datatype datatype, int file_ptr_type,
                 ADIO_Offset offset, ADIO_Request *request, int *error_code)  

@@ -15,6 +15,10 @@
 
 #include "queue.h"
 
+#if (_MSC_VER >=1400)
+#pragma warning (disable:4996)
+#endif
+
 /* Need to fix this... */
 #ifdef FOO
 #define MPID_SBalloc(a)  MALLOC(sizeof(MPID_QEL))

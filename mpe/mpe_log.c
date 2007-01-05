@@ -13,6 +13,10 @@
 #include "mpe.h"		/* why? */
 #include "mpe_log.h"
 
+#if (_MSC_VER >=1400)
+#pragma warning (disable:4996)
+#endif
+
 #ifdef HAVE_STDLIB_H
 /* Needed for getenv */
 #include <stdlib.h>

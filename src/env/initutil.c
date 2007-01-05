@@ -26,6 +26,10 @@ define MPID_NO_FORTRAN if the Fortran interface is not to be supported
 #define HOST_NAME_MAX 255
 #endif
 
+#if (_MSC_VER >=1400)
+#pragma warning (disable:4996)
+#endif
+
 
 extern int mpichtv_flag; /* mpichtv_flag lies in adi2init.c */
 

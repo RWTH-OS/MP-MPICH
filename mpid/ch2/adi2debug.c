@@ -12,6 +12,10 @@
 #include "mpiddev.h"
 #include "chpackflow.h"
 
+#if (_MSC_VER >=1400)
+#pragma warning (disable:4996)
+#endif
+
 /* 
    Unfortunately, stderr is not a guarenteed to be a compile-time
    constant in ANSI C, so we can't initialize MPID_DEBUG_FILE with

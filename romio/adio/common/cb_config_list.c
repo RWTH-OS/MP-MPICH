@@ -25,6 +25,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+#if (_MSC_VER >=1400)
+#pragma warning (disable:4996)
+#endif
+
 /* token types */
 #define AGG_WILDCARD 1
 #define AGG_STRING   2

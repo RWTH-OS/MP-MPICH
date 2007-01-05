@@ -9,6 +9,11 @@
 #include "ad_ntfs.h"
 #include "adio_extern.h"
 
+#if (_MSC_VER >=1400)
+#pragma warning (disable:4996)
+#endif
+
+
 void ADIOI_NTFS_Fcntl(ADIO_File fd, int flag, ADIO_Fcntl_t *fcntl_struct, int *error_code)
 {
     DWORD dwTemp;
