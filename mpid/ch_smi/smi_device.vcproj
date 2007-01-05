@@ -76,7 +76,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				OptimizeForProcessor="0"
-				AdditionalIncludeDirectories=".;..\ch2\;.\SMI\src;.\SMI\src\unix_to_nt;include;.\SMI\include;..\..\src\coll;..\lfbs_common;..\..\include;..\util;&quot;..\..\mpi-2-c++\src&quot;;..\..\util;..\ch_smi"
+				AdditionalIncludeDirectories=".;..\ch2\;.\SMI\src;include;.\SMI\include;..\..\src\coll;..\lfbs_common;..\..\include;..\util;&quot;..\..\mpi-2-c++\src&quot;;..\..\util;..\ch_smi;&quot;$(SolutionDir)/Unix2NT&quot;"
 				PreprocessorDefinitions="BLABLA;CH_SMI_PRESENT;_DEBUG;MPID_DEBUG_ALL;_USRDLL;RNDV_STATIC;SINGLECOPY;MPI_SMI;FORTRANCAPS;_WINDOWS;WIN32_FORTRAN_STDCALL;HAS_VOLATILE;IN_MPICH_DLL;USE_STDARG;WIN32;WIN32_LEAN_AND_MEAN;DEV_DEBUG"
 				StringPooling="FALSE"
 				BasicRuntimeChecks="3"
@@ -136,7 +136,7 @@
 				EnableIntrinsicFunctions="TRUE"
 				FavorSizeOrSpeed="1"
 				OptimizeForProcessor="0"
-				AdditionalIncludeDirectories=".;..\ch2\;.\SMI\src;.\SMI\src\unix_to_nt;include;.\SMI\include;..\..\src\coll;..\lfbs_common;..\..\include;..\util;&quot;..\..\mpi-2-c++\src&quot;;..\..\util;..\ch_smi"
+				AdditionalIncludeDirectories=".;..\ch2\;.\SMI\src;include;.\SMI\include;..\..\src\coll;..\lfbs_common;..\..\include;..\util;&quot;..\..\mpi-2-c++\src&quot;;..\..\util;..\ch_smi;&quot;$(SolutionDir)/Unix2NT&quot;"
 				PreprocessorDefinitions="CH_SMI_PRESENT;NDEBUG;MPID_DEBUG_NONE;FORTRANCAPS;_WINDOWS;WIN32_FORTRAN_STDCALL;HAS_VOLATILE;MPI_SMI;MPID_NOVERIFY;MPID_STAT_NONE;IN_MPICH_DLL;USE_STDARG;WIN32;WIN32_LEAN_AND_MEAN"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -4361,10 +4361,10 @@
 				RelativePath="..\ch2\mpid_bind.h">
 			</File>
 			<File
-				RelativePath="..\ch2\mpid_debug.h">
+				RelativePath="mpid_debug.h">
 			</File>
 			<File
-				RelativePath="mpid_debug.h">
+				RelativePath="..\ch2\mpid_debug.h">
 			</File>
 			<File
 				RelativePath="..\ch2\mpiddev.h">
@@ -4385,10 +4385,10 @@
 				RelativePath="..\..\include\mpiimpl.h">
 			</File>
 			<File
-				RelativePath="..\ch2\mpimem.h">
+				RelativePath="mpimem.h">
 			</File>
 			<File
-				RelativePath="mpimem.h">
+				RelativePath="..\ch2\mpimem.h">
 			</File>
 			<File
 				RelativePath="..\..\include\mpiprof.h">
