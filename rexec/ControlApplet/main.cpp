@@ -195,6 +195,11 @@ void InitContext(CONFIGURE_T *C) {
     if(lError !=ERROR_SUCCESS) {
 		C->Logging = FALSE;
     }
+	ValSize = sizeof(BOOL);
+    lError=RegQueryValueEx(hKey,"NOUSER",0,&ValType,(LPBYTE) &C->NoUser,&ValSize);
+    if(lError !=ERROR_SUCCESS) {
+		C->NoUser = FALSE;
+    }
     ValSize = sizeof(DWORD);
     lError=RegQueryValueEx(hKey,"NUM_THREADS",0,&ValType,(LPBYTE) &C->NumThreads,&ValSize);
     if(lError !=ERROR_SUCCESS) {
@@ -202,7 +207,9 @@ void InitContext(CONFIGURE_T *C) {
     }
     
     RegCloseKey(hKey);
-}
+} 
+
+/* settings are stored in registry, rclumad service will check registry to retrieve settings */
 
 DWORD StoreContext(HWND dlg,CONFIGURE_T *C) {
     // Store the values into the registry...
@@ -225,10 +232,12 @@ DWORD StoreContext(HWND dlg,CONFIGURE_T *C) {
     else
 		lError=RegSetValueEx(hKey,"LOG_FILE",0,REG_EXPAND_SZ,(PBYTE) "",1);
     lError=RegSetValueEx(hKey,"LOGGING",0,REG_DWORD,(PBYTE) &C->Logging,sizeof(C->Logging));
+	lError=RegSetValueEx(hKey,"NOUSER",0,REG_DWORD,(PBYTE) &C->NoUser,sizeof(C->NoUser));
     lError=RegSetValueEx(hKey,"NUM_THREADS",0,REG_DWORD,(PBYTE) &C->NumThreads,sizeof(C->NumThreads));
     
     RegCloseKey(hKey);
     
+	// send a message to the service; service will read config information from registry
     if(Context.OpenResult == ERROR_SUCCESS && Context.Running) {
 		if(!ControlService(C->hService,SERVICE_CONTROL_RECONFIG,&status)) {
 			lError = GetLastError();
@@ -242,6 +251,7 @@ DWORD StoreContext(HWND dlg,CONFIGURE_T *C) {
 void SetDialogData(HWND dlg,CONFIGURE_T *C) {
     char Threads[16];
     SendDlgItemMessage(dlg,IDC_LOGGING,BM_SETCHECK,C->Logging,0);
+	SendDlgItemMessage(dlg,IDC_NOUSER,BM_SETCHECK,C->NoUser,0);
     SendDlgItemMessage(dlg,IDC_EDIT_THREADS,EM_LIMITTEXT,3,0);
     SendDlgItemMessage(dlg,IDC_SPIN1,UDM_SETRANGE,0,MAKELONG(100, 1));
     sprintf(Threads,"%d",C->NumThreads);
@@ -253,7 +263,7 @@ void SetDialogData(HWND dlg,CONFIGURE_T *C) {
     else 
 		SendDlgItemMessage(dlg,IDC_START,WM_SETTEXT,0,(LONG)STOPSTRING);
     
-    
+    /* enable or disable edit of logfile */
     if(!C->Logging) {
 		EnableWindow(GetDlgItem(dlg,IDC_EDIT_FILE),FALSE);
 		EnableWindow(GetDlgItem(dlg,IDC_LOG_LABEL),FALSE);
@@ -272,6 +282,7 @@ void GetDialogData(HWND dlg,CONFIGURE_T *C) {
     char Threads[16];
     DWORD len;
     C->Logging = ( SendDlgItemMessage(dlg,IDC_LOGGING,BM_GETCHECK,0,0) == BST_CHECKED);
+	C->NoUser = ( SendDlgItemMessage(dlg,IDC_NOUSER,BM_GETCHECK,0,0) == BST_CHECKED);
     if(SendDlgItemMessage(dlg,IDC_EDIT_THREADS,WM_GETTEXT,16,(LPARAM)Threads)) 
 		C->NumThreads = atoi(Threads);
     else C->NumThreads = 1;
@@ -334,6 +345,11 @@ BOOL CALLBACK DialogFunction(HWND dlg,UINT message,WPARAM wParam,LPARAM lParam) 
 	        State = SendDlgItemMessage(dlg,IDC_LOGGING,BM_GETCHECK,0,0);
 			EnableWindow(GetDlgItem(dlg,IDC_EDIT_FILE),State);
 			EnableWindow(GetDlgItem(dlg,IDC_LOG_LABEL),State);
+			Context.Changed = TRUE;
+			EnableWindow(GetDlgItem(dlg,IDC_APPLY),TRUE);
+	      break;
+		  case IDC_NOUSER:
+	        State = SendDlgItemMessage(dlg,IDC_NOUSER,BM_GETCHECK,0,0);
 			Context.Changed = TRUE;
 			EnableWindow(GetDlgItem(dlg,IDC_APPLY),TRUE);
 	      break;

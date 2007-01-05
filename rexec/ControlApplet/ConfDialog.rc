@@ -72,7 +72,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 191
         TOPMARGIN, 3
-        BOTTOMMARGIN, 92
+        BOTTOMMARGIN, 106
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -102,6 +102,8 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,141,3,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,141,24,50,14
     PUSHBUTTON      "&Apply",IDC_APPLY,141,45,50,14,WS_DISABLED
+    CONTROL         "No user authentication (not recommended)",IDC_NOUSER,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,89,150,10
 END
 
 

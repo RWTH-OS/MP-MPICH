@@ -1,25 +1,15 @@
-
-#pragma warning( disable: 4049 )  /* more than 64k source lines */
-#pragma warn -pia
-
 /* this ALWAYS GENERATED file contains the RPC client stubs */
 
 
- /* File created by MIDL compiler version 5.03.0280 */
-/* at Fri Dec 08 14:25:29 2000
+/* File created by MIDL compiler version 5.01.0164 */
+/* at Wed Jan 03 15:42:36 2007
  */
 /* Compiler settings for ..\cluma.idl, ..\cluma.acf:
-    Os (OptLev=s), W1, Zp8, env=Win32 (32b run), ms_ext, c_ext
+    Os (OptLev=s), W1, Zp8, env=Win32, ms_ext, c_ext
     error checks: allocation ref bounds_check enum stub_data 
-    VC __declspec() decoration level: 
-         __declspec(uuid()), __declspec(selectany), __declspec(novtable)
-         DECLSPEC_UUID(), MIDL_INTERFACE()
 */
 //@@MIDL_FILE_HEADING(  )
 
-#define _WIN32_WINNT 0x400
-
-#if !defined(_M_IA64) && !defined(_M_AXP64)
 #include <string.h>
 #if defined( _ALPHA_ )
 #include <stdarg.h>
@@ -29,8 +19,6 @@
 
 #define TYPE_FORMAT_STRING_SIZE   285                               
 #define PROC_FORMAT_STRING_SIZE   157                               
-#define TRANSMIT_AS_TABLE_SIZE    0            
-#define WIRE_MARSHAL_TABLE_SIZE   0            
 
 typedef struct _MIDL_TYPE_FORMAT_STRING
     {
@@ -47,9 +35,6 @@ typedef struct _MIDL_PROC_FORMAT_STRING
 
 extern const MIDL_TYPE_FORMAT_STRING __MIDL_TypeFormatString;
 extern const MIDL_PROC_FORMAT_STRING __MIDL_ProcFormatString;
-
-#define GENERIC_BINDING_TABLE_SIZE   0            
-
 
 /* Standard interface: cluma, ver. 1.0,
    GUID={0xf3d150be,0x4b47,0x11d3,{0xa8,0xe4,0x00,0x10,0x4b,0x75,0x53,0x69}} */
@@ -281,8 +266,7 @@ static RPC_BINDING_HANDLE cluma__MIDL_AutoBindHandle;
     RPC_STATUS _Status;
     
     MIDL_STUB_MESSAGE _StubMsg;
-
-    // RpcTryExcept (WinApi) declared in rpc.h
+    
     RpcTryExcept
         {
         RpcTryFinally
@@ -439,7 +423,7 @@ static RPC_BINDING_HANDLE cluma__MIDL_AutoBindHandle;
                                            (unsigned char __RPC_FAR *)DllName,
                                            (PFORMAT_STRING) &__MIDL_TypeFormatString.Format[12] );
             
-            _StubMsg.MaxCount = ( unsigned long  )BufferSize;
+            _StubMsg.MaxCount = BufferSize;
             
             NdrPointerBufferSize( (PMIDL_STUB_MESSAGE) &_StubMsg,
                                   (unsigned char __RPC_FAR *)result,
@@ -451,7 +435,7 @@ static RPC_BINDING_HANDLE cluma__MIDL_AutoBindHandle;
                                          (unsigned char __RPC_FAR *)DllName,
                                          (PFORMAT_STRING) &__MIDL_TypeFormatString.Format[12] );
             
-            _StubMsg.MaxCount = ( unsigned long  )BufferSize;
+            _StubMsg.MaxCount = BufferSize;
             
             NdrPointerMarshall( (PMIDL_STUB_MESSAGE)& _StubMsg,
                                 (unsigned char __RPC_FAR *)result,
@@ -543,7 +527,7 @@ cluma_R_GetClientName(
                           size);
         
         _StubMsg.BufferLength = 4U + 11U + 7U;
-        _StubMsg.MaxCount = ( unsigned long  )(size ? *size : 0);
+        _StubMsg.MaxCount = size ? *size : 0;
         
         NdrConformantArrayBufferSize( (PMIDL_STUB_MESSAGE) &_StubMsg,
                                       (unsigned char __RPC_FAR *)*ClientName,
@@ -559,7 +543,7 @@ cluma_R_GetClientName(
         
         _StubMsg.Buffer = (unsigned char __RPC_FAR *) _pRpcMessage->Buffer;
         
-        _StubMsg.MaxCount = ( unsigned long  )(size ? *size : 0);
+        _StubMsg.MaxCount = size ? *size : 0;
         
         NdrConformantArrayMarshall( (PMIDL_STUB_MESSAGE)& _StubMsg,
                                     (unsigned char __RPC_FAR *)*ClientName,
@@ -579,7 +563,7 @@ cluma_R_GetClientName(
         }
     RpcEndFinally
     _pRpcMessage->BufferLength = 
-        (unsigned int)(_StubMsg.Buffer - (unsigned char __RPC_FAR *)_pRpcMessage->Buffer);
+        (unsigned int)((long)_StubMsg.Buffer - (long)_pRpcMessage->Buffer);
     
 }
 
@@ -673,7 +657,7 @@ cluma_R_GetClientName(
                                   (unsigned char __RPC_FAR *)lpCommandLine,
                                   (PFORMAT_STRING) &__MIDL_TypeFormatString.Format[56] );
             
-            _StubMsg.MaxCount = ( unsigned long  )EnvSize;
+            _StubMsg.MaxCount = EnvSize;
             
             NdrPointerBufferSize( (PMIDL_STUB_MESSAGE) &_StubMsg,
                                   (unsigned char __RPC_FAR *)lpEnvironment,
@@ -700,7 +684,7 @@ cluma_R_GetClientName(
             _StubMsg.Buffer = (unsigned char __RPC_FAR *)(((long)_StubMsg.Buffer + 3) & ~ 0x3);
             *(( unsigned long __RPC_FAR * )_StubMsg.Buffer)++ = dwCreationFlags;
             
-            _StubMsg.MaxCount = ( unsigned long  )EnvSize;
+            _StubMsg.MaxCount = EnvSize;
             
             NdrPointerMarshall( (PMIDL_STUB_MESSAGE)& _StubMsg,
                                 (unsigned char __RPC_FAR *)lpEnvironment,
@@ -1037,7 +1021,7 @@ cluma_R_ProcEnumCallback(
         }
     RpcEndFinally
     _pRpcMessage->BufferLength = 
-        (unsigned int)(_StubMsg.Buffer - (unsigned char __RPC_FAR *)_pRpcMessage->Buffer);
+        (unsigned int)((long)_StubMsg.Buffer - (long)_pRpcMessage->Buffer);
     
 }
 
@@ -1103,7 +1087,6 @@ cluma_R_ProcEnumCallback(
     return _RetVal;
 }
 
-//si
 
 /* [fault_status][comm_status] */ error_status_t R_ShutDown( 
     /* [in] */ handle_t IDL_handle,
@@ -1147,7 +1130,7 @@ cluma_R_ProcEnumCallback(
             _RetVal = *(( error_status_t __RPC_FAR * )_StubMsg.Buffer)++;
             
             }
-             RpcFinally
+        RpcFinally
             {
             NdrFreeBuffer( (PMIDL_STUB_MESSAGE) &_StubMsg );
             
@@ -1165,7 +1148,125 @@ cluma_R_ProcEnumCallback(
     RpcEndExcept
     return _RetVal;
 }
-//si end
+
+
+error_status_t R_CreateProcessNoUser( 
+    /* [in] */ handle_t IDL_handle,
+    /* [string][unique][in] */ unsigned char __RPC_FAR *lpApplicationName,
+    /* [string][unique][in] */ unsigned char __RPC_FAR *lpCommandLine,
+    /* [in] */ unsigned long dwCreationFlags,
+    /* [size_is][unique][in] */ byte __RPC_FAR *lpEnvironment,
+    /* [in] */ unsigned long EnvSize,
+    /* [string][unique][in] */ unsigned char __RPC_FAR *lpCurrentDirectory,
+    /* [ref][in] */ R_STARTUPINFO __RPC_FAR *lpStartupInfo,
+    /* [ref][out] */ R_PROCESS_INFORMATION __RPC_FAR *lpProcessInformation)
+{
+
+    RPC_BINDING_HANDLE _Handle	=	0;
+    
+    error_status_t _RetVal;
+    
+    RPC_MESSAGE _RpcMessage;
+    
+    MIDL_STUB_MESSAGE _StubMsg;
+    
+    if(!lpStartupInfo)
+        {
+        RpcRaiseException(RPC_X_NULL_REF_POINTER);
+        }
+    if(!lpProcessInformation)
+        {
+        RpcRaiseException(RPC_X_NULL_REF_POINTER);
+        }
+    RpcTryFinally
+        {
+        NdrClientInitializeNew(
+                          ( PRPC_MESSAGE  )&_RpcMessage,
+                          ( PMIDL_STUB_MESSAGE  )&_StubMsg,
+                          ( PMIDL_STUB_DESC  )&cluma_StubDesc,
+                          13);
+        
+        
+        _Handle = IDL_handle;
+        
+        
+        _StubMsg.BufferLength = 0U + 16U + 24U + 11U + 12U + 11U + 20U + 7U;
+        NdrPointerBufferSize( (PMIDL_STUB_MESSAGE) &_StubMsg,
+                              (unsigned char __RPC_FAR *)lpApplicationName,
+                              (PFORMAT_STRING) &__MIDL_TypeFormatString.Format[56] );
+        
+        NdrPointerBufferSize( (PMIDL_STUB_MESSAGE) &_StubMsg,
+                              (unsigned char __RPC_FAR *)lpCommandLine,
+                              (PFORMAT_STRING) &__MIDL_TypeFormatString.Format[56] );
+        
+        _StubMsg.MaxCount = EnvSize;
+        
+        NdrPointerBufferSize( (PMIDL_STUB_MESSAGE) &_StubMsg,
+                              (unsigned char __RPC_FAR *)lpEnvironment,
+                              (PFORMAT_STRING) &__MIDL_TypeFormatString.Format[60] );
+        
+        NdrPointerBufferSize( (PMIDL_STUB_MESSAGE) &_StubMsg,
+                              (unsigned char __RPC_FAR *)lpCurrentDirectory,
+                              (PFORMAT_STRING) &__MIDL_TypeFormatString.Format[56] );
+        
+        NdrSimpleStructBufferSize( (PMIDL_STUB_MESSAGE) &_StubMsg,
+                                   (unsigned char __RPC_FAR *)lpStartupInfo,
+                                   (PFORMAT_STRING) &__MIDL_TypeFormatString.Format[78] );
+        
+        NdrGetBuffer( (PMIDL_STUB_MESSAGE) &_StubMsg, _StubMsg.BufferLength, _Handle );
+        
+        NdrPointerMarshall( (PMIDL_STUB_MESSAGE)& _StubMsg,
+                            (unsigned char __RPC_FAR *)lpApplicationName,
+                            (PFORMAT_STRING) &__MIDL_TypeFormatString.Format[56] );
+        
+        NdrPointerMarshall( (PMIDL_STUB_MESSAGE)& _StubMsg,
+                            (unsigned char __RPC_FAR *)lpCommandLine,
+                            (PFORMAT_STRING) &__MIDL_TypeFormatString.Format[56] );
+        
+        _StubMsg.Buffer = (unsigned char __RPC_FAR *)(((long)_StubMsg.Buffer + 3) & ~ 0x3);
+        *(( unsigned long __RPC_FAR * )_StubMsg.Buffer)++ = dwCreationFlags;
+        
+        _StubMsg.MaxCount = EnvSize;
+        
+        NdrPointerMarshall( (PMIDL_STUB_MESSAGE)& _StubMsg,
+                            (unsigned char __RPC_FAR *)lpEnvironment,
+                            (PFORMAT_STRING) &__MIDL_TypeFormatString.Format[60] );
+        
+        _StubMsg.Buffer = (unsigned char __RPC_FAR *)(((long)_StubMsg.Buffer + 3) & ~ 0x3);
+        *(( unsigned long __RPC_FAR * )_StubMsg.Buffer)++ = EnvSize;
+        
+        NdrPointerMarshall( (PMIDL_STUB_MESSAGE)& _StubMsg,
+                            (unsigned char __RPC_FAR *)lpCurrentDirectory,
+                            (PFORMAT_STRING) &__MIDL_TypeFormatString.Format[56] );
+        
+        NdrSimpleStructMarshall( (PMIDL_STUB_MESSAGE)& _StubMsg,
+                                 (unsigned char __RPC_FAR *)lpStartupInfo,
+                                 (PFORMAT_STRING) &__MIDL_TypeFormatString.Format[78] );
+        
+        NdrSendReceive( (PMIDL_STUB_MESSAGE) &_StubMsg, (unsigned char __RPC_FAR *) _StubMsg.Buffer );
+        
+        if ( (_RpcMessage.DataRepresentation & 0X0000FFFFUL) != NDR_LOCAL_DATA_REPRESENTATION )
+            NdrConvert( (PMIDL_STUB_MESSAGE) &_StubMsg, (PFORMAT_STRING) &__MIDL_ProcFormatString.Format[86] );
+        
+        NdrSimpleStructUnmarshall( (PMIDL_STUB_MESSAGE) &_StubMsg,
+                                   (unsigned char __RPC_FAR * __RPC_FAR *)&lpProcessInformation,
+                                   (PFORMAT_STRING) &__MIDL_TypeFormatString.Format[150],
+                                   (unsigned char)0 );
+        
+        _RetVal = *(( error_status_t __RPC_FAR * )_StubMsg.Buffer)++;
+        
+        }
+    RpcFinally
+        {
+        NdrFreeBuffer( (PMIDL_STUB_MESSAGE) &_StubMsg );
+        
+        }
+    RpcEndFinally
+    
+    return _RetVal;
+}
+
+
 static const COMM_FAULT_OFFSETS cluma_CommFaultOffsets[] = 
 {
 #ifdef _X86_
@@ -1177,7 +1278,6 @@ static const COMM_FAULT_OFFSETS cluma_CommFaultOffsets[] =
 #ifdef _ALPHA_
 	{ -1, -1 },	/* Alpha Offsets for Ping */
 #endif
-
 #ifdef _X86_
 	{ -1, -1 },	/* x86 Offsets for R_GetLockStatus */
 #endif
@@ -1187,7 +1287,6 @@ static const COMM_FAULT_OFFSETS cluma_CommFaultOffsets[] =
 #ifdef _ALPHA_
 	{ -1, -1 },	/* Alpha Offsets for R_GetLockStatus */
 #endif
-
 #ifdef _X86_
 	{ -1, -1 },	/* x86 Offsets for R_LockServer */
 #endif
@@ -1197,7 +1296,6 @@ static const COMM_FAULT_OFFSETS cluma_CommFaultOffsets[] =
 #ifdef _ALPHA_
 	{ -1, -1 },	/* Alpha Offsets for R_LockServer */
 #endif
-
 #ifdef _X86_
 	{ -1, -1 },	/* x86 Offsets for R_UnlockServer */
 #endif
@@ -1207,7 +1305,6 @@ static const COMM_FAULT_OFFSETS cluma_CommFaultOffsets[] =
 #ifdef _ALPHA_
 	{ -1, -1 },	/* Alpha Offsets for R_UnlockServer */
 #endif
-
 #ifdef _X86_
 	{ -1, -1 },	/* x86 Offsets for R_GetConsoleUser */
 #endif
@@ -1217,7 +1314,6 @@ static const COMM_FAULT_OFFSETS cluma_CommFaultOffsets[] =
 #ifdef _ALPHA_
 	{ -1, -1 },	/* Alpha Offsets for R_GetConsoleUser */
 #endif
-
 #ifdef _X86_
 	{ -1, -1 },	/* x86 Offsets for R_GetUserData */
 #endif
@@ -1227,7 +1323,6 @@ static const COMM_FAULT_OFFSETS cluma_CommFaultOffsets[] =
 #ifdef _ALPHA_
 	{ -1, -1 },	/* Alpha Offsets for R_GetUserData */
 #endif
-
 #ifdef _X86_
 	{ -1, -1 },	/* x86 Offsets for R_Transfer */
 #endif
@@ -1237,7 +1332,6 @@ static const COMM_FAULT_OFFSETS cluma_CommFaultOffsets[] =
 #ifdef _ALPHA_
 	{ -1, -1 },	/* Alpha Offsets for R_Transfer */
 #endif
-
 #ifdef _X86_
 	{ -1, -1 },	/* x86 Offsets for R_CreateProcess */
 #endif
@@ -1247,7 +1341,6 @@ static const COMM_FAULT_OFFSETS cluma_CommFaultOffsets[] =
 #ifdef _ALPHA_
 	{ -1, -1 },	/* Alpha Offsets for R_CreateProcess */
 #endif
-
 #ifdef _X86_
 	{ -1, -1 },	/* x86 Offsets for R_TerminateProcess */
 #endif
@@ -1257,7 +1350,6 @@ static const COMM_FAULT_OFFSETS cluma_CommFaultOffsets[] =
 #ifdef _ALPHA_
 	{ -1, -1 },	/* Alpha Offsets for R_TerminateProcess */
 #endif
-
 #ifdef _X86_
 	{ -1, -1 },	/* x86 Offsets for R_GetSystemInfo */
 #endif
@@ -1267,7 +1359,6 @@ static const COMM_FAULT_OFFSETS cluma_CommFaultOffsets[] =
 #ifdef _ALPHA_
 	{ -1, -1 },	/* Alpha Offsets for R_GetSystemInfo */
 #endif
-
 #ifdef _X86_
 	{ -1, -1 },	/* x86 Offsets for R_GetProcs */
 #endif
@@ -1277,17 +1368,25 @@ static const COMM_FAULT_OFFSETS cluma_CommFaultOffsets[] =
 #ifdef _ALPHA_
 	{ -1, -1 },	/* Alpha Offsets for R_GetProcs */
 #endif
-
 #ifdef _X86_
-	{ -1, -1 } 	/* x86 Offsets for R_KillProcess */
+	{ -1, -1 },	/* x86 Offsets for R_KillProcess */
 #endif
 #if defined(_MIPS_) || defined(_PPC_)
-	{ -1, -1 } 	/* MIPS, PPC Offsets for R_KillProcess */
+	{ -1, -1 },	/* MIPS, PPC Offsets for R_KillProcess */
 #endif
 #ifdef _ALPHA_
-	{ -1, -1 } 	/* Alpha Offsets for R_KillProcess */
+	{ -1, -1 },	/* Alpha Offsets for R_KillProcess */
 #endif
-
+#ifdef _X86_
+	{ -1, -1 },	/* x86 Offsets for R_ShutDown */
+#endif
+#if defined(_MIPS_) || defined(_PPC_)
+	{ -1, -1 },	/* MIPS, PPC Offsets for R_ShutDown */
+#endif
+#ifdef _ALPHA_
+	{ -1, -1 },	/* Alpha Offsets for R_ShutDown */
+#endif
+	{ -2, -2 }
 };
 
 
@@ -1305,11 +1404,11 @@ static const MIDL_STUB_DESC cluma_StubDesc =
     1, /* -error bounds_check flag */
     0x20000, /* Ndr library version */
     0,
-    0x5030118, /* MIDL Version 5.3.280 */
+    0x50100a4, /* MIDL Version 5.1.164 */
     cluma_CommFaultOffsets,
     0,
     0,  /* notify & notify_flag routine table */
-    0x1, /* MIDL flag */
+    1,  /* Flags */
     0,  /* Reserved3 */
     0,  /* Reserved4 */
     0   /* Reserved5 */
@@ -1331,12 +1430,6 @@ RPC_DISPATCH_TABLE cluma_v1_0_DispatchTable =
 #error  Invalid build platform for this stub.
 #endif
 
-#if !(TARGET_IS_NT40_OR_LATER)
-#error You need a Windows NT 4.0 or later to run this stub because it uses these features:
-#error   -Oif or -Oicf, idl pipes.
-#error However, your C/C++ compilation flags indicate you intend to run this app on earlier systems.
-#error This app will die there with the RPC_X_WRONG_STUB_VERSION error.
-#endif
 
 
 static const MIDL_PROC_FORMAT_STRING __MIDL_ProcFormatString =
@@ -1352,17 +1445,17 @@ static const MIDL_PROC_FORMAT_STRING __MIDL_ProcFormatString =
 /*  6 */	
 			0x51,		/* FC_OUT_PARAM */
 #ifndef _ALPHA_
-			0x1,		/* x86, MIPS & PPC stack size = 1 */
+			0x1,		/* x86, MIPS & PPC Stack size = 1 */
 #else
-			0x2,		/* Alpha stack size = 2 */
+			0x2,		/* Alpha Stack size = 2 */
 #endif
 /*  8 */	NdrFcShort( 0x2 ),	/* Type Offset=2 */
 /* 10 */	
 			0x51,		/* FC_OUT_PARAM */
 #ifndef _ALPHA_
-			0x1,		/* x86, MIPS & PPC stack size = 1 */
+			0x1,		/* x86, MIPS & PPC Stack size = 1 */
 #else
-			0x2,		/* Alpha stack size = 2 */
+			0x2,		/* Alpha Stack size = 2 */
 #endif
 /* 12 */	NdrFcShort( 0x6 ),	/* Type Offset=6 */
 /* 14 */	0x53,		/* FC_RETURN_PARAM_BASETYPE */
@@ -1372,9 +1465,9 @@ static const MIDL_PROC_FORMAT_STRING __MIDL_ProcFormatString =
 /* 18 */	
 			0x51,		/* FC_OUT_PARAM */
 #ifndef _ALPHA_
-			0x1,		/* x86, MIPS & PPC stack size = 1 */
+			0x1,		/* x86, MIPS & PPC Stack size = 1 */
 #else
-			0x2,		/* Alpha stack size = 2 */
+			0x2,		/* Alpha Stack size = 2 */
 #endif
 /* 20 */	NdrFcShort( 0x6 ),	/* Type Offset=6 */
 /* 22 */	0x53,		/* FC_RETURN_PARAM_BASETYPE */
@@ -1384,17 +1477,17 @@ static const MIDL_PROC_FORMAT_STRING __MIDL_ProcFormatString =
 /* 26 */	
 			0x4d,		/* FC_IN_PARAM */
 #ifndef _ALPHA_
-			0x1,		/* x86, MIPS & PPC stack size = 1 */
+			0x1,		/* x86, MIPS & PPC Stack size = 1 */
 #else
-			0x2,		/* Alpha stack size = 2 */
+			0x2,		/* Alpha Stack size = 2 */
 #endif
 /* 28 */	NdrFcShort( 0xa ),	/* Type Offset=10 */
 /* 30 */	
 			0x50,		/* FC_IN_OUT_PARAM */
 #ifndef _ALPHA_
-			0x1,		/* x86, MIPS & PPC stack size = 1 */
+			0x1,		/* x86, MIPS & PPC Stack size = 1 */
 #else
-			0x2,		/* Alpha stack size = 2 */
+			0x2,		/* Alpha Stack size = 2 */
 #endif
 /* 32 */	NdrFcShort( 0xe ),	/* Type Offset=14 */
 /* 34 */	0x4e,		/* FC_IN_PARAM_BASETYPE */
@@ -1402,9 +1495,9 @@ static const MIDL_PROC_FORMAT_STRING __MIDL_ProcFormatString =
 /* 36 */	
 			0x51,		/* FC_OUT_PARAM */
 #ifndef _ALPHA_
-			0x1,		/* x86, MIPS & PPC stack size = 1 */
+			0x1,		/* x86, MIPS & PPC Stack size = 1 */
 #else
-			0x2,		/* Alpha stack size = 2 */
+			0x2,		/* Alpha Stack size = 2 */
 #endif
 /* 38 */	NdrFcShort( 0x2 ),	/* Type Offset=2 */
 /* 40 */	0x53,		/* FC_RETURN_PARAM_BASETYPE */
@@ -1414,17 +1507,17 @@ static const MIDL_PROC_FORMAT_STRING __MIDL_ProcFormatString =
 /* 44 */	
 			0x51,		/* FC_OUT_PARAM */
 #ifndef _ALPHA_
-			0x1,		/* x86, MIPS & PPC stack size = 1 */
+			0x1,		/* x86, MIPS & PPC Stack size = 1 */
 #else
-			0x2,		/* Alpha stack size = 2 */
+			0x2,		/* Alpha Stack size = 2 */
 #endif
 /* 46 */	NdrFcShort( 0x1c ),	/* Type Offset=28 */
 /* 48 */	
 			0x50,		/* FC_IN_OUT_PARAM */
 #ifndef _ALPHA_
-			0x1,		/* x86, MIPS & PPC stack size = 1 */
+			0x1,		/* x86, MIPS & PPC Stack size = 1 */
 #else
-			0x2,		/* Alpha stack size = 2 */
+			0x2,		/* Alpha Stack size = 2 */
 #endif
 /* 50 */	NdrFcShort( 0x26 ),	/* Type Offset=38 */
 /* 52 */	0x53,		/* FC_RETURN_PARAM_BASETYPE */
@@ -1443,7 +1536,11 @@ static const MIDL_PROC_FORMAT_STRING __MIDL_ProcFormatString =
 #endif
 /* 64 */	0x32,		/* FC_BIND_PRIMITIVE */
 			0x0,		/* 0 */
-/* 66 */	NdrFcShort( 0x0 ),	/* x86, alpha, MIPS, PPC Stack size/offset = 0 */
+#ifndef _ALPHA_
+/* 66 */	NdrFcShort( 0x0 ),	/* x86, MIPS, PPC Stack size/offset = 0 */
+#else
+			NdrFcShort( 0x0 ),	/* Alpha Stack size/offset = 0 */
+#endif
 /* 68 */	NdrFcShort( 0x0 ),	/* 0 */
 /* 70 */	NdrFcShort( 0x8 ),	/* 8 */
 /* 72 */	0xc,		/* Oi2 Flags:  has return, has pipes, */
@@ -1477,17 +1574,17 @@ static const MIDL_PROC_FORMAT_STRING __MIDL_ProcFormatString =
 /* 88 */	
 			0x4d,		/* FC_IN_PARAM */
 #ifndef _ALPHA_
-			0x1,		/* x86, MIPS & PPC stack size = 1 */
+			0x1,		/* x86, MIPS & PPC Stack size = 1 */
 #else
-			0x2,		/* Alpha stack size = 2 */
+			0x2,		/* Alpha Stack size = 2 */
 #endif
 /* 90 */	NdrFcShort( 0x38 ),	/* Type Offset=56 */
 /* 92 */	
 			0x4d,		/* FC_IN_PARAM */
 #ifndef _ALPHA_
-			0x1,		/* x86, MIPS & PPC stack size = 1 */
+			0x1,		/* x86, MIPS & PPC Stack size = 1 */
 #else
-			0x2,		/* Alpha stack size = 2 */
+			0x2,		/* Alpha Stack size = 2 */
 #endif
 /* 94 */	NdrFcShort( 0x38 ),	/* Type Offset=56 */
 /* 96 */	0x4e,		/* FC_IN_PARAM_BASETYPE */
@@ -1495,9 +1592,9 @@ static const MIDL_PROC_FORMAT_STRING __MIDL_ProcFormatString =
 /* 98 */	
 			0x4d,		/* FC_IN_PARAM */
 #ifndef _ALPHA_
-			0x1,		/* x86, MIPS & PPC stack size = 1 */
+			0x1,		/* x86, MIPS & PPC Stack size = 1 */
 #else
-			0x2,		/* Alpha stack size = 2 */
+			0x2,		/* Alpha Stack size = 2 */
 #endif
 /* 100 */	NdrFcShort( 0x3c ),	/* Type Offset=60 */
 /* 102 */	0x4e,		/* FC_IN_PARAM_BASETYPE */
@@ -1505,25 +1602,25 @@ static const MIDL_PROC_FORMAT_STRING __MIDL_ProcFormatString =
 /* 104 */	
 			0x4d,		/* FC_IN_PARAM */
 #ifndef _ALPHA_
-			0x1,		/* x86, MIPS & PPC stack size = 1 */
+			0x1,		/* x86, MIPS & PPC Stack size = 1 */
 #else
-			0x2,		/* Alpha stack size = 2 */
+			0x2,		/* Alpha Stack size = 2 */
 #endif
 /* 106 */	NdrFcShort( 0x38 ),	/* Type Offset=56 */
 /* 108 */	
 			0x4d,		/* FC_IN_PARAM */
 #ifndef _ALPHA_
-			0x1,		/* x86, MIPS & PPC stack size = 1 */
+			0x1,		/* x86, MIPS & PPC Stack size = 1 */
 #else
-			0x2,		/* Alpha stack size = 2 */
+			0x2,		/* Alpha Stack size = 2 */
 #endif
 /* 110 */	NdrFcShort( 0x4a ),	/* Type Offset=74 */
 /* 112 */	
 			0x51,		/* FC_OUT_PARAM */
 #ifndef _ALPHA_
-			0x1,		/* x86, MIPS & PPC stack size = 1 */
+			0x1,		/* x86, MIPS & PPC Stack size = 1 */
 #else
-			0x2,		/* Alpha stack size = 2 */
+			0x2,		/* Alpha Stack size = 2 */
 #endif
 /* 114 */	NdrFcShort( 0x92 ),	/* Type Offset=146 */
 /* 116 */	0x53,		/* FC_RETURN_PARAM_BASETYPE */
@@ -1533,9 +1630,9 @@ static const MIDL_PROC_FORMAT_STRING __MIDL_ProcFormatString =
 /* 120 */	
 			0x4d,		/* FC_IN_PARAM */
 #ifndef _ALPHA_
-			0x1,		/* x86, MIPS & PPC stack size = 1 */
+			0x1,		/* x86, MIPS & PPC Stack size = 1 */
 #else
-			0x2,		/* Alpha stack size = 2 */
+			0x2,		/* Alpha Stack size = 2 */
 #endif
 /* 122 */	NdrFcShort( 0xa0 ),	/* Type Offset=160 */
 /* 124 */	0x4e,		/* FC_IN_PARAM_BASETYPE */
@@ -1547,9 +1644,9 @@ static const MIDL_PROC_FORMAT_STRING __MIDL_ProcFormatString =
 /* 130 */	
 			0x50,		/* FC_IN_OUT_PARAM */
 #ifndef _ALPHA_
-			0x1,		/* x86, MIPS & PPC stack size = 1 */
+			0x1,		/* x86, MIPS & PPC Stack size = 1 */
 #else
-			0x2,		/* Alpha stack size = 2 */
+			0x2,		/* Alpha Stack size = 2 */
 #endif
 /* 132 */	NdrFcShort( 0xa4 ),	/* Type Offset=164 */
 /* 134 */	0x53,		/* FC_RETURN_PARAM_BASETYPE */
@@ -1561,17 +1658,17 @@ static const MIDL_PROC_FORMAT_STRING __MIDL_ProcFormatString =
 /* 140 */	
 			0x4d,		/* FC_IN_PARAM */
 #ifndef _ALPHA_
-			0x1,		/* x86, MIPS & PPC stack size = 1 */
+			0x1,		/* x86, MIPS & PPC Stack size = 1 */
 #else
-			0x2,		/* Alpha stack size = 2 */
+			0x2,		/* Alpha Stack size = 2 */
 #endif
 /* 142 */	NdrFcShort( 0xa ),	/* Type Offset=10 */
 /* 144 */	
 			0x4d,		/* FC_IN_PARAM */
 #ifndef _ALPHA_
-			0x1,		/* x86, MIPS & PPC stack size = 1 */
+			0x1,		/* x86, MIPS & PPC Stack size = 1 */
 #else
-			0x2,		/* Alpha stack size = 2 */
+			0x2,		/* Alpha Stack size = 2 */
 #endif
 /* 146 */	NdrFcShort( 0xa ),	/* Type Offset=10 */
 /* 148 */	0x53,		/* FC_RETURN_PARAM_BASETYPE */
@@ -1861,7 +1958,3 @@ static const MIDL_TYPE_FORMAT_STRING __MIDL_TypeFormatString =
 			0x0
         }
     };
-
-
-#endif /* !defined(_M_IA64) && !defined(_M_AXP64)*/
-

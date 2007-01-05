@@ -36,6 +36,7 @@
 #include "service.h"
 #include "cluma.h"
 #include "messages.h"
+#include "helpers.h"
 
 #define KEY "System\\CurrentControlSet\\Services\\rcluma\\Parameters"
 
@@ -72,8 +73,9 @@ ULONG MinimumThreads = 5;
 BOOL Reconfig=FALSE;
 BOOL debug_flag=0;
 char *DebugFileName=0;
+BOOL NoUser=FALSE;
 
-void ReadValues(char** LogFile,ULONG *NumThreads) {
+void ReadValues(char** LogFile,ULONG *NumThreads, BOOL* NoUser) {
     
     HKEY hKey;
     LONG lError;
@@ -101,6 +103,12 @@ void ReadValues(char** LogFile,ULONG *NumThreads) {
 	*NumThreads = 5;
     }
 
+	ValSize = sizeof(BOOL);
+    lError=RegQueryValueEx(hKey,"NOUSER",0,&ValType,(LPBYTE) NoUser,&ValSize);
+    if(lError !=ERROR_SUCCESS) {
+	*NoUser = FALSE;
+    }
+
     if(log) {
 	ValSize=0;
 	lError=RegQueryValueEx(hKey,"LOG_FILE",0,&ValType,(LPBYTE) *LogFile,&ValSize);
@@ -123,7 +131,7 @@ VOID ServiceReconfigure() {
     char *NewFile=0;
     
     Reconfig=FALSE;
-    ReadValues(&NewFile,&MinimumThreads);
+    ReadValues(&NewFile,&MinimumThreads,&NoUser);
 /*    DBG("Reconfiguring Service.\nNumThreads="<<MinimumThreads);
     if(NewFile) DBG("Logfile name = "<<NewFile);
 */
@@ -157,6 +165,12 @@ VOID ServiceReconfigure() {
 	InitLogging(NewFile);
 	free(DebugFileName);
 	DebugFileName = NewFile;
+
+	if(NoUser)
+		{DBG("no user authentication needed - not recommended");}
+	else
+		{DBG("user authentication required");}
+
 	return;
     } 
     // OFF->OFF

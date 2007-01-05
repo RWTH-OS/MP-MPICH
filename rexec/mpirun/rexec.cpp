@@ -17,7 +17,7 @@
 
 
 #define VERSION 1
-#define SUBVERSION 95
+#define SUBVERSION 96
 //version 1.5 support remote reboot/shutdown
 //version 1.6 changes in encryption
 //version 1.7 suppress error msg on store with no executable
@@ -30,6 +30,7 @@
 //version 1.93 bug correction at reboot and shutdown (empty DllName)
 //version 1.94 specify additional plugin parameters
 //version 1.95 4.8.2005 -plugin none: no generation of plugin parameters 
+//version 1.96:3.1.2006 support of RPC calls without user authentication, flag -nouser 
 
 
 // For users with outdated SDKs ;)
@@ -39,6 +40,7 @@
 
 BOOL verbose = FALSE,StopIt=FALSE,debug_flag=FALSE,reboot_flag=FALSE,shutdown_flag=FALSE;
 BOOL storeflag=FALSE, NoNetworkScan=FALSE;
+BOOL nouser = FALSE;
 HANDLE *RemoteProcs=0;
 int NumStarted=0;
 CAsyncWindow *MessageWin;
@@ -111,6 +113,7 @@ int Usage(void) {
     std::cerr<<SPACE<<"-n num"<<"Start 'num' processes.\n";
 	std::cerr<<SPACE<<"-noaccountcheck"<<"Do not check if the account is valid on local host.\n";//SI 7.7.04
     std::cerr<<SPACE<<"-noscan"<<"Do not scan the network for valid hosts.\n";
+	std::cerr<<SPACE<<"-nouser"<<"Create process without user account, has to be switched on in rclumad.\n";//SI 3.1.06
     std::cerr<<SPACE<<"-password pass"<<"Use 'pass' as password for account.\n";
     std::cerr<<SPACE<<"-path path"<<"Use 'path' to prefix executable name\n";
     std::cerr<<SPACE<<"-plugin file"<<"Use 'file.dll' as actual plugin (default: ch_wsock).\n";
@@ -411,32 +414,38 @@ void ParseCommandline(int *ArgsEnd,char **argv,HostData*** Hosts, int *NumProcs,
 	
 	
 	if(!User) {
-		User = (char*)malloc(50*sizeof(char));
-		std::cout<<"Login: "<<std::flush;
-		std::cin>>User;
+		User = (char*)calloc(50,sizeof(char));
+		if (!nouser){
+			std::cout<<"Login: "<<std::flush;
+			std::cin>>User;
+		}
 	}
 	
 	if(!Domain) {
-		Domain = (char*)malloc(50*sizeof(char));
-		std::cout<<"Domain: ";
-		std::cin>>Domain;
+		Domain = (char*)calloc(50,sizeof(char));
+		if (!nouser){
+			std::cout<<"Domain: ";
+			std::cin>>Domain;
+		}
 	}
 	
 	if(!Password) {
 		DWORD fdwOldMode,fdwMode;
 		HANDLE hStdin=GetStdHandle(STD_INPUT_HANDLE);
 		
-		Password  = (char*)malloc(128*sizeof(char));
-		GetConsoleMode(hStdin, &fdwOldMode);      
-		fdwMode = fdwOldMode & ~ENABLE_ECHO_INPUT; 
-		SetConsoleMode(hStdin, fdwMode); 
-		std::cout<<"Password: "<<std::flush;
-		std::cin>>Password;
-		std::cout<<std::endl;   
-		SetConsoleMode(hStdin, fdwOldMode);   
+		Password  = (char*)calloc(128,sizeof(char));
+		if (!nouser){
+			GetConsoleMode(hStdin, &fdwOldMode);      
+			fdwMode = fdwOldMode & ~ENABLE_ECHO_INPUT; 
+			SetConsoleMode(hStdin, fdwMode); 
+			std::cout<<"Password: "<<std::flush;
+			std::cin>>Password;
+			std::cout<<std::endl;   
+			SetConsoleMode(hStdin, fdwOldMode); 
+		}
 	}
 	
-	if(IsArgPresent(ArgsEnd,argv,"-store")) {
+	if(IsArgPresent(ArgsEnd,argv,"-store") && !nouser) {
 		char name[255];
 		sprintf(name,"%s/%s",Domain,User);
 		StoreAccount(name,User,Domain,Password);
@@ -549,9 +558,12 @@ int main(int argc,char** argv) {
 	verbose = IsArgPresent(&ArgsEnd,argv,"-loud");
 	debug_flag = IsArgPresent(&ArgsEnd,argv,"-debug");
 	test = IsArgPresent(&ArgsEnd,argv,"-test");
+	nouser = IsArgPresent(&ArgsEnd,argv,"-nouser");
 	checkuseraccount = !(IsArgPresent(&ArgsEnd,argv,"-noaccountcheck"));
 	if (checkuseraccount)
 		checkuseraccount = !(IsArgPresent(&ArgsEnd,argv,"-nac"));
+	if(nouser)
+		checkuseraccount=false;
 	
 	GetStringArg(&ArgsEnd,argv,"-reboot",&BootComputer);
 	reboot_flag = (BootComputer != 0);
@@ -884,7 +896,7 @@ int main(int argc,char** argv) {
 		SI.WorkingDir  = Servers[i]->ProcData->WorkingDir;
 		
 		
-		if(Servers[i]->ProcData->LoadProfile ==1)
+		if(!nouser && (Servers[i]->ProcData->LoadProfile ==1))
 			SI.CreationFlags = CREATE_WITH_USERPROFILE;
 		else
 			SI.CreationFlags = 0;
@@ -916,8 +928,11 @@ int main(int argc,char** argv) {
 				}
 			}
 			NOTE("Starting process on "<<Servers[i]->Name);
-			
-			result=CreateRemoteProcess(Servers[i],&SI,RemoteProcs+i);
+
+			if(nouser)
+				result=CreateRemoteProcessNoUser(Servers[i],&SI,RemoteProcs+i);
+			else
+				result=CreateRemoteProcess(Servers[i],&SI,RemoteProcs+i);
 			
 			if(result != ERROR_SUCCESS) {
 				std::cerr<<std::endl<<SI.Commandline<<"\nCould not start process on "<<Servers[i]->Name<<":\n"<<

@@ -70,9 +70,9 @@ extern "C" {
 
 //version and subversion have to be changed in helpers.H, too!
 #ifdef _DEBUG
-#define SZSERVICEDISPLAYNAME "Cluster Manager Service V2.16R - DEBUG"
+#define SZSERVICEDISPLAYNAME "Cluster Manager Service V2.17R - DEBUG -test"
 #else
-#define SZSERVICEDISPLAYNAME "Cluster Manager Service V2.16R"
+#define SZSERVICEDISPLAYNAME "Cluster Manager Service V2.17R"
 #endif
 
 // list of service dependencies - "dep1\0dep2\0\0"

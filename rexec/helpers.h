@@ -13,9 +13,9 @@
 #define SERVER_STRING "Cluster Manager"
 #define VERSION 2
 #ifdef _DEBUG
-#define SUBVERSION "16R - DEBUG"
+#define SUBVERSION "17R - DEBUG"
 #else
-#define SUBVERSION "16R"
+#define SUBVERSION "17R"
 #endif
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -24,6 +24,7 @@
 //version 2.14R: added remote shutdown
 //version 2.15R: added PRC-protocols for test purposes
 //version 2.16R: error correction at debug output 
+//version 2.17R: support of RPC calls without user authentication 
 //version and subversion have to be changed in SERVICE.H, too!
 //
 //////////////////////////////////////////////////////////////////////////////

@@ -14,6 +14,7 @@ typedef struct {
     BOOL Changed;
     DWORD OpenResult;
     SC_HANDLE hService;
+	BOOL NoUser;
 } CONFIGURE_T;
 
 void SetDialogData(HWND dlg,CONFIGURE_T *C);

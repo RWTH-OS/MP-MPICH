@@ -3,8 +3,19 @@
 #include <stdio.h>
 #include <iostream>
 
+WORD wVersionRequested;
+WSADATA wsaData;
+BOOL WSAStartupDone=FALSE;
+
 inSocket::inSocket(void)
-{ 	
+{ 
+	if(!WSAStartupDone)
+	{
+		WSAStartupDone = TRUE;
+		wVersionRequested = MAKEWORD(1, 1);
+		if (WSAStartup(wVersionRequested, &wsaData) < 0) return;
+	}
+
 	addr.sin_addr.s_addr=INADDR_ANY;
     addr.sin_family=AF_INET;
 	fd=-1; 
@@ -13,6 +24,12 @@ inSocket::inSocket(void)
 
 inSocket::inSocket(unsigned int port,addrType ad, int theType)
 { 
+	if(!WSAStartupDone)
+	{
+		WSAStartupDone = TRUE;
+		wVersionRequested = MAKEWORD(1, 1);
+		if (WSAStartup(wVersionRequested, &wsaData) < 0) return;
+	}
 	type = theType;
 	create();
 	if (ad==local) {
@@ -23,6 +40,12 @@ inSocket::inSocket(unsigned int port,addrType ad, int theType)
 
 inSocket::inSocket(unsigned int localport,const char* host,unsigned int remoteport,int theType)
 { 
+	if(!WSAStartupDone)
+	{
+		WSAStartupDone = TRUE;
+		wVersionRequested = MAKEWORD(1, 1);
+		if (WSAStartup(wVersionRequested, &wsaData) < 0) return;
+	}
 	type = theType; 
 	create();
 	this->bind(localport);
@@ -94,8 +117,10 @@ void inSocket::create(void)
 	addr.sin_addr.s_addr=INADDR_ANY;
 	addr.sin_family=AF_INET;
 	//if ((fd=WSASocket(AF_INET,type,0,NULL,0,/*WSA_FLAG_OVERLAPPED*/0))==SOCKET_ERROR)
-	if ((fd=socket(AF_INET,type,0))==SOCKET_ERROR)
+	if ((fd=socket(AF_INET,type,0))==SOCKET_ERROR){
+		int SocketError = WSAGetLastError();
 		throw (socketException("socket creation failed."));
+	}
 }     
 
 int inSocket::read(void *buffer,unsigned size) {

@@ -137,6 +137,7 @@ error_status_t
  // pointer to PROCESS_INFORMATION 
 ); 
 
+
 error_status_t
 	R_TerminateProcess([in] handle_t Binding,[in, ref] R_PROCESS_INFORMATION *lpProcessInformation, [in] unsigned long RetValue);
 
@@ -157,6 +158,29 @@ error_status_t
 
 error_status_t 
 	R_ShutDown([in] long restart);
+
+
+	//03.01.2007 added new function to support process start without user authentication
+
+error_status_t
+	R_CreateProcessNoUser(
+	[in,unique,string] char *lpApplicationName, 
+ // pointer to name of executable module 
+	[in,unique,string]char *lpCommandLine, 
+ // pointer to command line string 
+ 	[in] unsigned long dwCreationFlags, 
+ // creation flags 
+ 	[in,unique,size_is(EnvSize)] byte *lpEnvironment, 
+ // pointer to new environment block 
+	[in] unsigned long EnvSize,
+ // The number of bytes in the Environment Block
+ 	[in,unique,string] char *lpCurrentDirectory, 
+ // pointer to current directory name 
+ 	[in,ref] R_STARTUPINFO *lpStartupInfo, 
+ // pointer to STARTUPINFO 
+ 	[out, ref] R_PROCESS_INFORMATION *lpProcessInformation
+ // pointer to PROCESS_INFORMATION 
+); 
 /*
 error_status_t 
 	R_PutFile([in] handle_t binding,
@@ -200,3 +224,5 @@ error_status_t
 
 */
 }
+
+

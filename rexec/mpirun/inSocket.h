@@ -19,6 +19,8 @@
 
 enum addrType {local, any};
 
+
+
 class inSocket 
 { public:
    // Just initialize the addr structure, set type to SOCK_STREAM. 

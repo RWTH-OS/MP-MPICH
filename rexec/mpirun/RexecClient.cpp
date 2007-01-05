@@ -224,6 +224,38 @@ extern "C" {
 	return status;
     }//CreateBinding
 
+	/*************************************************************************************/
+
+DWORD CreateBindingNoUser(char *Host,char* Protocol,RPC_BINDING_HANDLE *Binding,
+						unsigned long SecurityLevel) {
+	
+	
+	unsigned char *stringBinding=0;
+	RPC_STATUS status;
+	char errortext[256];
+	status = RpcStringBindingCompose(0,
+	    (unsigned char*)Protocol,
+	    (unsigned char*)Host,
+	    0,
+	    0,
+	    (unsigned char**)&stringBinding);
+	if (status != RPC_S_OK) {
+	    fprintf(stderr,"%s: RpcStringBindingCompose failed - \n%s\n",Host,GetLastErrorText(status,errortext,256));
+	    return(status);
+	}
+	
+	status = RpcBindingFromStringBinding(stringBinding, Binding);
+	RpcStringFree(&stringBinding);
+	
+	if (status != RPC_S_OK) {
+	    DBM(Host<<": RpcBindingFromStringBinding failed (Protocol "<<Protocol<<") - "
+			<<GetLastErrorText(status,errortext,256)<<std::endl);
+	    return(status);
+	}
+
+	return status;
+    }//CreateBinding
+
 /*************************************************************************************/
 	
 //SI//23-08-2004 Use ncacn_np as workaround against XP SP2 RPC restrictions    
@@ -302,6 +334,70 @@ extern "C" {
 
 /*************************************************************************************/
 
+#define NUM_PROTOCOLS 4
+
+
+    DWORD OpenHostNoUser(HostData *Server) {
+	TServerHandle *hServer;
+	TAccount *Creds;
+	int i;
+	char *Protocols[] = { "ncalrpc",
+	    "ncacn_ip_tcp",
+	    "ncacn_nb_tcp",
+		"ncacn_np"
+	};
+	
+	DBM("Opening host");
+	EnterCriticalSection(&ClientCS);
+	if(!Server) {
+	    LeaveCriticalSection(&ClientCS);
+	    DBM("Got NULL Server handle");
+	    return ERROR_INVALID_PARAMETER;
+	}
+	if(Server->handle) {
+	    LeaveCriticalSection(&ClientCS);
+	    DBM("Server is already open");
+	    return ERROR_SUCCESS;
+	}
+	if(!Server->Security)
+	    Server->Security=RPC_C_AUTHN_LEVEL_PKT_INTEGRITY;
+	
+	hServer = (TServerHandle*)malloc(sizeof(TServerHandle));
+	Creds = Server->Account;
+	i=0;
+	for(;i<NUM_PROTOCOLS;++i) {
+	    DBM("Trying protocol "<<Protocols[i]);
+	    Server->LastError=CreateBindingNoUser(Server->Name,Protocols[i],
+		&hServer->Binding,
+		Server->Security);
+	    if(Server->LastError != RPC_S_OK) {
+		DBM("Failed with "<<Server->LastError);
+		continue;
+	    }
+	    DBM("Pinging host");
+	    Server->LastError = Ping(hServer->Binding);
+	    if(Server->LastError == RPC_S_OK) {
+		DBM("Host is alive");
+		break;
+	    }
+	    DBM("Host is unreachable ("<<Server->LastError<<")");
+	    RpcBindingFree(&hServer->Binding);
+	}
+	if(Server->LastError != RPC_S_OK) {
+	    DBM("Could not open the host");
+	    free(hServer);
+	    Server->handle=0;
+	    LeaveCriticalSection(&ClientCS);
+	    return Server->LastError;
+	}
+	
+	Server->handle = hServer;
+	Server->LastError = ERROR_SUCCESS;
+	LeaveCriticalSection(&ClientCS);
+	return ERROR_SUCCESS;
+    }//OpenHostNoUser
+
+/*************************************************************************************/
     
     DWORD CloseHost(HostData *Server) {
 	TServerHandle *hServer;
@@ -466,20 +562,37 @@ extern "C" {
 	}
 	if(!ServerDllName) ServerDllName = "";
 	if(!Server->handle) {
-	    if(OpenHost(Server) != ERROR_SUCCESS) {
-		FreeHostStatus(Server);
-		LeaveCriticalSection(&ClientCS);
-		return Server->LastError;
-	    }
+		if(nouser){
+			if(OpenHostNoUser(Server) != ERROR_SUCCESS) {
+			FreeHostStatus(Server);
+			LeaveCriticalSection(&ClientCS);
+			return Server->LastError;
+			}
+		}else{
+			if(OpenHost(Server) != ERROR_SUCCESS) {
+			FreeHostStatus(Server);
+			LeaveCriticalSection(&ClientCS);
+			return Server->LastError;
+			}
+		}
+	
 	} else {
 	    if(Ping(((TServerHandle*)(Server->handle))->Binding) != RPC_S_OK) {
 		CloseHost(Server);
-		if(OpenHost(Server) != ERROR_SUCCESS) {
+		if(nouser){
+			if(OpenHostNoUser(Server) != ERROR_SUCCESS) {
+				FreeHostStatus(Server);
+				LeaveCriticalSection(&ClientCS);
+				return Server->LastError;
+			}
+		}else{
+			if(OpenHost(Server) != ERROR_SUCCESS) {
 		    FreeHostStatus(Server);
 		    LeaveCriticalSection(&ClientCS);
 		    return Server->LastError;
-		}
+			}
 	    }
+		}
 	}
 	hServer = (TServerHandle*)Server->handle;
 	if(!Server->State) {
@@ -660,6 +773,115 @@ extern "C" {
 	return ERROR_SUCCESS;
     }//CreateRemoteProcess
 
+	/*************************************************************************************/
+
+    
+ DWORD CreateRemoteProcessNoUser(HostData *Server,RemoteStartupInfo *SI,HANDLE *hProcess) {
+	 
+	Session *S;
+	TServerHandle *hServer;
+	R_STARTUPINFO StartupInfo;
+	//DWORD tId;
+	inSocket master(0,any),inS,errS;
+	
+	*hProcess = 0;
+	DBM("Entering CreateRemoteProcessNoUser");
+	if(!Server) {
+	    DBM("The server handle is invalid");
+	    return ERROR_INVALID_PARAMETER;
+	}
+	
+	if(!Server->handle) {
+	    Server->Security = RPC_C_AUTHN_LEVEL_PKT_PRIVACY;
+	    if(OpenHostNoUser(Server) != ERROR_SUCCESS) return Server->LastError;
+	}
+	hServer = (TServerHandle*)Server->handle;
+	S=new Session;
+	S->Window=SI->Window;
+	S->Server = Server;
+	DBM("Setting up sockets");
+	try {
+	    master.listen(2);
+	    S->port=master.getPort();
+	    DBM("Port is :"<<S->port);
+	} catch (socketException e) {
+	    Server->LastError=WSAGetLastError();
+	    DBM("listen failed with "<<e);
+	    master.close();
+	}
+	/*S->thread = CreateThread(0,0,(LPTHREAD_START_ROUTINE)ThreadFunc,S,0,&tId);
+	
+	  if(!S->thread) {
+	  delete S;
+	  Server->LastError=GetLastError();
+	  return Server->LastError;
+	  }
+	*/
+	memset(&StartupInfo,0,sizeof(StartupInfo));
+	//while(!S->port) Sleep(1);
+	 //redirect all output of remote processes to S->port 
+	StartupInfo.hStdInput = StartupInfo.hStdOutput = StartupInfo.hStdError = S->port;
+	if(Server->Account)
+	    StartupInfo.lpPassword = (unsigned char*)Server->Account->Password;
+//	DBM("Calling R_CreateProcess");
+
+	Server->LastError = R_CreateProcessNoUser(hServer->Binding,0,
+	    (unsigned char*)SI->Commandline,SI->CreationFlags,
+	    (unsigned char*)SI->Environment,SI->EnvSize,
+	    (unsigned char*)SI->WorkingDir,&StartupInfo,&S->ProcInfo);
+	
+	if(Server->LastError != RPC_S_OK) {
+	    DBM("Call failed with "<<Server->LastError);
+	    CloseHost(Server);
+	    delete S;
+	    master.close();
+	    return Server->LastError;
+	}
+	DBM("Waiting for client to connect");
+	try {
+	    inS.accept(master);
+	    errS.accept(master);
+	    master.close();
+	} catch (socketException e) {
+	    DBM("Error "<<e<<" while waiting for connections");
+	    Server->LastError=WSAGetLastError();
+	    master.close();
+	    inS.close();
+	    errS.close();
+	    CloseHost(Server);
+	    *hProcess=0;
+	    return Server->LastError;
+	}
+	S->in = (SOCKET)(inS);
+	S->out= (SOCKET)(inS);
+	S->error = (SOCKET)(errS);
+	
+	//if remote process sends output on socket connected with port S->out, then generate
+	//windows-notification of type IN_DATA for window with handle SI->Window
+	if(WSAAsyncSelect(S->out,SI->Window,IN_DATA,FD_READ|FD_CLOSE)) {
+	    Server->LastError=WSAGetLastError();
+	    DBM("WsaAsyncSelect(out) failed");
+	    inS.close();
+	    errS.close();
+	    CloseHost(Server);
+	    return Server->LastError;
+	}
+	//as above for error messages
+	if(WSAAsyncSelect(S->error,SI->Window,ERR_DATA,FD_READ|FD_CLOSE)) {
+	    Server->LastError=WSAGetLastError();
+	    DBM("WsaAsyncSelect(error) failed");
+	    inS.close();
+	    errS.close();
+	    CloseHost(Server);
+	    return Server->LastError;
+	}
+	DBM("Remote process created succesfully");
+	//S->thread = CreateThread(0,0,(LPTHREAD_START_ROUTINE)ThreadFunc,S,0,&tId);
+	S->State=TRUE;
+	*hProcess=(HANDLE)S;
+	Server->LastError = ERROR_SUCCESS;
+	return ERROR_SUCCESS;
+    }//CreateRemoteProcess
 
 /*************************************************************************************/
     
@@ -670,7 +892,10 @@ extern "C" {
 	if(!S || !S->Server )
 	    return ERROR_INVALID_PARAMETER;
 	if(!S->Server->handle)
-	    if(OpenHost(S->Server) != ERROR_SUCCESS) return S->Server->LastError;
+		if(nouser){
+			if(OpenHostNoUser(S->Server) != ERROR_SUCCESS) return S->Server->LastError;
+		}else{
+			if(OpenHost(S->Server) != ERROR_SUCCESS) return S->Server->LastError;}
 	    hServer=(TServerHandle*)S->Server->handle;
 	    S->Server->LastError =R_TerminateProcess(hServer->Binding,&S->ProcInfo,-1);
 	    return S->Server->LastError;

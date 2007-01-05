@@ -14,6 +14,8 @@
 #define RC_PROC_START (WM_USER+14)
 #define RC_PROC_END (WM_USER+15)
 
+extern BOOL nouser;
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,6 +47,7 @@ extern "C" {
     void InitializeRexecClient();
     void ShutdownRexecClient();
     DWORD CreateRemoteProcess(HostData *Server,RemoteStartupInfo *SI,HANDLE *hProcess);
+	DWORD CreateRemoteProcessNoUser(HostData *Server,RemoteStartupInfo *SI,HANDLE *hProcess);
 
 //	Output Redirection of CreateRemoteProcess:
 //	front-end opens socket, port number is contained in SI

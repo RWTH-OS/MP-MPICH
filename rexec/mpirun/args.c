@@ -6,7 +6,7 @@
 
 #ifndef DEBUG
 #define DEBUG 0
-#endif
+#endif 
 
 GetIntArg( argc, argv, switchName, val )
 int *argc, *val;

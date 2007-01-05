@@ -1,18 +1,12 @@
-
-#pragma warning( disable: 4049 )  /* more than 64k source lines */
-
 /* this ALWAYS GENERATED file contains the definitions for the interfaces */
 
 
- /* File created by MIDL compiler version 5.03.0280 */
-/* at Fri Dec 08 14:25:29 2000
+/* File created by MIDL compiler version 5.01.0164 */
+/* at Wed Jan 03 15:42:36 2007
  */
 /* Compiler settings for ..\cluma.idl, ..\cluma.acf:
-    Os (OptLev=s), W1, Zp8, env=Win32 (32b run), ms_ext, c_ext
+    Os (OptLev=s), W1, Zp8, env=Win32, ms_ext, c_ext
     error checks: allocation ref bounds_check enum stub_data 
-    VC __declspec() decoration level: 
-         __declspec(uuid()), __declspec(selectany), __declspec(novtable)
-         DECLSPEC_UUID(), MIDL_INTERFACE()
 */
 //@@MIDL_FILE_HEADING(  )
 
@@ -28,11 +22,11 @@
 #ifndef __cluma_h__
 #define __cluma_h__
 
-/* Forward Declarations */ 
-
 #ifdef __cplusplus
 extern "C"{
 #endif 
+
+/* Forward Declarations */ 
 
 void __RPC_FAR * __RPC_USER MIDL_user_allocate(size_t);
 void __RPC_USER MIDL_user_free( void __RPC_FAR * ); 
@@ -43,10 +37,10 @@ void __RPC_USER MIDL_user_free( void __RPC_FAR * );
 /* interface cluma */
 /* [explicit_handle][version][uuid] */ 
 
-typedef /* [public][public] */ struct __MIDL_cluma_0001
+typedef /* [public][public] */ struct  __MIDL_cluma_0001
     {
     /* [ref][string] */ unsigned char ServerString[ 100 ];
-    struct 
+    struct  
         {
         unsigned long dwMajorVersion;
         unsigned long dwMinorVersion;
@@ -54,7 +48,7 @@ typedef /* [public][public] */ struct __MIDL_cluma_0001
         unsigned long dwPlatformId;
         unsigned char szCSDVersion[ 128 ];
         }	OS;
-    struct 
+    struct  
         {
         unsigned long dwNumberOfProcessors;
         unsigned long dwActiveProcessorMask;
@@ -64,7 +58,7 @@ typedef /* [public][public] */ struct __MIDL_cluma_0001
         unsigned long Mhz;
         unsigned long dwTotalPhysMem;
         }	HW;
-    struct 
+    struct  
         {
         /* [ref][string] */ unsigned char Hostname_ip[ 255 ];
         unsigned long NumEntries;
@@ -73,7 +67,7 @@ typedef /* [public][public] */ struct __MIDL_cluma_0001
         }	IP;
     }	R_MACHINE_INFO;
 
-typedef /* [public][public] */ struct __MIDL_cluma_0005
+typedef /* [public][public][public] */ struct  __MIDL_cluma_0005
     {
     unsigned long cb;
     /* [unique][string] */ unsigned char __RPC_FAR *lpReserved;
@@ -96,7 +90,7 @@ typedef /* [public][public] */ struct __MIDL_cluma_0005
     /* [unique][string] */ unsigned char __RPC_FAR *lpPassword;
     }	R_STARTUPINFO;
 
-typedef /* [public][public][public] */ struct __MIDL_cluma_0006
+typedef /* [public][public][public][public] */ struct  __MIDL_cluma_0006
     {
     long hProcess;
     long hThread;
@@ -104,7 +98,7 @@ typedef /* [public][public][public] */ struct __MIDL_cluma_0006
     unsigned long dwThreadId;
     }	R_PROCESS_INFORMATION;
 
-typedef /* [public] */ struct __MIDL_cluma_0007
+typedef /* [public] */ struct  __MIDL_cluma_0007
     {
     unsigned long ID;
     /* [ref][string] */ unsigned char __RPC_FAR *name;
@@ -200,6 +194,18 @@ typedef struct pipe_byte_pipe
     /* [in] */ handle_t IDL_handle,
     /* [in] */ long restart);
 
+error_status_t R_CreateProcessNoUser( 
+    /* [in] */ handle_t IDL_handle,
+    /* [string][unique][in] */ unsigned char __RPC_FAR *lpApplicationName,
+    /* [string][unique][in] */ unsigned char __RPC_FAR *lpCommandLine,
+    /* [in] */ unsigned long dwCreationFlags,
+    /* [size_is][unique][in] */ byte __RPC_FAR *lpEnvironment,
+    /* [in] */ unsigned long EnvSize,
+    /* [string][unique][in] */ unsigned char __RPC_FAR *lpCurrentDirectory,
+    /* [ref][in] */ R_STARTUPINFO __RPC_FAR *lpStartupInfo,
+    /* [ref][out] */ R_PROCESS_INFORMATION __RPC_FAR *lpProcessInformation);
+
+
 
 extern RPC_IF_HANDLE cluma_v1_0_c_ifspec;
 extern RPC_IF_HANDLE cluma_v1_0_s_ifspec;
@@ -214,5 +220,3 @@ extern RPC_IF_HANDLE cluma_v1_0_s_ifspec;
 #endif
 
 #endif
-
-

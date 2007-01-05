@@ -37,9 +37,13 @@
 #include "messages.h"
 #include "helpers.h"
 
+#define SERVICE_CONTROL_RECONFIG 128
+
 extern ULONG MinimumThreads;
 extern BOOL Reconfig;
 extern BOOL debug_flag;
+extern BOOL NoUser;
+
 // internal variables
 SERVICE_STATUS          ssStatus;       // current status of the service
 SERVICE_STATUS_HANDLE   sshStatusHandle;
@@ -268,7 +272,8 @@ VOID WINAPI service_ctrl(DWORD dwCtrlCode)
 	    ReportStatusToSCMgr(SERVICE_PAUSED, NO_ERROR, 3000);
             ServiceStop();
             return;
-	case 128:
+	case SERVICE_CONTROL_RECONFIG:
+		// this is a code sent by the control applet
 	    Reconfig = TRUE;
 	    ReportStatusToSCMgr(SERVICE_PAUSED, NO_ERROR, 3000);
             ServiceStop();
