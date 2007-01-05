@@ -1,5 +1,5 @@
 #include "pthread.h"
-
+#include <stdio.h>
 #include <winbase.h>
 
 int pthread_create(pthread_t *new_thread_ID,
@@ -34,11 +34,16 @@ int pthread_create(pthread_t *new_thread_ID,
     return 0;
 };
 	
-
+int pthread_cancel( pthread_t target_thread)
+{
+	BOOL retval= !TerminateThread (target_thread, 9);
+	CloseHandle( target_thread);
+	return retval;
+}
 int pthread_kill(pthread_t target_thread, int sig)
 {
 	if(sig == 9)
-		return !TerminateThread (target_thread, sig);
+		return pthread_cancel(target_thread);
 	 else return ERROR_CALL_NOT_IMPLEMENTED;
 };
 
@@ -244,8 +249,21 @@ int pthread_attr_setdetachstate(pthread_attr_t *attr, int detachstate)
 pthread_t pthread_self ()
 {
 	return GetCurrentThread();
-};
+}
 
 void pthread_exit(void *retval) {
     ExitThread((DWORD)retval);
+}
+
+int pthread_setcancelstate ( int state, int * oldstate)
+{
+	fprintf(stderr,"nt2unix warning: pthread_setcancelstate has no functionality yet\n");
+	
+	return 1;
+}
+int pthread_setcanceltype ( int type, int * oldtype )
+{
+	fprintf(stderr,"nt2unix warning: pthread_setcanceltype has no functionality yet\n");
+
+	return 1;
 }

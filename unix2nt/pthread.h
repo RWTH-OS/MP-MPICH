@@ -23,6 +23,9 @@
 #define PTHREAD_CREATE_DETACHED 1
 #define PTHREAD_SCOPE_SYSTEM 0
 
+#define PTHREAD_CANCEL_ENABLE 0
+#define PTHREAD_CANCEL_ASYNCHRONOUS 1
+
 #ifndef EBUSY
 	#define EBUSY 1
 #endif
@@ -62,6 +65,10 @@ int pthread_create(pthread_t *new_thread_ID,
                    pthread_attr_t *pthread_attr,
                    void * (*start_func)(void *),
 				   void *arg);
+
+pthread_t pthread_self ();
+
+int pthread_cancel( pthread_t target_thread);
 
 void pthread_exit(void *retval);
 
@@ -114,4 +121,9 @@ int pthread_attr_setscope (pthread_attr_t *attr, int contentionscope);
 
 int pthread_attr_setdetachstate(pthread_attr_t *attr, int detachstate);
 
+
+/* empty implementations !!!! */
+int pthread_setcancelstate ( int state, int * oldstate);
+
+int pthread_setcanceltype ( int type, int * oldtype );
 #endif
