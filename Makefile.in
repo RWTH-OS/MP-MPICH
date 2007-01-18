@@ -745,7 +745,8 @@ distclean: cleanslate rmlib
 install: lib/lib$(MPILIBNAME).a
 	$(INSTALL) -d $(bindir) $(libdir) $(datadir)/doc $(sharedlib_dir) \
 		$(includedir) $(sbindir) $(datadir)/examples
-	$(INSTALL_SCRIPT) bin/mpicc bin/mpicompile.args bin/mpif77 bin/mpif90 \
+	$(INSTALL_SCRIPT) bin/mpicc bin/mpicompile.args \
+		@MPIF77@ @MPIF90@ \
 		bin/tarch util/execer \
 		bin/mpirun.args bin/mpiman bin/mpirun $(bindir)
 	for file in $(MPIRUNLIST); do \
