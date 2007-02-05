@@ -480,7 +480,7 @@ do
     ## disabled due to timing problems when closing pid-files (the process hung)
     # pidarg="-f ${PIDBASE}_$i"
     pidarg=""
-    rcmd="(cd $WDNAME; $EXP_ENV $progname $mpichtv -r $i -n $np $pidarg $options -- $cmdLineArgs $out $err $input)"
+    rcmd="(cd $WDNAME; $EXP_ENV $progname -r $i -n $np $pidarg $options -- $cmdLineArgs $out $err $input)"
     xrcmd="$progname -r $i -n $np $options -- $cmdLineArgs $input 2>&1"
     xprcmd="$progname -r $i -n $np $options -- $cmdLineArgs $input 2>&1 | $LESS"
 	if [ -n "$debugprocs" ] ; then
@@ -505,7 +505,7 @@ do
 			fi
 			;;
 		totalview)
-			totalviewcmd="cd $WDNAME; $SET_ENV DISPLAY=$DISPLAY ;$EXP_ENV totalview $progname -a $mpichtv -r 0 -n $np $options -- $cmdLineArgs"
+			totalviewcmd="cd $WDNAME; $SET_ENV DISPLAY=$DISPLAY ;$EXP_ENV totalview $progname -a -r 0 -n $np $options -- $cmdLineArgs"
 			;;
 		totalview2)
 			totalview2cmd="\"( cd $WDNAME; $EXP_ENV export DISPLAY=$DISPLAY ; totalview ${commandfile} )\""
