@@ -57,6 +57,10 @@ for c in $cmdLineArgs ; do
   fi
 done
 
+
+BASENAME=`basename $progname` 
+DIRNAME=`dirname $progname`
+
 cmdLineArgs=$tmpLineArgs
 
 # save user and meta args
@@ -65,20 +69,19 @@ usermetaArgs=$cmdLineArgs
 cmdLineArgs="-usedevice $device_nbr"
 
 # number of processes to start
-cmdLineArgs="$cmdLineArgs -n $np"
+cmdLineArgs="${mpichtv} $cmdLineArgs -n $np"
 
 # end of device args
 cmdLineArgs="$cmdLineArgs -- $usermetaArgs"
 
-startpgm="$progname $cmdLineArgs"
+startpgm="cd ${DIRNAME}; $progname $cmdLineArgs"
 
 if [ "$debugger" != "" ] ; then
     if [ "$debugger" = "totalview" -o "$debugger" = "totalview2" ] ; then
         if [ "$TOTALVIEW" = "" ] ; then
 	   TOTALVIEW="totalview"
         fi
-        # We need to put -mpichtv into an environment variable
-        startpgm="$TOTALVIEW $progname -a $cmdLineArgs -mpichtv"
+        startpgm="$TOTALVIEW $progname -a $cmdLineArgs"
     else
 	# There should be a way to specify a debugger startup method, for
         # special vendor-specific debuggers (like SGI's cvd) etc.

@@ -212,7 +212,7 @@ else
    port_nbr=$[$lower_port_bound + $port_nbr]
 fi
 
-common_options="${common_options} -p ${port_nbr}"
+common_options="${mpichtv} ${common_options} -p ${port_nbr}"
 
 if [ ${mpirun_verbose} -gt 1 ] ; then
     echo "*** mpirun.ch_usock: listening port is ${port_nbr}"
@@ -223,6 +223,16 @@ common_options="${common_options} -usedevice ${device_nbr}"
 
 # the master process (and only the master process) gets the number of processes
 master_options="${master_options} -n ${np}"
+
+# if a netmask was supplied:
+if [ -n "$netmask" ] ; then
+    mask=`dirname $netmask`
+    bits=`basename $netmask`
+    # get the master's IP: (this might be not very portable!)
+    master_ip_addr=`host ${MASTER_HOST} | cut -d" " -f 4`
+    # combine the address with the netmask:
+    master_ip_addr=`${bindir}/netmask ${master_ip_addr} ${mask} ${bits}`
+fi
 
 # if a NIC for the master was supplied, ...
 if [ -n "$master_ip_addr" ] ; then
@@ -283,8 +293,7 @@ for h in ${HOSTS} ; do
 		# the first process is the master process
    		totalviewcmd="totalview"
     	if [ "$debugger" == "totalview" ] ; then
-    		mpichtv="-mpichtv"
-			master_launch_cmd="$Show $rshcmd $h \" ( cd ${WDNAME} ; $SET_ENV DISPLAY=$DISPLAY ; ${EXP_ENV} ${USOCK_VERBOSE} ${USOCK_SIZES} ${totalviewcmd} ${DIRNAME}/${BASENAME} -a ${mpichtv} ${common_options} ${master_options} -r 0 -- ${cmdLineArgs} ) \" "
+			master_launch_cmd="$Show $rshcmd $h \" ( cd ${WDNAME} ; $SET_ENV DISPLAY=$DISPLAY ; ${EXP_ENV} ${USOCK_VERBOSE} ${USOCK_SIZES} ${totalviewcmd} ${DIRNAME}/${BASENAME} -a ${common_options} ${master_options} -r 0 -- ${cmdLineArgs} ) \" "
     	elif [ "$debugger" == "totalview2" -a "${is_debug[0]}" = "1" ] ; then
     		#creating TotalView configfile
 
@@ -328,7 +337,7 @@ for h in ${HOSTS} ; do
 			fi
 			tv_item=`expr ${tv_item} + 1`
 		else
-			client_launch_cmd="$Show $rshcmd $h ' ( cd ${WDNAME} ; sleep 2 ; ${EXP_ENV} ${USOCK_SIZES} ${DIRNAME}/${BASENAME} ${mpichtv} ${common_options} ${client_options} -r ${rank_count} -- ${cmdLineArgs} ) ' &"
+			client_launch_cmd="$Show $rshcmd $h ' ( cd ${WDNAME} ; sleep 2 ; ${EXP_ENV} ${USOCK_SIZES} ${DIRNAME}/${BASENAME} ${common_options} ${client_options} -r ${rank_count} -- ${cmdLineArgs} ) ' &"
 			eval $client_launch_cmd
 		fi
     fi

@@ -1,14 +1,16 @@
 #!/bin/sh
 # launch the real application on the participating hosts
 # via the standard mpirun script as it is configured on the host
-# 
+#
 # make sure that the paths are correct on each host
 # and that gawk is available on the machine that launches the meta
 # application (this should change in the future)
 # set -x
 
+nbr() { echo $#;}
+
 if [ ${mpirun_verbose} != 0 ] ; then
-    echo "*** mpirun.meta: running on META environment" 
+    echo "*** mpirun.meta: running on META environment"
 fi
 OIFS=$IFS
 IFS=%
@@ -71,11 +73,47 @@ fi
 
 
 if [ ${mpirun_verbose} -gt 1 ] ; then
-    echo "*** mpirun.meta: configuration file is $metacfg" 
+    echo "*** mpirun.meta: configuration file is $metacfg"
 fi
+
+
+
+if [ "x$debugger" = "xtotalview" ] ; then
+	exp_display="export DISPLAY=$DISPLAY;"
+	j=1
+	for s in $sLines ; do
+		if [ $j = 1 ] ; then
+			tv_switch_for_mh[$j]="-tv"
+		else
+			tv_switch_for_mh[$j]="-mpichtv"
+		fi
+		j=`expr $j + 1`
+	done
+elif [ "x$debugger" = "xtotalview2" ] ; then
+	exp_display="export DISPLAY=$DISPLAY;"
+
+	#build -tv2 switches for each metahost separately
+	IFS=$OIFS
+	i=1
+	for n in $debugargs ; do
+		j=`echo $tv2param | cut -d "," -f $i | cut -d "@" -f 2`
+		if [ "${tv_switch_for_mh[$j]}" != "" ] ; then
+			tv_switch_for_mh[$j]="${tv_switch_for_mh[$j]},"
+		else
+			tv_switch_for_mh[$j]="-tv2 "
+		fi
+		tv_switch_for_mh[$j]="${tv_switch_for_mh[$j]}`echo $tv2param | cut -d "," -f $i | cut -d "@" -f 1`"
+	# 	echo "tv_switch_for_mh[$j]=${tv_switch_for_mh[$j]}"
+		i=`expr $i + 1`
+	done
+	IFS=%
+fi
+
 
 p=0;
 n=1
+#mh: number of metahost
+mh=1
 
 confName=`basename $metacfg`
 confPath=`dirname $metacfg`
@@ -84,13 +122,14 @@ for i in $sLines ; do
     # this is for the first metahost, we just save the command and execute it at last without
     # the ampersand to keep it connected to the user shell
     if [ $n = 1 ] ; then
-	# i contains a hostname 
+	# i contains a hostname
 	if [ $p = 0 ] ; then
 	    lastHost=$i
 	    p=1
 	# i contains a skeleton for commands to be executed
 	else
-	    eLine=$(echo ${i} | sed s%@SHOW@%$show_opt%g)
+# 		echo "tv_switch_for_mh[$mh]=${tv_switch_for_mh[$mh]}"
+    	eLine=$(echo ${i} | sed "s%@SHOW@%$show_opt ${tv_switch_for_mh[$mh]} %g")
 	    eLine=$(echo ${eLine} | sed s%@VERBOSE@%$verbose_opt%g)
 	    eLine=$(echo ${eLine} | sed s%@EXECPATH@%${DIRNAME}%g)
 	    eLine=$(echo ${eLine} | sed "s%source @ENVFILE@;% %g")
@@ -106,19 +145,21 @@ for i in $sLines ; do
 		eLine="$eLine -metaverbose"
 	    fi
 
-	    lastLine=$eLine
+	    lastLine="$exp_display $eLine"
 	    p=0
 	    n=2
+	    mh=`expr $mh + 1`
 	fi
     # this is not for the first metahost, we directly execute the command
     else
-	# i contains a hostname 
+	# i contains a hostname
 	if [ $p = 0 ] ; then
 	    eHost=$i
 	    p=1
 	# i contains a skeleton for commands to be executed
 	else
-	    eLine=$(echo ${i} | sed s%@SHOW@%$show_opt%g) 
+# 		echo "tv_switch_for_mh[$mh]=${tv_switch_for_mh[$mh]}"
+    	eLine=$(echo ${i} | sed "s%@SHOW@%$show_opt ${tv_switch_for_mh[$mh]} %g")
 	    eLine=$(echo ${eLine} | sed s%@VERBOSE@%$verbose_opt%g)
 	    eLine=$(echo ${eLine} | sed s%@EXECPATH@%${DIRNAME}%g)
 	    eLine=$(echo ${eLine} | sed "s%source @ENVFILE@;% %g")
@@ -139,6 +180,8 @@ for i in $sLines ; do
 	    # for the shell to be able to interprete the command line correctly
 	    IFS=$OIFS
 
+	    eLine="$exp_display $eLine"
+
 	    if [ $just_testing = 1 ] ; then
 		echo
 		echo $rshcmd $eHost $eLine
@@ -147,15 +190,16 @@ for i in $sLines ; do
 		# for unicore, we just show the first remote shell calls, but don't execute them
 		if [ $unicore = 0 ] ; then
 		    $rshcmd $eHost $eLine &
-		fi    
-	    else	
+		fi
+	    else
 		$rshcmd $eHost $eLine &
 	    fi
 
-	    # for the shell to execute the for-loop 
+	    # for the shell to execute the for-loop
 	    IFS=%
 
 	    p=0
+	    mh=`expr $mh + 1`
 	fi
     fi
 done
@@ -173,9 +217,8 @@ if [ $just_testing = 1 ] ; then
     # for unicore, we just show the first remote shell calls, but don't execute them
     if [ $unicore = 0 ] ; then
         $rshcmd $lastHost $lastLine &
-    fi    
+    fi
 
 else
     $rshcmd $lastHost $lastLine
 fi
-

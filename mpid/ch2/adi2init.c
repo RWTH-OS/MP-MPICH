@@ -1,6 +1,6 @@
 /*
  * $Id$
- * 
+ *
  * (C) 1995 by Argonne National Laboratory and Mississipi State University. All
  * rights reserved.  See COPYRIGHT in top-level directory.
  *
@@ -35,7 +35,7 @@
 #include "patchlevel.h"
 
 #ifdef META
-#include "metampi.h" 
+#include "metampi.h"
 #include "../../src/routing/rhlist.h"
 #endif /*  /META */
 
@@ -124,7 +124,7 @@ extern unsigned long *Global2Local;
 extern int MPID_numids;
 #endif
 
-void 
+void
 MPID_Init(argc, argv, config, error_code)
     int            *argc, *error_code;
     void           *config;
@@ -181,8 +181,8 @@ MPID_Init(argc, argv, config, error_code)
      * Needs to be changed for persistent handles.  A common request
      * form?
      */
-    
-	  /* 
+
+	  /*
        * check for verbose startup
        * this is necessary to be able to have verbose output before MPIR_Init has been called
        */
@@ -199,13 +199,13 @@ MPID_Init(argc, argv, config, error_code)
 #endif /*META*/
       	}
       }
-      
+
       MPID_ArgSqueeze( argc, *argv );
-    
-    
+
+
     if (config_info) {
 	/* config_info != NULL means that we are running a meta computer (with at least two meta hosts) */
-	
+
 #ifdef META
       MPID_Config    *p;
       int global_rank, metahost_rank;
@@ -217,8 +217,8 @@ MPID_Init(argc, argv, config, error_code)
 	  	strcat(RDEBUG_dbgprefix, "|" );
 	  	strcat(RDEBUG_dbgprefix, MPIR_meta_cfg.nodeName);
 	  	strcat(RDEBUG_dbgprefix, "]" );
-      }	
-      
+      }
+
       if( use_ch_gm ) {
 #ifdef CH_GM_PRESENT
 	  /* ch_gm is a very special case */
@@ -236,13 +236,13 @@ MPID_Init(argc, argv, config, error_code)
 	  /* Make devset safe for initializations errors */
 	  MPID_devset->req_pending = NULL;
 	  MPID_devset->dev_list = NULL;
-	  MPID_devset->active_dev = NULL;	  
+	  MPID_devset->active_dev = NULL;
 
 	  /* the native devices of ch_gm and the gateway device, these
 	     numbers are later increased for the routers, which use ch_tunnel, too  */
 	  MPID_devset->ndev      = MPID_GM_devset->ndev + 1;
 	  MPID_devset->ndev_list = MPID_GM_devset->ndev_list + 1;
-	  
+
 	  MPID_devset->dev = (MPID_Device **) MALLOC( (MPIR_meta_cfg.np + MPIR_meta_cfg.nrp) * sizeof(MPID_Device *) );
 	  if (!MPID_devset->dev) {
 	      *error_code = MPI_ERR_INTERN;
@@ -279,7 +279,7 @@ MPID_Init(argc, argv, config, error_code)
       }
       else {
 	  /* initialization of primary device when not running ch_gm */
-	  
+
 	  MPID_devset = (MPID_DevSet *) MALLOC(sizeof(MPID_DevSet));
 	  if (!MPID_devset) {
 	      *error_code = MPI_ERR_INTERN;
@@ -290,24 +290,24 @@ MPID_Init(argc, argv, config, error_code)
 	  MPID_devset->req_pending = NULL;
 	  MPID_devset->dev_list = NULL;
 	  MPID_devset->active_dev = NULL;
-	  
+
 	  /* the native device and the gateway device, these numbers are later increased for
 	     the routers, which use ch_tunnel, too  */
-	  MPID_devset->ndev = 2; 
+	  MPID_devset->ndev = 2;
 	  MPID_devset->ndev_list = 2;
-	  
+
 	  MPID_devset->dev = (MPID_Device **) MALLOC( (MPIR_meta_cfg.np + MPIR_meta_cfg.nrp) * sizeof(MPID_Device *) );
 	  if (!MPID_devset->dev) {
 	      *error_code = MPI_ERR_INTERN;
 	      RETURN;
 	  }
-	  
+
 	  p = config_info;
-	  
+
 	  /* **************
 	     PRIMARY DEVICE
-	     ************** */ 
-	  
+	     ************** */
+
 	  /* initialize device */
 	  PRVERBOSE("Initializing primary device...\n");
 	  dev = (p->device_init) (argc, argv, MPID_Short_len, -1);
@@ -318,24 +318,24 @@ MPID_Init(argc, argv, config, error_code)
 	  PRVERBOSE("Primary device initialized.\n");
 	  /* needed for the initialization of ch_tunnel below */
 	  primary_dev = dev;
-	  
+
 	  /* include device in list of different devices */
 	  dev->next = MPID_devset->dev_list;
 	  MPID_devset->dev_list = dev;
-	  
+
 	  /*  for any process with number j in the whole system ( rank in
 	      MPI_COMM_ALL for META-enviranments ),
 	      MPID_devset->dev[j] points to the device via which
 	      we send messages from here to that process */
 	  for (i = 0; i < p->num_served; i++)
 	      MPID_devset->dev[p->granks_served[i]] = dev;
-	  
+
 	  /* set up mapping global ranks to local device ranks and vice versa */
 	  dev->grank_to_devlrank = (int *)MALLOC(sizeof(int) * (MPIR_meta_cfg.np + MPIR_meta_cfg.nrp));
 	  for( i = 0; i < p->num_served; i++ )
 	      dev->grank_to_devlrank[p->granks_served[i]] = i;
       } /* end of initialization of primary device when not running ch_gm */
-      
+
       /* set MPID_MyWorldRank / MPID_MyWorldSize for those devices that don't do this anymore (which
 	 should be all devices in the near future) */
       if( MPID_MyWorldRank == -1 )
@@ -351,17 +351,21 @@ MPID_Init(argc, argv, config, error_code)
 	      MPIR_meta_cfg.my_routingid = i;
       }
       MPIR_meta_cfg.my_rank_on_metahost = MPID_MyWorldRank;
-      
+
       /* now it is time to check if we are a router */
       if (!MPIR_meta_cfg.router && MPIR_meta_cfg.routerAutoCfg &&
 	  (MPIR_meta_cfg.dedicated_rp ||
 	   ( MPIR_meta_cfg.my_routingid != -1 ) ) ) {
-	  
-	  
-	  /* this proc will become a router proc */ 
+
+
+	  /* this proc will become a router proc */
 	  MPIR_meta_cfg.router = 1;
 	  (MPID_devset->ndev)++;
 	  (MPID_devset->ndev_list)++;
+	  /* since this is a router, set mpichtv_flag to 0, so process will
+	   * not be attached to by totalview
+	   */
+	  mpichtv_flag = 0;
 
 	  /* if we also use a secondary device, p->next points to it, otherwise,
 	     p->next points to the gateway device */
@@ -378,41 +382,41 @@ MPID_Init(argc, argv, config, error_code)
 	     if MPIR_meta_cfg.my_localrank = j, then this process is the
 	     jth application process on this metahost */
 	  int i;
-	  
+
 	  MPIR_meta_cfg.my_localrank = 0;
 	  i = 0;
 	  while( i < MPIR_meta_cfg.my_rank_on_metahost ) {
 	      if( !(MPIR_meta_cfg.isRouter[i]) )
 		  MPIR_meta_cfg.my_localrank++;
 	      i++;
-	  } 
+	  }
       }
-      
+
       /* need to get to know the other MPI procs on this machine */
       MPID_MyLocalSize = MPIR_meta_cfg.np_metahost[MPIR_meta_cfg.my_metahost_rank];
-      /* local rank is assigned from command line */ 
-      MPID_MyLocalRank = MPIR_meta_cfg.my_localrank; 
-      
+      /* local rank is assigned from command line */
+      MPID_MyLocalRank = MPIR_meta_cfg.my_localrank;
+
       MPID_MyHostRank = MPIR_meta_cfg.my_rank_on_metahost;
       MPID_MyHostSize = MPID_MyLocalSize + MPIR_meta_cfg.nrp_metahost[MPIR_meta_cfg.my_metahost_rank];
-      
+
       MPID_MyMetaRank = 0;
-      for (i = 0; i < MPIR_meta_cfg.my_metahost_rank; i++) 
+      for (i = 0; i < MPIR_meta_cfg.my_metahost_rank; i++)
 	  MPID_MyMetaRank += MPIR_meta_cfg.np_metahost[i];
       MPID_MyMetaRank += MPID_MyLocalRank;
       MPID_MyMetaSize = MPIR_meta_cfg.np;
-      
+
       MPID_MyWorldRank = MPID_MyMetaRank;
       MPID_MyWorldSize = MPID_MyMetaSize;
-      
+
       MPID_MyAllRank = MPIR_meta_cfg.metahost_firstrank + MPIR_meta_cfg.my_rank_on_metahost;
       MPID_MyAllSize = MPIR_meta_cfg.np + MPIR_meta_cfg.nrp;
-      
+
       /* ****************
 	 SECONDARY DEVICE
 	 **************** */
       if( MPIR_meta_cfg.useSecondaryDevice ) {
-	  
+
 	  /* advance pointer to secondary device */
 	  p = p->next;
 
@@ -421,7 +425,7 @@ MPID_Init(argc, argv, config, error_code)
 	  if( MPID_buildRankMappingForSecondaryDevice() != MPI_SUCCESS ) {
 	      fprintf( stderr, "MPID_buildRankMappingForSecondaryDevice() returned with an error\n" );
 	      fflush( stderr );
-	      
+
 	      *error_code = MPI_ERR_INTERN;
 	      RETURN;
 	  }
@@ -431,12 +435,12 @@ MPID_Init(argc, argv, config, error_code)
 	  if( MPID_buildSecondaryDeviceArgs( MPIR_meta_cfg.secondaryDevice, argv ) != MPI_SUCCESS ) {
 	      fprintf( stderr, "MPID_buildSecondaryDeviceArgs() returned with an error\n" );
 	      fflush( stderr );
-	      
+
 	      *error_code = MPI_ERR_INTERN;
 	      RETURN;
 	  }
-      
-      
+
+
 	  if (RDEBUG_verbose){
 	  	fprintf(stderr, "%sStarting secondary device initialization with cmdLine:", RDEBUG_dbgprefix);
 	  	for (i = 0; i < MPID_SecondaryDevice_argc; i++ ) {
@@ -445,30 +449,30 @@ MPID_Init(argc, argv, config, error_code)
 	  	fprintf(stderr, "\n");
 	  	fflush(stderr);
 	  }
-  	
+
 	  /* call device initialization function for secondary device with fake command line arguments */
 	  dev = (p->device_init)( &MPID_SecondaryDevice_argc, &MPID_SecondaryDevice_argv, MPID_Short_len, -1 );
-  
+
 	  PRVERBOSE("Secondary device initialization done.\n");
-	  
+
 	  /* include device in list of different devices */
 	  dev->next = MPID_devset->dev_list;
 	  MPID_devset->dev_list = dev;
-	  
+
 	  /*  for any process with number j in the whole system ( rank in
 	      MPI_COMM_ALL for META-environments ),
 	      MPID_devset->dev[j] points to the device via which
 	      we send messages from here to that process */
 	  for( i = 0; i < p->num_served; i++ )
 	      MPID_devset->dev[p->granks_served[i]] = dev;
-	  
+
 	  /* The rank mappings for the seondary device have already been set */
 	  dev->grank_to_devlrank = MPID_SecondaryDevice_grank_to_devlrank;
-      } /* end of secondary device initialization */ 
-      
+      } /* end of secondary device initialization */
+
       /* p should now point to the device before the gateway device (primary or secondary) */
 
-      
+
       if( MPIR_meta_cfg.useRouters ) {
 
 	  /* advance pointer to the gateway device */
@@ -477,7 +481,7 @@ MPID_Init(argc, argv, config, error_code)
 	  /* **************
 	     gateway device
 	     ************** */
-      
+
 	  /* initialize device */
 	  dev = (p->device_init) (argc, argv, MPID_Short_len, -1);
 	  if (!dev) {
@@ -495,40 +499,40 @@ MPID_Init(argc, argv, config, error_code)
 	      we send messages from here to that process */
 	  for (i = 0; i < p->num_served; i++)
 	      MPID_devset->dev[p->granks_served[i]] = dev;
-	  
+
 	  /* set mapping global ranks -> local device ranks */
 	  dev->grank_to_devlrank = (int *)MALLOC(sizeof(int) * (MPIR_meta_cfg.np + MPIR_meta_cfg.nrp));
 	  for (i = 0; i < (MPIR_meta_cfg.np + MPIR_meta_cfg.nrp); i++)
 	      dev->grank_to_devlrank[i] = i;
-	  
+
 	  /* *advance pointer to the tunnel device (if any) */
 	  p = p->next;
-	  
-	  
+
+
 	  if( p ) {
 
 	      /* ***************************
 		 tunnel device (only routers)
 		 **************************** */
-	      
+
 	      /* initialize device */
 	      dev = (p->device_init) (argc, argv, MPID_Short_len, -1);
 	      if (!dev) {
 		  *error_code = MPI_ERR_INTERN;
 		  RETURN;
 	      }
-	      
+
 	      /* include device in list of different devices */
 	      dev->next = MPID_devset->dev_list;
 	      MPID_devset->dev_list = dev;
-	      
+
 	      /* for ch_tunnel, we save the pointers to the devices on the metahost, before
 		 they are overwritten later (we save all pointers including those to ch_gateway,
 		 but it's only the pointers to the native devices that we are interested in)*/
 	      MPID_Tunnel_native_dev = (MPID_Device **)MALLOC( sizeof(MPID_Device *) * (MPIR_meta_cfg.np + MPIR_meta_cfg.nrp) );
-	      for( i = 0; i < MPIR_meta_cfg.np + MPIR_meta_cfg.nrp; i++ ) 
+	      for( i = 0; i < MPIR_meta_cfg.np + MPIR_meta_cfg.nrp; i++ )
 		  MPID_Tunnel_native_dev[i] = MPID_devset->dev[i];
-	      
+
 	      /*  for any process with number j in the whole system ( rank in
 		  MPI_COMM_ALL for META-enviranments ),
 		  MPID_devset->dev[j] points to the device via which
@@ -536,13 +540,13 @@ MPID_Init(argc, argv, config, error_code)
 	      /* here, we overwrite pointers to the native device */
 	      for (i = 0; i < p->num_served; i++)
 		  MPID_devset->dev[p->granks_served[i]] = dev;
-	      
+
 	      /* set mapping global ranks -> local device ranks */
 	      dev->grank_to_devlrank = (int *)MALLOC(sizeof(int) * (MPIR_meta_cfg.np + MPIR_meta_cfg.nrp));
 	      for( i = 0; i < p->num_served; i++ )
 		  dev->grank_to_devlrank[p->granks_served[i]] =
 		      primary_dev->grank_to_devlrank[p->granks_served[i]];
-	      
+
 	  } /* end of code for ch_tunnel */
       } /* end of initialization of ch_gateway and ch_tunnel */
 #endif /* META */
@@ -551,7 +555,7 @@ MPID_Init(argc, argv, config, error_code)
 	/* device initialization without meta devices (ch_gateway and ch_tunnel) or secondary device */
 
 	if( !use_ch_gm ) {
-	    
+
 	    /*
 	     * Create the device set structure.  Currently, only handles one
 	     * device and maps all operations to that device
@@ -561,7 +565,7 @@ MPID_Init(argc, argv, config, error_code)
 		*error_code = MPI_ERR_INTERN;
 		RETURN;
 	    }
-	    
+
 	    /* Make devset safe for initializations errors */
 	    MPID_devset->req_pending = NULL;
 	    MPID_devset->dev_list = NULL;
@@ -569,7 +573,7 @@ MPID_Init(argc, argv, config, error_code)
 	}
 
 #ifdef DEBUG_TRACE
-TR_stack_debug =1; 
+TR_stack_debug =1;
 #endif
 
 #ifndef WIN32
@@ -586,11 +590,11 @@ TR_stack_debug =1;
 	    TR_MSG("CH_P4_PRESENT defined");
 	case DEVICE_ch_p4_nbr:
 #endif
-#ifdef CH_USOCK_PRESENT	
+#ifdef CH_USOCK_PRESENT
 	    TR_MSG("CH_USOCK_PRESENT defined");
 	case DEVICE_ch_usock_nbr:
 #endif
-#ifdef CH_MPX_PRESENT	
+#ifdef CH_MPX_PRESENT
 	    TR_MSG("CH_MPX_PRESENT defined");
 	case DEVICE_ch_mpx_nbr:
 #endif
@@ -637,7 +641,7 @@ TR_stack_debug =1;
 	/*
 	  MPID_Short_len default is -1 -> default MPID_PKT_MAX_DATA_SIZE
 	  MPID_PKT_MAX_DATA_SIZE defined in packets.h: 16384
-	  change with parameter -mpipktsize 
+	  change with parameter -mpipktsize
 	  long_len: parameter -1 -> default 128000*/
 	TR_MSG("CH_WSOCK_PRESENT defined");
 	dev = (MPID_Device*)MPID_CH_WSOCK_InitMsgPass( argc, argv, MPID_Short_len, -1 );
@@ -655,18 +659,18 @@ TR_stack_debug =1;
 #ifdef DEBUG_TRACE
 	TR_stack_debug =0;
 #endif
-	
+
 	/* set MPID_MyWorldRank / MPID_MyWorldSize for those devices that don't do this anymore (which
 	   should be all devices in the near future) */
 	if( MPID_MyWorldRank == -1 )
 	    MPID_MyWorldRank = dev->lrank;
 	if( MPID_MyWorldSize == -1 )
 	    MPID_MyWorldSize = dev->lsize;
-	
+
 	/* if we run with only one device, these should be all the same */
 	MPID_MyHostRank = MPID_MyLocalRank = MPID_MyMetaRank = MPID_MyAllRank = MPID_MyWorldRank;
 	MPID_MyHostSize = MPID_MyLocalSize = MPID_MyMetaSize = MPID_MyAllSize = MPID_MyWorldSize;
-	
+
 	if( !use_ch_gm ) {
 	    /*
 	     * Get the device type and the number of processors
@@ -687,7 +691,7 @@ TR_stack_debug =1;
 		    dev->next->grank_to_devlrank[i] = i;
 	    }
 #endif
-	
+
 #ifdef CH_WSOCK_PRESENT
 	    /* this preprocessor flag should be used only on windows;
 	       the initialization function of ch_wsock maybe returned a pointer
@@ -697,7 +701,7 @@ TR_stack_debug =1;
 #else
 	    MPID_devset->ndev = 1;
 #endif
-	    
+
 	    MPID_devset->dev = (MPID_Device **) MALLOC( MPID_MyAllSize * sizeof(MPID_Device *));
 	    if (!MPID_devset->dev) {
 		*error_code = MPI_ERR_INTERN;
@@ -711,15 +715,15 @@ TR_stack_debug =1;
 		    MPID_devset->dev[i] = dev->next;/* NTSHMEM device */
 		else
 		    MPID_devset->dev[i] = dev;/* WSOCK device */
-	    
+
 	    MPID_devset->ndev_list = MPID_devset->ndev = (dev->next ? 2 : 1);
 #else
 	    for( i = 0; i < MPID_MyAllSize; i++ )
 		MPID_devset->dev[i] = dev;
-	    
+
 	    MPID_devset->ndev_list = 1;
 #endif
-	    
+
 	    MPID_devset->dev_list = dev;
 	}
 	else {
@@ -727,12 +731,12 @@ TR_stack_debug =1;
 	    /* using ch_gm */
 	    MPID_devset = MPID_GM_devset;
 	    MPID_GM_post_init( argc, argv );
-#endif	
+#endif
 	}
-	
+
     } /* end of initialization without meta devices (ch_gateway and ch_tunnel) */
-    
-    
+
+
 #ifdef MPIR_MEMDEBUG
     TR_MSG("MPIR_MEMDEBUG defined");
     MPID_trinit(MPID_MyAllRank);
@@ -743,7 +747,7 @@ TR_stack_debug =1;
      * for sending the arguments to other processors.
      */
     MPID_ProcessArgs(argc, argv);
-    
+
     /*
      * does any of the channel devices offer a timing function? Use it as
      * it is probably better than gettimeofday()
@@ -753,9 +757,9 @@ TR_stack_debug =1;
      * resolution/highest precision would be nice, but it would take some
      * time to determine it
      */
-    
+
     dev = MPID_devset->dev_list;
-    
+
     while (dev) {
       if (dev->wtime != NULL) {
 	MPID_dev_wtime = dev->wtime;
@@ -772,7 +776,7 @@ TR_stack_debug =1;
  * should probably be a separate argument for whether it is a user requested
  * or internal abort.
  */
-void 
+void
 MPID_Abort(comm_ptr, code, user, str)
     struct MPIR_COMMUNICATOR *comm_ptr;
     int             code;
@@ -814,14 +818,14 @@ MPID_Abort(comm_ptr, code, user, str)
     }
 }
 
-void 
+void
 MPID_End()
 {
     MPID_Device    *dev, *ndev;
 #ifdef CH_GM_PRESENT
     MPID_Config * config_info;
 #endif /* CH_GM */
-    
+
 
     DEBUG_PRINT_MSG("Entering MPID_End")
 	/* Finish off any pending transactions */
@@ -861,7 +865,7 @@ MPID_End()
     /* Free remaining storage */
     FREE(MPID_devset->dev);
     FREE(MPID_devset);
-    
+
 #ifdef CH_GM_PRESENT
     while (gm_config_info_copy != NULL)
     {
@@ -872,7 +876,7 @@ MPID_End()
 	free(config_info);
     }
 #endif /* CH_GM */
-    
+
 #if defined(MPIR_MEMDEBUG) && defined(MPID_ONLY)
     /* MPI_Finalize also does this */
     MPID_trdump(stdout);
@@ -883,7 +887,7 @@ MPID_End()
  * Returns 1 if something found, -1 otherwise (if is_blocking is
  * MPID_NOTBLOCKING)
  */
-int 
+int
 MPID_DeviceCheck(is_blocking)
     MPID_BLOCKING_TYPE is_blocking;
 {
@@ -899,18 +903,18 @@ MPID_DeviceCheck(is_blocking)
     while (!found) {
 	dev = MPID_devset->dev_list;
 	while (dev) {
-		
+
 	    /* if we have multiple devices running, we never block  */
 	    if( MPID_devset->ndev > 1 )
 	        lerr = MPID_Device_call_check_device (dev, MPID_NOTBLOCKING);
 	    else {
 		/* attention: using threads breaks multi-device-safety! */
 #ifndef MPID_USE_DEVTHREADS
-		/* If threads are used in the device, they will take care of 
-		   completing the message, and *this* thread has to block if 
+		/* If threads are used in the device, they will take care of
+		   completing the message, and *this* thread has to block if
 		   this is requested here!
-		       
-		   If threads are *not* used, we will want to loop over all 
+
+		   If threads are *not* used, we will want to loop over all
 		   devices, and thus enforce NOTBLOCKING. */
 		is_blocking = MPID_NOTBLOCKING;
 #endif
@@ -923,17 +927,17 @@ MPID_DeviceCheck(is_blocking)
 	if (is_blocking == MPID_NOTBLOCKING) {
 	    break;
 	}
-	    
+
     }
 
     MPID_devset->active_dev = actual_dev;
-	
+
     DEBUG_PRINT_MSG("Exiting DeviceCheck");
 	TR_POP;
     return (found) ? found : -1;
 }
 
-int 
+int
 MPID_Collops_init(struct MPIR_COMMUNICATOR * comm, MPIR_COMM_TYPE comm_type)
 {
     MPIR_COLLOPS    new_collops;
@@ -958,7 +962,7 @@ MPID_Collops_init(struct MPIR_COMMUNICATOR * comm, MPIR_COMM_TYPE comm_type)
     return MPI_SUCCESS;
 }
 
-int 
+int
 MPID_CommInit(struct MPIR_COMMUNICATOR * oldcomm,
 	      struct MPIR_COMMUNICATOR * newcomm)
 {
@@ -977,7 +981,7 @@ MPID_CommInit(struct MPIR_COMMUNICATOR * oldcomm,
     return MPI_SUCCESS;
 }
 
-int 
+int
 MPID_CommFree(struct MPIR_COMMUNICATOR * comm)
 {
     if ((MPID_devset->ndev == 1) && MPID_devset->dev_list->comm_free) {
@@ -991,7 +995,7 @@ MPID_CommFree(struct MPIR_COMMUNICATOR * comm)
     return MPI_SUCCESS;
 }
 
-int 
+int
 MPID_Complete_pending()
 {
     MPID_Device    *dev;
@@ -1013,7 +1017,7 @@ MPID_Complete_pending()
     return MPI_SUCCESS;
 }
 
-void 
+void
 MPID_SetPktSize(len)
     int             len;
 {
@@ -1023,7 +1027,7 @@ MPID_SetPktSize(len)
 /*
  * Perhaps this should be a util function
  */
-int 
+int
 MPID_WaitForCompleteSend(request)
     MPIR_SHANDLE   *request;
 {
@@ -1032,7 +1036,7 @@ MPID_WaitForCompleteSend(request)
     return MPI_SUCCESS;
 }
 
-int 
+int
 MPID_WaitForCompleteRecv(request)
     MPIR_RHANDLE   *request;
 {
@@ -1041,7 +1045,7 @@ MPID_WaitForCompleteRecv(request)
     return MPI_SUCCESS;
 }
 
-void 
+void
 MPID_Version_name(name)
     char           *name;
 {
@@ -1075,7 +1079,7 @@ void debug_print_devset()
 {
     MPID_Device *dev;
     int n;
-  
+
     printf( "\n-----------------------------------------\n" );
     printf( "MPID_devset:\n" );
     printf( "  ndev = %d, dev =", MPID_devset->ndev );
@@ -1109,33 +1113,33 @@ int MPID_GM_special_init( int *argc, char ***argv )
   int ndev = 0;
   int np, i;
   MPID_Device *dev;
-  
-  /* 
+
+  /*
      We call MPID_GM_GetConfigInfo() to fill up the MPID_Config structure to describe
      the different devices and the routes.
   */
   gm_config_info = MPID_GM_GetConfigInfo( argc, argv );
-  
+
   gm_config_info_copy = gm_config_info;
-  
+
   np = 0;
   if( gm_config_info ) {
-	    
+
     /* calculate the number of devices */
     p = gm_config_info;
     while (p) {
       ndev++;
-      
+
       for (i = 0; i < p->num_served; i++) {
 	if (p->granks_served[i] > np)
 	  np = p->granks_served[i];
       }
-      
+
       p = p->next;
     }
-	    
+
     np++;
-    
+
     /*
      * Create the device set structure
      */
@@ -1146,7 +1150,7 @@ int MPID_GM_special_init( int *argc, char ***argv )
     /* Make devset safe for initializations errors */
     MPID_GM_devset->req_pending = 0;
     MPID_GM_devset->dev_list = 0;
-    
+
     MPID_GM_devset->ndev = ndev;
     MPID_GM_devset->ndev_list = ndev-1;
     MPID_GM_devset->dev = (MPID_Device **) MALLOC( np * sizeof(MPID_Device *));
@@ -1154,7 +1158,7 @@ int MPID_GM_special_init( int *argc, char ***argv )
       return MPI_ERR_INTERN;
     }
     p = gm_config_info;
-    
+
     while (p) {
       dev = (p->device_init)( argc, argv, MPID_Short_len, -1 );
       if (!dev) {
@@ -1167,7 +1171,7 @@ int MPID_GM_special_init( int *argc, char ***argv )
 
       dev->next = MPID_GM_devset->dev_list;
       MPID_GM_devset->dev_list = dev;
-      for (i=0; i<p->num_served; i++) 
+      for (i=0; i<p->num_served; i++)
 	MPID_GM_devset->dev[p->granks_served[i]] = dev;
       p = p->next;
     }
@@ -1178,7 +1182,7 @@ int MPID_GM_special_init( int *argc, char ***argv )
     fprintf (stderr, "Configuration retrieval failed\n");
     gmpi_abort (0);
   }
-  
+
 
   MPID_MyWorldRank = MPID_GM_rank;
   MPID_MyWorldSize = MPID_GM_size;
@@ -1192,18 +1196,18 @@ void MPID_GM_post_init( int *argc, char ***argv )
   char hostname[GM_MAX_HOST_NAME_LEN];
   char execname[256];
   int msgrp = 0;
-  MPI_Status status;    
+  MPI_Status status;
   struct MPIR_COMMUNICATOR *comm = 0;
 
 #ifdef NEEDS_PROCESS_GROUP_FIX
   /* Call this to force each MPI job into a separate process group
      if there is no attached terminal.  This is necessary on some
      systems to overcome runtime libraries that kill a process group
-     on abnormal exit (the proces group can contain the invoking 
+     on abnormal exit (the proces group can contain the invoking
      shell scripts and programs otherwise) */
   MPID_FixupProcessGroup();
 #endif
-    
+
   /* Initialize the array on node with MPI process 0 that contains
      pid information for all processes. The index of the array is the same
      as the mpi rank of the process. We associate this with a node by
@@ -1212,7 +1216,7 @@ void MPID_GM_post_init( int *argc, char ***argv )
   mypid = (int) getpid();
   gm_get_host_name (gmpi_gm_port, hostname);
   strcpy (execname, ((const char **) (*argv))[0]);
-  
+
   if (MPID_MyWorldRank == 0) {
     gmpi.mpi_pids[0] = mypid;
     gmpi.host_names[0] = (char *) malloc (strlen (hostname) + 1);
@@ -1225,18 +1229,18 @@ void MPID_GM_post_init( int *argc, char ***argv )
 		       "MPID_Init",
 		       "malloc: exec names");
     strcpy (gmpi.exec_names[0], execname);
-    for (j=1; j<MPID_MyWorldSize; j++) 
+    for (j=1; j<MPID_MyWorldSize; j++)
       {
-	MPID_RecvContig(&(gmpi.mpi_pids[j]), sizeof(int), j, 
+	MPID_RecvContig(&(gmpi.mpi_pids[j]), sizeof(int), j,
 			0, 0, &status ,&err);
-	MPID_RecvContig(hostname, GM_MAX_HOST_NAME_LEN 
+	MPID_RecvContig(hostname, GM_MAX_HOST_NAME_LEN
 			* sizeof(char), j, 0, 0, &status ,&err);
 	gmpi.host_names[j] = (char *) malloc (strlen (hostname) + 1);
 	gmpi_malloc_assert(gmpi.host_names[j],
 			   "MPID_Init",
 			   "malloc: host names");
 	strcpy (gmpi.host_names[j], hostname);
-	MPID_RecvContig(execname, 256 * sizeof(char), 
+	MPID_RecvContig(execname, 256 * sizeof(char),
 			j, 0, 0, &status ,&err);
 	gmpi.exec_names[j] = (char *) malloc (strlen (execname) + 1);
 	gmpi_malloc_assert(gmpi.exec_names[j],
@@ -1247,11 +1251,11 @@ void MPID_GM_post_init( int *argc, char ***argv )
   }
   else
     {
-      MPID_SendContig(&mypid, sizeof(int), MPID_MyWorldRank, 
+      MPID_SendContig(&mypid, sizeof(int), MPID_MyWorldRank,
 		      0, 0, 0, msgrp, &err);
-      MPID_SendContig(hostname, GM_MAX_HOST_NAME_LEN * sizeof(char), 
+      MPID_SendContig(hostname, GM_MAX_HOST_NAME_LEN * sizeof(char),
 		      MPID_MyWorldRank, 0, 0, 0, msgrp, &err);
-      MPID_SendContig(execname, 256 * sizeof(char), 
+      MPID_SendContig(execname, 256 * sizeof(char),
 		      MPID_MyWorldRank, 0, 0, 0, msgrp, &err);
       gmpi.host_names[MPID_MyWorldRank] = (char *) malloc (strlen (hostname) + 1);
       gmpi_malloc_assert(gmpi.host_names[MPID_MyWorldRank],

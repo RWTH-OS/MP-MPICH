@@ -241,7 +241,7 @@ if [ -n "$devFile" ] ; then
 	smi_irq_opt=""
    fi
 fi
-options="$options $smi_irq_opt"
+options="${mpichtv} $options $smi_irq_opt"
 
 # set initialization host
 INIT_HOST=`firsthost $HOSTS`
@@ -341,7 +341,7 @@ if [ $smistaton = 1 ] ; then
 fi
 
 # check if user has turned of the watchdog
-if [ $watchdog = "no" -o -n "$debugprocs" ] ; then
+if [ $watchdog = "no" -o -n "$debugprocs" -o -n "$mpichtv" ] ; then
     options="$options -w"
 fi
 
@@ -505,7 +505,6 @@ do
 			fi
 			;;
 		totalview)
-			mpichtv="-mpichtv"
 			totalviewcmd="cd $WDNAME; $SET_ENV DISPLAY=$DISPLAY ;$EXP_ENV totalview $progname -a $mpichtv -r 0 -n $np $options -- $cmdLineArgs"
 			;;
 		totalview2)

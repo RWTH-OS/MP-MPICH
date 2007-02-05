@@ -581,22 +581,28 @@ while [ 1 -le $# ] ; do
       	just_testing=1
 	Show=echo
 	;;
-    -tv|-totalview)
-        debugger="totalview"
-        debugprocs=0
-        console=1
-        consoles=0
+	-tv|-totalview)
+		debugger="totalview"
+		debugprocs=0
+		console=1
+		consoles=0
+		mpichtv="-mpichtv"
 	;;
     -tv2)
 	debugger="totalview2"
 	commandfile="-s %f"
 	debugargs=`echo $1 | sed "s/,/ /g"`
+	#get rid of @, since this should only be used in meta-runs
+	debugargs=`echo $debugargs | sed "s/@[0-9]//g"`
 	console=1
 	shift
 	for d in $debugargs ; do
 	    debugprocs=${debugprocs}" "$d
 	    consoles=${consoles}" "$d
 	done
+	;;
+    -mpichtv)
+		mpichtv="-mpichtv"
 	;;
     -ld_lib_path)
         ld_lib_path="$1"
