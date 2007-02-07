@@ -2,8 +2,13 @@
 # Since this is the top-level makefile for all tests, it does not need to
 # compile anything.
 
-TESTDIRS := pt2pt coll topol env context profile @IO@ ssided resources command
-SUBDIRS := util pt2pt coll topol env context profile @IO@ ssided resources command
+TESTDIRS := pt2pt coll topol env context profile ssided resources command
+SUBDIRS := util pt2pt coll topol env context profile ssided resources command
+
+ifeq (@ROMIO@,1)
+TESTDIRS += io
+SUBDIRS += io
+endif
 
 srcdir := @srcdir@
 
