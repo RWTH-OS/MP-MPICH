@@ -1,29 +1,13 @@
-ALL: default
-##### User configurable options #####
+# $Id$
 
-ARCH        := @ARCH@
 META        := @META@
-MPIR_HOME   := @MPIR_HOME@
-CC          := @CC@
-CLINKER     := $(CC)
-CXX         := @CXX@
-CCLINKER    := $(CXX)
-F77         := @F77@
-FLINKER     := $(F77)
-AR          := @AR@
-RANLIB      := @RANLIB@
-PROFILING   := $(PMPILIB)
-OPTFLAGS    := @OPTFLAGS@
-MPE_GRAPH   := @MPE_GRAPHICS@
-DEVICE      := @DEVICE@
 
 ### End User configurable options ###
 SHELL := /bin/sh
 
-# We're not ready to do contrib by default yet; 
+# We're not ready to do contrib by default yet;
 SUBDIRS := test perftest basic
 TESTDIRS := test
-EXECS := sendchar
 
 ifeq ($(META),yes)
 SUBDIRS += meta
@@ -77,7 +61,6 @@ all: subdirs testing
 clean:
 	@echo "" ;
 	@echo "*# cleaning examples & testsuite" ;
-	@rm -f $(EXECS) *.o
 	@for dir in $(SUBDIRS) ;\
 		do \
 			if [ ! -d $$dir -o ! -s $$dir/Makefile ] ; then \
