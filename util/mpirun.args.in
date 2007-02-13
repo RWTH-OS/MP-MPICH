@@ -194,6 +194,10 @@ cat <<EOF
     -tv     Start under totalview
     -tv2    all | <rank | host,...,rank | host>
             Start the specified processes under totalview
+            If you use meta, please take the following syntax:
+            -tv2 0@1,2@1,5@2 to run process 0 and 2 of the first metahost under
+            one instance of totalview and process 5 of the second metahost under
+            a second instance of totalview.
     -break  <specification>
             Set a breakpoint at the location specified. The syntax of the
             specification needs to match the selected debugger.
@@ -595,6 +599,15 @@ while [ 1 -le $# ] ; do
 	debugargs=`echo $1 | sed "s/,/ /g"`
 	#get rid of @, since this should only be used in meta-runs
 	debugargs=`echo $debugargs | sed "s/@[0-9]//g"`
+	#check for proper arguments are after -tv2
+	ret=`expr "$debugargs" : '[0-9]\+'`
+	if [ $ret = 0 ] ; then
+		echo "*** mpirun.args:"
+		echo "ERROR: You entered \"$1\" after the parameter -tv2."
+		echo "There has to be a number or something like 1@2 after the parameter -tv2."
+		echo "Type mpirun -help for more info."
+		exit
+	fi
 	console=1
 	shift
 	for d in $debugargs ; do
