@@ -48,6 +48,11 @@ int main( int argc, char **argv )
     src  = size - 1;
     dest = 0;
  */
+	if (size < 2){
+		fprintf(stderr,"Needs at least two processes");
+		fflush(stderr);
+		return 1;
+	}
     src = 0;
     dest = size - 1;
     /* waiter = dest; */  	/* Receiver delays, so msgs unexpected */
