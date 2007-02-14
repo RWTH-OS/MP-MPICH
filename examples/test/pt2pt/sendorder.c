@@ -91,15 +91,28 @@ int main( int argc, char *argv[] )
   dest = size - 1;
 
   /* Single Int */
+#ifdef _DEBUG
+  printf("[%i] starting single int\n",rank);fflush(stdout);
+  Sleep(1);
+#endif
+
   MPI_Barrier( comm );
   if (rank == src) {
     for (i=0; i<n; i++) {
+#ifdef _DEBUG
+		if ((i % 100) == 0)
+			printf("[%i] sending message %i of %i\n",rank,i,n);fflush(stdout);
+#endif
       MPI_Send( &i, 1, MPI_INT, dest, tag, comm );
     }
   }
   else if (rank == dest) {
     for (i=0; i<n; i++) {
       delay( 10 );
+#ifdef _DEBUG
+	  if ((i % 100) == 0)
+		  printf("[%i] receiving message %i of %i\n",rank,i,n);fflush(stdout);
+#endif
       MPI_Recv( &val, 1, MPI_INT, src, tag, comm, &status );
       /* The messages are sent in order that matches the value of i; 
 	 if they are not received in order, this will show up in the
@@ -116,6 +129,11 @@ int main( int argc, char *argv[] )
   }
 
   /* Alternating message sizes */
+
+#ifdef _DEBUG
+  printf("[%i] starting alternating message sizes\n",rank);fflush(stdout);
+  Sleep(1);
+#endif
   buf = (int *)malloc( m * sizeof(int) );
   if (!buf) {
     fprintf( stdout, "Could not allocate %d ints\n", m );
@@ -126,6 +144,10 @@ int main( int argc, char *argv[] )
   MPI_Barrier( comm );
   if (rank == src) {
     for (i=0; i<n; i++) {
+#ifdef _DEBUG
+		if ((i % 100) == 0)
+			printf("[%i] sending message %i of %i\n",rank,i,n);fflush(stdout);
+#endif
       buf[0] = i;
       MPI_Send( &i, 1, MPI_INT, dest, tag, comm );
       MPI_Send( buf, m, MPI_INT, dest, tag, comm );
@@ -134,6 +156,10 @@ int main( int argc, char *argv[] )
   else if (rank == dest) {
     for (i=0; i<n; i++) {
       delay( 10 );
+#ifdef _DEBUG
+	  if ((i % 100) == 0)
+		  printf("[%i] receiving message %i of %i\n",rank,i,n);fflush(stdout);
+#endif
       MPI_Recv( &val, 1, MPI_INT, src, tag, comm, &status );
       if (val != i) { 
 	if (err < 10) {
@@ -156,6 +182,11 @@ int main( int argc, char *argv[] )
       CheckStatus( &status, tag, src, m, &err );
     }
   }
+
+#ifdef _DEBUG
+  printf("[%i] 0 collects error count\n",rank);fflush(stdout);
+  Sleep(1);
+#endif
   
   /* Finally error reporting: make sure that rank 0 reports the message */
   MPI_Allreduce( &err, &toterr, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD );
