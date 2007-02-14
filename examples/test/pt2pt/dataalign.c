@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "mpi.h"
 
+
 int main( int argc, char *argv[])
 {
 	struct a {	int	i;
@@ -21,6 +22,18 @@ int main( int argc, char *argv[])
 
 	MPI_Comm_rank( MPI_COMM_WORLD, &rank );
 	MPI_Comm_size( MPI_COMM_WORLD, &size );
+#ifdef DEBUG
+	printf("[%i] size is %i\n",rank, size );
+	fflush(stdout);
+	Sleep(1);
+#endif
+	if ((size % 2) != 0)
+	{
+		printf("dataalign needs even number of processes");fflush(stdout);
+		MPI_Finalize();
+		return 1;
+
+	}
 
 	for( j = 0; j < 10; j ++ ) {
 		s[j].i = j + rank;
@@ -38,7 +51,7 @@ int main( int argc, char *argv[])
 	MPI_Type_extent( con, &text );
 
 #ifdef DEBUG
-	printf("Size of MPI array is %d, extent is %d\n", tsize, text );
+	printf("Size of MPI array is %d, extent is %d\n", tsize, text );fflush(stdout);
 #endif
 
 #ifdef DEBUG
@@ -48,6 +61,7 @@ int main( int argc, char *argv[])
 	p2 = &(s[10].i);  /* This statement may fail on some systems */
 	printf("C array starts at %p and ends at %p for a length of %d\n",
 		s, &(s[9].c), (char *)p2-(char *)p1 );
+	fflush(stdout);
         }
 #endif
 	MPI_Type_extent( str, &text );
@@ -61,7 +75,12 @@ int main( int argc, char *argv[])
 		    (int)text, (int)sizeof(struct a) );
 	    errs++;
 	}
-
+#ifdef DEBUG
+	printf("[%i] sending to %i\n",rank, rank ^ 1 );
+	fflush(stdout);
+	Sleep(1);
+#endif
+	/* ^ is (XOR), so an even number of processes is needed */
 	MPI_Send( s, 1, con, rank ^ 1, 0, MPI_COMM_WORLD );
 	MPI_Recv( s1, 1, con, rank ^ 1, 0, MPI_COMM_WORLD, &status );
 
