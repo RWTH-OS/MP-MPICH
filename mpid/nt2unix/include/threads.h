@@ -33,11 +33,11 @@ typedef void * (*solaris_PTHREAD_START_ROUTINE)(void *);
 struct ThreadInfo {
 
     ThreadInfo() {
-      ThreadInfo::init(THREAD_RUNNING);
+      init(THREAD_RUNNING);
     }
     
     ThreadInfo(DWORD aState) {
-      ThreadInfo::init(aState);
+      init(aState);
     }
     
 #ifdef __POSIX_THREADS__
@@ -81,7 +81,7 @@ private:
    void operator=(ThreadInfo& other);
 public:
 #endif
-    inline void init(DWORD aState) {
+    void init(DWORD aState) {
       state = aState;
       suspendCount=0;
       exitCode = 0;

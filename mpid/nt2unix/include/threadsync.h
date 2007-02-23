@@ -10,10 +10,10 @@ class CriticalSection {
     ~CriticalSection() {
       DeleteCriticalSection(&cs);
     }    
-    inline void enter() {
+    void enter() {
       EnterCriticalSection(&cs);       
     }  
-    inline void leave() {
+    void leave() {
       LeaveCriticalSection(&cs);
     }
   protected: 
