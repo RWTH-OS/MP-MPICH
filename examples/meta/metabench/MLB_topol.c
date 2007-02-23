@@ -19,7 +19,9 @@
 
 #include "MLB_common.h"
 
-#define DEBUG
+#undef DEBUG
+//#define DEB(a) {a}
+#define DEB(a)
 
 /* minimal amount of data to transfer for benchmark in byte */
 #define MINTRANSFER (8 * 1024 * 1024) 
@@ -208,7 +210,7 @@ int automerge(t_set* pSets, int num, int elem1, int elem2, int class){
 	}
     }
     
-    /* remove obsolete (empty) grouos */
+    /* remove obsolete (empty) groups */
     return remove_empty_sets(pSets, num);
 }
 
@@ -226,7 +228,7 @@ int insets(t_set* pSets, int num, int elem, int class) {
 }
 
 
-/* bwcompare is used by qsort to order elements of speedpais by bandwidth descending */
+/* bwcompare is used by qsort to order elements of speedpairs by bandwidth descending */
 int bwcompare(const void *p1, const void *p2)
 {
     double a = ((t_pairspeed *)p1)->bw;
@@ -283,7 +285,7 @@ double bandwidth(int proca, int procb, int packetsize) {
     return bw;
 }
 
-void MLB_Init_comm(MPI_Comm *local_comm, MPI_Comm *inter_comm)
+void MLB_Init_comm(MPI_Comm *local_comm, MPI_Comm *inter_comm, int from_file)
 {
     int i,j,k,class = 0,group= 0,groups = 0,gcand= 0;
     int s_tab_size;
@@ -294,11 +296,13 @@ void MLB_Init_comm(MPI_Comm *local_comm, MPI_Comm *inter_comm)
 
     MPI_Comm_rank( MPI_COMM_WORLD, &rank );
     MPI_Comm_size( MPI_COMM_WORLD, &size );
-
+    
+if (!from_file)
+{
     /* this is the number of communication pairs for all to all p2p communication */
     s_tab_size = (size *(size-1)) / 2;
    
-    /* if the is no pair, whe're finished */
+    /* if there is no pair, we're finished */
     if (s_tab_size < 1)
 	return;
     
@@ -322,14 +326,13 @@ void MLB_Init_comm(MPI_Comm *local_comm, MPI_Comm *inter_comm)
 	bw_table[i] = 0;
     }
     
-    
     /* get the bandwidths of the (P(P-1))/2 possible p2p communication pairs */  
     for (i=0,k=0; i<size; i++) {
 	for(j=i+1; j<size; j++,k++) {
 	    s_table[k].a = i;
 	    s_table[k].b = j;
 	    s_table[k].bw = bandwidth(i,j,PACKETSIZE);
-	    
+
 #ifdef DEBUG
 	    if (rank == 0) {
 		printf("bw %d <-> %d : %.2f MB/s\n",
@@ -338,11 +341,10 @@ void MLB_Init_comm(MPI_Comm *local_comm, MPI_Comm *inter_comm)
 		       s_table[k].bw);
 	    }
 #endif
-	    
 	    MPI_Barrier(MPI_COMM_WORLD);
 	}
     }
-    
+
     /* sort speedpairs by bandwidth */
     qsort((void *)s_table, s_tab_size, sizeof(t_pairspeed), bwcompare);
     
@@ -397,12 +399,14 @@ void MLB_Init_comm(MPI_Comm *local_comm, MPI_Comm *inter_comm)
 
     /* print found classes, groups */
     if (rank == 0) {
+        printf("\n");
 	for (k=0; k < groups; k++) {
-	    printf("class %d (%.2f MB/s), group %d ( ", c_table[k], bw_table[c_table[k]], k);
+	    printf("MLB: class %d (%.2f MB/s), group %d ( ", c_table[k], bw_table[c_table[k]], k);
 	    printset(g_table[k]);
 	    printf(")\n");
 	}
     }
+}
 
     /****************************************************/
 
@@ -411,11 +415,17 @@ void MLB_Init_comm(MPI_Comm *local_comm, MPI_Comm *inter_comm)
 
       double tmp;
       int ab_flag;
-      int best_pair;      
+      int best_pair;
       int meta_group_A, meta_group_B;
-      int meta_leader_A, meta_leader_B;
-      int *keybuf, *colorbuf;
+      int meta_leader_A = -1, meta_leader_B = -1;
+      int *keybuf; //defines new ranks for new comms
+      int *colorbuf; //defines which MPI_COMM_WORLD ranks belong to the 2 classes
 
+    keybuf = (int*)malloc(size*sizeof(int));
+    colorbuf = (int*)malloc(size*sizeof(int));
+
+  if (!from_file)
+  {
       if(rank == 0)
       {
 	for(i=0; i < groups; i++)
@@ -429,11 +439,11 @@ void MLB_Init_comm(MPI_Comm *local_comm, MPI_Comm *inter_comm)
 	    }
 	    if(l==size)
 	    {
-#ifdef DEBUG
-	      printf("found meta groups: %d / %d\n", i, j);
-#endif
+	      printf("MLB: found meta groups: %d / %d\n", i, j);
 	      meta_group_A = i;
 	      meta_group_B = j;
+	      i = groups;
+	      j = groups;
 	    }
 	  }
 	}
@@ -466,7 +476,7 @@ void MLB_Init_comm(MPI_Comm *local_comm, MPI_Comm *inter_comm)
 	if(best_pair<0)
 	{
 	  printf("MLB-ERROR: Best Pair = -1\n"); fflush(stdout);
-	  MPI_Abort(NULL, 0);
+	  MPI_Abort(MPI_COMM_WORLD, 0);
 	}
 
 	if(ab_flag == 0)
@@ -480,26 +490,91 @@ void MLB_Init_comm(MPI_Comm *local_comm, MPI_Comm *inter_comm)
 	  meta_leader_B = s_table[best_pair].a;
 	}
 
-#ifdef DEBUG
-	printf("best inter-comm pair is:  %d <-> %d\n", meta_leader_A, meta_leader_B);
-#endif
-      }
+	printf("MLB: best inter-comm pair is:  %d <-> %d\n", meta_leader_A, meta_leader_B);
+      } /* if rank==0 */
 
-      MPI_Bcast(&meta_leader_A, 1, MPI_INT, 0, MPI_COMM_WORLD);
-      MPI_Bcast(&meta_leader_B, 1, MPI_INT, 0, MPI_COMM_WORLD);
+     MPI_Bcast(&meta_leader_A, 1, MPI_INT, 0, MPI_COMM_WORLD);
+     MPI_Bcast(&meta_leader_B, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-      keybuf = (int*)malloc(size*sizeof(int));
-      colorbuf = (int*)malloc(size*sizeof(int));
+    }
+  else if (from_file)
+  {
+	char hostname_read[MPI_MAX_PROCESSOR_NAME];
+	char processor_name[MPI_MAX_PROCESSOR_NAME];
+	char* result = NULL;
+	int namelen;
+	FILE *f = NULL;
+	char fname[80];
+	char leader = 'X';
+    int color;
+	
+	
+	MPI_Get_processor_name(processor_name, &namelen);
+
+	for (i = 1; i <= 2; i++)
+	{
+		k = 1;
+		sprintf(fname, "mh%d.txt", i);
+		f = fopen(fname, "r");
+		if( f == NULL ) {
+   			fprintf(stderr, "[%d] Could not open file %s for reading processor naming information.\n", rank, fname);
+   			break; //Error
+		}
+		while ((fscanf(f, "%s\n", hostname_read)) != EOF )
+		{
+			/* check if hostname_read is in processor_name, or vice versa */
+			if (strlen(hostname_read) > strlen(processor_name))
+				result = strstr(hostname_read, processor_name);
+			else
+				result = strstr(processor_name, hostname_read);
+	
+			if (result){
+				DEB(printf("[%d] (%s) Found myself\n", rank, processor_name);)
+				color = i-1; /* I am in group i-1 */
+				break;
+			}
+			k++;
+		}
+		fclose(f);
+		if (result)
+			break;
+	}
+	
+	/* gather information about which process is in which group (color) */
+	MPI_Allgather(&color, 1, MPI_INT, colorbuf, 1, MPI_INT, MPI_COMM_WORLD);
+
+
+	DEB(if (rank == 0){\
+	printf("colorbuf: ");\
+	for (i = 0; i < size; i++)\
+		printf("%d",colorbuf[i]);\
+	printf("\n");\
+	})
+	
+	/* look for first 0 or 1 in colorbuf[] to find the meta_leader_A, and B, respectively */ 
+	for (i=size-1; i > -1; i--)
+	{
+		if (colorbuf[i] == 0)
+			meta_leader_A = i;
+		else if (colorbuf[i] == 1)
+			meta_leader_B = i;
+	}
+
+	DEB(printf("meta_leader_A=%d, meta_leader_B=%d\n", meta_leader_A, meta_leader_B);)
+	
+  }
 	
       if(rank == 0)
       {
-	for(i=0; i<size; i++) keybuf[i] = 1;
-	keybuf[meta_leader_A] = 0;
-	keybuf[meta_leader_B] = 0;
-	
-	for(i=0; i<size; i++)
-	  if(inset(g_table[meta_group_A],i)) colorbuf[i]=0;
-	  else colorbuf[i]=1;
+		for(i=0; i<size; i++) keybuf[i] = 1;
+		keybuf[meta_leader_A] = 0;
+		keybuf[meta_leader_B] = 0;
+		
+		if(!from_file){	
+			for(i=0; i<size; i++)
+		  		if(inset(g_table[meta_group_A],i)) colorbuf[i]=0;
+	  			else colorbuf[i]=1;
+		}
       }
 	
       MPI_Bcast(keybuf, size, MPI_INT, 0, MPI_COMM_WORLD);
@@ -536,14 +611,15 @@ void MLB_Init_comm(MPI_Comm *local_comm, MPI_Comm *inter_comm)
 
     
     /* kill all remaining created sets */
-    for(i=0; i<groups; i++) { 
-	killset(g_table[i]);
-    }
-    
-    free(s_table);
-    free(g_table);
-    free(c_table);
-    free(bw_table);
-
+	if(!from_file)
+	{    
+	    for(i=0; i<groups; i++) { 
+		killset(g_table[i]);
+    	}
+	    free(s_table);
+	    free(c_table);
+	    free(g_table);
+	    free(bw_table);
+	}
     return;
 }

@@ -10,7 +10,8 @@
 /****************************************/
 
 #define MLB_HIERARCHY_TOLERANCE 0.5
-#define MLB_CONV_TABLE_FACTOR 1.5
+#define MLB_TABLE_BREAK_COUNT 4
+#define MLB_TABLE_MAX_COUNT 16
 
 /****************************************/
 /**     DO _NOT_ CHANGE:               **/
