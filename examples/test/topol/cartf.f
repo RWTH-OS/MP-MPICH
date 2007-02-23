@@ -24,7 +24,7 @@ c
         call MPI_INIT( ierr )
         call MPI_COMM_RANK( MPI_COMM_WORLD, myid, ierr )
         call MPI_COMM_SIZE( MPI_COMM_WORLD, numprocs, ierr )
-c        print *, "Process ", myid, " of ", numprocs, " is alive"
+c       print *, "Process ", myid, " of ", numprocs, " is alive"
         if (numprocs .ne. 4) then
            print *, "This test requires exactly four processes"
            call MPI_Abort( MPI_COMM_WORLD, 1, ierr )
@@ -78,7 +78,11 @@ c
         call mpi_allreduce( nerrs, toterrs, 1, MPI_INTEGER, MPI_SUM,
      $       MPI_COMM_WORLD, ierr )
         if (myid .eq. 0) then
-           print *, " Total errors = ", toterrs
+            if (toterr .eq. 0) then
+                print *, "No Errors"
+            else
+                print *, " Total errors = ", toterrs
+            endif
         endif
         call MPI_TYPE_FREE( stride, ierr )
         call MPI_COMM_FREE( comm2d, ierr )
