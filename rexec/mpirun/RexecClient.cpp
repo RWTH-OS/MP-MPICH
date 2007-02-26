@@ -67,8 +67,18 @@ extern "C" {
     void ShutdownRexecClient() {
 	DeleteCriticalSection(&ClientCS);
     }
-
 /*************************************************************************************/
+/* treat Windows Exception as C++ exception to enable usage of try without __
+	necessary for R_CreateProcessNoUser */
+	void se_translator(unsigned int e, _EXCEPTION_POINTERS* p)
+
+{
+
+    throw (e) ;
+
+}
+
+
     
     LPTSTR GetLastErrorText( DWORD error,LPTSTR lpszBuf, DWORD dwSize )
     {
@@ -824,11 +834,25 @@ DWORD CreateBindingNoUser(char *Host,char* Protocol,RPC_BINDING_HANDLE *Binding,
 	if(Server->Account)
 	    StartupInfo.lpPassword = (unsigned char*)Server->Account->Password;
 //	DBM("Calling R_CreateProcess");
+	Server->LastError =-1;
 
+	_set_se_translator(se_translator);//use try instead of __try
+
+	  
+	try{
 	Server->LastError = R_CreateProcessNoUser(hServer->Binding,0,
 	    (unsigned char*)SI->Commandline,SI->CreationFlags,
 	    (unsigned char*)SI->Environment,SI->EnvSize,
 	    (unsigned char*)SI->WorkingDir,&StartupInfo,&S->ProcInfo);
+	}
+	catch(unsigned int e)
+	{
+		
+		DBM("Fehler: "<<e);
+		Server->LastError = e;
+	}
+	
+	_set_se_translator(NULL);//common exception handling with __try enabled again
 	
 	if(Server->LastError != RPC_S_OK) {
 	    DBM("Call failed with "<<Server->LastError);
