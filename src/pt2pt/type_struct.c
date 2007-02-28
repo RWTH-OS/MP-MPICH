@@ -106,8 +106,10 @@ EXPORT_MPI_API int MPI_Type_struct(
   MPI_Aint        ub, lb, high, low, real_ub, real_lb, real_init;
   int             high_init = 0, low_init = 0;
   int             i, mpi_errno = MPI_SUCCESS;
-  MPI_Aint        ub_marker = 0, lb_marker = 0;
-  MPI_Aint        ub_found = 0, lb_found = 0;
+  MPI_Aint        ub_marker = 0;
+  MPI_Aint        lb_marker = 0;
+  MPI_Aint        ub_found = 0;
+  MPI_Aint        lb_found = 0;
   int             size = 0, total_count = 0;
   static char myname[] = "MPI_TYPE_STRUCT";
 
