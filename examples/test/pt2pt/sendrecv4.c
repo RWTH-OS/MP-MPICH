@@ -43,11 +43,26 @@ MPI_Init( &argc, &argv );
 
 AllocateForData( &types, &inbufs, &outbufs, &counts, &bytesize, 
 		 &names, &ntype );
-GenerateData( types, inbufs, outbufs, counts, bytesize, names, &ntype );
 
 MPI_Comm_rank( MPI_COMM_WORLD, &world_rank );
+#ifdef _DEBUG
+  printf("[%i] generating data\n",rank);fflush(stdout);
+  Sleep(1);
+#endif
+
+GenerateData( types, inbufs, outbufs, counts, bytesize, names, &ntype );
+
+#ifdef _DEBUG
+  printf("[%i] making communicators\n",rank);fflush(stdout);
+  Sleep(1);
+#endif
+
 MakeComms( comms, 20, &ncomm, 0 );
 
+#ifdef _DEBUG
+  printf("[%i] starting test\n",rank);fflush(stdout);
+  Sleep(1);
+#endif
 /* Test over a wide range of datatypes and communicators */
 err = 0;
 for (i=0; i<ncomm; i++) {
