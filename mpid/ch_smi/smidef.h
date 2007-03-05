@@ -368,7 +368,7 @@ extern MPID_SBHeader MPID_SMI_os_ta_allocator;
 
 /* replace generic collective operations by SCI-optimized versions? */
 #define NAME_COLLOPS "COLL_CUSTOM_ENABLE"
-#define MPID_SMI_COLLOPS_DEF 1
+#define MPID_SMI_COLLOPS_DEF 0
 
 #define NAME_COLL_BARRIER "COLL_BARRIER"
 #define MPID_SMI_BARRIER_DEF 1
