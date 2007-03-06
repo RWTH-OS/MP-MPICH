@@ -11,7 +11,9 @@
 #include "smicheck.h"
 #include "smidebug.h"
 
+#ifdef WIN32
 #include <crtdbg.h>
+#endif
 
 #ifdef DMALLOC
 #include <dmalloc.h>
@@ -471,12 +473,13 @@ void         *in_pkt;
 		/* //SI// use msglen instead of rhandle->len, because MPID_SMI_short_pack
 		copies msglen in the buffer which is otherwise corrupted */ 
 			MPID_SMI_short_pack(trunc_buf, pkt, msglen, from_grank);
+#ifdef WIN32
 			_ASSERTE(_CrtIsValidHeapPointer(trunc_buf)); /* //SI// check if heap pointer is still valid */
+#endif			
 			MEMCPY (rhandle->buf, trunc_buf, rhandle->len);
 			FREE (trunc_buf);
 			msglen = rhandle->len;
 		}
-		MPID_SetDebugFlag( 0 );//si
     } else 
 		/* non-truncated message */
 		if (msglen > 0) {
