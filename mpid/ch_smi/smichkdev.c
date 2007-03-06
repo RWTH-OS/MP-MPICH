@@ -38,8 +38,8 @@ static int waitlck_nest = 0;
 */    
 int MPID_SMI_Check_incoming( MPID_Device *dev, MPID_BLOCKING_TYPE is_blocking )
 {
-    MPID_PKT_T   *pkt;
-    MPIR_RHANDLE *rhandle;
+    MPID_PKT_T   *pkt = NULL;
+    MPIR_RHANDLE *rhandle = NULL;
     int          from_grank = -1;
     int          is_posted;
     int          err = MPI_SUCCESS;

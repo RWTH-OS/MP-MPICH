@@ -11,6 +11,8 @@
 #include "smicheck.h"
 #include "smidebug.h"
 
+#include <crtdbg.h>
+
 #ifdef DMALLOC
 #include <dmalloc.h>
 #endif
@@ -456,18 +458,25 @@ void         *in_pkt;
        checksum-verify the complete message, but only write the truncated
        message into the user buffer. The way we do it here is not efficient, 
        but who cares for truncated messages anyway ? */
+
+
     if (rhandle->len < msglen) {
 		err = MPI_ERR_TRUNCATE;
-      
+       
 		if (msglen > 0) {
-			void *trunc_buf;
-			ALLOCATE (trunc_buf, void *, rhandle->len);
+			void *trunc_buf = NULL;
+
+		/*ALLOCATE (trunc_buf, void *, rhandle->len);*/ /*#define ALLOCATE(ptr,type,size)*/
+		ALLOCATE (trunc_buf, void *, msglen);
+		/* //SI// use msglen instead of rhandle->len, because MPID_SMI_short_pack
+		copies msglen in the buffer which is otherwise corrupted */ 
 			MPID_SMI_short_pack(trunc_buf, pkt, msglen, from_grank);
+			_ASSERTE(_CrtIsValidHeapPointer(trunc_buf)); /* //SI// check if heap pointer is still valid */
 			MEMCPY (rhandle->buf, trunc_buf, rhandle->len);
 			FREE (trunc_buf);
-	
 			msglen = rhandle->len;
 		}
+		MPID_SetDebugFlag( 0 );//si
     } else 
 		/* non-truncated message */
 		if (msglen > 0) {
