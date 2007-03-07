@@ -44,7 +44,7 @@ int main( int argc, char **argv )
 	if (rank == 0) {
 		partner = size - 1;
 		/* Cancel succeeds for wait/waitall */
-		printf( "Cancel for wait/waitall\n");fflush(stdout);
+		printf( "[%i]: Cancel for wait/waitall\n",rank);fflush(stdout);
 		MPI_Send_init( buf, 10, MPI_INT, partner, 0, MPI_COMM_WORLD, &r1 );
 		MPI_Sendrecv( MPI_BOTTOM, 0, MPI_INT, partner, 1,
 			MPI_BOTTOM, 0, MPI_INT, partner, 1,
@@ -58,11 +58,11 @@ int main( int argc, char **argv )
 			MPI_COMM_WORLD, &status );
 		if (!flag) {
 			err++; 
-			printf( "Cancel of a send failed where it should succeed (Wait).\n" );
+			printf( "[%i]: Cancel of a send failed where it should succeed (Wait).\n" ,rank);
 		}
 		MPI_Request_free( &r1 ); 
 
-		printf( "Cancel for test/testall\n");fflush(stdout);
+		printf( "[%i]: Cancel for test/testall\n",rank);fflush(stdout);
 		/* Cancel fails for test/testall */
 		buf[0] = 3;
 		MPI_Send_init( buf, 3, MPI_INT, partner, 2, MPI_COMM_WORLD, &r1 );
@@ -75,11 +75,11 @@ int main( int argc, char **argv )
 		MPI_Test_cancelled( &status, &flag );
 		if (flag) {
 			err++;
-			printf( "Cancel of a send succeeded where it shouldn't (Test).\n" );
+			printf( "[%i]: Cancel of a send succeeded where it shouldn't (Test).\n" ,rank);
 		}
 		MPI_Request_free( &r1 );
 
-		printf( "Cancel for waitany\n");fflush(stdout);
+		printf( "[%i]: Cancel for waitany\n",rank);fflush(stdout);
 		/* Cancel succeeds for waitany */
 		MPI_Send_init( buf, 10, MPI_INT, partner, 0, MPI_COMM_WORLD, &r1 );
 		MPI_Sendrecv( MPI_BOTTOM, 0, MPI_INT, partner, 1,
@@ -94,11 +94,11 @@ int main( int argc, char **argv )
 			MPI_COMM_WORLD, &status );
 		if (!flag) {
 			err++;
-			printf( "Cancel of a send failed where it should succeed (Waitany).\n" );
+			printf( "[%i]: Cancel of a send failed where it should succeed (Waitany).\n" ,rank);
 		}
 		MPI_Request_free( &r1 );
 
-		printf( "Cancel for testany\n");fflush(stdout);
+		printf( "[%i]: Cancel for testany\n",rank);fflush(stdout);
 		/* Cancel fails for testany */
 		buf[0] = 3;
 		MPI_Send_init( buf, 3, MPI_INT, partner, 2, MPI_COMM_WORLD, &r1 );
@@ -111,11 +111,11 @@ int main( int argc, char **argv )
 		MPI_Test_cancelled( &status, &flag );
 		if (flag) {
 			err++;
-			printf( "Cancel of a send succeeded where it shouldn't (Testany).\n" );
+			printf( "[%i]: Cancel of a send succeeded where it shouldn't (Testany).\n" ,rank);
 		}
 		MPI_Request_free( &r1 );
 
-		printf( "Cancel for waitsome\n");fflush(stdout);
+		printf( "[%i]: Cancel for waitsome\n",rank);fflush(stdout);
 		/* Cancel succeeds for waitsome */
 		MPI_Send_init( buf, 10, MPI_INT, partner, 0, MPI_COMM_WORLD, &r1 );
 		MPI_Sendrecv( MPI_BOTTOM, 0, MPI_INT, partner, 1,
@@ -130,11 +130,11 @@ int main( int argc, char **argv )
 			MPI_COMM_WORLD, &status );
 		if (!flag) {
 			err++;
-			printf( "Cancel of a send failed where it should succeed (Waitsome).\n" );
+			printf( "[%i]: Cancel of a send failed where it should succeed (Waitsome).\n",rank );
 		}
 		MPI_Request_free( &r1 );
 
-		printf( "Cancel for testsome\n");fflush(stdout);
+		printf( "[%i]: Cancel for testsome\n",rank);fflush(stdout);
 		/* Cancel fails for testsome*/
 		buf[0] = 3;
 		MPI_Send_init( buf, 3, MPI_INT, partner, 2, MPI_COMM_WORLD, &r1 );
@@ -150,7 +150,7 @@ int main( int argc, char **argv )
 		MPI_Test_cancelled( &status, &flag );
 		if (flag) {
 			err++;
-			printf( "Cancel of a send succeeded where it shouldn't (Testsome).\n" );
+			printf( "Cancel of a send succeeded where it shouldn't (Testsome).\n" ,rank);
 		}
 		MPI_Request_free( &r1 );
 
