@@ -12,6 +12,7 @@
 HANDLE hRemoteProc;
 BOOL Run=TRUE,KILLED=FALSE;
 int debug_flag = 0;
+BOOL nouser = FALSE;
 using namespace std;
 
 extern "C" {
