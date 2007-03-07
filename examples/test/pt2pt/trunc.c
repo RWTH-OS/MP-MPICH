@@ -43,7 +43,9 @@ int main( int argc, char **argv )
    sendrecv                                   sendrecv
    send( count = 10)                          test (expected/err trunc)
  */
-   
+ #ifdef _DEBUG
+	printf("[%i] starting test\n",rank);fflush(stdout);
+#endif  
     if (size < 2) {
 	fprintf( stderr, "This test requires at least 2 processes\n" );
 	MPI_Abort( MPI_COMM_WORLD, 1 );
@@ -53,6 +55,9 @@ int main( int argc, char **argv )
 	MPI_Errhandler_set( comm, MPI_ERRORS_RETURN );
 	partner = size - 1;
 	SetupRecvBuf( recvbuf );
+#ifdef _DEBUG
+	printf("receiver buffer setup done, partner is %i\n",partner);fflush(stdout);
+#endif
 	merr = MPI_Recv( recvbuf, 1, MPI_INT, partner, 1, comm, &status );
 	err += CheckRecvErr( merr, &status, recvbuf, "Recv" );
 	MPI_Sendrecv( MPI_BOTTOM, 0, MPI_INT, partner, 0,
@@ -60,10 +65,16 @@ int main( int argc, char **argv )
 		      dupcomm, &status );
 
 	SetupRecvBuf( recvbuf );
+#ifdef _DEBUG
+	printf("receiver buffer setup 2 done\n" );fflush(stdout);
+#endif
 	merr = MPI_Recv( recvbuf, 1, MPI_INT, partner, 2, comm, &status );
 	err += CheckRecvErr( merr, &status, recvbuf, "Unexpected Recv" );
 
 	SetupRecvBuf( recvbuf );
+#ifdef _DEBUG
+	printf("receiver buffer setup 3 done\n" );fflush(stdout);
+#endif
 	merr = MPI_Irecv( recvbuf, 1, MPI_INT, partner, 3, comm, &request );
     
 	MPI_Sendrecv( MPI_BOTTOM, 0, MPI_INT, partner, 0,
@@ -73,6 +84,9 @@ int main( int argc, char **argv )
 	err += CheckRecvErr( merr, &status, recvbuf, "Irecv/Wait" );
 
 	SetupRecvBuf( recvbuf );
+#ifdef _DEBUG
+	printf("receiver buffer setup 4 done\n" );fflush(stdout);
+#endif
 	merr = MPI_Irecv( recvbuf, 1, MPI_INT, partner, 4, comm, &request );
 	MPI_Sendrecv( MPI_BOTTOM, 0, MPI_INT, partner, 0,
 		      MPI_BOTTOM, 0, MPI_INT, partner, 0,
@@ -86,6 +100,9 @@ int main( int argc, char **argv )
 	partner = 0;
 	for (i=0; i<10; i++) 
 	    sendbuf[i] = 100 + i;
+#ifdef _DEBUG
+	printf("sender buffer setup, partner is %i\n",partner);fflush(stdout);
+#endif
 	MPI_Send( sendbuf, 10, MPI_INT, partner, 1, comm );
 	MPI_Isend( sendbuf, 10, MPI_INT, partner, 2, comm, &request );
 	MPI_Sendrecv( MPI_BOTTOM, 0, MPI_INT, partner, 0,
