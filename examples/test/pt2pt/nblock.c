@@ -10,6 +10,9 @@
 #define MAXNP 16
 #endif
 
+#ifndef NRRUNS
+#define NRRUNS 1
+#endif
 /*
    Test to make sure that nonblocking routines actually work.  This
    stresses them by sending large numbers of requests and receiving them
@@ -18,7 +21,7 @@
 int main( int argc, char **argv )
 {
     int count, tag, nsend, myid, np, rcnt, scnt, i, j;
-    int *(sbuf[MAXNP]), *(rbuf[MAXNP]);
+    int *(sbuf[NRRUNS*MAXNP]), *(rbuf[NRRUNS*MAXNP]);
     MPI_Status status;
     MPI_Request *rsend, *rrecv;
 
@@ -28,11 +31,11 @@ int main( int argc, char **argv )
 
     if (np > MAXNP) {
 	fprintf( stderr, 
-		 "This test must run with at most %d processes\n", MAXNP );
+		 "This test must run with at most %d processes. Otherwise increase MAXNP in the sourcefile.\n", MAXNP );
 	MPI_Abort( MPI_COMM_WORLD, 1 );
     }
 
-    nsend = 3 * np;
+    nsend = NRRUNS * np;
     rsend = (MPI_Request *) malloc ( nsend * sizeof(MPI_Request) );
     rrecv = (MPI_Request *) malloc ( nsend * sizeof(MPI_Request) );
     if (!rsend || !rrecv) {
@@ -55,7 +58,7 @@ int main( int argc, char **argv )
 	rcnt = 0;
 	/* The MPI standard requires that active buffers be distinct
 	   in nonblocking calls */
-	for (j=0; j<3; j++) {
+	for (j=0; j<NRRUNS; j++) {
 	    tag = j;
 	    for (i=0; i<np; i++) {
 		if (i != myid) {
