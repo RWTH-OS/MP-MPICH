@@ -632,12 +632,31 @@ error_status_t ShutDown(BOOL restart)
    }
 
   Sleep(1);
+
+ /* BOOL InitiateSystemShutdown(
+  LPTSTR lpMachineName,   // pointer to name of computer to shut down
+  LPTSTR lpMessage,          // pointer to message to display in 
+                             // dialog box
+  DWORD dwTimeout,           // time to display dialog box
+  BOOL bForceAppsClosed,     // force applications closed flag
+  BOOL bRebootAfterShutdown  // reboot flag
+);*/
+
+  if (!InitiateSystemShutdown(NULL,&"Computer shutting down",20,true,restart))
+  {
+    DBG("InitiateSystemShutdown failed"); 
+		return GetLastError();
+  }
+ 
+
+ 
+  /*Sleep(5);
   
  if (!ExitWindowsEx(uFlags, 0)) 
   {
     DBG("ExitWindowsEx failed"); 
 		return GetLastError();
-  }
+  }*/
 return ERROR_SUCCESS;
 }
 
