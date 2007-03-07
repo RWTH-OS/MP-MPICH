@@ -277,10 +277,9 @@ DWORD CreateBindingNoUser(char *Host,char* Protocol,RPC_BINDING_HANDLE *Binding,
 	SEC_WINNT_AUTH_IDENTITY *Ident;
 	TAccount *Creds;
 	int i;
-	char *Protocols[] = { "ncalrpc",
+	char *Protocols[] = { "ncacn_np","ncalrpc",
 	    "ncacn_ip_tcp",
-	    "ncacn_nb_tcp",
-		"ncacn_np"
+	    "ncacn_nb_tcp"
 	};
 	
 	DBM("Opening host");
@@ -351,10 +350,10 @@ DWORD CreateBindingNoUser(char *Host,char* Protocol,RPC_BINDING_HANDLE *Binding,
 	TServerHandle *hServer;
 	TAccount *Creds;
 	int i;
-	char *Protocols[] = { "ncalrpc",
+	char *Protocols[] = { "ncacn_np","ncalrpc",
 	    "ncacn_ip_tcp",
-	    "ncacn_nb_tcp",
-		"ncacn_np"
+	    "ncacn_nb_tcp"
+		
 	};
 	
 	DBM("Opening host");

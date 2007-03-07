@@ -226,9 +226,11 @@ error_status_t R_CreateProcessNoUser(
     /* [ref][out] */ R_PROCESS_INFORMATION __RPC_FAR *lpProcessInformation) {
 
 
+	DBG("R_CreateProcessNoUser called with " << lpCommandLine);
 	/* check if function call without user authentication is switched on */
-	if (!NoUser)
-		return ERROR_LOGON_NOT_GRANTED;
+	if (!NoUser){
+		DBG("Acces denied");
+	return ERROR_LOGON_NOT_GRANTED;}
 
 
 	ProcInfo *pInfo;
@@ -252,7 +254,7 @@ error_status_t R_CreateProcessNoUser(
 	unsigned char *OldD;
 	BOOL Update = FALSE;
 
-	DBG("R_CreateProcess called with " << lpCommandLine);
+	
 
 	DWORD UserSize=256,DomainSize=256,DirSize=1024;
 	char DomainName[256],UserName[256];
