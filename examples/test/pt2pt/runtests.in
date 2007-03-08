@@ -71,6 +71,9 @@ for arg in "$@" ; do
 	echo "at the end of the test rather than also after each test."
 	echo "If -check is used, only a single simple test is run; this"
 	echo "is used to check that mpirun can run an MPI program."
+        echo
+        echo "If you get errors like \"poll: protocol failure in circuit setup\""
+        echo "try to set RUNTEST_SLEEPTIME=<number of seconds> to slow down rsh calls"
 	exit 1
 	;;
 	*)

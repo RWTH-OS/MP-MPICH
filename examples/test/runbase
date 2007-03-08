@@ -198,9 +198,9 @@ RunTest() {
         if [ x"$META" = x"yes" ] ; then
             # meta is very special, we have to override the number of processes in
             # the configuration file. we also need a configuration file in the local directory
-            eval "$mpirun $args -metaparam $2 -meta ./runtest_meta.cfg $1 $4 </dev/null >> $1.out 2>&1 --"
+            eval "$mpirun -metaparam $2 -meta ./runtest_meta.cfg $args ./$pgm $4 </dev/null >> $pgm.out 2>&1 --"
         else
-            eval $mpirun $args -np $np ./$pgm $4 </dev/null >> $pgm.out 2>&1
+            eval $mpirun -np $np $args ./$pgm $4 </dev/null >> $pgm.out 2>&1
         fi
         if [ -n "$5" ] ; then 
             for file in $5 ; do 
@@ -223,6 +223,12 @@ EOF
         fi
         CleanExe $pgm
     #ipcs
+    fi
+    # slow down execution of tests (useful if too many rsh calls per minute
+    #   yield errors like: "poll: protocol failure in circuit setup")
+    if [ $RUNTEST_SLEEPTIME ] ; then
+        #echo "...[Sleeping $RUNTEST_SLEEPTIME second(s)]..."
+        sleep $RUNTEST_SLEEPTIME
     fi
 }
 
