@@ -3,6 +3,7 @@
 
 args=""
 mpirun=${MPIRUN:-"../../../bin/mpirun"}
+make=${MAKE:-"make"}
 quiet=0
 runtests=1
 makeeach=0
@@ -74,7 +75,7 @@ done
 
 # If the programs are not available, run make.
 #  if [ ! -x timers -a $makeeach = 0 -a $runtests = 1 ] ; then
-    $MAKE default
+    $make default
 # fi
 
 echo "Testing MPI_Put ..."
