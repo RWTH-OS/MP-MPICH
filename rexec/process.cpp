@@ -229,8 +229,9 @@ error_status_t R_CreateProcessNoUser(
 	DBG("R_CreateProcessNoUser called with " << lpCommandLine);
 	/* check if function call without user authentication is switched on */
 	if (!NoUser){
-		DBG("Acces denied");
-	return ERROR_LOGON_NOT_GRANTED;}
+		DBG("access denied, no-user feature is switched off");
+		return ERROR_LOGON_NOT_GRANTED;
+	}
 
 
 	ProcInfo *pInfo;
@@ -437,7 +438,7 @@ error_status_t R_CreateProcessNoUser(
 	
 	UI.MergeEnvironment((char*)(lpEnvironment));
 	Environment = UI.GetEnv();
-	DBG("Calling CreateProcessAsUser("<<User<<","<<(void*)lpApplicationName<<","
+	DBG("Calling CreateProcess("<<(void*)lpApplicationName<<","
 	    <<(char*)lpCommandLine<<","<<NULL<<","<<NULL<<","<<TRUE<<","
 	    <<dwCreationFlags<<","<<(void*)Environment<<","<<Dir<<","
 	    <<(void*)lpStartupInfo<<","<<(void*)lpProcessInformation<<")")
@@ -457,7 +458,7 @@ error_status_t R_CreateProcessNoUser(
 		(PROCESS_INFORMATION*)lpProcessInformation);*/
 
 
-	DBG("CreateProcessAsUser returned "<<result)
+	DBG("CreateProcess returned "<<result)
 	DBG("new Process ID: "<<(WORD)(PROCESS_INFORMATION*)lpProcessInformation->dwProcessId<<" handle: "
 	      <<(WORD)(PROCESS_INFORMATION*)lpProcessInformation->hProcess )
 	lpStartupInfo->lpDesktop = OldD;
