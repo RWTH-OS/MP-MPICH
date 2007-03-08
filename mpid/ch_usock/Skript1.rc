@@ -27,8 +27,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,4,0,0
- PRODUCTVERSION 1,4,0,0
+ FILEVERSION 1,5,0,0
+ PRODUCTVERSION 1,5,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -46,13 +46,13 @@ BEGIN
             VALUE "Comments", "Ethernet "
             VALUE "CompanyName", "Chair for operating systems, RWTH Aachen"
             VALUE "FileDescription", "MPICH for Windows NT - ch_usock"
-            VALUE "FileVersion", "1, 4, 0, 0"
+            VALUE "FileVersion", "1, 5, 0, 0"
             VALUE "InternalName", "MPICH"
-            VALUE "LegalCopyright", "Copyright © 1999-2004 Chair for Operating Systems"
+            VALUE "LegalCopyright", "Copyright © 1999-2007 Chair for Operating Systems"
             VALUE "LegalTrademarks", "MPICH was created by Argonne National Laboratory (http://www-unix.mcs.anl.gov/mpi/mpich/)"
             VALUE "OriginalFilename", "mpich.dll"
             VALUE "ProductName", "NT-MPICH"
-            VALUE "ProductVersion", "1, 4, 0, 0"
+            VALUE "ProductVersion", "1, 5, 0, 0"
         END
     END
     BLOCK "VarFileInfo"
