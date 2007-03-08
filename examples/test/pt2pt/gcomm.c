@@ -20,7 +20,7 @@ int      *n, maxn, make_intercomm;
 	int dims[2];
 	int periods[2], range[1][3];
 	MPI_Group group, newgroup;
-	void * tmp = NULL;
+	void * tmp = (void*) 0;
 
 	MPI_Comm_rank( MPI_COMM_WORLD, &rank );
 	MPI_Comm_size( MPI_COMM_WORLD, &size );
