@@ -15,7 +15,7 @@ top_srcdir := @top_srcdir@
 srcdir     := @srcdir@
 @VPATH@
 
-CFLAGS  := @CFLAGS@ @DEFS@ $(OPTFLAGS)
+CFLAGS  := @CFLAGS@ @DEFS@
 FFLAGS := @FFLAGS@
 # Use LIBS to add any special libraries for C programs
 LIBS := @LIB_PATH@ @LIB_LIST@
@@ -409,6 +409,6 @@ distclean: clean
 	-rm -f Makefile runtests
 
 .c.o:
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) $(OPTFLAGS) -c $<
 .f.o:
-	$(F77) $(FFLAGS) -c $<
+	$(F77) $(FFLAGS) $(OPTFLAGS) -c $<
