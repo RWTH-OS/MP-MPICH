@@ -10,8 +10,8 @@ define MPID_NO_FORTRAN if the Fortran interface is not to be supported
 (perhaps because there is no Fortran compiler)
 */
 #include "mpiimpl.h"
-#include "../mpid/ch2/adi2config.h"
-#include "../mpid/util/cmnargs.h" /* for MPID_ArgSqueeze */
+#include "../../mpid/ch2/adi2config.h"
+#include "../../mpid/util/cmnargs.h" /* for MPID_ArgSqueeze */
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
