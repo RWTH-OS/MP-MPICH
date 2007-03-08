@@ -40,6 +40,7 @@ extern char *getenv();
 
 #include "mpid.h"
 #include "mpiddev.h"
+#include "mpiddevbase.h"
 #include "mpimem.h"
 #include "flow.h"
 #include "wsock2debug.h"
