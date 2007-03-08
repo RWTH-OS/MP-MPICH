@@ -8,10 +8,6 @@ pushd coll
 call build.bat %1
 popd
 
-pushd coll
-call build.bat %1
-popd
-
 pushd context
 call build.bat %1
 popd
