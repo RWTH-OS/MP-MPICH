@@ -4,6 +4,7 @@
 	Version="7.10"
 	Name="ch_smi_dll"
 	ProjectGUID="{F6BCF8CB-94AC-4A26-9220-E6E0EB20CE80}"
+	RootNamespace="ch_smi_dll"
 	SccProjectName=""
 	SccLocalPath="">
 	<Platforms>
@@ -143,7 +144,8 @@
 				TypeLibraryName=".\Release/ch_smi.tlb"
 				HeaderFileName=""/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="copy &quot;$(TargetPath)&quot; &quot;$(TargetDir)\mpich_smi.dll&quot;"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool

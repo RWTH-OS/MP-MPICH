@@ -65,7 +65,8 @@
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy Release\mpich.lib ..\..\lib"/>
+				CommandLine="copy Release\mpich.lib ..\..\lib
+copy &quot;$(TargetPath)&quot; &quot;$(TargetDir)\mpich_wsock.dll&quot;"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -1051,10 +1052,10 @@ rem copy ..\..\lib\mpich.dll \\data\exp_imp
 				RelativePath="..\..\src\pt2pt\type_ff.h">
 			</File>
 			<File
-				RelativePath="..\..\src\coll\x86_ops.h">
+				RelativePath="..\lfbs_common\x86_ops.h">
 			</File>
 			<File
-				RelativePath="..\lfbs_common\x86_ops.h">
+				RelativePath="..\..\src\coll\x86_ops.h">
 			</File>
 		</Filter>
 		<File
