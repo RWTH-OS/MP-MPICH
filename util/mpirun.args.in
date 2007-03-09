@@ -437,29 +437,27 @@ while [ 1 -le $# ] ; do
 	;;
     -nodes | -node | -hosts | -host)
 	nodenbr=0
-	# is the node specifier a filename or a textual expression?
-	if [ -s "$1" ] ; then
-	    nodestr=`cat $1`
-	else
-	    nodestr=`eval echo $1 | sed "s/,/ /g"`
-	fi
+	nodestr=`eval echo $1 | sed "s/,/ /g"`
 	shift
-	if [ $np = 0 ]; then
-	    # no -np or -n option is given OR has not yet been parsed
-	    for node in $nodestr ; do
-		nodes=${nodes}" "$node
-		nodenbr=`expr $nodenbr + 1`
-	    done
-	    np=$nodenbr
-	else
-	    # -np or -n option has been supplied
-	    for node in $nodestr ; do
-		if [ $nodenbr -lt $np ] ; then
-		    nodes="$nodes $node"
-		    nodenbr=`expr $nodenbr + 1`
-		fi
-	    done
-	fi
+        # MOVED: Evaluation should take place _after_ we know all parameters,
+        #        otherwise we get strange effects when -np is given twice
+        #        "-np 1 -nodes ... -np 2" != "-np 1 -np 2 -nodes ..."
+        #if [ $np = 0 ]; then
+        #    # no -np or -n option is given OR has not yet been parsed
+        #    for node in $nodestr ; do
+        #       nodes=${nodes}" "$node
+        #       nodenbr=`expr $nodenbr + 1`
+        #    done
+        #    np=$nodenbr
+        #else
+        #    # -np or -n option has been supplied
+        #    for node in $nodestr ; do
+        #       if [ $nodenbr -lt $np ] ; then
+        #           nodes="$nodes $node"
+        #           nodenbr=`expr $nodenbr + 1`
+        #       fi
+        #    done
+        #fi
 	;;
     -skip)
 	skipproc="$1"
@@ -842,6 +840,27 @@ while [ 1 -le $# ] ; do
       ;;
   esac
 done
+
+#Evaluation of -nodes
+# If -np was not given, set it to number of nodes given
+# If -np was given, shorten list of nodes to number of processes given (in case nodenbr > np) 
+if [ $np = 0 ]; then
+        # no -np or -n option is given OR has not yet been parsed
+        for node in $nodestr ; do
+                nodes=${nodes}" "$node
+                nodenbr=`expr $nodenbr + 1`
+        done
+        np=$nodenbr
+else
+        # -np or -n option has been supplied
+        for node in $nodestr ; do 
+        if [ $nodenbr -lt $np ] ; then
+                nodes="$nodes $node"
+                nodenbr=`expr $nodenbr + 1`
+        fi
+        done
+fi
+
 
 if [ "x$machine" = "x" ] ; then
     machine=""
