@@ -27,8 +27,8 @@
 // Additional copyrights may follow.
 // 
 
-#include <iostream.h>
-#include <mpi++.h>
+#include <iostream>
+#include "mpi2c++/mpi++.h"
 
 void example10_2(void);
 void example10_3(void);

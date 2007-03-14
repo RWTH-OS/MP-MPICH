@@ -27,8 +27,8 @@
 // Additional copyrights may follow.
 //
 
-#include <iostream.h>
-#include <mpi++.h>
+#include <iostream>
+#include "mpi++.h"
 
 
 void user_bcast(int buffer[], int count, MPI::Intracomm comm);

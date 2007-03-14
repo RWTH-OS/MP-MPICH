@@ -27,9 +27,9 @@
 // Additional copyrights may follow.
 //
 
-#include <iostream.h> 
-#include <mpi++.h>
-#include <assert.h>
+#include <iostream> 
+#include "mpi++.h"
+#include <assert>
 
 void cartesian();
 void graph();

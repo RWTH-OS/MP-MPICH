@@ -27,7 +27,7 @@
 // Additional copyrights may follow.
 //
 
-#include <iostream.h>
+#include <iostream>
 #include "mpi++.h"
 
 int
