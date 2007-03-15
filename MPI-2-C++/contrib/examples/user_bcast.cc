@@ -30,6 +30,10 @@
 #include <iostream>
 #include "mpi++.h"
 
+#ifdef _WIN32
+using namespace std;
+#endif
+
 
 void user_bcast(int buffer[], int count, MPI::Intracomm comm);
 

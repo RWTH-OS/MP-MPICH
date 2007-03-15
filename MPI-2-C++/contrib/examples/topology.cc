@@ -29,7 +29,15 @@
 
 #include <iostream> 
 #include "mpi++.h"
+#ifdef _WIN32
+#include <assert.h>
+#else
 #include <assert>
+#endif
+
+#ifdef _WIN32
+using namespace std;
+#endif
 
 void cartesian();
 void graph();

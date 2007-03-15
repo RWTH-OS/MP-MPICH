@@ -1,0 +1,61 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chapter_10_mpi2", "chapter_10_mpi2.vcproj", "{6E51B874-928C-4D9C-BDDD-24AFEC19FF5B}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pi", "pi.vcproj", "{FDF6A7A6-6180-4703-ADCC-CBE431D11058}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hello_world", "hello_world.vcproj", "{2FFC83E8-DB71-4E79-9973-3EB969FBD4A7}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ring", "ring.vcproj", "{F62DB939-A045-420F-A905-F0F766AEC435}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "topology", "topology.vcproj", "{1E25AEFB-AA65-4C58-9190-9AFEDD2272D0}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "user_bcast", "user_bcast.vcproj", "{421564EB-F068-44F2-9804-523F87496AA0}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{6E51B874-928C-4D9C-BDDD-24AFEC19FF5B}.Debug.ActiveCfg = Debug|Win32
+		{6E51B874-928C-4D9C-BDDD-24AFEC19FF5B}.Debug.Build.0 = Debug|Win32
+		{6E51B874-928C-4D9C-BDDD-24AFEC19FF5B}.Release.ActiveCfg = Release|Win32
+		{6E51B874-928C-4D9C-BDDD-24AFEC19FF5B}.Release.Build.0 = Release|Win32
+		{FDF6A7A6-6180-4703-ADCC-CBE431D11058}.Debug.ActiveCfg = Debug|Win32
+		{FDF6A7A6-6180-4703-ADCC-CBE431D11058}.Debug.Build.0 = Debug|Win32
+		{FDF6A7A6-6180-4703-ADCC-CBE431D11058}.Release.ActiveCfg = Release|Win32
+		{FDF6A7A6-6180-4703-ADCC-CBE431D11058}.Release.Build.0 = Release|Win32
+		{2FFC83E8-DB71-4E79-9973-3EB969FBD4A7}.Debug.ActiveCfg = Debug|Win32
+		{2FFC83E8-DB71-4E79-9973-3EB969FBD4A7}.Debug.Build.0 = Debug|Win32
+		{2FFC83E8-DB71-4E79-9973-3EB969FBD4A7}.Release.ActiveCfg = Release|Win32
+		{2FFC83E8-DB71-4E79-9973-3EB969FBD4A7}.Release.Build.0 = Release|Win32
+		{F62DB939-A045-420F-A905-F0F766AEC435}.Debug.ActiveCfg = Debug|Win32
+		{F62DB939-A045-420F-A905-F0F766AEC435}.Debug.Build.0 = Debug|Win32
+		{F62DB939-A045-420F-A905-F0F766AEC435}.Release.ActiveCfg = Release|Win32
+		{F62DB939-A045-420F-A905-F0F766AEC435}.Release.Build.0 = Release|Win32
+		{1E25AEFB-AA65-4C58-9190-9AFEDD2272D0}.Debug.ActiveCfg = Debug|Win32
+		{1E25AEFB-AA65-4C58-9190-9AFEDD2272D0}.Debug.Build.0 = Debug|Win32
+		{1E25AEFB-AA65-4C58-9190-9AFEDD2272D0}.Release.ActiveCfg = Release|Win32
+		{1E25AEFB-AA65-4C58-9190-9AFEDD2272D0}.Release.Build.0 = Release|Win32
+		{421564EB-F068-44F2-9804-523F87496AA0}.Debug.ActiveCfg = Debug|Win32
+		{421564EB-F068-44F2-9804-523F87496AA0}.Debug.Build.0 = Debug|Win32
+		{421564EB-F068-44F2-9804-523F87496AA0}.Release.ActiveCfg = Release|Win32
+		{421564EB-F068-44F2-9804-523F87496AA0}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

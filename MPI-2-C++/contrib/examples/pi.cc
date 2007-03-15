@@ -26,10 +26,16 @@
 // 
 // Additional copyrights may follow.
 //
-
+#ifdef _WIN32
+#include <math.h>
+#else
 #include <math>
+#endif
 #include <iostream>
 #include "mpi++.h"
+#ifdef _WIN32
+using namespace std;
+#endif
 
 int
 main(int argc, char *argv[])

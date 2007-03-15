@@ -29,6 +29,9 @@
 
 #include <iostream>
 #include "mpi++.h"
+#ifdef _WIN32
+using namespace std;
+#endif
 
 int
 main(int argc, char *argv[])

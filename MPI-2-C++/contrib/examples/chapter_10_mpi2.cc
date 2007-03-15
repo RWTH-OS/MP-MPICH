@@ -28,7 +28,11 @@
 // 
 
 #include <iostream>
-#include "mpi2c++/mpi++.h"
+#include "mpi++.h"
+
+#ifdef _WIN32
+using namespace std;
+#endif
 
 void example10_2(void);
 void example10_3(void);
