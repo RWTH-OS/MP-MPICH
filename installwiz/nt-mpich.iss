@@ -4,7 +4,7 @@ EnableISX=false
 [Setup]
 AppCopyright=LfBS
 AppName=nt-mpich
-AppVerName=nt-mpich 1.4.0
+AppVerName=nt-mpich 1.5.0
 DefaultDirName={pf}\nt-mpich
 MinVersion=0,4.00.1381sp6
 LicenseFile=..\COPYRIGHT
@@ -17,14 +17,13 @@ UninstallDisplayIcon={app}\bin\RexecShell.exe
 PrivilegesRequired=admin
 AppPublisher=LfBS
 AppPublisherURL=http://www.lfbs.rwth-aachen.de
-AppUpdatesURL=http://www.lfbs.rwth-aachen.de/mp-mpich/download_form.html
+AppUpdatesURL=http://www.lfbs.rwth-aachen.de/content/mp-mpich-dl
 UninstallDisplayName=NT-MPICH
-AppVersion=1.4.0
+AppVersion=1.5.0
 
 
 [Files]
 Source: ..\doc\mp-mpich_manual.pdf; DestDir: {app}\doc; Components: Cluster_Frontend; Flags: isreadme
-Source: ..\doc\mpiman.pdf; DestDir: {app}\doc; Components: Cluster_Frontend
 Source: ..\doc\runtests_readme.txt; DestDir: {app}\doc; Components: Cluster_Frontend
 Source: ..\doc\Quickstart.pdf; DestDir: {app}\doc; Components: Cluster_Frontend; Flags: isreadme
 
@@ -34,6 +33,7 @@ Source: ..\bin\mpe_server_frontend.exe; DestDir: {app}\bin; Components: Cluster_
 Source: ..\bin\mpiexec.exe; DestDir: {app}\bin; Components: Cluster_Frontend
 Source: ..\bin\ntrexec.exe; DestDir: {app}\bin; Components: Cluster_Frontend
 Source: ..\bin\runtests.exe; DestDir: {app}\bin; Components: Cluster_Frontend
+Source: ..\bin\chkresult.exe; DestDir: {app}\bin; Components: Cluster_Frontend
 Source: ..\rexec\mpirun\plugins\libs\*.dll; DestDir: {app}\bin\plugins; Components: Cluster_Frontend
 
 Source: ..\bin\rclumad.exe; DestDir: {tmp}\nt-mpich_setup; Components: Cluster_Node; Flags: deleteafterinstall
@@ -43,6 +43,8 @@ Source: ..\bin\rcluma-uninstall.bat; DestDir: {tmp}\nt-mpich_setup; Components: 
 Source: ..\bin\rcluma-uninstall.bat; DestDir: {app}\bin; Components: Cluster_Node
 Source: ..\bin\rcluma-update.bat; DestDir: {app}\bin; Components: Cluster_Node
 
+Source: ..\examples\basic\*.sln; DestDir: {app}\examples\basic; Components: Examples; Flags: recursesubdirs
+Source: ..\examples\basic\*.vcproj; DestDir: {app}\examples\basic; Components: Examples; Flags: recursesubdirs
 Source: ..\examples\basic\*.dsp; DestDir: {app}\examples\basic; Components: Examples; Flags: recursesubdirs
 Source: ..\examples\basic\*.dsw; DestDir: {app}\examples\basic; Components: Examples; Flags: recursesubdirs
 Source: ..\examples\basic\*.c; DestDir: {app}\examples\basic; Components: Examples; Flags: recursesubdirs
@@ -52,20 +54,22 @@ Source: ..\examples\basic\*.h; DestDir: {app}\examples\basic; Components: Exampl
 Source: ..\examples\basic\*.f; DestDir: {app}\examples\basic; Components: Examples
 Source: ..\examples\basic\*.f90; DestDir: {app}\examples\basic; Components: Examples
 Source: ..\examples\basic\README; DestDir: {app}\examples\basic; Components: Examples
+Source: ..\examples\basic\build.bat; DestDir: {app}\examples\basic; Components: Examples
 Source: ..\examples\basic\PiMfc\*.rc*; DestDir: {app}\examples\basic\PiMfc; Components: Examples; Flags: recursesubdirs
 Source: ..\examples\basic\PiMfc\res\*.ico; DestDir: {app}\examples\basic\PiMfc\res; Components: Examples; Flags: recursesubdirs
 
-
-Source: ..\examples\test\*.dsp; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
-Source: ..\examples\test\*.dsw; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
-Source: ..\examples\test\*.c; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
+Source: ..\examples\test\*.sln; Excludes: util*; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
+Source: ..\examples\test\*.vcproj; Excludes: util*; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
+Source: ..\examples\test\*.vfproj; Excludes: util*; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
+Source: ..\examples\test\*.dsp; Excludes: util*; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
+Source: ..\examples\test\*.dsw; Excludes: util*; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
+Source: ..\examples\test\*.c; Excludes: util*; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
 Source: ..\examples\test\*.f; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
-Source: ..\examples\test\*.h; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
-Source: ..\examples\test\*.bat; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
+Source: ..\examples\test\*.h; Excludes: util*; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
 Source: ..\examples\test\*.txt; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
 Source: ..\examples\test\*.std; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
-Source: ..\examples\test\*.vbs; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
-Source: ..\examples\test\README.; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
+Source: ..\examples\test\README; Excludes: command*; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
+Source: ..\examples\test\build.bat; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
 
 
 Source: ..\mpe\contrib\*.dsw; DestDir: {app}\examples\MPE; Components: Examples
@@ -78,11 +82,12 @@ Source: ..\mpe\contrib\*.pd; DestDir: {app}\examples\MPE; Components: Examples; 
 Source: ..\mpe\contrib\README; DestDir: {app}\examples\MPE; Components: Examples; Flags: recursesubdirs
 Source: ..\mpe\contrib\*.points; DestDir: {app}\examples\MPE; Components: Examples; Flags: recursesubdirs
 
-Source: ..\MPI-2-C++\contrib\*.dsw; DestDir: {app}\examples\C++; Components: Examples; Flags: recursesubdirs
-Source: ..\MPI-2-C++\contrib\*.dsp; DestDir: {app}\examples\C++; Components: Examples; Flags: recursesubdirs
-Source: ..\MPI-2-C++\contrib\*.cc; DestDir: {app}\examples\C++; Components: Examples; Flags: recursesubdirs
-Source: ..\MPI-2-C++\contrib\*.h; DestDir: {app}\examples\C++; Components: Examples; Flags: recursesubdirs
-Source: ..\MPI-2-C++\contrib\README; DestDir: {app}\examples\C++; Components: Examples; Flags: recursesubdirs
+Source: ..\MPI-2-C++\contrib\examples\*.sln; DestDir: {app}\examples\C++; Components: Examples; Flags: recursesubdirs
+Source: ..\MPI-2-C++\contrib\examples\*.vcproj; DestDir: {app}\examples\C++; Components: Examples; Flags: recursesubdirs
+Source: ..\MPI-2-C++\contrib\examples\*.cc; DestDir: {app}\examples\C++; Components: Examples; Flags: recursesubdirs
+Source: ..\MPI-2-C++\contrib\examples\README; DestDir: {app}\examples\C++; Components: Examples; Flags: recursesubdirs
+Source: ..\MPI-2-C++\*.h; DestDir: {app}\include\mpi2c++\; Components: Examples Development
+Source: ..\MPI-2-C++\src\mpi2c++\*.h; DestDir: {app}\include\mpi2c++\; Components: Examples Development
 
 Source: ..\romio\test\*.dsw; DestDir: {app}\examples\RomIO; Components: Examples; Flags: recursesubdirs
 Source: ..\romio\test\*.dsp; DestDir: {app}\examples\RomIO; Components: Examples; Flags: recursesubdirs
@@ -99,7 +104,6 @@ Source: ..\lib\*.txt; DestDir: {app}\lib; Components: Examples Development
 
 Source: ..\include\*.h; DestDir: {app}\include; Components: Examples Development
 Source: ..\mpe\win_mpe_server\*.h; DestDir: {app}\include; Components: Examples Development
-Source: ..\MPI-2-C++\*.h; DestDir: {app}\include; Components: Examples Development
 Source: ..\mpe\mpe.h; DestDir: {app}\include; Components: Examples Development
 Source: ..\mpe\mpe_log.h; DestDir: {app}\include; Components: Examples Development
 Source: ..\mpe\mpe_win_graphics.h; DestDir: {app}\include; Components: Examples Development
@@ -196,4 +200,3 @@ Name: Node; Description: Cluster Node
 
 [InstallDelete]
 Name: {tmp}\nt-mpich; Type: dirifempty
-
