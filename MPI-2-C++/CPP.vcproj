@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="CPP"
+	RootNamespace="CPP"
 	SccProjectName=""
 	SccLocalPath="">
 	<Platforms>
@@ -22,7 +23,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				OptimizeForProcessor="0"
-				AdditionalIncludeDirectories=".\,..\include,C:\Programme\Microsoft SDK\Include"
+				AdditionalIncludeDirectories=".\;..\include;$(ProjectDir)src\mpi2c++;$(ProjectDir)"
 				PreprocessorDefinitions="_DEBUG;_LIB;USE_STDARG;WIN32;WIN32_LEAN_AND_MEAN"
 				StringPooling="FALSE"
 				BasicRuntimeChecks="3"
@@ -82,7 +83,7 @@
 				EnableIntrinsicFunctions="TRUE"
 				FavorSizeOrSpeed="1"
 				OptimizeForProcessor="0"
-				AdditionalIncludeDirectories=".\,..\include,C:\Programme\Microsoft SDK\Include"
+				AdditionalIncludeDirectories=".\;..\include;&quot;C:\Programme\Microsoft SDK\Include&quot;;&quot;..\MPI-2-C++\src\mpi2c++&quot;;&quot;..\MPI-2-C++&quot;"
 				PreprocessorDefinitions="NDEBUG;_LIB;USE_STDARG;WIN32;WIN32_LEAN_AND_MEAN"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -525,6 +526,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\intercepts.cc">
+			</File>
+			<File
 				RelativePath="src\intercomm.cpp">
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -958,7 +962,10 @@
 				RelativePath="src\map.h">
 			</File>
 			<File
-				RelativePath="src\mpi++.h">
+				RelativePath=".\src\mpi2c++\mpi++.h">
+			</File>
+			<File
+				RelativePath=".\Mpi2c++_Config.H">
 			</File>
 			<File
 				RelativePath="src\op.h">

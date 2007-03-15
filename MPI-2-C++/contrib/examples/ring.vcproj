@@ -23,7 +23,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\src\mpi2c++,..\..\src,$(MPI_ROOT)\include,..\..\"
+				AdditionalIncludeDirectories="..\..\src\mpi2c++,..\..\src,$(MPI_ROOT)\include,..\..\,$(MPI_ROOT)\include\mpi2c++"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
@@ -84,7 +84,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\src\mpi2c++,..\..\src,$(MPI_ROOT)\include,..\..\"
+				AdditionalIncludeDirectories="..\..\src\mpi2c++,..\..\src,$(MPI_ROOT)\include,..\..\,$(MPI_ROOT)\include\mpi2c++"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"

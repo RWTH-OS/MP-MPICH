@@ -80,10 +80,24 @@
 #define _MPIPP_INLINE_ 
 #endif
 
-#if HAVE_BOOL
+#if MPI2CPP_HAVE_BOOL
 typedef bool MPI2CPP_BOOL_T;
+#define MPI2CPP_FALSE false
+#define MPI2CPP_TRUE true
 #else
-enum MPI2CPP_BOOL_T { false, true };
+enum MPI2CPP_BOOL_T { MPI2CPP_FALSE, MPI2CPP_TRUE };
+#ifdef bool
+#undef bool
+#endif
+#ifdef false
+#undef false
+#endif
+#ifdef true
+#undef true
+#endif
+#define bool MPI2CPP_BOOL_T
+#define false MPI2CPP_FALSE
+#define true MPI2CPP_TRUE
 #endif
 
 #define MPI2CPP_BSD_SIGNAL 0
@@ -134,6 +148,7 @@ enum MPI2CPP_BOOL_T { false, true };
 #define G_PLUS_PLUS 0
 
 #define ATTR int
+#define MPI2CPP_ATTR int
 
 // #$%@#%@#%@#% AIX!!!!
 
