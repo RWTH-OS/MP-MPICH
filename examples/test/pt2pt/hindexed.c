@@ -36,6 +36,7 @@ int main( int argc, char **argv )
     sbuf = (int *) malloc( mat_n * mat_n * sizeof(int) );
     rbuf = (int *) malloc( mat_n * mat_n * sizeof(int) );
     if (!sbuf || !rbuf) {
+		fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 	MPI_Abort( MPI_COMM_WORLD, 1 );
     }
 

@@ -41,6 +41,7 @@ int main( int argc, char **argv )
     recv_buf = (int **) malloc ( nsend * sizeof(int *) );
     if (!rsend || !rrecv) {
 	fprintf( stderr, "Failed to allocate space for requests\n" );
+	fprintf( stderr, "Aborting\n");fflush(stderr);
 	MPI_Abort( MPI_COMM_WORLD, 1 );
     }
 

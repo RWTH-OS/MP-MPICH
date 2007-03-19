@@ -35,6 +35,7 @@ char **argv;
 
     if (size < 2) {
 	  printf( "Cancel test requires at least 2 processes\n" );
+	  fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 	  MPI_Abort( MPI_COMM_WORLD, 1 );
     }
 

@@ -30,6 +30,7 @@ int main( int argc, char *argv[] )
 	    fprintf( stderr, 
 		     "MPI_WTIME is returning 0; a working value is needed\n\
 for this test.\n" );
+		fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 	    MPI_Abort( MPI_COMM_WORLD, 1 );
 	}
     }

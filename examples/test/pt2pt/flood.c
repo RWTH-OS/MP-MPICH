@@ -59,6 +59,7 @@ int main( int argc, char **argv )
 
     if (size < 2) {
 	printf( "This test requires at least 2 processors\n" );
+	fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 	MPI_Abort( comm, 1 );
     }
 
@@ -101,6 +102,7 @@ int main( int argc, char **argv )
 	    ALLOC (rbuf, int, msgsize * sizeof(int));
 	    if (!rbuf) {
 		printf( "Could not allocate %d words\n", msgsize );
+		fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 		MPI_Abort( comm, 1 );
 	    }
 	    for (i=0; i<size; i++) {
@@ -115,6 +117,7 @@ int main( int argc, char **argv )
 	    ALLOC (sbuf, int, msgsize * sizeof(int));
 	    if (!sbuf) {
 		printf( "Could not allocate %d words\n", msgsize );
+		fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 		MPI_Abort( comm, 1 );
 	    }
 	    SetupData( sbuf, msgsize, 2*rank );
@@ -136,6 +139,7 @@ int main( int argc, char **argv )
 	    ALLOC (rbuf, int, msgsize * sizeof(int));
 	    if (!rbuf) {
 		printf( "Could not allocate %d words\n", msgsize );
+		fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 		MPI_Abort( comm, 1 );
 	    }
 	    MPI_Barrier( comm );
@@ -151,6 +155,7 @@ int main( int argc, char **argv )
 	    ALLOC(sbuf, int, msgsize * sizeof(int));
 	    if (!sbuf) {
 		printf( "Could not allocate %d words\n", msgsize );
+		fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 		MPI_Abort( comm, 1 );
 	    }
 	    SetupData( sbuf, msgsize, 2*rank );
@@ -174,6 +179,7 @@ int main( int argc, char **argv )
 	    ALLOC (rbuf, int, msgsize * sizeof(int));
 	    if (!rbuf) {
 		printf( "Could not allocate %d words\n", msgsize );
+		fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 		MPI_Abort( comm, 1 );
 	    }
 	    for (i=0; i<size; i++) {
@@ -188,6 +194,7 @@ int main( int argc, char **argv )
 	    ALLOC (sbuf, int, msgsize * sizeof(int));
 	    if (!sbuf) {
 		printf( "Could not allocate %d words\n", msgsize );
+		fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 		MPI_Abort( comm, 1 );
 	    }
 	    SetupData( sbuf, msgsize, 2*rank );
@@ -210,6 +217,7 @@ int main( int argc, char **argv )
 	    ALLOC (rbuf, int, msgsize * sizeof(int));
 	    if (!rbuf) {
 		printf( "Could not allocate %d words\n", msgsize );
+		fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 		MPI_Abort( comm, 1 );
 	    }
 	    for (i=0; i<size; i++) {
@@ -226,6 +234,7 @@ int main( int argc, char **argv )
 	    ALLOC (sbuf, int, msgsize * sizeof(int));
 	    if (!sbuf) {
 		printf( "Could not allocate %d words\n", msgsize );
+		fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 		MPI_Abort( comm, 1 );
 	    }
 	    SetupData( sbuf, msgsize, 2*rank );

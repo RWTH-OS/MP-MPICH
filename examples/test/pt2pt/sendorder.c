@@ -85,6 +85,7 @@ int main( int argc, char *argv[] )
   MPI_Comm_size( comm, &size );
   if (size < 2) {
     fprintf( stderr, "This program requires at least 2 processes\n" );
+	fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
     MPI_Abort( MPI_COMM_WORLD, 1 );
   }
   src  = 0;
@@ -137,6 +138,7 @@ int main( int argc, char *argv[] )
   buf = (int *)malloc( m * sizeof(int) );
   if (!buf) {
     fprintf( stdout, "Could not allocate %d ints\n", m );
+	fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
     MPI_Abort( MPI_COMM_WORLD, 1 );
   }
   for (i=0; i<m; i++) buf[i] = - i;

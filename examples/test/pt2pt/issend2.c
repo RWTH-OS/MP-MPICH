@@ -27,6 +27,7 @@ int rank;
 char *msg;
 {
 	printf("***FATAL** rank %d: %s\n", rank, msg);
+	fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 	MPI_Abort(MPI_COMM_WORLD, 1);
 	exit(1);
 }

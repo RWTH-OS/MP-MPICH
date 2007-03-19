@@ -65,7 +65,7 @@ a = (c *)outbufs[cnt]; for (i=0; i<TYPECNT; i++) a[i] = 0; \
 names[cnt] = (char *)malloc(100);\
 sprintf( names[cnt], "Contig type %s", name );\
 counts[cnt]  = 1;  bytesize[cnt] = sizeof(c) * TYPECNT; cnt++; }
-
+ 
 /* These are vectors of block length one.  */
 #define STRIDE 9
 #define SETUPVECTORTYPE(mpi,c,name) { int i; c *a; \

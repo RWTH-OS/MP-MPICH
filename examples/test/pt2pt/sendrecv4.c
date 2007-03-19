@@ -46,7 +46,7 @@ AllocateForData( &types, &inbufs, &outbufs, &counts, &bytesize,
 
 MPI_Comm_rank( MPI_COMM_WORLD, &world_rank );
 #ifdef _DEBUG
-  printf("[%i] generating data\n",rank);fflush(stdout);
+  printf("[%i] generating data\n",world_rank);fflush(stdout);
   Sleep(1);
 #endif
 

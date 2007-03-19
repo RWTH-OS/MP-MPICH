@@ -35,6 +35,7 @@ int main( int argc, char **argv )
 
   if (size < 2) {
     printf( "This test requires at least 2 processors\n" );
+	fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
     MPI_Abort( MPI_COMM_WORLD, 1 );
     return 1;
   }
@@ -62,6 +63,7 @@ int main( int argc, char **argv )
   buf2 = (int *)malloc( cnt * sizeof(int) );
   if (!buf1 || !buf2) {
     printf( "Could not allocate buffers of size %d\n", cnt );
+	fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
     MPI_Abort( MPI_COMM_WORLD, 1 );
     return 1;
   }

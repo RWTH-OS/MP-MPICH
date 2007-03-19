@@ -58,8 +58,10 @@ for (i=0; i<ncomm; i++) {
 	    partner = np - 1;
 	    MPI_Pack_size( counts[j], types[j], comms[i], &packsize );
 	    packbuf = (char *)malloc( packsize );
-	    if (!packbuf) 
-		MPI_Abort( MPI_COMM_WORLD, 1 );
+		if (!packbuf) {
+			fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
+			MPI_Abort( MPI_COMM_WORLD, 1 );
+		}
 	    position = 0;
 	    MPI_Pack( inbufs[j], counts[j], types[j], packbuf, packsize, 
 		      &position, comms[i] );
@@ -99,8 +101,10 @@ for (i=0; i<ncomm; i++) {
 	    /* Receive packed, then unpack */
 	    MPI_Pack_size( counts[j], types[j], comms[i], &unpacksize ); 
 	    unpackbuf = (char *)malloc( unpacksize );
-	    if (!unpackbuf) 
-		MPI_Abort( MPI_COMM_WORLD, 1 );
+		if (!unpackbuf) {
+			fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
+			MPI_Abort( MPI_COMM_WORLD, 1 );
+		}
             MPI_Recv( unpackbuf, unpacksize, MPI_PACKED, partner, tag, 
 		      comms[i], &status );
 	    obuf = outbufs[j];

@@ -28,7 +28,8 @@ int main(int argc, char **argv) {
 
   if(mysize % 2 != 0) {
     printf ("pingpong must be used with an even number of processes (currently %d processes). \n",mysize);
-    MPI_Abort (MPI_COMM_WORLD, 0);
+    fprintf( stderr, "Aborting\n");fflush(stderr);
+	MPI_Abort (MPI_COMM_WORLD, 0);
   }
 
   if (argc != 4) {

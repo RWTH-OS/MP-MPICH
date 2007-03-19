@@ -25,6 +25,7 @@ void Test_Init(char *suite, int rank)
     fileout = fopen(filename, "w");
     if (!fileout) {
 	fprintf( stderr, "Could not open %s on node %d\n", filename, rank );
+	fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 	MPI_Abort( MPI_COMM_WORLD, 1 );
     }
 

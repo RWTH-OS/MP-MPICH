@@ -31,6 +31,7 @@ int main( int argc, char **argv )
   MPI_Comm_size(MPI_COMM_WORLD, &my_size);
   if (my_size < 2) {
 	  printf( "dtyperecv requires at least 2 processes\n" );
+	  fprintf( stderr, "Aborting\n");fflush(stderr);
 	  MPI_Abort( MPI_COMM_WORLD, 1 );
   }
   MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);

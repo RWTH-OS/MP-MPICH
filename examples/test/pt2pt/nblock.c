@@ -32,6 +32,7 @@ int main( int argc, char **argv )
     if (np > MAXNP) {
 	fprintf( stderr, 
 		 "This test must run with at most %d processes. Otherwise increase MAXNP in the sourcefile.\n", MAXNP );
+	fprintf( stderr, "Aborting\n");fflush(stderr);
 	MPI_Abort( MPI_COMM_WORLD, 1 );
     }
 
@@ -40,6 +41,7 @@ int main( int argc, char **argv )
     rrecv = (MPI_Request *) malloc ( nsend * sizeof(MPI_Request) );
     if (!rsend || !rrecv) {
 	fprintf( stderr, "Failed to allocate space for requests\n" );
+	fprintf( stderr, "Aborting\n");fflush(stderr);
 	MPI_Abort( MPI_COMM_WORLD, 1 );
     }
 
@@ -49,6 +51,7 @@ int main( int argc, char **argv )
 	    rbuf[i] = (int *)malloc( count * sizeof(int) );
 	    if (!sbuf[i] || !rbuf[i]) {
 		fprintf( stderr, "Unable to allocate %d ints\n", count );
+		fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 		MPI_Abort( MPI_COMM_WORLD, 1 );
 	    }
 	}

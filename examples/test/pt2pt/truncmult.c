@@ -72,6 +72,7 @@ int main( int argc, char **argv )
 	if (merr != MPI_ERR_IN_STATUS) {
 	    err++;
 	    fprintf( stderr, "Did not return MPI_ERR_IN_STATUS\n" );
+		fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 	    MPI_Abort( MPI_COMM_WORLD, 1 );
 	}
 	if (statuses[0].MPI_ERROR == MPI_ERR_PENDING) {
@@ -84,6 +85,7 @@ int main( int argc, char **argv )
 	if (statuses[0].MPI_ERROR != MPI_SUCCESS) {
 	    err ++;
 	    fprintf( stderr, "Could not complete legal send-receive\n" );
+		fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 	    MPI_Abort( MPI_COMM_WORLD, 1 );
 	}
 	err += CheckRecvErr( merr, &statuses[1], recvbuf2, "Irecv" );
@@ -107,6 +109,7 @@ int main( int argc, char **argv )
 	if (merr != MPI_ERR_IN_STATUS) {
 	    err++;
 	    fprintf( stderr, "Did not return MPI_ERR_IN_STATUS (4)\n" );
+		fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 	    MPI_Abort( MPI_COMM_WORLD, 1 );
 	}
 	if (statuses[0].MPI_ERROR == MPI_ERR_PENDING) {
@@ -132,11 +135,13 @@ int main( int argc, char **argv )
 	if (statuses[0].MPI_ERROR != MPI_SUCCESS) {
 	    err ++;
 	    fprintf( stderr, "Could not complete legal send-receive-0\n" );
+		fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 	    MPI_Abort( MPI_COMM_WORLD, 1 );
 	}
 	if (statuses[3].MPI_ERROR != MPI_SUCCESS) {
 	    err ++;
 	    fprintf( stderr, "Could not complete legal send-receive-3\n" );
+		fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 	    MPI_Abort( MPI_COMM_WORLD, 1 );
 	}
 	

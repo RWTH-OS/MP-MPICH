@@ -48,7 +48,9 @@ void Checkbuf( char *buf, int len, MPI_Status *status )
 		}
 		ival++;
 	}
-	if (err) MPI_Abort( MPI_COMM_WORLD, 1 );
+	if (err) {
+		fprintf( stderr, "Aborting\n");fflush(stderr);
+		MPI_Abort( MPI_COMM_WORLD, 1 );}
 }
 
 int main( int argc, char *argv[] )
@@ -112,6 +114,7 @@ int main( int argc, char *argv[] )
 		recvbuf = malloc(msglen);
 		if(sendbuf == NULL || recvbuf == NULL) {
 			printf("Can't allocate %d bytes\n",msglen);
+			fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 			MPI_Abort( MPI_COMM_WORLD, 1 );
 		}
 

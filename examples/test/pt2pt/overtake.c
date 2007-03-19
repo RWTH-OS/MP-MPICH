@@ -195,6 +195,7 @@ int main( int argc, char **argv )
 		if (!tmpbuffer) {
 			fprintf( stderr, "Could not allocate bsend buffer of size %d\n",
 				bsize );
+			fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 			MPI_Abort( MPI_COMM_WORLD, 1 );
 		}
 		MPI_Buffer_attach( tmpbuffer, bsize + MPI_BSEND_OVERHEAD );

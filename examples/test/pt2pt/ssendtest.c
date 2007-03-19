@@ -82,6 +82,7 @@ int main( int argc, char **argv)
 		 "MPI_WTIME is returning 0; a working value is needed\n\
 for this test.\n" );
 		Test_Failed(Current_Test);
+		fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 		MPI_Abort( MPI_COMM_WORLD, 1 );
 	    }
             while (MPI_Wtime() - t0 < MAX_TIME) {

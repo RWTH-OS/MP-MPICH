@@ -81,6 +81,7 @@ int main( int argc, char **argv )
 			fprintf( stdout, 
 				"Usage: reqfree [ -loop n ] [ -req n ] [ -len n ]\n" );
 			fflush(stdout);
+			fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 			MPI_Abort( MPI_COMM_WORLD, 1 );
 		}
 		argv++;
@@ -105,6 +106,7 @@ int main( int argc, char **argv )
 			if (!b[i]) {
 				fprintf( stderr, "Could not allocate %dth block of %d ints\n", 
 					i, buf_len );
+				fprintf( stderr, "[%i] Aborting\n",rank );fflush(stderr);
 				MPI_Abort( MPI_COMM_WORLD, 2 );
 			}
 			if (rank != sendrank) break;
