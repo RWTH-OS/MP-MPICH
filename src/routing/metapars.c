@@ -351,7 +351,8 @@ void createProcGroup(char *pgName, char *execPath, int h, char *metahostname) {
 									{
 										if((pn->extraProcList[j])[k]==' ')
 											{	
-												if((pn->extraProcList[j])[k+1]>0x30)
+												if(((pn->extraProcList[j])[k+1]>0x30) &&
+												   ((pn->extraProcList[j])[k+1]<0x39))
 													{
 														(pn->extraProcList[j])[k+1]--;
 													}

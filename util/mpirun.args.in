@@ -851,6 +851,10 @@ if [ $np = 0 ]; then
                 nodenbr=`expr $nodenbr + 1`
         done
         np=$nodenbr
+        if [ -z "$np" ] ; then
+        # If the nummber of processes are stated in a procgroup file, set np to zero:
+          np="0"
+        fi
 else
         # -np or -n option has been supplied
         for node in $nodestr ; do 
