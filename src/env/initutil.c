@@ -1960,6 +1960,7 @@ int MPID_write_deb_file(int rank)
 	fprintf(f, "%s %s %d\n", hostname, MPIR_process_name, getpid());
 	fclose(f);
 	DEBUG(fprintf(stderr, "File %s written.\n", fname);)
+	free(hostname);
 	return MPI_SUCCESS;
 }
 
