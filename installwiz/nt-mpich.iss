@@ -70,6 +70,8 @@ Source: ..\examples\test\*.txt; DestDir: {app}\examples\test; Components: Exampl
 Source: ..\examples\test\*.std; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
 Source: ..\examples\test\README; Excludes: command*; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
 Source: ..\examples\test\build.bat; DestDir: {app}\examples\test; Components: Examples; Flags: recursesubdirs
+Source: ..\examples\test\util\test.h; DestDir: {app}\examples\test\util; Components: Examples
+Source: ..\examples\test\util\test.c; DestDir: {app}\examples\test\util; Components: Examples
 
 
 Source: ..\mpe\contrib\*.dsw; DestDir: {app}\examples\MPE; Components: Examples
