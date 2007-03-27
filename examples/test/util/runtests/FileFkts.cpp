@@ -4,13 +4,14 @@
 #include <stdlib.h>
 
 
-#ifdef unicode
+#ifdef unicode 
 
 #define _splitpath _wsplitpath
 #define _makepath _wmakepath
 #define _fullpath _wfullpath
 
 #endif
+
 
 //////////////////////////////////////////////////////////////////////
 DWORD FileGetSize(LPCTSTR FileName)
@@ -20,10 +21,11 @@ DWORD FileGetSize(LPCTSTR FileName)
 
 	LPWIN32_FIND_DATA lpFindFileData;
 	DWORD returnvalue = 0;
+	HANDLE myhandle;
 
 	lpFindFileData = (LPWIN32_FIND_DATA) malloc (sizeof(WIN32_FIND_DATA));
 
-    HANDLE myhandle = FindFirstFile(FileName,lpFindFileData);
+    FindFirstFile(FileName,lpFindFileData);
     if (myhandle != INVALID_HANDLE_VALUE)
 	{
 	  if ((lpFindFileData->nFileSizeHigh)==0)
@@ -47,10 +49,12 @@ BOOL FileExists(LPCSTR FileName)
 
 	LPWIN32_FIND_DATA lpFindFileData;
 	BOOL returnvalue = FALSE;
+	HANDLE myhandle;
 
 	lpFindFileData = (LPWIN32_FIND_DATA) malloc (sizeof(WIN32_FIND_DATA));
 
-    HANDLE myhandle = FindFirstFile(FileName,lpFindFileData);
+    
+	myhandle = FindFirstFile(FileName,lpFindFileData);
 	if (myhandle != INVALID_HANDLE_VALUE)
 	{
 		//function succeds
@@ -75,10 +79,11 @@ BOOL DirectoryExists(LPCSTR FilePath)
 
 	LPWIN32_FIND_DATA lpFindFileData;
 	BOOL returnvalue = FALSE;
+	HANDLE myhandle;
 
 	lpFindFileData = (LPWIN32_FIND_DATA) calloc (1,sizeof(WIN32_FIND_DATA));
 
-    HANDLE myhandle = FindFirstFile(FilePath,lpFindFileData);
+    myhandle = FindFirstFile(FilePath,lpFindFileData);
 	if (myhandle != INVALID_HANDLE_VALUE)
 	{
 		//function succeeds
@@ -99,6 +104,10 @@ BOOL DirectoryExists(LPCSTR FilePath)
 //////////////////////////////////////////////////////////////////////
 BOOL CreateFilePath(LPCSTR FilePath)
 {
+	char * dirbuf,* pdir, * fullpath;
+	BOOL ok = TRUE,direx = FALSE;
+    int index,pathlength;
+	BOOL erz;
 
     if (DirectoryExists(FilePath))
         return(TRUE);
@@ -106,8 +115,7 @@ BOOL CreateFilePath(LPCSTR FilePath)
     if (strlen(FilePath)<1)
         return(FALSE);
 
-    char * dirbuf,* pdir, * fullpath;
-
+    
     // Wildcards are not allowed    
     pdir = strchr(FilePath,'*');
     if (pdir != NULL)
@@ -116,8 +124,7 @@ BOOL CreateFilePath(LPCSTR FilePath)
     if (pdir != NULL)
         return(FALSE);
 
-    BOOL ok = TRUE,direx = FALSE;
-    int index,pathlength;
+    
 
     dirbuf = (char *) calloc (strlen(FilePath)+2,sizeof(char));
     fullpath = (char *) calloc (strlen(FilePath)+2,sizeof(char));
@@ -129,7 +136,7 @@ BOOL CreateFilePath(LPCSTR FilePath)
 
     pathlength = strlen(fullpath);
 
-    BOOL erz = CreateDirectory(fullpath,NULL);
+    erz = CreateDirectory(fullpath,NULL);
 
     //skip device letter
     pdir = strchr(fullpath,':');
@@ -166,6 +173,8 @@ void ChangeFileExt(LPSTR FileName, LPCSTR extension)
 {
     char *path,*drive,*dir,*fname,*ext;
     DWORD maxlength;
+	char * charptr = NULL;
+
     maxlength = strlen(FileName)+strlen(extension)+1;
 
     path = (char *) calloc (maxlength,1);
@@ -179,7 +188,7 @@ void ChangeFileExt(LPSTR FileName, LPCSTR extension)
         strcpy(path,FileName+1);
     else
         strcpy(path,FileName);
-    char * charptr = NULL;
+    
     charptr = strchr(path,'"');
     if (charptr != NULL)
         charptr[0]='\0';
@@ -201,6 +210,8 @@ void ChangeFileName(LPSTR FileName, LPCSTR newname)
 {
     char *path,*drive,*dir,*fname,*ext;
     DWORD maxlength;
+	char * charptr = NULL;
+
     maxlength = strlen(FileName)+strlen(newname)+1;
 
     path = (char *) calloc (maxlength,1);
@@ -214,7 +225,7 @@ void ChangeFileName(LPSTR FileName, LPCSTR newname)
         strcpy(path,FileName+1);
     else
         strcpy(path,FileName);
-    char * charptr = NULL;
+    
     charptr = strchr(path,'"');
     if (charptr != NULL)
         charptr[0]='\0';
@@ -238,6 +249,8 @@ void ChangeFilePath(LPSTR FileName, LPCSTR newpath)
     char *path,*drive,*dir,*fname,*ext;
     char *hlppath,*newdrive,*newdir,*newfname,*newext;
     DWORD maxlength;
+	char * charptr = NULL;
+
     maxlength = strlen(FileName)+strlen(newpath)+2+1; 
     // +1: '\0' +2: if there are leading end ending backslash added
     path = (char *) calloc (maxlength,1);
@@ -257,7 +270,7 @@ void ChangeFilePath(LPSTR FileName, LPCSTR newpath)
         strcpy(path,FileName+1);
     else
         strcpy(path,FileName);
-    char * charptr = NULL;
+    
     charptr = strchr(path,'"');
     if (charptr != NULL)
         charptr[0]='\0';
@@ -295,6 +308,8 @@ void ExtractFilePath(LPCSTR FileName, LPSTR FilePath)
 {
     char *path,*drive,*dir,*fname,*ext;
     DWORD maxlength;
+	char * charptr = NULL;
+
     maxlength = strlen(FileName)+1;
 
     path = (char *) calloc (maxlength,1);
@@ -308,7 +323,7 @@ void ExtractFilePath(LPCSTR FileName, LPSTR FilePath)
         strcpy(path,FileName+1);
     else
         strcpy(path,FileName);
-    char * charptr = NULL;
+    
     charptr = strchr(path,'"');
     if (charptr != NULL)
         charptr[0]='\0';
@@ -330,6 +345,8 @@ void ExtractFileName(LPCSTR FileName, LPSTR Name)
 {
     char *path,*drive,*dir,*fname,*ext;
     DWORD maxlength;
+	char * charptr = NULL;
+
     maxlength = strlen(FileName)+1;
 
     path = (char *) calloc (maxlength,1);
@@ -343,7 +360,7 @@ void ExtractFileName(LPCSTR FileName, LPSTR Name)
         strcpy(path,FileName+1);
     else
         strcpy(path,FileName);
-    char * charptr = NULL;
+    
     charptr = strchr(path,'"');
     if (charptr != NULL)
         charptr[0]='\0';
