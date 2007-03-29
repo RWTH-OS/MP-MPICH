@@ -27,6 +27,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PiMfc", "PiMfc\PiMfc.vcproj
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpinonstop", "cpinonstop.vcproj", "{E9B85795-DDD6-4037-B94C-40F83A6CC6C6}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		anim = anim
@@ -181,6 +185,26 @@ Global
 		{D268B58A-4044-4EE4-BB94-3CD27861F4F4}.Release x64.Build.0 = Release x64|Win32
 		{D268B58A-4044-4EE4-BB94-3CD27861F4F4}.trace.ActiveCfg = Debug|Win32
 		{D268B58A-4044-4EE4-BB94-3CD27861F4F4}.trace.Build.0 = Debug|Win32
+		{E9B85795-DDD6-4037-B94C-40F83A6CC6C6}.anim.ActiveCfg = Release|Win32
+		{E9B85795-DDD6-4037-B94C-40F83A6CC6C6}.anim.Build.0 = Release|Win32
+		{E9B85795-DDD6-4037-B94C-40F83A6CC6C6}.Debug.ActiveCfg = Debug|Win32
+		{E9B85795-DDD6-4037-B94C-40F83A6CC6C6}.Debug.Build.0 = Debug|Win32
+		{E9B85795-DDD6-4037-B94C-40F83A6CC6C6}.Debug Client.ActiveCfg = Debug|Win32
+		{E9B85795-DDD6-4037-B94C-40F83A6CC6C6}.Debug Client.Build.0 = Debug|Win32
+		{E9B85795-DDD6-4037-B94C-40F83A6CC6C6}.Debug Master.ActiveCfg = Debug|Win32
+		{E9B85795-DDD6-4037-B94C-40F83A6CC6C6}.Debug Master.Build.0 = Debug|Win32
+		{E9B85795-DDD6-4037-B94C-40F83A6CC6C6}.Debug x64.ActiveCfg = Debug|Win32
+		{E9B85795-DDD6-4037-B94C-40F83A6CC6C6}.Debug x64.Build.0 = Debug|Win32
+		{E9B85795-DDD6-4037-B94C-40F83A6CC6C6}.log.ActiveCfg = Release|Win32
+		{E9B85795-DDD6-4037-B94C-40F83A6CC6C6}.log.Build.0 = Release|Win32
+		{E9B85795-DDD6-4037-B94C-40F83A6CC6C6}.meta.ActiveCfg = Release|Win32
+		{E9B85795-DDD6-4037-B94C-40F83A6CC6C6}.meta.Build.0 = Release|Win32
+		{E9B85795-DDD6-4037-B94C-40F83A6CC6C6}.Release.ActiveCfg = Release|Win32
+		{E9B85795-DDD6-4037-B94C-40F83A6CC6C6}.Release.Build.0 = Release|Win32
+		{E9B85795-DDD6-4037-B94C-40F83A6CC6C6}.Release x64.ActiveCfg = Release|Win32
+		{E9B85795-DDD6-4037-B94C-40F83A6CC6C6}.Release x64.Build.0 = Release|Win32
+		{E9B85795-DDD6-4037-B94C-40F83A6CC6C6}.trace.ActiveCfg = Release|Win32
+		{E9B85795-DDD6-4037-B94C-40F83A6CC6C6}.trace.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
