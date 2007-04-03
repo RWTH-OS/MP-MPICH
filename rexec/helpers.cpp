@@ -78,6 +78,50 @@ TOKEN_USER *GetActualUserToken(DWORD *error) {
 
 }
 
+
+TOKEN_GROUPS *GetActualTokenGroups(DWORD *error,DWORD* size) {
+	HANDLE hThreadToken;
+	TOKEN_GROUPS *pTokenGroups;
+	DWORD dwActSize;
+
+	* size =0;
+
+	*error = ERROR_SUCCESS;
+
+	if(!OpenThreadToken(GetCurrentThread(),TOKEN_QUERY,FALSE,&hThreadToken)) {
+	    *error = GetLastError();
+	    if(*error == ERROR_NO_TOKEN) {
+		if(!OpenProcessToken(GetCurrentProcess(),TOKEN_QUERY,&hThreadToken)) {
+		    *error = GetLastError();
+		} else *error = ERROR_SUCCESS;
+	    } 
+	    if(*error != ERROR_SUCCESS) {
+		DBG("GetActualUserToken: OpenThreadToken failed "<<*error)
+		return 0;
+	    }
+	}
+
+	dwActSize=0;
+	pTokenGroups=0;
+	GetTokenInformation(hThreadToken,TokenGroups,pTokenGroups,0,&dwActSize);
+	
+	if(dwActSize) pTokenGroups=(TOKEN_GROUPS*)malloc(dwActSize);
+	else pTokenGroups=0;
+
+	if(!pTokenGroups||!GetTokenInformation(hThreadToken,TokenGroups,pTokenGroups,dwActSize,&dwActSize) ){
+		*error = GetLastError();
+		DBG("GetActualUserToken: GetTokenInformation failed "<<*error)
+		if(hThreadToken) CloseHandle(hThreadToken);
+		if(pTokenGroups) free(pTokenGroups);
+		return 0;
+	}
+	* size = dwActSize;
+		
+	CloseHandle(hThreadToken);
+	return pTokenGroups;
+
+}
+
 BOOL CompareUser(PSID sid,DWORD *error) {
     
     TOKEN_USER *pTokenUser;

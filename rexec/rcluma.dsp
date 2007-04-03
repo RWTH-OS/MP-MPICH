@@ -146,6 +146,14 @@ SOURCE=.\cluma_s.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\CreateToken.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\CreateToken.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Environment.h
 # End Source File
 # Begin Source File
@@ -212,6 +220,10 @@ SOURCE=.\messages.rc
 # Begin Source File
 
 SOURCE=.\MSG00001.bin
+# End Source File
+# Begin Source File
+
+SOURCE=.\ntdll.h
 # End Source File
 # Begin Source File
 

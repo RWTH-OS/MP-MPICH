@@ -34,6 +34,6 @@ __fastcall TAboutBox::TAboutBox(TComponent* AOwner)
     #if (BCBVER > 1)
         LBuilderVersion->Caption = "32-bit compiled";
     #endif
-        Copyright->Caption="Copyright 1997-2005 Lehrstuhl für Betriebssysteme";
+        Copyright->Caption="Copyright 1997-2007 Lehrstuhl für Betriebssysteme";
 }
 //--------------------------------------------------------------------- 

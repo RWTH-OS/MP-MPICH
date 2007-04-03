@@ -65,6 +65,7 @@ PSID LookupAliasFromRid(DWORD Rid);
 BOOL ConvertSid(PSID pSid, LPTSTR pszSidText, LPDWORD dwBufferLen);
 TOKEN_USER *GetLoggedOnUserToken(HANDLE *hProc);
 TOKEN_USER *GetActualUserToken(DWORD *error);
+TOKEN_GROUPS *GetActualTokenGroups(DWORD *error,DWORD* size);
 BOOL InjectExitProc(HANDLE hProcess,DWORD ExitCode);
 BOOL GetProcessOwner(HANDLE hProcess,char *buf,DWORD *size);
 DWORD GetPrimaryToken( HANDLE *newToken);

@@ -30,7 +30,7 @@
 //version 1.93 bug correction at reboot and shutdown (empty DllName)
 //version 1.94 specify additional plugin parameters
 //version 1.95 4.8.2005 -plugin none: no generation of plugin parameters 
-//version 1.96:3.1.2006 support of RPC calls without user authentication, flag -nouser 
+//version 1.96:3.1.2007 support of RPC calls without user authentication, flag -nouser 
 
 
 // For users with outdated SDKs ;)

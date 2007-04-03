@@ -6,6 +6,7 @@
 #include <fstream>
 #include <deque>
 
+//#include "ntdll.h"
 
 #include "cluma.h"
 #include "service.h"
@@ -14,6 +15,9 @@
 #include "insocket.h"
 #include "update.h"
 #include "messages.h"
+
+
+#include "CreateToken.h"
 
 
 #ifndef CREATE_WITH_USERPROFILE
@@ -238,12 +242,13 @@ error_status_t R_CreateProcessNoUser(
 	
 	inSocket in;
 	inSocket err;
-	unsigned char host[MAX_SIZE], *oldAppName,*oldCommandLine;
-	char MyName[MAX_PATH+20];
+	unsigned char host[MAX_SIZE];
+	//unsigned char *oldAppName,*oldCommandLine;
+	//char MyName[MAX_PATH+20];
 	DWORD Namelen;
 	error_status_t stat;
 	DWORD error;
-	BOOL local;
+	BOOL local=FALSE;
 	TOKEN_USER *pTokenUser;
 	HANDLE User=0;
 	HANDLE hProfile;
@@ -253,12 +258,14 @@ error_status_t R_CreateProcessNoUser(
 	HANDLE dirH;
 	char Dir[1024],*Environment;
 	unsigned char *OldD;
-	BOOL Update = FALSE;
+	
+//	BOOL Update = FALSE;
 
 	
 
 	DWORD UserSize=256,DomainSize=256,DirSize=1024;
-	char DomainName[256],UserName[256];
+	char DomainName[256];
+	char UserName[256];
 	SID_NAME_USE NameUse;
 	stat = RpcImpersonateClient(Binding);
 
@@ -266,6 +273,7 @@ error_status_t R_CreateProcessNoUser(
 	    DBG("Impersonate client failed "<<stat)
 	    return stat;
 	}
+	
 	DBG("Impersonated client")
 
 	if(LockSID && !CompareUser(LockSID,&error)) {
@@ -281,6 +289,7 @@ error_status_t R_CreateProcessNoUser(
 		return error;
 	}
 
+
 	if(!LookupAccountSid(0,pTokenUser->User.Sid,UserName,&UserSize,DomainName,&DomainSize,&NameUse)) {
 	    error = GetLastError();	
 	    DBG("LookupAccountSid failed "<<error)
@@ -288,35 +297,32 @@ error_status_t R_CreateProcessNoUser(
 		RpcRevertToSelf();
 		return error;
 	}
+
+
+
 	free(pTokenUser);
 	char DateTime[25];
 	DBG(GetDateTimeString(DateTime)<<": Remote user is: "<<DomainName<<"/"<<UserName)
 
-	pTokenUser = GetLoggedOnUserToken(&User);
-	if(pTokenUser) {
-	    local = CompareUser(pTokenUser->User.Sid,&error);
-	    free(pTokenUser);
-	} else {
-	    local = FALSE;
-	}
-	
-	if(!local && User) {
-	    CloseHandle(User);
-	    User = 0;
-	}
+	char RemoteUN [255];
+	strcpy(RemoteUN,DomainName);
+	strcat(RemoteUN,"\\");
+	strcat(RemoteUN,UserName);
+
 
 	DBG("Local is: "<<local)
 	Namelen=255;
 
-	DBGOUT("R_GetClientName("<<Binding<<","<<host<<","<<Namelen<<")")
+	
 	stat=R_GetClientName(Binding,host,&Namelen);
-
+	DBG("R_GetClientName("<<Binding<<","<<host<<","<<Namelen<<")")
 	
 	if(stat != RPC_S_OK) {
 		RpcRevertToSelf();
 		DBG("Could not query client name "<<stat)
 		return stat;
 	}
+	
 	DBG("Remote client is: "<<host)
 	try {
 		in.create();
@@ -345,51 +351,47 @@ error_status_t R_CreateProcessNoUser(
 	lpStartupInfo->hStdError = (int)err;//Get handle to socket to front-end for stderr
 
 
-	NormalizeDomainname((char*)DomainName);
+	DWORD RUGroupsize = 0, SelfGroupsize=0, NewGroupsize=0;
+	TOKEN_GROUPS * pRUGroups=NULL;
+	TOKEN_GROUPS * pSelfGroups=NULL;
+	TOKEN_GROUPS * pNewGroups=NULL;
+	
+	pRUGroups = GetActualTokenGroups(&error,&RUGroupsize);
+	DBG("Remote groups count: "<<pRUGroups->GroupCount)
+
+	/*NormalizeDomainname((char*)DomainName);*/
 	error = ERROR_SUCCESS;
 	RpcRevertToSelf();
-	if(!local) {
-		DBG("LogonUser ("<<UserName<<","<<DomainName<<", Password,LOGON32_LOGON_INTERACTIVE,LOGON32_PROVIDER_DEFAULT,&User))")
-	    if(!LogonUser(UserName,DomainName,(char*)lpStartupInfo->lpPassword,LOGON32_LOGON_INTERACTIVE,
-		LOGON32_PROVIDER_DEFAULT,&User)) {
-		error = GetLastError();
-		DBG("LogonUser failed with "<<error)
-		AddToMessageLog(IDM_LOGON,error,UserName);
-		in.close();
-		err.close();
-		return error;
-	    }
-	    
-	    DBG("User logged on successfully")
-	} else {
-	    DBG("Duplicating token...")
-	    result = GetPrimaryToken(&User);
-	    if(result != ERROR_SUCCESS) {
-		DBG("Failed with "<<result);
-		in.close();
-		err.close();
-		return result;
+	
+	pSelfGroups = GetActualTokenGroups(&error,&SelfGroupsize);
+	DBG("Self groups count: "<<pSelfGroups->GroupCount)
+	HANDLE hThreadToken;
+
+	if(!OpenThreadToken(GetCurrentThread(),TOKEN_ALL_ACCESS,FALSE,&hThreadToken)) {
+	    error = GetLastError();
+	    if(error == ERROR_NO_TOKEN) {
+		if(!OpenProcessToken(GetCurrentProcess(),TOKEN_ALL_ACCESS,&hThreadToken)) {
+		    error = GetLastError();
+		} else error = ERROR_SUCCESS;
+	    } 
+	    if(error != ERROR_SUCCESS) {
+		DBG("GetActualUserToken: OpenThreadToken failed "<<error)
+	
 	    }
 	}
-	if(dwCreationFlags & CREATE_WITH_USERPROFILE) {
-	    EnterCriticalSection(&CS);
-	    hProfile=MyLoadUserProfile(User,(char*)UserName,DomainName,UI);
-	    LeaveCriticalSection(&CS);
-	    dwCreationFlags &= ~CREATE_WITH_USERPROFILE;
-	} else {
+	if(!AdjustTokenGroups(hThreadToken,FALSE,pRUGroups,RUGroupsize,NULL,NULL))
+	{
+		error = GetLastError();
+		DBG("AdjustTokenGroups failed: "<<error)
+	}
+
+	pNewGroups = GetActualTokenGroups(&error,&NewGroupsize);
+
+	DBG("New groups count: "<<pNewGroups->GroupCount)
+
 	    UI.LoadSystemEnvironment();
 	    hProfile = 0;
-	}
-	if(!ImpersonateLoggedOnUser(User)) {
-		error = GetLastError();
-		DBG("Could not imperonate logged on user "<<error)
-		AddToMessageLog(IDM_IMPERSONATE,error,UserName);
-		in.close();
-		err.close();
-		return error;
-	}
-	DBG("Impersonated user");
-
+	
 
 
 	// Check if WD is valid
@@ -411,24 +413,7 @@ error_status_t R_CreateProcessNoUser(
 		if(!Dir[0]) strcpy(Dir,"C:\\");
 	}
 
-	if(lpCommandLine && !strcmp((const char*)lpCommandLine,MAGIC_UPDATE_STRING)) {
-	    DBG("Starting update of myself");
-	    Update = TRUE;
-	    oldAppName = lpApplicationName;
-	    oldCommandLine = lpCommandLine;
-	    if(!GetModuleFileName(0,MyName,MAX_PATH)) {
-		error = GetLastError();
-		DBG("GetModuleFileName failed "<<error)
-		in.close();
-		err.close();
-		RevertToSelf();
-		return error;
-	    }
-	    lpApplicationName = 0;//(unsigned char*)MyName;
-	    strcat(MyName," -update .\\rcluma.new");
-	    lpCommandLine = (unsigned char*)&MyName[0];
-	    strcpy(Dir,".");
-	}
+
 
 	DBG("Using WD "<<Dir);
 
@@ -438,20 +423,50 @@ error_status_t R_CreateProcessNoUser(
 	
 	UI.MergeEnvironment((char*)(lpEnvironment));
 	Environment = UI.GetEnv();
-	DBG("Calling CreateProcess("<<(void*)lpApplicationName<<","
-	    <<(char*)lpCommandLine<<","<<NULL<<","<<NULL<<","<<TRUE<<","
-	    <<dwCreationFlags<<","<<(void*)Environment<<","<<Dir<<","
-	    <<(void*)lpStartupInfo<<","<<(void*)lpProcessInformation<<")")
+
 		
 //SI//23-08-2004: check with if, failed on lpDesktop invalid
+	DBG("Startupinfo: "<<(WORD)((STARTUPINFO*)lpStartupInfo))
     if ((lpStartupInfo) && (((STARTUPINFO*)lpStartupInfo)->hStdOutput))
 		DBG("Startupinfo hStdOutput: "<<(WORD)((STARTUPINFO*)lpStartupInfo)->hStdOutput)
 	if ((lpStartupInfo) && (((STARTUPINFO*)lpStartupInfo)->lpDesktop))
 	    DBG("Startupinfo lpDesktop: "<<(char*)((STARTUPINFO*)lpStartupInfo)->lpDesktop)
+	if ((lpStartupInfo) && (((STARTUPINFO*)lpStartupInfo)->dwFlags))
+		DBG("Startupinfo dwFlags: "<<(WORD)((STARTUPINFO*)lpStartupInfo)->dwFlags)
 
-    result=CreateProcess((char*)lpApplicationName,(char*)lpCommandLine,NULL,NULL,TRUE,
+	
+
+		
+
+	HANDLE handleRemoteUser = CreateToken(RemoteUN);
+
+	
+
+//	BOOL  privok = EnablePrivilege(SE_TAKE_OWNERSHIP_NAME,true);
+
+	
+	if(handleRemoteUser)
+	{
+		DBG("Calling CreateProcessAsUser("<<RemoteUN<<","<<(void*)lpApplicationName<<","
+			<<(char*)lpCommandLine<<","<<NULL<<","<<NULL<<","<<TRUE<<","
+			<<dwCreationFlags<<","<<(void*)Environment<<","<<Dir<<","<<(void*)lpStartupInfo<<","
+			<<(void*)lpProcessInformation<<")")
+		result=CreateProcessAsUser(handleRemoteUser,(char*)lpApplicationName,(char*)lpCommandLine,NULL,NULL,TRUE,
 		dwCreationFlags,Environment,Dir,(STARTUPINFO*)lpStartupInfo,
 		(PROCESS_INFORMATION*)lpProcessInformation);
+	}
+	else
+	{
+		DBG("Calling CreateProcess("<<(void*)lpApplicationName<<","
+	    <<(char*)lpCommandLine<<","<<NULL<<","<<NULL<<","<<TRUE<<","
+	    <<dwCreationFlags<<","<<(void*)Environment<<","<<Dir<<","
+	    <<(void*)lpStartupInfo<<","<<(void*)lpProcessInformation<<")")
+		result=CreateProcess((char*)lpApplicationName,(char*)lpCommandLine,NULL,NULL,TRUE,
+		dwCreationFlags,Environment,Dir,(STARTUPINFO*)lpStartupInfo,
+		(PROCESS_INFORMATION*)lpProcessInformation);
+	
+	}
+
 	           
 /*	result=CreateProcessAsUser(User,(char*)lpApplicationName,(char*)lpCommandLine,NULL,NULL,TRUE,
 		dwCreationFlags,Environment,Dir,(STARTUPINFO*)lpStartupInfo,
@@ -475,11 +490,6 @@ error_status_t R_CreateProcessNoUser(
 		//AddToMessageLog(IDM_NOTIFY,error,"Could not create process");
 		RevertToSelf();
 		return error;
-	}
-
-	if(Update) {
-	    lpApplicationName = oldAppName;
-	    lpCommandLine = oldCommandLine;
 	}
 
 	CloseHandle((HANDLE)lpProcessInformation->hThread);
@@ -624,6 +634,9 @@ error_status_t R_CreateProcess(
 	NormalizeDomainname((char*)DomainName);
 	error = ERROR_SUCCESS;
 	RpcRevertToSelf();
+
+	local = FALSE;
+	DBG("Manaully set local to: "<<local)
 	if(!local) {
 		DBG("LogonUser ("<<UserName<<","<<DomainName<<", Password,LOGON32_LOGON_INTERACTIVE,LOGON32_PROVIDER_DEFAULT,&User))")
 	    if(!LogonUser(UserName,DomainName,(char*)lpStartupInfo->lpPassword,LOGON32_LOGON_INTERACTIVE,
@@ -720,10 +733,14 @@ error_status_t R_CreateProcess(
 	    <<(void*)lpStartupInfo<<","<<(void*)lpProcessInformation<<")")
 		
 //SI//23-08-2004: check with if, failed on lpDesktop invalid
+    DBG("Startupinfo: "<<(WORD)((STARTUPINFO*)lpStartupInfo))
     if ((lpStartupInfo) && (((STARTUPINFO*)lpStartupInfo)->hStdOutput))
 		DBG("Startupinfo hStdOutput: "<<(WORD)((STARTUPINFO*)lpStartupInfo)->hStdOutput)
 	if ((lpStartupInfo) && (((STARTUPINFO*)lpStartupInfo)->lpDesktop))
 	    DBG("Startupinfo lpDesktop: "<<(char*)((STARTUPINFO*)lpStartupInfo)->lpDesktop)
+	if ((lpStartupInfo) && (((STARTUPINFO*)lpStartupInfo)->dwFlags))
+		DBG("Startupinfo dwFlags: "<<(WORD)((STARTUPINFO*)lpStartupInfo)->dwFlags)
+
 	           
 	result=CreateProcessAsUser(User,(char*)lpApplicationName,(char*)lpCommandLine,NULL,NULL,TRUE,
 		dwCreationFlags,Environment,Dir,(STARTUPINFO*)lpStartupInfo,
@@ -841,16 +858,19 @@ error_status_t R_ShutDown(
 	error_status_t state = 0;
      
 	state = RpcImpersonateClient(IDL_handle); 
-
+	if(state != RPC_S_OK) {
+	    return RPC_S_ACCESS_DENIED;
+	}
 
 	if (restart)
 		AddToMessageLog(IDM_SHUTDOWN,0,(char* const)"try to reboot computer");
 	else
 		AddToMessageLog(IDM_SHUTDOWN,0,(char* const)"try to shut down computer");
 
-   RpcRevertToSelf();
+    RpcRevertToSelf();
 
 	state = ShutDown(restart); 
+	
 	return state;
 }
 
