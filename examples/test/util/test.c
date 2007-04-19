@@ -10,6 +10,10 @@
 #include "mpi.h"
 #include "test.h"
 
+#ifdef _WIN32
+#include "FileFkts.h"
+#endif
+
 static int tests_passed = 0;
 static int tests_failed = 0;
 static char failed_tests[255][81];
@@ -24,9 +28,19 @@ void Test_Init(char *suite)
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	sprintf(filename, "%s-%d.out", suite, rank);
 	strncpy(suite_name, suite, 255);
+#ifdef _WIN32
+	ExtendFileName(filename, 511);
+	SetLastError(0);
+#endif
+	
 	fileout = fopen(filename, "w");
 	if (!fileout) {
+#ifdef _WIN32
+		DWORD error=GetLastError();
+		fprintf(stderr, "Could not open %s on node %d with error %d\n", filename, rank,error);
+#else
 		fprintf(stderr, "Could not open %s on node %d\n", filename, rank);
+#endif
 		fprintf(stderr, "[%i] Aborting\n",rank);fflush(stderr);
 		Sleep(1);
 		MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
