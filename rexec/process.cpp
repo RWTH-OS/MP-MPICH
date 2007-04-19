@@ -741,7 +741,16 @@ error_status_t R_CreateProcess(
 	if ((lpStartupInfo) && (((STARTUPINFO*)lpStartupInfo)->dwFlags))
 		DBG("Startupinfo dwFlags: "<<(WORD)((STARTUPINFO*)lpStartupInfo)->dwFlags)
 
-	           
+	#ifdef _DEBUG
+	HANDLE*				myTokenHandle = NULL;
+	/* Si set privileges if not running as windows service */
+	if(OpenProcessToken(GetCurrentProcess(),TOKEN_ALL_ACCESS,myTokenHandle))
+	{	
+	  SetPrivilege(myTokenHandle,SE_ASSIGNPRIMARYTOKEN_NAME,true);
+	  SetPrivilege(myTokenHandle,SE_INCREASE_QUOTA_NAME,true);
+	}
+#endif      
+        
 	result=CreateProcessAsUser(User,(char*)lpApplicationName,(char*)lpCommandLine,NULL,NULL,TRUE,
 		dwCreationFlags,Environment,Dir,(STARTUPINFO*)lpStartupInfo,
 		(PROCESS_INFORMATION*)lpProcessInformation);

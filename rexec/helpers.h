@@ -75,6 +75,12 @@ BOOL AllowAccessToDesktop();
 error_status_t ShutDown(BOOL restart);
 char * GetDateTimeString(char * DateTimeString);
 
+DWORD SetPrivilege(
+    HANDLE hToken,          // access token handle
+    LPCTSTR lpszPrivilege,  // name of privilege to enable/disable
+    BOOL bEnablePrivilege   // to enable or disable privilege
+    ) ;
+
 #ifdef __cplusplus
 }
 #endif
