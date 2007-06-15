@@ -42,7 +42,11 @@ void Test_Init(char *suite)
 		fprintf(stderr, "Could not open %s on node %d\n", filename, rank);
 #endif
 		fprintf(stderr, "[%i] Aborting\n",rank);fflush(stderr);
+#ifdef _WIN32
 		Sleep(1);
+#else
+		sleep(1);
+#endif
 		MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
 	}
 }
