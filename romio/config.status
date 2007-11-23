@@ -1,0 +1,212 @@
+#!/bin/sh
+# Generated automatically by configure.
+# Run this file to recreate the current configuration.
+# This directory was configured as follows,
+# on host igor:
+#
+# /work/rainer/mp-mpich/mp-mpich-15/romio/configure -arch=LINUX --with-sisci=/usr/local/dolphin/active_pd_debian32 --enable-sharedlib -mpi=mpich -from_mpich -make="make" -mpiincdir=/work/rainer/mp-mpich/mp-mpich-15/include -mpibindir=/work/rainer/mp-mpich/mp-mpich-15/bin -mpilib=/work/rainer/mp-mpich/mp-mpich-15/lib/libmpich.a -mpiolib=/work/rainer/mp-mpich/mp-mpich-15/lib/libmpio.a -cc=gcc -cflags= -fPIC -fc=g77 -fflags= -fPIC -f90=
+
+for arg
+do
+  case "$arg" in
+    -recheck | --recheck | --rechec | --reche | --rech | --rec | --re | --r)
+    echo running ${CONFIG_SHELL-/bin/sh} /work/rainer/mp-mpich/mp-mpich-15/romio/configure -arch=LINUX --with-sisci=/usr/local/dolphin/active_pd_debian32 --enable-sharedlib -mpi=mpich -from_mpich -make="make" -mpiincdir=/work/rainer/mp-mpich/mp-mpich-15/include -mpibindir=/work/rainer/mp-mpich/mp-mpich-15/bin -mpilib=/work/rainer/mp-mpich/mp-mpich-15/lib/libmpich.a -mpiolib=/work/rainer/mp-mpich/mp-mpich-15/lib/libmpio.a -cc=gcc -cflags= -fPIC -fc=g77 -fflags= -fPIC -f90=
+    exec ${CONFIG_SHELL-/bin/sh} /work/rainer/mp-mpich/mp-mpich-15/romio/configure -arch=LINUX --with-sisci=/usr/local/dolphin/active_pd_debian32 --enable-sharedlib -mpi=mpich -from_mpich -make="make" -mpiincdir=/work/rainer/mp-mpich/mp-mpich-15/include -mpibindir=/work/rainer/mp-mpich/mp-mpich-15/bin -mpilib=/work/rainer/mp-mpich/mp-mpich-15/lib/libmpich.a -mpiolib=/work/rainer/mp-mpich/mp-mpich-15/lib/libmpio.a -cc=gcc -cflags= -fPIC -fc=g77 -fflags= -fPIC -f90= ;;
+    *) echo "Usage: config.status --recheck" 2>&1; exit 1 ;;
+  esac
+done
+
+trap 'rm -f Makefile mpi-io/Makefile mpi2-other/info/Makefile mpi2-other/array/Makefile adio/common/Makefile test/Makefile test/misc.c test/large_file.c test/runtests util/romioinstall include/mpio.h include/mpiof.h; exit 1' 1 3 15
+VPATH='VPATH=.:$(srcdir)'
+CPPTRIAL=''
+RANLIB='ranlib'
+CC='/work/rainer/mp-mpich/mp-mpich-15/bin/mpicc'
+F77='g77'
+HAVE_WEAK_SYMBOLS='1'
+srcdir='/work/rainer/mp-mpich/mp-mpich-15/romio'
+ARCH='LINUX'
+FILE_SYSTEM='ufs nfs'
+CPP=''
+CFLAGS='  -fPIC -DLINUX -O -DNO_AIO -DFORTRANDOUBLEUNDERSCORE -DNFS -DUFS -DNEEDS_MPI_TEST -DMPICH  -DHAVE_LONG_LONG_64=1 -DHAVE_MPI_LONG_LONG_INT=1 -DHAVE_MPI_INFO=1 -DHAVE_MPI_DARRAY_SUBARRAY=1 -DHAVE_WEAK_SYMBOLS=1 -DHAVE_PRAGMA_WEAK=1'
+CPPFLAGS=''
+USER_CFLAGS=''
+USER_FFLAGS=''
+MIPS='0'
+BITS='0'
+MPI='mpich'
+AR='ar crl'
+MPI_INCLUDE_DIR='/work/rainer/mp-mpich/mp-mpich-15/include'
+MPI_LIB=''
+NOF77='0'
+NOPROFILE='0'
+MAKE='make'
+PREFIX=''
+arch_IRIX=''
+ROMIO_HOME='/work/rainer/mp-mpich/mp-mpich-15/romio'
+LIBNAME='/work/rainer/mp-mpich/mp-mpich-15/lib/libmpio.a'
+PLIBNAME='/work/rainer/mp-mpich/mp-mpich-15/lib/libpmpio.a'
+LIBPATH='/work/rainer/mp-mpich/mp-mpich-15/lib'
+ad_nfs_LIBNAME='libad_nfs.a'
+ad_ufs_LIBNAME='libad_ufs.a'
+ad_sci_LIBNAME=''
+ad_svm_LIBNAME=''
+ad_pvfs_LIBNAME=''
+ad_nfs_PLIBNAME='libpad_nfs.a'
+ad_ufs_PLIBNAME='libpad_ufs.a'
+ad_sci_PLIBNAME=''
+ad_svm_PLIBNAME=''
+ad_pvfs_PLIBNAME=''
+ADIO_LIBNAME='libadio.a'
+TEST_LIBNAME=''
+LL='\%lld'
+F77GETARG='call getarg(i,str)'
+F77IARGC='iargc()'
+FTESTDEFINE=''
+FORTRAN_MPI_OFFSET='integer*8'
+FROM_MPICH='1'
+NEEDS_MPI_FINT=''
+HAVE_MPI_INFO='#define HAVE_MPI_INFO'
+BUILD_MPI_INFO=''
+HAVE_MPI_DARRAY_SUBARRAY='#define HAVE_MPI_DARRAY_SUBARRAY'
+BUILD_MPI_ARRAY=''
+DEFINE_MPI_OFFSET='typedef long long MPI_Offset;'
+MPI_FINFO1='!'
+MPI_FINFO2='!'
+MPI_FINFO3='!'
+MPI_FINFO4='!'
+MPI_FARRAY1='!'
+MPI_FARRAY2='!'
+MPI_FARRAY3='!'
+MPI_FARRAY4='!'
+MPI_FARRAY5='!'
+MPI_FARRAY6='!'
+MPI_FARRAY7='!'
+MPI_OFFSET_KIND1='!'
+MPI_OFFSET_KIND2='!'
+TEST_CC='/work/rainer/mp-mpich/mp-mpich-15/bin/mpicc'
+TEST_F77='/work/rainer/mp-mpich/mp-mpich-15/bin/mpif77'
+SVMLIB_DIR=''
+ROMIO_INCLUDE=''
+ROMIO_LFLAGS=''
+ROMIO_LIBLIST=' -lad_ufs -lad_nfs -ladio '
+ROMIO_DEVLIBS=' -lad_ufs -lad_nfs -ladio'
+ROMIO_DEVPLIBS=' -lpad_ufs -lpad_nfs'
+ROMIO_LIBPATH=''
+ROMIO_TCFLAGS=''
+ROMIO_TCPPFLAGS=''
+ROMIO_TFFLAGS=''
+MPIRUN='/work/rainer/mp-mpich/mp-mpich-15/bin/mpirun'
+FORTRAN_TEST='fperf fcoll_test fmisc pfcoll_test'
+SISCI_DIR='/usr/local/dolphin/active_pd_debian32'
+LIBS=''
+DEFS=' -DHAVE_LONG_LONG_64=1 -DHAVE_MPI_LONG_LONG_INT=1 -DHAVE_MPI_INFO=1 -DHAVE_MPI_DARRAY_SUBARRAY=1 -DHAVE_WEAK_SYMBOLS=1 -DHAVE_PRAGMA_WEAK=1'
+prefix=''
+exec_prefix=''
+prsub=''
+extrasub=''
+
+top_srcdir=$srcdir
+
+CONFIG_FILES=${CONFIG_FILES-"Makefile mpi-io/Makefile mpi2-other/info/Makefile mpi2-other/array/Makefile adio/common/Makefile test/Makefile test/misc.c test/large_file.c test/runtests util/romioinstall include/mpio.h include/mpiof.h"}
+for file in .. ${CONFIG_FILES}; do if test "x$file" != x..; then
+  srcdir=$top_srcdir
+  # Remove last slash and all that follows it.  Not all systems have dirname.
+  dir=`echo $file|sed 's%/[^/][^/]*$%%'`
+  if test "$dir" != "$file"; then
+    test "$top_srcdir" != . && srcdir=$top_srcdir/$dir
+    test ! -d $dir && mkdir $dir
+  fi
+  echo creating $file
+  rm -f $file
+  echo "# Generated automatically from `echo $file|sed 's|.*/||'`.in by configure." > $file
+  sed -e "
+$prsub
+$extrasub
+s%@VPATH@%$VPATH%g
+s%@CPPTRIAL@%$CPPTRIAL%g
+s%@RANLIB@%$RANLIB%g
+s%@CC@%$CC%g
+s%@F77@%$F77%g
+s%@HAVE_WEAK_SYMBOLS@%$HAVE_WEAK_SYMBOLS%g
+s%@srcdir@%$srcdir%g
+s%@ARCH@%$ARCH%g
+s%@FILE_SYSTEM@%$FILE_SYSTEM%g
+s%@CPP@%$CPP%g
+s%@CFLAGS@%$CFLAGS%g
+s%@CPPFLAGS@%$CPPFLAGS%g
+s%@USER_CFLAGS@%$USER_CFLAGS%g
+s%@USER_FFLAGS@%$USER_FFLAGS%g
+s%@MIPS@%$MIPS%g
+s%@BITS@%$BITS%g
+s%@MPI@%$MPI%g
+s%@AR@%$AR%g
+s%@MPI_INCLUDE_DIR@%$MPI_INCLUDE_DIR%g
+s%@MPI_LIB@%$MPI_LIB%g
+s%@NOF77@%$NOF77%g
+s%@NOPROFILE@%$NOPROFILE%g
+s%@MAKE@%$MAKE%g
+s%@PREFIX@%$PREFIX%g
+s%@arch_IRIX@%$arch_IRIX%g
+s%@ROMIO_HOME@%$ROMIO_HOME%g
+s%@LIBNAME@%$LIBNAME%g
+s%@PLIBNAME@%$PLIBNAME%g
+s%@LIBPATH@%$LIBPATH%g
+s%@ad_nfs_LIBNAME@%$ad_nfs_LIBNAME%g
+s%@ad_ufs_LIBNAME@%$ad_ufs_LIBNAME%g
+s%@ad_sci_LIBNAME@%$ad_sci_LIBNAME%g
+s%@ad_svm_LIBNAME@%$ad_svm_LIBNAME%g
+s%@ad_pvfs_LIBNAME@%$ad_pvfs_LIBNAME%g
+s%@ad_nfs_PLIBNAME@%$ad_nfs_PLIBNAME%g
+s%@ad_ufs_PLIBNAME@%$ad_ufs_PLIBNAME%g
+s%@ad_sci_PLIBNAME@%$ad_sci_PLIBNAME%g
+s%@ad_svm_PLIBNAME@%$ad_svm_PLIBNAME%g
+s%@ad_pvfs_PLIBNAME@%$ad_pvfs_PLIBNAME%g
+s%@ADIO_LIBNAME@%$ADIO_LIBNAME%g
+s%@TEST_LIBNAME@%$TEST_LIBNAME%g
+s%@LL@%$LL%g
+s%@F77GETARG@%$F77GETARG%g
+s%@F77IARGC@%$F77IARGC%g
+s%@FTESTDEFINE@%$FTESTDEFINE%g
+s%@FORTRAN_MPI_OFFSET@%$FORTRAN_MPI_OFFSET%g
+s%@FROM_MPICH@%$FROM_MPICH%g
+s%@NEEDS_MPI_FINT@%$NEEDS_MPI_FINT%g
+s%@HAVE_MPI_INFO@%$HAVE_MPI_INFO%g
+s%@BUILD_MPI_INFO@%$BUILD_MPI_INFO%g
+s%@HAVE_MPI_DARRAY_SUBARRAY@%$HAVE_MPI_DARRAY_SUBARRAY%g
+s%@BUILD_MPI_ARRAY@%$BUILD_MPI_ARRAY%g
+s%@DEFINE_MPI_OFFSET@%$DEFINE_MPI_OFFSET%g
+s%@MPI_FINFO1@%$MPI_FINFO1%g
+s%@MPI_FINFO2@%$MPI_FINFO2%g
+s%@MPI_FINFO3@%$MPI_FINFO3%g
+s%@MPI_FINFO4@%$MPI_FINFO4%g
+s%@MPI_FARRAY1@%$MPI_FARRAY1%g
+s%@MPI_FARRAY2@%$MPI_FARRAY2%g
+s%@MPI_FARRAY3@%$MPI_FARRAY3%g
+s%@MPI_FARRAY4@%$MPI_FARRAY4%g
+s%@MPI_FARRAY5@%$MPI_FARRAY5%g
+s%@MPI_FARRAY6@%$MPI_FARRAY6%g
+s%@MPI_FARRAY7@%$MPI_FARRAY7%g
+s%@MPI_OFFSET_KIND1@%$MPI_OFFSET_KIND1%g
+s%@MPI_OFFSET_KIND2@%$MPI_OFFSET_KIND2%g
+s%@TEST_CC@%$TEST_CC%g
+s%@TEST_F77@%$TEST_F77%g
+s%@SVMLIB_DIR@%$SVMLIB_DIR%g
+s%@ROMIO_INCLUDE@%$ROMIO_INCLUDE%g
+s%@ROMIO_LFLAGS@%$ROMIO_LFLAGS%g
+s%@ROMIO_LIBLIST@%$ROMIO_LIBLIST%g
+s%@ROMIO_DEVLIBS@%$ROMIO_DEVLIBS%g
+s%@ROMIO_DEVPLIBS@%$ROMIO_DEVPLIBS%g
+s%@ROMIO_LIBPATH@%$ROMIO_LIBPATH%g
+s%@ROMIO_TCFLAGS@%$ROMIO_TCFLAGS%g
+s%@ROMIO_TCPPFLAGS@%$ROMIO_TCPPFLAGS%g
+s%@ROMIO_TFFLAGS@%$ROMIO_TFFLAGS%g
+s%@MPIRUN@%$MPIRUN%g
+s%@FORTRAN_TEST@%$FORTRAN_TEST%g
+s%@SISCI_DIR@%$SISCI_DIR%g
+s%@LIBS@%$LIBS%g
+s%@DEFS@%$DEFS%
+" $top_srcdir/${file}.in >> $file
+fi; done
+
+
+exit 0

@@ -1,0 +1,125 @@
+/* 
+ *   $Id: write_ordf.c 3744 2005-07-18 10:55:08Z georg $    
+ *
+ *   Copyright (C) 1997 University of Chicago. 
+ *   See COPYRIGHT notice in top-level directory.
+ */
+
+#include "mpio.h"
+#include "adio.h"
+
+
+#if defined(MPIO_BUILD_PROFILING) || defined(HAVE_WEAK_SYMBOLS)
+#ifdef FORTRANCAPS
+#define mpi_file_write_ordered_ PMPI_FILE_WRITE_ORDERED
+#elif defined(FORTRANDOUBLEUNDERSCORE)
+#define mpi_file_write_ordered_ pmpi_file_write_ordered__
+#elif !defined(FORTRANUNDERSCORE)
+#if defined(HPUX) || defined(SPPUX)
+#pragma _HP_SECONDARY_DEF pmpi_file_write_ordered pmpi_file_write_ordered_
+#endif
+#define mpi_file_write_ordered_ pmpi_file_write_ordered
+#else
+#if defined(HPUX) || defined(SPPUX)
+#pragma _HP_SECONDARY_DEF pmpi_file_write_ordered_ pmpi_file_write_ordered
+#endif
+#define mpi_file_write_ordered_ pmpi_file_write_ordered_
+#endif
+
+#if defined(HAVE_WEAK_SYMBOLS)
+#if defined(HAVE_PRAGMA_WEAK)
+#if defined(FORTRANCAPS)
+#pragma weak MPI_FILE_WRITE_ORDERED = PMPI_FILE_WRITE_ORDERED
+#elif defined(FORTRANDOUBLEUNDERSCORE)
+#pragma weak mpi_file_write_ordered__ = pmpi_file_write_ordered__
+#elif !defined(FORTRANUNDERSCORE)
+#pragma weak mpi_file_write_ordered = pmpi_file_write_ordered
+#else
+#pragma weak mpi_file_write_ordered_ = pmpi_file_write_ordered_
+#endif
+
+#elif defined(HAVE_ATTRIBUTE_WEAK)
+#if defined(FORTRANCAPS)
+void FORTRAN_API MPI_FILE_WRITE_ORDERED (MPI_Fint *fh,void *buf,int *count,
+                       MPI_Fint *datatype,MPI_Status *status, int *ierr ) 
+		       __attribute__ ((weak, alias ("PMPI_FILE_WRITE_ORDERED")));
+#elif defined(FORTRANDOUBLEUNDERSCORE)
+void FORTRAN_API mpi_file_write_ordered__(MPI_Fint *fh,void *buf,int *count,
+                       MPI_Fint *datatype,MPI_Status *status, int *ierr ) 
+		       __attribute__ ((weak, alias ("pmpi_file_write_ordered__")));
+#elif !defined(FORTRANUNDERSCORE)
+void FORTRAN_API mpi_file_write_ordered (MPI_Fint *fh,void *buf,int *count,
+                       MPI_Fint *datatype,MPI_Status *status, int *ierr ) 
+		       __attribute__ ((weak, alias ("pmpi_file_write_ordered")));
+#else
+void FORTRAN_API mpi_file_write_ordered_ (MPI_Fint *fh,void *buf,int *count,
+                       MPI_Fint *datatype,MPI_Status *status, int *ierr ) 
+		       __attribute__ ((weak, alias ("pmpi_file_write_ordered_")));
+#endif
+
+#elif defined(HAVE_PRAGMA_HP_SEC_DEF)
+#if defined(FORTRANCAPS)
+#pragma _HP_SECONDARY_DEF PMPI_FILE_WRITE_ORDERED MPI_FILE_WRITE_ORDERED
+#elif defined(FORTRANDOUBLEUNDERSCORE)
+#pragma _HP_SECONDARY_DEF pmpi_file_write_ordered__ mpi_file_write_ordered__
+#elif !defined(FORTRANUNDERSCORE)
+#pragma _HP_SECONDARY_DEF pmpi_file_write_ordered mpi_file_write_ordered
+#else
+#pragma _HP_SECONDARY_DEF pmpi_file_write_ordered_ mpi_file_write_ordered_
+#endif
+
+#elif defined(HAVE_PRAGMA_CRI_DUP)
+#if defined(FORTRANCAPS)
+#pragma _CRI duplicate MPI_FILE_WRITE_ORDERED as PMPI_FILE_WRITE_ORDERED
+#elif defined(FORTRANDOUBLEUNDERSCORE)
+#pragma _CRI duplicate mpi_file_write_ordered__ as pmpi_file_write_ordered__
+#elif !defined(FORTRANUNDERSCORE)
+#pragma _CRI duplicate mpi_file_write_ordered as pmpi_file_write_ordered
+#else
+#pragma _CRI duplicate mpi_file_write_ordered_ as pmpi_file_write_ordered_
+#endif
+
+/* end of weak pragmas */
+#endif
+/* Include mapping from MPI->PMPI */
+#include "mpioprof.h"
+#endif
+
+#else
+
+#ifdef FORTRANCAPS
+#define mpi_file_write_ordered_ MPI_FILE_WRITE_ORDERED
+#elif defined(FORTRANDOUBLEUNDERSCORE)
+#define mpi_file_write_ordered_ mpi_file_write_ordered__
+#elif !defined(FORTRANUNDERSCORE)
+#if defined(HPUX) || defined(SPPUX)
+#pragma _HP_SECONDARY_DEF mpi_file_write_ordered mpi_file_write_ordered_
+#endif
+#define mpi_file_write_ordered_ mpi_file_write_ordered
+#else
+#if defined(HPUX) || defined(SPPUX)
+#pragma _HP_SECONDARY_DEF mpi_file_write_ordered_ mpi_file_write_ordered
+#endif
+#endif
+#endif
+
+#if defined(MPIHP) || defined(MPILAM)
+void mpi_file_write_ordered_(MPI_Fint *fh,void *buf,int *count,
+                       MPI_Fint *datatype,MPI_Status *status, int *ierr ){
+    MPI_File fh_c;
+    MPI_Datatype datatype_c;
+    
+    fh_c = MPI_File_f2c(*fh);
+    datatype_c = MPI_Type_f2c(*datatype);
+
+    *ierr = MPI_File_write_ordered(fh_c,buf,*count,datatype_c,status);
+}
+#else
+void FORTRAN_API mpi_file_write_ordered_(MPI_Fint *fh,void *buf,int *count,
+                       MPI_Datatype *datatype,MPI_Status *status, int *ierr ){
+    MPI_File fh_c;
+    
+    fh_c = MPI_File_f2c(*fh);
+    *ierr = MPI_File_write_ordered(fh_c,buf,*count,*datatype,status);
+}
+#endif

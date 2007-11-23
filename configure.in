@@ -81,6 +81,7 @@ if test "${NBR_DEVICES}" = "0" ; then
    AC_MSG_ERROR([You must define a list of devices with --with-device=DEVICE{,DEVICE}])
 fi
 
+
 AC_ARG_WITH([lpgc],AS_HELP_STRING(--with-lpgc=LIBPATH,
 	    [when using pgf77 and gcc alltogether set this to the location of libpcg.a (by
 	    default, libpgc is not used)]),
@@ -908,7 +909,7 @@ fi
 if test "$enable_f77" = no ; then
     AC_MSG_WARN([Will not build the Fortran interfaces])
     CFLAGS="-DMPID_NO_FORTRAN $CFLAGS"
-    ROMIO_ARGS="$ROMIO_ARGS --disable-f77"
+    ROMIO_ARGS="$ROMIO_ARGS -nof77"
     F77=""
 fi
 
@@ -2756,7 +2757,12 @@ fi
 BASE_LIB_LIST="$LIB_LIST"
 # used to be LIB_LIST="$LIB_LIST -lmpi" I switched it, inspired by HPUX
 LIB_LIST="-l$MPILIBNAME $LIB_LIST"
-MPIOLIBNAME=$MPILIBNAME
+# use romio lib if romio is enabled
+if test X$ROMIO = X1 -a $ROMIO_DIR = "romio"; then
+	LIB_LIST="-l$MPIOLIBNAME $LIB_LIST"
+else
+	MPIOLIBNAME=$MPILIBNAME
+fi
 
 #
 # Generate the name for the MPI-C, MPI-CC, and MPI-F77 compilers (for use
@@ -2802,50 +2808,48 @@ if test $ROMIO = 1 -a -d ${top_srcdir}/${ROMIO_DIR} ; then
       if test -z "$f_integer_size" -o "$f_integer_size" = "unavailable" ; then
 	  f_integer_size=4
       fi
+      if test "$OFFSET_KIND" = 8 ; then
+	   # F90 has an 8-byte integer kind but F77 doesn't support it
+           # as integer*8.
+	   if test "$F90" != "FC" ; then
+               ROMIO_ARGS="$ROMIO_ARGS -longlongsize=int"
+           fi
+      else 	   
+          ROMIO_ARGS="$ROMIO_ARGS -longlongsize=int"
+      fi
   fi
   if test "$UseSharedLibs" = 1 ; then ROMIO_ARGS="$ROMIO_ARGS --enable-sharedlib" ; fi
   if test ! -d ${ROMIO_DIR} ; then mkdir ${ROMIO_DIR} ; fi
-  FROM_MPICH=yes
-  MPI_BIN_DIR=$binbuild_dir
-  MPI_LIB=$libbuild_dir/lib$MPILIBNAME.a
-  MPI_INCLUDE_DIR=$includebuild_dir
-  # We force the romio configure to use a null cache file.  Without this,
-  # ROMIO may pick up its local config.cache, which may not be current
-  # (autoconf caching is very dangerous)
-  (cd $ROMIO_DIR ; \
-  LIBNAME=$libbuild_dir/lib$MPILIBNAME.a ; export LIBNAME ; \
-  export MPI_BIN_DIR ; export MPI_LIB ; export MPI_INCLUDE_DIR ; \
-  export CROSS_SIZEOF_INT; \
-  export CROSS_SIZEOF_VOID_P; \
-  export CROSS_SIZEOF_LONG_LONG; \
-  export CROSS_SIZEOF_LONG;\
-  export MAKE;\
-  export ARCH;\
-  export INSTALL; export INSTALL_DATA; export INSTALL_PROGRAM ; \
-  export INSTALL_SCRIPT; \
-  export CC; export F77; export F90; export MPILIBNAME ; \
-  export FROM_MPICH;\
-  export int_len ; export void_star_len ; export OFFSET_KIND ; \
-  export long_long_len ; \
-  "${top_srcdir}/${ROMIO_DIR}/configure" $ROMIO_ARGS $ROMIO_FILE_SYSTEM \
-          --with-mpi=mpich \
-          --prefix=$prefix --with-setbytes=no \
-          INSTALL="$INSTALL" INSTALL_DATA="$INSTALL_DATA" \
-          INSTALL_PROGRAM="$INSTALL_PROGRAM" \
-          INSTALL_SCRIPT="$INSTALL_SCRIPT" )
+  if test $ROMIO_DIR = "romio" ; then
+        (cd ${ROMIO_DIR} ; \
+        ${top_srcdir}/${ROMIO_DIR}/configure -arch="$ARCH" $ROMIO_ARGS \
+            -mpi=mpich -from_mpich \
+            -make='"'"$MAKE"'"' \
+            -mpiincdir=$includebuild_dir \
+            -mpibindir=$binbuild_dir \
+            -mpilib=$libbuild_dir/lib$MPILIBNAME.a \
+            -mpiolib=$libbuild_dir/lib$MPIOLIBNAME.a \
+            -cc="$CC" -cflags="$ROMIO_CFLAGS $CC_SHARED_OPT" \
+            -fc="$F77" -fflags="$ROMIO_FFLAGS $FC_SHARED_OPT" -f90="$F90")
+  fi
   if test "$?" != 0 ; then
       AC_MSG_ERROR([ROMIO configure failed, aborting configure])
   fi
   rm -f include/mpio.h ${top_srcdir}/include/mpio.h
   cp ${ROMIO_DIR}/include/mpio.h include
-  # Read ROMIO flags from localdefs (only works with supported versions of
-  # ROMIO, currently the included ROMIO and the non-public VIOLA-IO)
-  . ${ROMIO_DIR}/localdefs
-  LIB_LIST="$LIB_LIST $ROMIO_LIBLIST"
-  BASE_LIB_LIST="$BASE_LIB_LIST $ROMIO_LIBLIST"
-  LIB_PATH="$LIB_PATH $ROMIO_LIBPATH"
-
+  ROMIO_LFLAGS="`$MAKE -f ${ROMIO_DIR}/Makefile romio_lflags`"
+  ROMIO_TCFLAGS="`$MAKE -f ${ROMIO_DIR}/Makefile romio_tcflags`"
+  ROMIO_TCPPFLAGS="`$MAKE -f ${ROMIO_DIR}/Makefile romio_tcppflags`"
+  ROMIO_TFFLAGS="`$MAKE -f ${ROMIO_DIR}/Makefile romio_tfflags`"
+  ROMIO_DEVLIBS=`$MAKE -f ${ROMIO_DIR}/Makefile romio_devlibs`
+  ROMIO_DEVPLIBS=`$MAKE -f ${ROMIO_DIR}/Makefile romio_devplibs`
+  LIB_LIST="$LIB_LIST `$MAKE -f ${ROMIO_DIR}/Makefile romio_liblist`"
+  BASE_LIB_LIST="$BASE_LIB_LIST `$MAKE -f ${ROMIO_DIR}/Makefile romio_liblist`"
+  LIB_PATH="$LIB_PATH `$MAKE -f ${ROMIO_DIR}/Makefile romio_libpath`"
 # mpif.h prepared for ROMIO at end of configure
+  # If a VPATH build, the examples dir may not exist
+  if test ! -d examples ; then mkdir examples ; fi
+  if test ! -d examples/test ; then mkdir examples/test ; fi
   AC_CONFIG_LINKS(examples/io:${ROMIO_DIR}/test
 		  examples/test/io:${ROMIO_DIR}/test)
   AC_MSG_NOTICE([Finished configuring ROMIO])

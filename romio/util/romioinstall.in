@@ -1,0 +1,86 @@
+#!/bin/sh
+#
+# This script needs to be built by configure.
+#
+# This is a script to install ROMIO. It can be invoked with 
+#    make install
+#
+#    (if you used -prefix at configure time) or,
+#
+#    make install PREFIX=/usr/local/romio  (or whatever directory you like)
+#
+# in the top-level romio directory
+#
+PREFIX=@PREFIX@
+ROMIO_HOME=@ROMIO_HOME@
+ARCH=@ARCH@
+RANLIB=@RANLIB@
+#
+for arg in "$@" ; do
+    case "$arg" in 
+        -prefix=*)
+            PREFIX=`echo $arg | sed -e 's/-prefix=//'`
+            ;;
+        *)
+            echo "romioinstall: Unrecognized argument $arg ."
+            exit 1
+            ;;
+    esac
+done
+if test -z "$PREFIX" ; then
+    echo "Usage: make install PREFIX=/usr/local/romio  (or whatever directory you like)"
+    echo "in the top-level romio directory"
+fi
+if [ ! -d $PREFIX ] ; then
+    echo "Creating directory $PREFIX"
+    mkdir $PREFIX
+    chmod 755 $PREFIX
+fi
+echo copying $ROMIO_HOME/COPYRIGHT to $PREFIX/COPYRIGHT
+cp $ROMIO_HOME/COPYRIGHT $PREFIX
+chmod 644 $PREFIX/COPYRIGHT
+echo copying directory $ROMIO_HOME/doc to $PREFIX/doc
+cp -r $ROMIO_HOME/doc $PREFIX
+chmod 755 $PREFIX/doc
+chmod 644 $PREFIX/doc/README
+chmod 644 $PREFIX/doc/users-guide.ps.gz
+echo copying directory include to $PREFIX/include
+if [ ! -d $PREFIX/include ] ; then
+    echo "Creating directory $PREFIX/include"
+    mkdir $PREFIX/include
+    chmod 755 $PREFIX/include
+fi
+cp include/*.h $PREFIX
+chmod 644 $PREFIX/include/mpio.h
+chmod 644 $PREFIX/include/mpiof.h
+echo copying directory $ROMIO_HOME/lib to $PREFIX/lib
+cp -r $ROMIO_HOME/lib $PREFIX
+chmod 755 $PREFIX/lib
+find $PREFIX/lib -type d -name "*" -exec chmod 755 {} \;
+find $PREFIX/lib -type f -name "*" -exec chmod 644 {} \;
+echo copying directory $ROMIO_HOME/man to $PREFIX/man
+cp -r $ROMIO_HOME/man $PREFIX
+chmod 755 $PREFIX/man $PREFIX/man/man3
+chmod 644 $PREFIX/man/man3/*.3
+echo copying directory $ROMIO_HOME/test to $PREFIX/test
+cp -r $ROMIO_HOME/test $PREFIX
+cp test/Makefile $PREFIX/test
+cp test/*.c $PREFIX/test
+cp test/*.f $PREFIX/test
+cp test/runtests $PREFIX/test
+rm -f $PREFIX/test/*.in
+chmod 755 $PREFIX/test
+chmod 644 $PREFIX/test/*.c $PREFIX/test/*.f
+chmod 755 $PREFIX/test/runtests $PREFIX/test/std
+chmod 644 $PREFIX/test/std/*.std
+$RANLIB $PREFIX/lib/$ARCH/libmpio.a
+# change the include and lib paths in Makefile in the test directory
+echo updating paths in $PREFIX/test/Makefile
+TMPNEWINC=-I$PREFIX/include
+TMPNEWLIB=$PREFIX/lib/$ARCH/libmpio.a
+NEWINC=`echo $TMPNEWINC | sed 's/\//\\\\\//g'`
+NEWLIB=`echo $TMPNEWLIB | sed 's/\//\\\\\//g'`
+sed -e 5s/INCLUDE_DIR[\ ]*=\ [/a-z0-9.A-Z_-]*/INCLUDE_DIR\ =\ $NEWINC/ \
+    -e 6s/LIBS[\ ]*=\ [/a-z0-9.A-Z_-]*/LIBS\ =\ $NEWLIB/ $PREFIX/test/Makefile\
+       > $PREFIX/test/.romiotmp 
+mv $PREFIX/test/.romiotmp $PREFIX/test/Makefile

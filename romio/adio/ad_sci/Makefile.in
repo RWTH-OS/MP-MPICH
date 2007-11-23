@@ -1,0 +1,30 @@
+# $Id: Makefile.in 882 2001-05-03 15:19:27Z joachim $
+CC          = @CC@
+CPP         = @CPP@
+AR          = @AR@
+LIBNAME     = @LIBPATH@/@ad_sci_LIBNAME@
+srcdir      = @srcdir@
+
+INCLUDE_DIR = -I@MPI_INCLUDE_DIR@ -I${srcdir}/../include -I@SISCI_DIR@/include
+CFLAGS      = @CFLAGS@ $(INCLUDE_DIR)
+CPPFLAGS    = @CPPFLAGS@
+
+@VPATH@
+
+AD_SCI_OBJECTS = ad_sci_cbindings.o ad_sci_debug.o ad_sci_stat.o \
+	ad_sci_file.o ad_sci_hash.o ad_sci_fragment.o ad_sci_lock.o \
+	ad_sci_transfer.o ad_sci_msg.o ad_sci_startup.o ad_sci_memaccessor.o
+
+default: $(LIBNAME)
+
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+
+.cc.o:
+	$(CPP) $(CFLAGS) $(CPPFLAGS) -c $<
+
+$(LIBNAME): $(AD_SCI_OBJECTS)
+	$(AR) $(LIBNAME) $(AD_SCI_OBJECTS)
+
+clean:
+	@rm -f *.o

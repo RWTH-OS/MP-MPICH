@@ -1,0 +1,7 @@
+initial		Initial version from 8/9/99
+
+running_1	Version from 20/10/99 running with following configuration:
+		SMI_V1
+		ch_smi release-3b
+		SVMlib:	SCI-Communicator
+			SSC-MRSW-Konsistenz-Protokol
