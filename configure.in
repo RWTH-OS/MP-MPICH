@@ -5,6 +5,7 @@ AC_PREREQ(2.59)
 AC_REVISION($Revision$)
 CONFIGURE_ARGS_CLEAN="$@"
 
+
 dnl Place the definitions into a configuration file, rather than sedding
 dnl them into Makefiles.
 dnl Comment out this line (with dnl!) to force the definitions into
@@ -46,8 +47,12 @@ AC_ARG_WITH([comm],AS_HELP_STRING(--with-comm=COMM_TYPE,
 	    ]],[COMM=""])
 
 NBR_DEVICES=0
+AVAILABLE_DEVICES="ch_p4, ch_usock, ch_smi, ch_shmem, ch_mpx"
+# unfortunately we can not use the above variable three lines below, as in the produced
+# configure the variable setting ends up lower than the variable's first usage
 AC_ARG_WITH([device],AS_HELP_STRING(--with-device=DEVICE,
-	    [communications device(s) to be used]),
+	    [communications device(s) to be used.
+		 Choose a combination of: ch_p4, ch_usock, ch_smi, ch_shmem, ch_mpx]),
 	    [[
 	       # we expect withval to be a colon-separated list of device:service_args pairs
 	       oldifs=$IFS
@@ -78,7 +83,8 @@ AC_ARG_WITH([device],AS_HELP_STRING(--with-device=DEVICE,
 	      IFS=$oldifs
 	    ]])
 if test "${NBR_DEVICES}" = "0" ; then
-   AC_MSG_ERROR([You must define a list of devices with --with-device=DEVICE{,DEVICE}])
+	AC_MSG_ERROR([You must define a list of devices with --with-device=DEVICE{,DEVICE}. Available
+				 devices are ${AVAILABLE_DEVICES}])
 fi
 
 
