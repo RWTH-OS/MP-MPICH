@@ -7,6 +7,7 @@
 
 #include "mpid.h"
 #include "usockdev.h"
+#include "usockpriv.h"
 #include "mpimem.h"
 #include "reqalloc.h"
 /* flow.h includs the optional flow control for eager delivery */

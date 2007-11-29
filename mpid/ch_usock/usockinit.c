@@ -41,6 +41,7 @@ extern char *getenv();
 
 #include "mpid.h"
 #include "usockdev.h"
+#include "usockpriv.h"
 #include "mpimem.h"
 #include "flow.h"
 #include <stdio.h>
