@@ -539,7 +539,7 @@ IMPORT_MPI_API int MPI_Init(int *, char ***);
 IMPORT_MPI_API int MPI_Init_thread( int *, char ***, int, int * );
 IMPORT_MPI_API int MPI_Finalize(void);
 IMPORT_MPI_API int MPI_Initialized(int *);
-_NORETURN IMPORT_MPI_API int MPI_Abort(MPI_Comm, int);
+IMPORT_MPI_API int MPI_Abort(MPI_Comm, int);
 
 /* MPI-2 communicator naming functions */
 IMPORT_MPI_API int MPI_Comm_set_name(MPI_Comm, char *);
