@@ -1,4 +1,4 @@
-runtests is a program to run the tests in the directory %MPI_ROOT%\examples\test automatically
+runtests is a program for Windows platforms to run the tests in the directory %MPI_ROOT%\examples\test automatically
 you can also use this program to run tests for your own executables
 
 
@@ -34,4 +34,4 @@ you can also create a batch file containing the parameters suiting your needs; f
 
 C:\nt-mich\bin\runtests -eachexe -wdirtests C:\nt-mpich\examples\test\context -account lfbs/user -showpassed -delequal -n 2 -host p4-01,p4-02
 
-starts the test for each executable in directory C:\nt-mich\examples\test\context, the account lfbs/user is loaded from the registry, all passed tests are displayed, the output files <exename>.txt and <exename_cmp.txt are deleted if no differences between <exename>.txt and <exename>.std exist
+starts the test for each executable in directory C:\nt-mich\examples\test\context, the account lfbs/user is loaded from the registry, all passed tests are displayed, the output files <exename>.txt and <exename_cmp>.txt are deleted if no differences between <exename>.txt and <exename>.std exist
