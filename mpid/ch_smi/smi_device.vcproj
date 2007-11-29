@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="smi_device"
+	ProjectGUID="{6CE04D6E-5189-4855-A1BD-2E1BD64A3F89}"
 	SccProjectName=""
 	SccLocalPath="">
 	<Platforms>
@@ -1680,6 +1681,9 @@
 						PreprocessorDefinitions=""
 						BrowseInformation="1"/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\getopt.cpp">
 			</File>
 			<File
 				RelativePath="getsametype.c">
@@ -4334,6 +4338,9 @@
 				RelativePath="..\ch2\flow.h">
 			</File>
 			<File
+				RelativePath=".\getopt.h">
+			</File>
+			<File
 				RelativePath="getus.h">
 			</File>
 			<File
@@ -4361,16 +4368,16 @@
 				RelativePath="..\ch2\mpid_bind.h">
 			</File>
 			<File
-				RelativePath="mpid_debug.h">
-			</File>
-			<File
 				RelativePath="..\ch2\mpid_debug.h">
 			</File>
 			<File
-				RelativePath="..\ch2\mpiddev.h">
+				RelativePath="mpid_debug.h">
 			</File>
 			<File
 				RelativePath="mpiddev.h">
+			</File>
+			<File
+				RelativePath="..\ch2\mpiddev.h">
 			</File>
 			<File
 				RelativePath="..\..\include\mpidefs.h">

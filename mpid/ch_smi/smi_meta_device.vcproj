@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="smi_meta_device"
+	ProjectGUID="{380954DB-5A8D-4E57-8378-CD7624243B16}"
 	SccProjectName=""
 	SccLocalPath="">
 	<Platforms>
@@ -995,6 +996,9 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\getopt.cpp">
 			</File>
 			<File
 				RelativePath="getsametype.c">
@@ -2654,6 +2658,9 @@
 				RelativePath="..\ch2\flow.h">
 			</File>
 			<File
+				RelativePath=".\getopt.h">
+			</File>
+			<File
 				RelativePath="getus.h">
 			</File>
 			<File
@@ -2696,10 +2703,10 @@
 				RelativePath="..\..\include\mpiimpl.h">
 			</File>
 			<File
-				RelativePath="mpimem.h">
+				RelativePath="..\ch2\mpimem.h">
 			</File>
 			<File
-				RelativePath="..\ch2\mpimem.h">
+				RelativePath="mpimem.h">
 			</File>
 			<File
 				RelativePath="..\..\include\mpiprof.h">
