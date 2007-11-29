@@ -11,6 +11,7 @@
 
 #ifdef WIN32
 #define strcasecmp stricmp
+#include "getopt.h"
 #else
 #include <strings.h>
 #endif
