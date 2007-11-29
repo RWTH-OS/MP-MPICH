@@ -283,6 +283,21 @@
 				RelativePath="..\ch2\adi2wrapper.c">
 			</File>
 			<File
+				RelativePath="..\ch2\adi3get.c">
+			</File>
+			<File
+				RelativePath="..\ch2\adi3mmu.c">
+			</File>
+			<File
+				RelativePath="..\ch2\adi3put.c">
+			</File>
+			<File
+				RelativePath="..\ch2\adi3rhc.c">
+			</File>
+			<File
+				RelativePath="..\ch2\adi3win.c">
+			</File>
+			<File
 				RelativePath="..\ch2\calltrace.c">
 			</File>
 			<File
@@ -366,6 +381,9 @@
 			Filter="h;hpp;hxx;hm;inl">
 			<File
 				RelativePath="..\ch2\adi2config.h">
+			</File>
+			<File
+				RelativePath="..\ch2\adi3types.h">
 			</File>
 			<File
 				RelativePath="..\ch2\attach.h">
