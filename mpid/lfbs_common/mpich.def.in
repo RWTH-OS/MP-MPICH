@@ -47,8 +47,10 @@ EXPORTS
     MPIR_F_MPI_BOTTOM				@1020 DATA
 
     mpir_init_bottom_win32			@1021
-	ADIOI_Malloc=ADIOI_Malloc_fn	@1096
-	ADIOI_Free=ADIOI_Free_fn		@1097
+    ;These two functions are neither referenced
+    ; nor implemented anywhere
+	;ADIOI_Malloc=ADIOI_Malloc_fn	@1096
+	;ADIOI_Free=ADIOI_Free_fn		@1097
 	MPIR_strncpy=strncpy			@1098
 	MPIR_Alloc=malloc				@1099
 	MPIR_CAlloc=calloc				@1100
