@@ -39,7 +39,8 @@ int          count, src_comm_lrank, tag, context_id, dest_grank, *error_code;
     MPID_Device *dev = MPID_devset->dev[dest_grank];
     int             len, contig_size;
     void            *mybuf;
-    double 	    ptime  ;
+    /* Seems to be unused */
+	/* double 	    ptime  ;*/
     
 
     contig_size = MPIR_GET_DTYPE_SIZE(datatype,dtype_ptr);
