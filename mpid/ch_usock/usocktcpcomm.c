@@ -477,7 +477,7 @@ int ResolveAddress(const char *Host,unsigned long *Addr)
   Address = inet_addr(Host);
   
   /* if hostname was not in '.' notation, inet_addr returns -1 */
-  if(Address == ((unsigned long)256*256*256*256-1))
+  if(Address == ((unsigned long long)256*256*256*256-1))
   {
     if ((he=gethostbyname(Host)) != 0)
     {
