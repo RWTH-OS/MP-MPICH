@@ -7,7 +7,9 @@
 #include "usockdev.h"
 #include "flow.h"
 #include "usockdebug.h"
+#include "usockpackets.h"
 #include "queue.h"
+#include "usockpriv.h"
 /*#include "chpackflow.h"*/
 
 #define _DEBUG_EXTERN_REC

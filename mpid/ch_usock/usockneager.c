@@ -75,7 +75,7 @@ struct MPIR_DATATYPE *dtype;
      */
 
     /* Is this a short message? */
-    if( len <  MPID_CH_USOCK_long_len() )
+    if( len <  MPID_CH_USOCK_long_len(0) )
     {
 #ifndef USE_NT2UNIX
 #define alloca _alloca
@@ -108,7 +108,7 @@ struct MPIR_DATATYPE *dtype;
      |   the messages mut be sent in an overlapped manner to avoid deadlocks:
      */
 
-    if(  len < MPID_CH_USOCK_long_len() )
+    if(  len < MPID_CH_USOCK_long_len(0) )
     {
       /*
        |  This is a short message, nevertheless, we handle it in eager mode!
@@ -126,7 +126,7 @@ struct MPIR_DATATYPE *dtype;
     }
     else
     {
-      if( len < MPID_CH_USOCK_vlong_len() )
+      if( len < MPID_CH_USOCK_vlong_len(0) )
       {
 	SBuf[0].len=pkt_len;
 	SBuf[0].buf=(char*)pkt;

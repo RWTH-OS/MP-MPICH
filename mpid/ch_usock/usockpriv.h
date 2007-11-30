@@ -51,6 +51,11 @@ void MPID_USOCK_ReceiveTransfer ANSI_ARGS((int,ASYNCRecvId_t));
 int  MPID_USOCK_TestTransfer ANSI_ARGS((ASYNCRecvId_t));
 void MPID_USOCK_WaitTransfer ANSI_ARGS((ASYNCRecvId_t));
 
+int  MPID_CH_USOCK_long_len ANSI_ARGS((int));
+int  MPID_CH_USOCK_vlong_len ANSI_ARGS((int));
+void MPID_USOCK_RecvCancelOkPacket ANSI_ARGS((MPID_PKT_T*, int));
+void MPID_USOCK_SendCancelOkPacket ANSI_ARGS((MPID_PKT_T*, int));
+
 /* Error handling */
 void MPID_USOCK_Error ANSI_ARGS(( const char *, int ));
 void MPID_USOCK_SysError ANSI_ARGS(( const char *, int ));

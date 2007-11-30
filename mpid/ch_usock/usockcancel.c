@@ -14,6 +14,7 @@
 #include "usockpackets.h"
 #include "usockdebug.h"
 #include "queue.h"
+#include "channel.h"
 
 /*
  * This file contains the routines to handle canceling a message

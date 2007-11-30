@@ -27,6 +27,8 @@
  */
 /* Do we need stdio here, or has it already been included? */
 
+#include "usockpriv.h"
+
 #define MPIDPATCHLEVEL 2.0
 
 #define MPID_RecvAnyControl( pkt, size, from ) \

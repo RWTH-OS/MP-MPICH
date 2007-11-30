@@ -61,8 +61,9 @@ int MPID_USOCK_End ANSI_ARGS(( MPID_Device * ));
 int MPID_USOCK_Abort ANSI_ARGS(( struct MPIR_COMMUNICATOR *, int, char * ));
 void MPID_CH_USOCK_Version_name ANSI_ARGS(( char * ));
 
-int MPID_CH_USOCK_long_len( int );
-int MPID_CH_USOCK_vlong_len( int );
+/* These are now declared in usockpriv.h as they are used by other files as well*/
+/*int MPID_CH_USOCK_long_len( int );
+int MPID_CH_USOCK_vlong_len( int );*/
 
 MPID_Device *MPID_CH_USOCK_InitMsgPass( argc, argv, short_len, long_len )
 int  *argc;
