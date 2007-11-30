@@ -135,7 +135,9 @@ MPID_Init(argc, argv, config, error_code)
     MPID_Config    *config_info = (MPID_Config *) config;
     int use_ch_gm = 0;  /* are we running with ch_gm ? */
     int symbol_res_error = 0;
+#ifndef WIN32
     MPID_Device * (*InitMsgPassPt)(int *, char ***, int, int); /* pointer to device initialization function */
+#endif
 #ifdef CH_GM_PRESENT
     int dev_type = 0;
     int dev_rank = 0;
