@@ -207,6 +207,7 @@ static TransferRequest *MPID_USOCK_Get_TransferRequest(void*, int);
 
 static MPID_USOCK_Data_priv_type* MPID_USOCK_Get_priv_data(MPID_Device*);
 
+BOOL MPID_USOCK_RecvTransferMessage(ReceiveRequest*);
 
    /**********************************
 --- ** exported (global) functions: ** --------------------------------------------------------
@@ -1036,7 +1037,8 @@ static int MPID_USOCK_Start_SendRequest( WSABUF *buf, int size, unsigned long Nu
   DSECTION("MPID_USOCK_Start_SendRequest");
 
   DWORD ToSend = size; /* <-- number of bytes that are to be sent */
-  int res,error;
+  unsigned int res;
+  int error;
   BOOL retry;
   SelfSend* self_msg;
   
@@ -1906,10 +1908,10 @@ static void MPID_USOCK_GenericWait(OVERLAPPED *Over)
 {
   DSECTION("MPID_USOCK_GenericWait");
     
-  HANDLE Ev[2];
   int counter =0;
   BOOL Finished=FALSE;
 #ifdef BLOCK
+  HANDLE Ev[2];
   Ev[0]=Over->hEvent;
 #endif
 
