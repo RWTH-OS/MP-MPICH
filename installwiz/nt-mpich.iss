@@ -27,14 +27,14 @@ Source: ..\doc\mp-mpich_manual.pdf; DestDir: {app}\doc; Components: Cluster_Fron
 Source: ..\doc\runtests_readme.txt; DestDir: {app}\doc; Components: Cluster_Frontend
 Source: ..\doc\Quickstart.pdf; DestDir: {app}\doc; Components: Cluster_Frontend; Flags: isreadme
 
-Source: ..\rexec\RexecShell\RexecShell.exe; DestDir: {app}\bin; DestName: RexecShell.exe; Components: Cluster_Frontend
+Source: ..\bin\RexecShell.exe; DestDir: {app}\bin; DestName: RexecShell.exe; Components: Cluster_Frontend
 Source: ..\bin\mpe_server_frontend.exe; DestDir: {app}\bin; Components: Cluster_Frontend
 
 Source: ..\bin\mpiexec.exe; DestDir: {app}\bin; Components: Cluster_Frontend
 Source: ..\bin\ntrexec.exe; DestDir: {app}\bin; Components: Cluster_Frontend
 Source: ..\bin\runtests.exe; DestDir: {app}\bin; Components: Cluster_Frontend
 Source: ..\bin\chkresult.exe; DestDir: {app}\bin; Components: Cluster_Frontend
-Source: ..\rexec\mpirun\plugins\libs\*.dll; DestDir: {app}\bin\plugins; Components: Cluster_Frontend
+Source: ..\bin\Plugins\*.dll; DestDir: {app}\bin\plugins; Components: Cluster_Frontend
 
 Source: ..\bin\rclumad.exe; DestDir: {tmp}\nt-mpich_setup; Components: Cluster_Node; Flags: deleteafterinstall
 Source: ..\bin\rcluma.cpl; DestDir: {tmp}\nt-mpich_setup; Components: Cluster_Node; Flags: deleteafterinstall
