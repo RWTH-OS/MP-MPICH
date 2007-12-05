@@ -121,10 +121,9 @@ Source: ..\mpe\slog_api\Readme.; DestDir: {app}\slog_api; Components: Logging
 Source: ..\mpe\slog_api\*.txt; DestDir: {app}\slog_api; Components: Logging
 Source: ..\mpe\slog_api\*.dsp; DestDir: {app}\slog_api; Components: Logging
 Source: ..\mpe\slog_api\bin\Readme; DestDir: {app}\slog_api\bin; Components: Logging
-Source: ..\mpe\slog_api\test\Release\readtest.exe; DestDir: {app}\slog_api\bin; Components: Logging
 Source: ..\mpe\slog_api\doc\html\*.*; DestDir: {app}\slog_api\doc\html; Components: Logging
 Source: ..\mpe\slog_api\src\*.h; DestDir: {app}\slog_api\include; Components: Logging
-Source: ..\mpe\slog_api\lib\slog_api.lib; DestDir: {app}\slog_api\lib; Components: Logging
+Source: ..\lib\slog_api.lib; DestDir: {app}\slog_api\lib; Components: Logging
 Source: ..\mpe\slog_api\lib\README.; DestDir: {app}\slog_api\lib; Components: Logging
 Source: ..\mpe\slog_api\test\*.dsp; DestDir: {app}\slog_api\test; Components: Logging
 Source: ..\mpe\slog_api\test\*.dsw; DestDir: {app}\slog_api\test; Components: Logging
