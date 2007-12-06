@@ -754,7 +754,7 @@ install: lib/lib$(MPILIBNAME).a
 		$(INSTALL_SCRIPT) bin/`basename $$file .in` $(bindir); done
 	cd $(bindir); rm -f mpiexec; $(LN_S) mpirun mpiexec
 	$(INSTALL_DATA) doc/install.ps.gz doc/guide.ps.gz \
-		doc/mp-mpich_manual.pdf doc/multidevice.txt doc/mpiman.ps $(datadir)/doc
+		doc/mp-mpich_manual.pdf doc/multi-device.txt doc/mpiman.ps $(datadir)/doc
 	$(INSTALL_DATA) util/machines/machines* $(datadir)
 	$(INSTALL_DATA) include/mpi.h include/mpi_errno.h  include/mpichconf.h \
 		include/mpidefs.h include/mpif.h $(includedir)
