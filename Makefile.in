@@ -722,7 +722,8 @@ distclean: cleanslate rmlib
 	     rm -f jumpshot/confdefs.h jumpshot/config.log \
 	        jumpshot/config.cache jumpshot/config.status ; fi
 	@for dir in mpid/server mpe util f90modules $(AVAILDEVICES) mpid/ch2 \
-			mpid/ch_shmem mpid/tests ${ROMIO_DIR} MPI-2-C++ $(DIRS); \
+			mpid/ch_shmem mpid/tests ${ROMIO_DIR} MPI-2-C++ $(DIRS) \
+			mpid/ch_gateway mpid/ch_tunnel ;\
 		do if [ -d $$dir ] && [ -s $$dir/Makefile ]; then \
 			(cd $$dir && $(MAKE) distclean ); \
 		fi; done
