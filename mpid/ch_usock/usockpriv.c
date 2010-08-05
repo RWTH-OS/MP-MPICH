@@ -196,7 +196,7 @@ static SendRequest *MPID_USOCK_Get_SendRequest(void);
 static void MPID_USOCK_Init_ReceiveRequest(SOCKET, ReceiveRequest*);
 static void MPID_USOCK_Finish_ReceiveRequest(ReceiveRequest*);
 static int  MPID_USOCK_Start_ReceiveRequest(char*, unsigned long, int, ReceiveRequest*);
-static int  MPID_USOCK_CheckType_ReceiveRequest(ReceiveRequest*);
+static int  MPID_USOCK_CheckType_ReceiveRequest(ReceiveRequest*, int);
 static int  MPID_USOCK_Test_ReceiveRequest(int, ReceiveRequest*);
 static void MPID_USOCK_Wait_ReceiveRequest(ReceiveRequest*);
 static int  MPID_USOCK_GetHeader_ReceiveRequest(ReceiveRequest*);
@@ -431,7 +431,7 @@ void MPID_USOCK_RecvAnyControl( MPID_PKT_T *pkt, int size, int *from )
 	 ) {
 	--res;
 	Request=local_data->ReceiveRequestArray[current];
-	found = MPID_USOCK_CheckType_ReceiveRequest(Request);
+	found = MPID_USOCK_CheckType_ReceiveRequest(Request, current);
 	if(found && (local_data->numConnections || global_data->MyWorldSize<2)) {
 	  *from=current;
 	  if(Request->Header.Size > size) { /* XXX SIGNED <-> UNSIGNED CONFLICT !!! */
@@ -534,7 +534,7 @@ int MPID_USOCK_ControlMsgAvail( void )
       DNOTICEI("checking channel",current);
       res--;
       DNOTICE("checking for incoming type");
-      found = MPID_USOCK_CheckType_ReceiveRequest( local_data->ReceiveRequestArray[current] );
+      found = MPID_USOCK_CheckType_ReceiveRequest( local_data->ReceiveRequestArray[current], current);
     } 	
     current++; /* <-- check for messages from next process */
   }
@@ -1440,7 +1440,7 @@ static int MPID_USOCK_Start_ReceiveRequest( char *mem, unsigned long amount, int
 }
  
 
-static int MPID_USOCK_CheckType_ReceiveRequest( ReceiveRequest *Request )
+static int MPID_USOCK_CheckType_ReceiveRequest( ReceiveRequest *Request, int current )
 {
   MPID_USOCK_Data_global_type *global_data;
   MPID_USOCK_Data_priv_type  *local_data;

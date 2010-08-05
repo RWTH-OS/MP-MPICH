@@ -58,7 +58,7 @@ MPIR_SHANDLE *shandle;
     MPID_AINT_SET(pkt->send_id,shandle); 
     
     MPID_USOCK_DEBUG_PRINT_BASIC_SEND_PKT("S Sending anti-send message\n", pkt);
-    MPID_PKT_PACK( pkt, sizeof(*pkt), pkt->to );
+    MPID_PKT_PACK( pkt, sizeof(*pkt), shandle->partner);
     MPID_SendControl( (MPID_PKT_T*)pkt, sizeof(MPID_PKT_ANTI_SEND_T), shandle->partner );
 
     DSECTLEAVE
