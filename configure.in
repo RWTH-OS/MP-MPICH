@@ -3144,7 +3144,7 @@ AC_CONFIG_FILES([src/env/farg.f src/env/farg90.f])
 #
 # Configure the ADI2-layer and the device(s) 
 #
-AC_CONFIG_FILES([mpid/ch2/Makefile mpid/util/Makefile])
+AC_CONFIG_FILES([mpid/ch2/Makefile mpid/util/Makefile mpid/stl2c/Makefile])
 if test -f $srcdir/mpid/tests/Makefile.in ; then
    AC_CONFIG_FILES([mpid/tests/Makefile])
 fi
