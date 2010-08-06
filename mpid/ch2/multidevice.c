@@ -17,6 +17,7 @@
 #include "mpimem.h"
 #include "metaconfig.h"
 #include "../../src/routing/rhlist.h"
+#include "dev.h"
 
 #include "multidevice.h"
 
@@ -129,6 +130,14 @@ int MPID_GetDeviceNbr( int deviceType, int *error )
     return deviceNbr;
 }
 
+#ifdef NODLOPEN
+MPID_Device *MPID_CH_SMI_InitMsgPass( int, char***, int, int );
+MPID_Device *MPID_CH_SHMEM_InitMsgPass( int, char***, int, int );
+MPID_Device *MPID_CH_P4_InitMsgPass( int, char***, int, int );
+MPID_Device *MPID_CH_USOCK_InitMsgPass( int, char***, int, int );
+MPID_Device *MPID_CH_MPX_InitMsgPass( int, char***, int, int );
+#endif
+
 /* Function to get pointer to device intialization function;
    it must be given the device type number (as configured in mpichconf.h);
    error_code is MPI_SUCCESS if fucntion was found and MPI_ERR_INTERN otherwise */
@@ -141,19 +150,31 @@ void *MPID_GetInitMsgPassPt( int device_type_nbr, int *error_code )
     switch( device_type_nbr ) {
 #ifdef CH_SMI_PRESENT
     case DEVICE_ch_smi_nbr:
+#ifdef NODLOPEN
+       InitMsgPassPt = &MPID_CH_SMI_InitMsgPass;
+#else
 	InitMsgPassPt = MPID_Get_SymbolPt( "MPID_CH_SMI_InitMsgPass", "libch_smi.so", error_code );
+#endif
        break;
 #endif
 
 #ifdef CH_SHMEM_PRESENT
    case DEVICE_ch_shmem_nbr:
+#ifdef NODLOPEN
+       InitMsgPassPt = &MPID_CH_SHMEM_InitMsgPass;
+#else
        InitMsgPassPt = MPID_Get_SymbolPt( "MPID_CH_SHMEM_InitMsgPass", "libch_shmem.so", error_code );
+#endif
        break;
 #endif
 
 #ifdef CH_P4_PRESENT	    
    case DEVICE_ch_p4_nbr:
+#ifdef NODLOPEN
+       InitMsgPassPt = &MPID_CH_P4_InitMsgPass;
+#else
        InitMsgPassPt = MPID_Get_SymbolPt( "MPID_CH_P4_InitMsgPass", "libch_p4.so", error_code );
+#endif
        break;
 #endif
 
@@ -165,13 +186,21 @@ void *MPID_GetInitMsgPassPt( int device_type_nbr, int *error_code )
 
 #ifdef CH_USOCK_PRESENT	    
    case DEVICE_ch_usock_nbr:
+#ifdef NODLOPEN
+       InitMsgPassPt = &MPID_CH_USOCK_InitMsgPass;
+#else
        InitMsgPassPt = MPID_Get_SymbolPt( "MPID_CH_USOCK_InitMsgPass", "libch_usock.so", error_code );
+#endif
        break;
 #endif
 
 #ifdef CH_MPX_PRESENT	    
    case DEVICE_ch_mpx_nbr:
+#ifdef NODLOPEN
+       InitMsgPassPt = &MPID_CH_MPX_InitMsgPass;
+#else
        InitMsgPassPt = MPID_Get_SymbolPt( "MPID_CH_MPX_InitMsgPass", "libch_mpx.so", error_code );
+#endif
        break;
 #endif
 
@@ -212,6 +241,7 @@ void *MPID_Get_SymbolPt( symbolName, dllName, error_code )
     
     *error_code = MPI_SUCCESS;
 
+#ifndef NODLOPEN
     /* get handle for main program*/
     if( (dll_handle = dlopen( 0, RTLD_NOW )) == 0 ) {
 	/* this is an error, handle for main program should always be available */ 
@@ -238,6 +268,9 @@ void *MPID_Get_SymbolPt( symbolName, dllName, error_code )
 	*error_code = MPI_ERR_INTERN;
 	return NULL;
     }
+#else
+    symbol_pointer = NULL;
+#endif
 
     return symbol_pointer;
 }

@@ -388,6 +388,14 @@ AC_ARG_ENABLE([router-threads],AS_HELP_STRING(--disable-router-threads,
 	       [CFLAGS="$CFLAGS -DROUTER_THREADS"
 		USER_CFLAGS="$USER_CFLAGS -DROUTER_THREADS"])
 
+AC_ARG_ENABLE([dlopen],AS_HELP_STRING(--disable-dlopen,
+	      [Do not use the dlopen() function for device handling]),
+	      [if test "$enableval" != "no"; then
+		 CFLAGS="$CFLAGS"
+	       else
+		 CFLAGS="$CFLAGS -DNODLOPEN"
+	       fi],)
+
 AC_ARG_ENABLE([hetero],AS_HELP_STRING(--enable-hetero,
 	      [Enable data conversion for inter-host communication (at the
 	       current state, XDR is used for this purpose) between not
