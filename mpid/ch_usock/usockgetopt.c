@@ -54,10 +54,10 @@
 /*
  * get option letter from argument vector
  */
-int	opterr = 1,		/* if error message should be printed */
-	        optind = 1,		/* index into parent argv vector */
-         	optopt;			/* character checked for validity */
-char	*optarg;		/* argument associated with option */
+int	_opterr = 1,		/* if error message should be printed */
+	        _optind = 1,		/* index into parent argv vector */
+         	_optopt;			/* character checked for validity */
+char	*_optarg;		/* argument associated with option */
 
 
 #define	BADCH	(int)'?'
@@ -70,10 +70,10 @@ This is used by CTCPCommunicator if any following layers
 want to use MPID_USOCK_getopt() as well.
 */
 void MPID_USOCK_resetGetOpt() {
-	opterr=1;
-	optind=1;
-	optopt=0;
-	optarg=0;
+	_opterr=1;
+	_optind=1;
+	_optopt=0;
+	_optarg=0;
 	place=EMSG;
 }
 
@@ -93,67 +93,67 @@ MPID_USOCK_getopt(int nargc, char * const *nargv, const char *ostr)
 	DSECTENTRYPOINT;
 
 	if (!*place) {				/* update scanning pointer */
-		if (optind >= nargc || *(place = nargv[optind]) != '-') {
+		if (_optind >= nargc || *(place = nargv[_optind]) != '-') {
 			place = EMSG;
 			DSECTLEAVE
 			    return(EOF);
 		}
 		if (place[1] && *++place == '-') {	/* found "--" */
-			++optind;
+			++_optind;
 			place = EMSG;
 			DSECTLEAVE
 			    return(EOF);
 		}
 	}					/* option letter okay? */
-	if ((optopt = (int)*place++) == (int)':' ||
-	    !(oli = index(ostr, optopt))) {
+	if ((_optopt = (int)*place++) == (int)':' ||
+	    !(oli = index(ostr, _optopt))) {
 		/*
 		 * if the user didn't specify '-' as an option,
 		 * assume it means EOF.
 		 */
-	    	if (optopt == (int)'-') {
+	    	if (_optopt == (int)'-') {
 		    DSECTLEAVE
 			return(EOF);
 		}
 		if (!*place)
-			++optind;
-		if (opterr) {
+			++_optind;
+		if (_opterr) {
 			if (!(p = rindex(*nargv, '/')))
 				p = *nargv;
 			else
 				++p;
 			(void)fprintf(stderr, "%s: illegal option -- %c\n",
-			    p, optopt);
+			    p, _optopt);
 		}
 		DSECTLEAVE
 		    return(BADCH);
 	}
 	if (*++oli != ':') {			/* don't need argument */
-		optarg = NULL;
+		_optarg = NULL;
 		if (!*place)
-			++optind;
+			++_optind;
 	}
 	else {					/* need an argument */
 		if (*place)			/* no white space */
-			optarg = place;
-		else if (nargc <= ++optind) {	/* no arg */
+			_optarg = place;
+		else if (nargc <= ++_optind) {	/* no arg */
 			place = EMSG;
 			if (!(p = rindex(*nargv, '/')))
 				p = *nargv;
 			else
 				++p;
-			if (opterr)
+			if (_opterr)
 				(void)fprintf(stderr,
 				    "%s: option requires an argument -- %c\n",
-				    p, optopt);
+				    p, _optopt);
 			DSECTLEAVE
 			    return(BADCH);
 		}
 	 	else				/* white space */
-			optarg = nargv[optind];
+			_optarg = nargv[_optind];
 		place = EMSG;
-		++optind;
+		++_optind;
 	}
 	DSECTLEAVE
-	    return(optopt);				/* dump back option letter */
+	    return(_optopt);				/* dump back option letter */
 }

@@ -17,8 +17,8 @@ extern "C" {
 int MPID_USOCK_getopt(int nargc, char * const *nargv, const char *ostr); 
 void MPID_USOCK_resetGetOpt();
 
-extern char *optarg;
-extern int optind, opterr, optopt;
+extern char *_optarg;
+extern int _optind, _opterr, _optopt;
 
 #ifdef __cplusplus
 }
@@ -35,8 +35,8 @@ SYNOPSIS
      int getopt(int argc, char * const *argv,
           const char *optstring);
 
-     extern char *optarg;
-     extern int optind, opterr, optopt;
+     extern char *_optarg;
+     extern int _optind, _opterr, _optopt;
 
 MT-LEVEL
      Unsafe
@@ -54,11 +54,11 @@ DESCRIPTION
      getopt() will recognize; if a letter is followed by a colon,
      the option is expected to have  an  argument,  or  group  of
      arguments,  which  may  be separated from it by white space.
-     optarg is set to point to the start of the  option  argument
+     _optarg is set to point to the start of the  option  argument
      on return from getopt().
 
-     getopt() places in optind the argv index of the  next  argu-
-     ment to be processed.  optind is external and is initialized
+     getopt() places in _optind the argv index of the  next  argu-
+     ment to be processed.  _optind is external and is initialized
      to 1 before the first call to getopt().   When  all  options
      have  been  processed  (that  is, up to the first non-option
      argument), getopt() returns EOF.  The special option " - - "
@@ -72,8 +72,8 @@ RETURN VALUES
      returns  a "?"  (question mark) when it encounters an option
      letter not included in optstring or  no  argument  after  an
      option that expects one.  This error message may be disabled
-     by setting opterr to 0.  The value  of  the  character  that
-     caused the error is in optopt.
+     by setting _opterr to 0.  The value  of  the  character  that
+     caused the error is in _optopt.
 */
 
 #endif

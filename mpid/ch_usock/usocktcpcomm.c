@@ -248,42 +248,42 @@ int ParseCommandLine(int *argc, char*** argv, Options *opt)
   opt->LocalAddr[0]  = 0;
   
   /* do the parsing */
-  opterr = 0;
+  _opterr = 0;
   while((c=MPID_USOCK_getopt(*argc,*argv,"n:m:p:b:r:t:"))!=EOF) {
     switch(c) {
       case 'm':
-	       if(!optarg||!optarg[0]) return -1;
-	       strcpy(opt->MasterName,optarg);
+	       if(!_optarg||!_optarg[0]) return -1;
+	       strcpy(opt->MasterName,_optarg);
 	       break;
       case 'n':
-	       if(sscanf(optarg,"%d",&(opt->np))!=1) return -1;
+	       if(sscanf(_optarg,"%d",&(opt->np))!=1) return -1;
 	       break;
       case 'r':
-	       if(sscanf(optarg,"%d",&(opt->rank))!=1) return -1;
+	       if(sscanf(_optarg,"%d",&(opt->rank))!=1) return -1;
 	       break;
       case 'p':
-	       if(sscanf(optarg,"%d",&(opt->port))!=1) return -1;
+	       if(sscanf(_optarg,"%d",&(opt->port))!=1) return -1;
 	       break;
       case 't':
-	       if(sscanf(optarg,"%d",&(opt->timeout))!=1) return -1;
+	       if(sscanf(_optarg,"%d",&(opt->timeout))!=1) return -1;
 	       break;	       
       case 'b':
-	       if(!optarg||!optarg[0]) return -1;
-	       strcpy(opt->LocalAddr,optarg); 
+	       if(!_optarg||!_optarg[0]) return -1;
+	       strcpy(opt->LocalAddr,_optarg); 
 	       break;
 	       
     }
   }
   
-  if(optind>1)
+  if(_optind>1)
   {
-    optind--;
-    *argc-=optind;
-    (*argv)[optind]=(*argv)[0];
-    *argv+=optind;
+    _optind--;
+    *argc-=_optind;
+    (*argv)[_optind]=(*argv)[0];
+    *argv+=_optind;
     MPID_USOCK_resetGetOpt();
   }  
-  opterr=1;
+  _opterr=1;
   
   DSECTLEAVE
     return 0;
