@@ -65,7 +65,7 @@ default: $(LIBNAME)
 	@echo "building nt2unix in directory ${NT2UNIX_HOME}"
 	$(MAKE) stl2c
 	@cd ${NT2UNIX_HOME}; $(MAKE)
-	$(AR) $(LIBNAME) $(NT2UNIX_HOME)/lib/*.o
+	$(AR) $(LIBNAME) $(NT2UNIX_HOME)/src/*.o
 	$(RANLIB) $(LIBNAME)
 
 $(LIBNAME): $(DEVOBJECTS) 

@@ -1,0 +1,33 @@
+# Makefile.in for the nt2unix source directory
+TARGET=@target@
+HOST=@host@
+SRCDIR=@srcdir@
+CFLAGS=@CFLAGS@
+CPPFLAGS=@CPPFLAGS@  -I./ -I../include -finline-functions -fno-rtti
+LDFLAGS=@LDFLAGS@
+CXX=@CXX@
+
+####
+#=-I./ -I../include CPPFLAGS=-I./ -I../include ${CPPFLAGS}
+
+CSOURCE=maptest.c
+CPPSOURCE=threadsync.cc handle.cc virtualmemory.cc general.cc environment.cc\
+	exception.cc process.cc filemap.cc threads.cc winsockapi.cc \
+	winsock2api.cc iphlpapi.cc
+
+
+OBJ=${CPPSOURCE:.cc=.o}
+
+default: lib
+
+lib: ${OBJ}
+	ar -r ../lib/libnt2unix.a ${OBJ}
+
+sharedlib:  ${OBJ}
+	$(CXX) -shared -o ../lib/libnt2unix.so ${OBJ}
+
+clean:
+	rm -f ${OBJ}
+
+distclean: clean
+	rm -f Makefile
