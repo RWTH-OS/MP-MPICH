@@ -459,7 +459,7 @@ void *import_msgs (void *arg)
 		confirm_msg.tag        = 0;
 		confirm_msg.len        = 0;
 		confirm_msg.send_id    = remote_send_id;
-		MPID_AINT_SET(confirm_msg.recv_id, tmpzero);
+		MPID_AINT_SET(confirm_msg.recv_id, &tmpzero);
 		
 		/* remove cancel message from pending queue */
 		Qput (availQ, req_id);

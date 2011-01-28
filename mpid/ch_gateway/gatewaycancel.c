@@ -45,7 +45,7 @@ MPIR_SHANDLE *shandle;
     cancel_msg.len        = 0;
     cancel_msg.cancel     = 0;
     MPID_AINT_SET(cancel_msg.send_id, shandle);
-    MPID_AINT_SET(cancel_msg.recv_id, tmpzero);
+    MPID_AINT_SET(cancel_msg.recv_id, &tmpzero);
 
 
     dest_comm_all_rank = shandle->partner_grank; /* saved there in MPI_Isend(), MPI_Issend(), MPI_Send_init(), ... */

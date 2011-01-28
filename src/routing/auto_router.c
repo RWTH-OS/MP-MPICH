@@ -3,6 +3,8 @@
  * author: Martin Poeppe email: mpoeppe@gmx.de 
  */
 
+#include <stdlib.h>
+#include <string.h>
 #include <netdb.h>
 #include <sys/socket.h>
 

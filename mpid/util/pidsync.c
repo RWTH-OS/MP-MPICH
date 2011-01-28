@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "pidsync.h"
 #ifdef _CRAY
 /* for access to MPIR_meta_cfg, which is needed for the cray implementation */

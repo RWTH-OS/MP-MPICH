@@ -4,6 +4,8 @@
  * parstest is a commandline tool to test configuration files 
  */
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "router_config.h"
 
 
