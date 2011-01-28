@@ -67,6 +67,7 @@ EXPORT_MPI_API int MPI_Sendrecv_replace( void *buf, int count, MPI_Datatype data
 			  int dest, int sendtag, int source, int recvtag, 
 			  MPI_Comm comm, MPI_Status *status )
 {
+    MPI_Status __status;
     int          mpi_errno = MPI_SUCCESS;
     int          buflen;
     void         *rbuf;
@@ -78,6 +79,8 @@ EXPORT_MPI_API int MPI_Sendrecv_replace( void *buf, int count, MPI_Datatype data
     static char myname[] = "MPI_SENDRECV_REPLACE";
 
     TR_PUSH(myname);
+
+    if(status == MPI_STATUS_IGNORE) status = &__status;
 
     comm_ptr = MPIR_GET_COMM_PTR(comm);
     MPIR_TEST_MPI_COMM(comm,comm_ptr,comm_ptr,myname );

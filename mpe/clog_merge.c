@@ -281,8 +281,9 @@ void CLOG_mergend()
       }
     }
     FREE (outbuf);		/* free output buffer */
-    CLOG_currbuff = buffer_parser = CLOG_first;
+    CLOG_currbuff = CLOG_first;
     while(CLOG_currbuff) {
+      buffer_parser = CLOG_currbuff;
       CLOG_currbuff = CLOG_currbuff->next;
       FREE (buffer_parser);
     }

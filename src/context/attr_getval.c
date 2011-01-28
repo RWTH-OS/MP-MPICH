@@ -10,6 +10,7 @@
 #ifdef HAVE_WEAK_SYMBOLS
 
 #if defined(HAVE_PRAGMA_WEAK)
+
 #pragma weak MPI_Attr_get = PMPI_Attr_get
 #elif defined(HAVE_ATTRIBUTE_WEAK)
 EXPORT_MPI_API int MPI_Attr_get ( MPI_Comm comm, int keyval, void *attr_value, 
@@ -18,8 +19,25 @@ EXPORT_MPI_API int MPI_Attr_get ( MPI_Comm comm, int keyval, void *attr_value,
 #pragma _HP_SECONDARY_DEF PMPI_Attr_get  MPI_Attr_get
 #elif defined(HAVE_PRAGMA_CRI_DUP)
 #pragma _CRI duplicate MPI_Attr_get as PMPI_Attr_get
-/* end of weak pragmas */
+
+/* end of weak pragma for MPI_Attr_get*/
 #endif
+
+
+#if defined(HAVE_PRAGMA_WEAK)
+
+#pragma weak MPI_Comm_get_attr = PMPI_Comm_get_attr
+#elif defined(HAVE_ATTRIBUTE_WEAK)
+EXPORT_MPI_API int MPI_Comm_get_attr ( MPI_Comm comm, int keyval, void *attr_value, 
+				       int *flag ) __attribute__ ((weak, alias ("PMPI_Comm_get_attr")));
+#elif defined(HAVE_PRAGMA_HP_SEC_DEF)
+#pragma _HP_SECONDARY_DEF PMPI_Comm_get_attr  MPI_Comm_get_attr
+#elif defined(HAVE_PRAGMA_CRI_DUP)
+#pragma _CRI duplicate MPI_Comm_get_attr as PMPI_Comm_get_attr
+
+/* end of weak pragma for MPI_Comm_get_attr */
+#endif
+
 
 /* Include mapping from MPI->PMPI */
 #define MPI_BUILD_PROFILING
@@ -96,4 +114,11 @@ EXPORT_MPI_API int MPI_Attr_get (
 }
 
 
-
+EXPORT_MPI_API int MPI_Comm_get_attr ( 
+	MPI_Comm comm, 
+	int keyval, 
+	void *attr_value, 
+	int *flag )
+{
+  return MPI_Attr_get ( comm, keyval, attr_value, flag );
+}

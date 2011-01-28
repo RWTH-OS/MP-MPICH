@@ -129,6 +129,7 @@ typedef int MPI_Comm;
 #define MPI_COMM_WORLD 93
 extern MPI_Comm MPI_COMM_LOCAL_REDUCED;
 extern MPI_Comm MPI_COMM_META_REDUCED;
+extern MPI_Comm MPI_COMM_TUNNELFS_SELF;
 #else /* NOT META */
 #define MPI_COMM_WORLD 91
 #define MPI_COMM_SELF  92
@@ -210,7 +211,8 @@ typedef int MPI_Op;
 /* These are only guesses; make sure you change them in mpif.h as well */
 #define MPI_MAX_PROCESSOR_NAME 256
 #define MPI_MAX_ERROR_STRING   512
-#define MPI_MAX_NAME_STRING     63		/* How long a name do you need ? */
+#define MPI_MAX_NAME_STRING     64		/* How long a name do you need ? */
+#define MPI_MAX_OBJECT_NAME MPI_MAX_NAME_STRING
 
 /* Pre-defined constants */
 #define MPI_UNDEFINED      (-32766)
@@ -539,11 +541,16 @@ IMPORT_MPI_API int MPI_Init(int *, char ***);
 IMPORT_MPI_API int MPI_Init_thread( int *, char ***, int, int * );
 IMPORT_MPI_API int MPI_Finalize(void);
 IMPORT_MPI_API int MPI_Initialized(int *);
-IMPORT_MPI_API int MPI_Abort(MPI_Comm, int);
+IMPORT_MPI_API int MPI_Query_thread(int *);
+_NORETURN IMPORT_MPI_API int MPI_Abort(MPI_Comm, int);
 
 /* MPI-2 communicator naming functions */
 IMPORT_MPI_API int MPI_Comm_set_name(MPI_Comm, char *);
 IMPORT_MPI_API int MPI_Comm_get_name(MPI_Comm, char *, int *);
+
+/* MPI-2 attribute functions (used instead of deprecated MPI_Attr_put/get functions) */
+IMPORT_MPI_API int MPI_Comm_set_attr(MPI_Comm, int, void*);
+IMPORT_MPI_API int MPI_Comm_get_attr(MPI_Comm, int, void *, int *);
 
 #ifdef HAVE_NO_C_CONST
 /* Default Solaris compiler does not accept const but does accept prototypes */
@@ -788,12 +795,19 @@ MPI_Info PMPI_Info_f2c(MPI_Fint);
 /* Wtime done above */
 IMPORT_MPI_API int PMPI_Init(int *, char ***);
 IMPORT_MPI_API int PMPI_Init_thread( int *, char ***, int, int * );
+IMPORT_MPI_API int PMPI_Query_thread(int *);
 IMPORT_MPI_API int PMPI_Finalize(void);
 IMPORT_MPI_API int PMPI_Initialized(int *);
 IMPORT_MPI_API int PMPI_Abort(MPI_Comm, int);
+
 /* MPI-2 communicator naming functions */
-/* IMPORT_MPI_API int PMPI_Comm_set_name(MPI_Comm, char *); */
-/* IMPORT_MPI_API int PMPI_Comm_get_name(MPI_Comm, char **); */
+IMPORT_MPI_API int PMPI_Comm_set_name(MPI_Comm, char *);
+IMPORT_MPI_API int PMPI_Comm_get_name(MPI_Comm, char *, int *);
+
+/* MPI-2 attribute functions (used instead of deprecated MPI_Attr_put/get functions) */
+IMPORT_MPI_API int PMPI_Comm_set_attr(MPI_Comm, int, void*);
+IMPORT_MPI_API int PMPI_Comm_get_attr(MPI_Comm, int, void *, int *);
+
 #ifdef HAVE_NO_C_CONST
 /* Default Solaris compiler does not accept const but does accept prototypes */
 #if defined(USE_STDARG) 

@@ -20,9 +20,9 @@
 #endif
 
 
+#ifndef MPI_MAX_OBJECT_NAME
 #define MPI_MAX_OBJECT_NAME 32
-
-
+#endif
 
 typedef struct MPIR_Info 			MPID_Info;
 typedef struct MPIR_GROUP 			MPID_Group;

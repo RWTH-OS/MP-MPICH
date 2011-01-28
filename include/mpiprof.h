@@ -173,10 +173,11 @@
 #define MPI_Comm_free_keyval PMPI_Comm_free_keyval
 #define MPI_Comm_get_errhandler PMPI_Comm_get_errhandler
 #define MPI_Comm_get_name PMPI_Comm_get_name
-#define MPI_Comm_get_parent PMPI_Comm_get_parent
+#define MPI_Comm_get_attr PMPI_Comm_get_attr
 #define MPI_Comm_join PMPI_Comm_join
 #define MPI_Comm_set_errhandler PMPI_Comm_set_errhandler
 #define MPI_Comm_set_name PMPI_Comm_set_name
+#define MPI_Comm_set_attr PMPI_Comm_set_attr
 #define MPI_Comm_spawn PMPI_Comm_spawn
 #define MPI_Comm_spawn_multiple PMPI_Comm_spawn_multiple
 #define MPI_Exscan PMPI_Exscan
@@ -243,13 +244,13 @@
 #define MPI_Info_create PMPI_Info_create
 #define MPI_Info_free PMPI_Info_free
 #define MPI_Init_thread PMPI_Init_thread
+#define MPI_Query_thread PMPI_Query_thread
 #define MPI_Lookup_name PMPI_Lookup_name
 #define MPI_Open_port PMPI_Open_port
 #define MPI_Pack_external PMPI_Pack_external
 #define MPI_Publish_name PMPI_Publish_name
 #define MPI_Put PMPI_Put
 #define MPI_Accumulate PMPI_Accumulate
-#define MPI_Query_thread PMPI_Query_thread
 #define MPI_Register_datarep PMPI_Register_datarep
 #define MPI_Request_get_status PMPI_Request_get_status
 #define MPI_Sizeof PMPI_Sizeof

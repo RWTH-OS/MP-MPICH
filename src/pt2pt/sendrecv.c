@@ -66,12 +66,15 @@ EXPORT_MPI_API int MPI_Sendrecv( void *sendbuf, int sendcount, MPI_Datatype send
                   void *recvbuf, int recvcount, MPI_Datatype recvtype, 
 		  int source, int recvtag, MPI_Comm comm, MPI_Status *status )
 {
+    MPI_Status __status;
     int               mpi_errno = MPI_SUCCESS;
     MPI_Status        status_array[2];
     MPI_Request       req[2];
     MPIR_ERROR_DECL;
     struct MPIR_COMMUNICATOR *comm_ptr;
     static char myname[] = "MPI_SENDRECV";
+
+    if(status == MPI_STATUS_IGNORE) status = &__status;
 
     /* Let the Isend/Irecv check arguments */
     /* Comments on this:

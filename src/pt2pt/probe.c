@@ -51,9 +51,12 @@ Output Parameter:
 @*/
 EXPORT_MPI_API int MPI_Probe( int source, int tag, MPI_Comm comm, MPI_Status *status )
 {
+    MPI_Status __status;
     int mpi_errno = MPI_SUCCESS;
     struct MPIR_COMMUNICATOR *comm_ptr;
     static char myname[] = "MPI_PROBE";
+
+    if(status == MPI_STATUS_IGNORE) status = &__status;
     
     comm_ptr = MPIR_GET_COMM_PTR(comm);
     MPIR_TEST_MPI_COMM(comm,comm_ptr,comm_ptr,myname);

@@ -1,9 +1,8 @@
 /*
- *  $Id$
- *
  *  (C) 1993 by Argonne National Laboratory and Mississipi State University.
  *      See COPYRIGHT in top-level directory.
  */
+#include <stdlib.h>
 #include "mpiimpl.h"
  
 #ifdef HAVE_WEAK_SYMBOLS

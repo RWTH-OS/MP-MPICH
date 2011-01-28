@@ -10,6 +10,7 @@
 #ifdef HAVE_WEAK_SYMBOLS
 
 #if defined(HAVE_PRAGMA_WEAK)
+
 #pragma weak MPI_Attr_put = PMPI_Attr_put
 #elif defined(HAVE_ATTRIBUTE_WEAK)
 EXPORT_MPI_API int MPI_Attr_put ( MPI_Comm comm, int keyval,
@@ -18,8 +19,25 @@ EXPORT_MPI_API int MPI_Attr_put ( MPI_Comm comm, int keyval,
 #pragma _HP_SECONDARY_DEF PMPI_Attr_put  MPI_Attr_put
 #elif defined(HAVE_PRAGMA_CRI_DUP)
 #pragma _CRI duplicate MPI_Attr_put as PMPI_Attr_put
-/* end of weak pragmas */
+
+/* end of weak pragma for MPI_Attr_put */
 #endif
+
+
+#if defined(HAVE_PRAGMA_WEAK)
+
+#pragma weak MPI_Comm_set_attr = PMPI_Comm_set_attr
+#elif defined(HAVE_ATTRIBUTE_WEAK)
+EXPORT_MPI_API int MPI_Comm_set_attr ( MPI_Comm comm, int keyval,
+				       void *attr_value ) __attribute__ ((weak, alias ("PMPI_Comm_set_attr")));
+#elif defined(HAVE_PRAGMA_HP_SEC_DEF)
+#pragma _HP_SECONDARY_DEF PMPI_Comm_set_attr  MPI_Comm_set_attr
+#elif defined(HAVE_PRAGMA_CRI_DUP)
+#pragma _CRI duplicate MPI_Comm_set_attr as PMPI_Comm_set_attr
+
+/* end of weak pragma for MPI_Comm_set_attr */
+#endif
+
 
 /* Include mapping from MPI->PMPI */
 #define MPI_BUILD_PROFILING
@@ -125,3 +143,8 @@ EXPORT_MPI_API int MPI_Attr_put ( MPI_Comm comm, int keyval, void *attr_value )
   return (mpi_errno);
 }
 
+
+EXPORT_MPI_API int MPI_Comm_set_attr ( MPI_Comm comm, int keyval, void *attr_value )
+{
+  return MPI_Attr_put ( comm, keyval, attr_value );
+}

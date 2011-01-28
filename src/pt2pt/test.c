@@ -53,11 +53,15 @@ EXPORT_MPI_API int MPI_Test (
 	int          *flag,
 	MPI_Status   *status)
 {
+    MPI_Status __status;
     int mpi_errno;
     MPIR_ERROR_DECL;
 
     MPIR_ERROR_PUSH(MPIR_COMM_WORLD);
     /* We let Testall detect errors */
+
+    if(status == MPI_STATUS_IGNORE) status = &__status;
+
     mpi_errno = MPI_Testall( 1, request, flag, status );
     MPIR_ERROR_POP(MPIR_COMM_WORLD);
     if (mpi_errno == MPI_ERR_IN_STATUS) 

@@ -13,6 +13,7 @@
 #ifdef HAVE_WEAK_SYMBOLS
 
 #if defined(HAVE_PRAGMA_WEAK)
+
 #pragma weak MPI_Init_thread = PMPI_Init_thread
 #elif defined(HAVE_ATTRIBUTE_WEAK)
 EXPORT_MPI_API int MPI_Init_thread(int *argc, char ***argv, int required,
@@ -21,8 +22,24 @@ EXPORT_MPI_API int MPI_Init_thread(int *argc, char ***argv, int required,
 #pragma _HP_SECONDARY_DEF PMPI_Init_thread  MPI_Init_thread
 #elif defined(HAVE_PRAGMA_CRI_DUP)
 #pragma _CRI duplicate MPI_Init_thread as PMPI_Init_thread
-/* end of weak pragmas */
+
+/* end of weak pragma for MPI_Init_thread */
 #endif
+
+
+#if defined(HAVE_PRAGMA_WEAK)
+
+#pragma weak MPI_Query_thread = PMPI_Query_thread
+#elif defined(HAVE_ATTRIBUTE_WEAK)
+EXPORT_MPI_API int MPI_Query_thread(int *provided ) __attribute__ ((weak, alias ("PMPI_Query_thread")));
+#elif defined(HAVE_PRAGMA_HP_SEC_DEF)
+#pragma _HP_SECONDARY_DEF PMPI_Query_thread  MPI_Query_thread
+#elif defined(HAVE_PRAGMA_CRI_DUP)
+#pragma _CRI duplicate MPI_Query_thread as PMPI_Query_thread
+
+/* end of weak pragma for MPI_Query_thread */
+#endif
+
 
 /* Include mapping from MPI->PMPI */
 #define MPI_BUILD_PROFILING
@@ -104,4 +121,13 @@ EXPORT_MPI_API int MPI_Init_thread(int *argc, char ***argv, int required, int *p
      */
     *provided = MPI_THREAD_SINGLE;
     return MPIR_Init(argc,(char ***)argv);
+}
+
+/*@
+   MPI_Query_thread - Get thread level supported
+@*/
+EXPORT_MPI_API int MPI_Query_thread(int *provided)
+{
+  *provided = MPI_THREAD_SINGLE;
+  return MPI_SUCCESS;
 }

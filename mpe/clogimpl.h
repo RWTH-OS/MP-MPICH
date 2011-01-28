@@ -14,7 +14,7 @@
 #define FREE(a)      MPID_trfree(a,__LINE__,__FILE__)
 #else
 #define MALLOC(a)    malloc(a)
-#define FREE(a)      free(a)
+#define FREE(a)      if(a!=0) { free(a); a=0; }
 #define MPID_trvalid(a)
 #endif
 

@@ -52,10 +52,14 @@ EXPORT_MPI_API int MPI_Wait (
 	MPI_Request  *request,
 	MPI_Status   *status)
 {
+    MPI_Status __status;
     int mpi_errno;
     MPIR_ERROR_DECL;
 
     MPIR_ERROR_PUSH(MPIR_COMM_WORLD);
+
+    if(status == MPI_STATUS_IGNORE) status = &__status;
+
     /* We'll let MPI_Waitall catch the errors */
     mpi_errno = MPI_Waitall( 1, request, status );
 

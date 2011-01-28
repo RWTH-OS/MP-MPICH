@@ -160,6 +160,10 @@ int MPI_Abort(MPI_Comm, int);
 int MPI_Comm_set_name(MPI_Comm, char *);
 int MPI_Comm_get_name(MPI_Comm, char *, int *);
 
+/* MPI-2 attribute functions (used instead of deprecated MPI_Attr_put/get functions) */
+int MPI_Comm_set_attr(MPI_Comm, int, void*);
+int MPI_Comm_get_attr(MPI_Comm, int, void *, int *);
+
 #ifdef HAVE_NO_C_CONST
 /* Default Solaris compiler does not accept const but does accept prototypes */
 #if defined(USE_STDARG) 
@@ -406,12 +410,19 @@ MPI_Info PMPI_Info_f2c(MPI_Fint);
 /* Wtime done above */
 int PMPI_Init(int *, char ***);
 int PMPI_Init_thread(int *, char ***, int, int *);
+int PMPI_Query_thread(int *);
 int PMPI_Finalize(void);
 int PMPI_Initialized(int *);
 int PMPI_Abort(MPI_Comm, int);
+
 /* MPI-2 communicator naming functions */
-/* int PMPI_Comm_set_name(MPI_Comm, char *); */
-/* int PMPI_Comm_get_name(MPI_Comm, char **); */
+int PMPI_Comm_set_name(MPI_Comm, char *);
+int PMPI_Comm_get_name(MPI_Comm, char *, int *);
+
+/* MPI-2 attribute functions (used instead of deprecated MPI_Attr_put/get functions) */
+int PMPI_Comm_set_attr(MPI_Comm, int, void*);
+int PMPI_Comm_get_attr(MPI_Comm, int, void *, int *);
+
 #ifdef HAVE_NO_C_CONST
 /* Default Solaris compiler does not accept const but does accept prototypes */
 #if defined(USE_STDARG) 
