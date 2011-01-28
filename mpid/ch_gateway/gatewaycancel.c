@@ -27,7 +27,7 @@ MPIR_SHANDLE *shandle;
     int router_comm_host_rank,       /* rank in MPI_COMM_HOST of exporting router */
 	router_comm_all_rank;        /* rank in MPI_COMM_ALL of exporting router */
     MPI_Status status;
-    int tmpzero = 0;
+    void* tmpzero = NULL;
 
     msgrep = MPID_MSGREP_UNKNOWN;
     
@@ -45,7 +45,7 @@ MPIR_SHANDLE *shandle;
     cancel_msg.len        = 0;
     cancel_msg.cancel     = 0;
     MPID_AINT_SET(cancel_msg.send_id, shandle);
-    MPID_AINT_SET(cancel_msg.recv_id, &tmpzero);
+    MPID_AINT_SET(cancel_msg.recv_id, tmpzero);
 
 
     dest_comm_all_rank = shandle->partner_grank; /* saved there in MPI_Isend(), MPI_Issend(), MPI_Send_init(), ... */
