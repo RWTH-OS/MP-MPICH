@@ -431,6 +431,11 @@ while [ 1 -le $# ] ; do
 	default_device="$1"
 	shift
 	;;
+    -channel)
+	machine="$1"
+	default_device="$1"
+	shift
+	;;
     -machinefile)
         machineFile="$1"
 	eval machineFile$narch="$1"
